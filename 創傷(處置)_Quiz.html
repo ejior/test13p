@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>創傷(處置)</title>
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+      
+      /* Card Colors */
+      --green-border: #22c55e;
+      --green-bg: #f0fdf4;
+      --green-tag: #dcfce7;
+      --green-tag-text: #166534;
+      
+      --blue-border: #3b82f6;
+      --blue-bg: #eff6ff;
+      --blue-tag: #dbeafe;
+      --blue-tag-text: #1e40af;
+      
+      --orange-border: #f97316;
+      --orange-bg: #fff7ed;
+      --orange-tag: #ffedd5;
+      --orange-tag-text: #9a3412;
+      
+      --purple-border: #a855f7;
+      --purple-bg: #faf5ff;
+      --purple-tag: #f3e8ff;
+      --purple-tag-text: #6b21a8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 20px;
+      top: 3rem;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1.2rem;
+      background: var(--card-bg);
+      padding: 5px 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: var(--transition);
+      z-index: 100;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background: var(--bg-color);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: var(--primary-color);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Card Component */
+    .summary-card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      border-left: 6px solid #ccc; /* Default */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .card-tag {
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-right: 1rem;
+      white-space: nowrap;
+    }
+    
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+      font-size: 1.05rem;
+      color: #334155;
+    }
+    
+    .card-body ul {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+    }
+    
+    .card-body li {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Specific Card Styles */
+    .card-green { border-left-color: var(--green-border); }
+    .card-green .card-header { background: var(--green-bg); }
+    .card-green .card-tag { background: var(--green-tag); color: var(--green-tag-text); }
+    .card-green .card-title { color: var(--green-border); }
+    
+    .card-blue { border-left-color: var(--blue-border); }
+    .card-blue .card-header { background: var(--blue-bg); }
+    .card-blue .card-tag { background: var(--blue-tag); color: var(--blue-tag-text); }
+    .card-blue .card-title { color: var(--blue-border); }
+    
+    .card-orange { border-left-color: var(--orange-border); }
+    .card-orange .card-header { background: var(--orange-bg); }
+    .card-orange .card-tag { background: var(--orange-tag); color: var(--orange-tag-text); }
+    .card-orange .card-title { color: var(--orange-border); }
+    
+    .card-purple { border-left-color: var(--purple-border); }
+    .card-purple .card-header { background: var(--purple-bg); }
+    .card-purple .card-tag { background: var(--purple-tag); color: var(--purple-tag-text); }
+    .card-purple .card-title { color: var(--purple-border); }
+
+  </style>
+</head>
+<body>
+
+  <a href="Comprehensive_Summary.html" class="back-btn" title="返回首頁">🔙 返回</a>
+
+  <h1>創傷(處置)</h1>
+
+  <div class="container">
+
+    <!-- 5H5T -->
+    <div class="summary-card card-orange">
+      <div class="card-header">
+        <div class="card-tag">急救處置</div>
+        <div class="card-title">5H5T 評估重點</div>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li><strong>眼瞼：</strong>低血容</li>
+          <li><strong>體溫：</strong>低體溫</li>
+          <li><strong>瞳孔、鼻孔粉末：</strong>中毒</li>
+          <li><strong>心電圖：</strong>高低血鉀</li>
+          <li><strong>掃ehco (兩側肺部)：</strong>張力性氣胸</li>
+          <li><strong>掃ehco (劍突)：</strong>心包膜填塞</li>
+          <li><strong>掃ehco (右心室肥大)：</strong>肺栓塞</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 意識不清 -->
+    <div class="summary-card card-purple">
+      <div class="card-header">
+        <div class="card-tag">急救處置</div>
+        <div class="card-title">意識不清</div>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li><strong>測血糖、病史詢問</strong></li>
+          <li><strong>詢問喝酒、吸毒可能</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 復甦後照護 -->
+    <div class="summary-card card-blue">
+      <div class="card-header">
+        <div class="card-tag">急救處置</div>
+        <div class="card-title">復甦後照護</div>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li><strong>通氣目標：</strong>6秒鐘給一口氣</li>
+          <li><strong>血氧目標：</strong>92~98%<span style="color: red;">(北市流程：90-98%)</span></li>
+          <li><strong>平均動脈壓：</strong>>65mmHg</li>
+          <li><strong>維持ETCO₂：</strong>35-40 mmHg</li>
+          <li><strong>輸液：</strong>1支bosmin加到500ml salin，每秒鐘一滴</li>
+        </ul>
+      </div>
+    </div>
+
+
+  </div>
+</body>
+</html>
