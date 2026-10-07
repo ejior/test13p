@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 22 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：14 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH22</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":103,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"高級救護技術員的關鍵思考步驟順序為何？a、應用原則b、資料判讀c、反應評估d、概念今形成e、事後回顧","options":{"A":"a，b，c，d，e","B":"b，d，c，a，e","C":"d，a，b，c，e","D":"d，b，a，c，e"},"answer":"D","manualChapter":"CH22"},{"id":120,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"各種到院前情境處理時所需要的個人防護裝備說明，下列何者為非？","options":{"A":"小出血止血不用穿隔離衣","B":"急產接生不用戴護目鏡","C":"氣管插管不用穿隔離衣","D":"建立靜脈注射管路不用戴護目鏡"},"answer":"B","matchedChapters":["CH22"],"manualChapter":"CH22"},{"id":504,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"高級救護技術員的關鍵思考步驟順序為何？（a）應用原則，（b）資料判讀，（c）反應評估，（d）概念形成，（e）事後回顧","options":{"A":"a，b，c，d，e","B":"b，d，c，a，e","C":"d，a，b，c，e","D":"d，b，a，c，e"},"answer":"D","manualChapter":"CH22"},{"id":539,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"各種到院前情境處理時所需要的個人防護裝備說明，下列何者為非？","options":{"A":"小出血止血不用穿隔離衣","B":"急產接生不用戴護目鏡","C":"氣插管不用穿隔離衣","D":"建立靜脈注射管路不用戴護目鏡"},"answer":"B","matchedChapters":["CH22"],"manualChapter":"CH22"},{"id":680,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"高級救護技術員的關鍵思考步驟順序為何？a.應用原則；b.資料判讀；c.反應評估；d.概念形成；e.事後回顧","options":{"A":"a，b，c，e，d","B":"b，d，c，a，e","C":"b，d，a，c，e","D":"d，b，a，c，e"},"answer":"D","manualChapter":"CH22"},{"id":796,"source":"第五章 創傷急症(2015-2018).doc","question":"五十歲男性，因車禍被送入急診，意識清楚，自訴駕車不慎撞擊及路墩，並抱怨胸痛，此時您認為下列何種病史最具診斷價值？","options":{"A":"是否使用安全帶","B":"方向盤是否變形","C":"開車前是否喝酒","D":"是否邊開車邊使用行動電話"},"answer":"B","manualChapter":"CH22"},{"id":2050,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"病人身體檢查發現右上肢出現彎曲姿勢，雙下肢伸張僵直姿勢；對聲音刺激無睜眼反應，沒有發出任何聲音；給予疼痛刺激時，眼睛仍沒有睜開，僅發出模糊叫聲，四肢沒有特別反應動作。請問病人的GCS評分？","options":{"A":"E2V2M2。","B":"E2V1M2。","C":"E1V1M3。","D":"E1V2M3。"},"answer":"D","manualChapter":"CH22"},{"id":2112,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列關於使用昏迷指數(Glasgow Coma Scale，GCS)評估傷患意識狀態之敘述，何者為最不正確？","options":{"A":"傷患經由疼痛刺激後張開雙眼，Eye Opening指數應為2。","B":"對傷患進行疼痛刺激時，不應該採用胸骨上按壓之方式。","C":"脊椎受損且四肢癱瘓之傷患無法配合舉起右手之指令，Motor response為1。","D":"詢問傷患有何不適時，傷患僅能回答「痛...」，Verbal response為3。"},"answer":"C","manualChapter":"CH22"},{"id":2114,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列關於病患評估與決策，何者為最不正確？","options":{"A":"傷病患具多重主訴的情況時，較適合使用收斂式的資料判讀。","B":"對於滿身酒氣之意識改變的傷病患直接判定為飲酒過多的酒鬼，此為<標籤效應>偏見。","C":"即使面臨有控管之現場，仍應具備沒有所謂安全環境的預期心態。","D":"當傷病患之病情出現改變或對治療反應不佳時，應重新評估並修改治療計畫。"},"answer":"A","manualChapter":"CH22","matchedChapters":["CH22"]},{"id":2235,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"58歲男性，有高血壓、糖尿病等過去病史，因半小時前發現右側肢體無力報案，對於此病人之到院前處置，下列敘述何者為非？","options":{"A":"若病人意識清楚，可以排除低血糖情形，不需要測量血糖。","B":"可以用洛杉磯到院前腦中風評量表(LAPSS)，協助評估病人是否可能為腦中風。","C":"若病人有低血壓狀況，應將主動脈剝離列為可能之鑑別診斷。","D":"將此病人送醫時，應直接送至可以給予血栓溶解劑的醫院。"},"answer":"A","manualChapter":"CH22"},{"id":2302,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"意識不清的原因素可利用口訣『AEIOUTIPS』來鑑別，以下配對何者為非？","options":{"A":"A：例如酒精(Alcohol)。","B":"E：例如觸電(Electric shock)。","C":"O：例如缺氧(Hypoxemia)。","D":"I：例如中毒(Intoxication)。"},"answer":"B","manualChapter":"CH22"},{"id":2399,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"「您好，我是xx91的EMTP，同事報案主訴意識不清，病患為60歲男性，有高血壓、糖尿病史，現場評估GCS為E2V2M5，我們現場量測血糖值為50，已經給予D50W兩隻，現在GCS回復至E4V4M6」，以上敘述關於「SBAR」的應用，何者是錯誤的？","options":{"A":"「同事報案主訴意識不清」，屬於「S」Situation。","B":"「病患為60歲男性，有高血壓、糖尿病史」，屬於「B」Background。","C":"「現場評估GCS為E2V2M5，我們現場量測血糖值為50」，屬於「A」Assessment。","D":"「給予D50W兩隻，現在GCS回復至E4V4M6」，屬於「R」Recommendation。"},"answer":"D","manualChapter":"CH22"},{"question":"詳細身體診察項目中下列何者不屬於意識評估？","options":{"A":"步態動作","B":"思考與認知","C":"記憶力","D":"病識感"},"answer":"A","manualChapter":"CH22","id":3439,"source":"TP題庫 (圖片匯入)"},{"question":"「收斂式」資料判讀通常適合用在什麼情況？","options":{"A":"主訴腹痛的患者","B":"心跳停止的病人","C":"多重主訴的老人","D":"胡言亂語的患者"},"answer":"B","manualChapter":"CH22","id":3443,"source":"TP題庫 (圖片匯入)"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

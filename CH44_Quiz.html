@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 44 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：72 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH44</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":67,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於低體溫病患之到院前治療，何者為非？","options":{"A":"在低溫環境下疑似心跳停止的病患，檢查脈搏時間應達30-45秒","B":"劇烈地晃動病患可能誘發病患的心律不整，例如心室顫動（Vf）","C":"對於沒有反應且檢查不到脈搏的病患，為避免過度晃動病患，不建議插管","D":"瞳孔放大固定是重度低體溫常見的症候，故無法以此判斷病患是否已死亡很久"},"answer":"C","matchedChapters":["CH44"],"manualChapter":"CH44"},{"id":68,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於疑似發生高山症之隊友，其預防惡化的策略，何者為非？","options":{"A":"輕微增加其活動強度以強化其耐受性","B":"減緩上升速度或開始下降登山高度","C":"吃高碳水化合物的食物較好","D":"使用預防性的藥物例如丹木斯（Diamox）或威而剛（Viagra）"},"answer":"A","manualChapter":"CH44"},{"id":179,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"以下關於中暑（heatstroke）敘述，何者正確？","options":{"A":"中暑的定義是中心體溫高於40.5℃，此時體表必然無汗","B":"只要待在室內，不在太陽下作劇烈運動，就可以避免中署","C":"大量輸液（點滴）可以有效地降低中暑病患的體溫，改善存活率","D":"利用濕毛巾覆蓋在病患身上，以風扇吹拂散熱，可以有效降低中心體溫"},"answer":"D","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":294,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列敘述何者正確？","options":{"A":"熱痙攀是一種短暫、間歇的，且常常嚴重的肌肉反應，發生於肌肉因負荷重的工作或運動時產生肌肉疲憊，主因是鋰與水的流失","B":"熱昏厥通常是在熱環境中久站，原因是靜脈血液滯流於下肢及相對的體液不足產生姿勢性低血壓所致","C":"體溫是由延腦的體溫調節中樞控制，體溫升高或下降是由兩種方式調節：調節熱產生或熱散失","D":"中暑者體溫調節功能失常，體溫可達39度C以上，這樣的高溫會造成所有組織受到傷害並產生熱衰竭"},"answer":"B","manualChapter":"CH44"},{"id":295,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列敘述何者在確？","options":{"A":"低體溫可分為三類，其中中度中心體溫介於32～34之間","B":"急性高山病是一個常見的高山疾病，其症狀可在高地12-24小時內發生，最嚴重的症狀常在到達高地的24〜48小時內發生","C":"高山肺水腫至少部份的原因是缺氧所產生的肺靜脈高壓有關，肺靜脈壓升高會促進白三烯釋放。而造成肺小靜脈通透性增加","D":"高山疾病是因於暴露在低壓低氧的環境而產生，主要發生在2400公尺以上高度"},"answer":"D","matchedChapters":["CH44"],"manualChapter":"CH44"},{"id":296,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列有關身體體溫調節的敘述，何者為非？","options":{"A":"皮膚血管的擴張以及排汗可以增加體熱散失","B":"環境相對溼度越高，身體蒸發散熱的效果越差","C":"溺水病人容易產生失溫的現象和身體的輻射熱有關","D":"環境風速越快，身體對流散熱的效果越好"},"answer":"C","manualChapter":"CH44"},{"id":496,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列何種疾病不是低體溫病患的主要鑑別診斷？","options":{"A":"低血糖（hypoglycemia）","B":"嚴重敗血症（severe sepsis）","C":"肝腦病變（hepatic encephalopathy）","D":"甲狀腺黏液水腫性昏迷（myxedema coma）"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":875,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"溺水病人之處置，何者為非？","options":{"A":"需考慮頸椎受傷之可能","B":"水中救援時，盡量將病患保持垂直姿勢","C":"病患可能因喉部痙攣導致呼吸停止，水並未吸入肺部","D":"溺水病人常合併低體溫，故不能輕易放棄CPR"},"answer":"B","manualChapter":"CH44"},{"id":901,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關身體體溫調節的敘述，何者為非？","options":{"A":"皮膚血管的擴張以及出汗可以增加體熱的散失","B":"環境相對溼度越高，身體蒸發散熱的效果越好","C":"溺水病人容易產生失溫的現象和身體的傳導散熱有關","D":"環境風速越快，身體對流散熱的效果越好"},"answer":"B","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":904,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於熱急症，下列敘述何者為是？","options":{"A":"中暑時中心體溫可能升高至41℃或以上","B":"目標在希望能快速降低體溫，越快越好。將病患移至陰涼處，給予冰水浴或是低輸液可以幫助病患快速降溫","C":"老人及小孩對於溫度反應較為敏感，且調節功能比較好，較不易發生中暑等熱急","D":"若病患出現高體溫（＞41℃）合併意識不清，需先排除感染急症後再給予降溫以免延治療"},"answer":"A","matchedChapters":["CH44"],"manualChapter":"CH44"},{"id":905,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於溺水及溺斃，下列敘述何者為是？","options":{"A":"溺斃的病人幾乎都是因為大量液體吸入肺中造成缺氧導致死亡","B":"溺水事件的受難者有高風險會發生浸泡性低體溫，在現場及轉送途中應考慮體外回溫以及給予加溫潮溼的氧氣","C":"應盡早給予病患呼吸施救，若懷疑有異物阻塞呼吸道，可以施行橫膈下推擠的哈姆立克急救法施救","D":"溺水時根據吸入不同的液體，及溫度，水的濁度等而有不同的預後"},"answer":"B","manualChapter":"CH44"},{"id":906,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於高山疾病，下列敘述何者為是？","options":{"A":"緩慢上升高度，保持身體活動及補充大量水份有助於預防高山疾病","B":"若出現頭痛，頭暈，食慾不佳，虛弱及嘔吐等症狀多是體力不好或不常爬山不適應，做好充分休息就可以","C":"使用藥物即可以完全預防高山症的發生","D":"高山腦水腫應盡速處理，到院前緊急醫療照護著重於支持呼吸道，呼吸，循環並盡快降低高度"},"answer":"D","manualChapter":"CH44"},{"id":950,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關身體體溫調節的敘述，何者為是？1.皮膚血管的擴張以及出汗可以增加體熱的散失2.環境相對溼度越高、身體蒸發散熱的效果越不好3.溺水病人容易產生失溫的現象和身體的傳導散熱有關4.環境風速越快，身體對流散熱的效果越好","options":{"A":"1","C":"1、2、3","B":"1、2","D":"1、2、3、4"},"answer":"D","manualChapter":"CH44"},{"id":969,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關於低體溫病患照顧的特殊考慮，何者為非？","options":{"A":"低體溫病患呼吸及脈搏不易偵測，因此應評估脈搏30～45秒，以決定是否要做心肺復甦術，如有懷疑則仍先做心肺復甦術","B":"對於心臟停止及沒有反應的病患，仍建議插管。其目的有二：（1）停供有效換氣並給予溫暖潮濕的氧氣；（2）隔離呼吸道避免吸入","C":"低體溫的心臟對心血管藥物反應很強，且藥物代謝較迅速容易累積在周邊組織產生毒性，因此一般中心體溫在30℃以下要減半給藥劑量","D":"竇性心搏過慢對嚴重低體溫病患有保護作用，可維持低體溫病患足夠的氧氣供應，一不建議使用心臟節律器"},"answer":"C","matchedChapters":["CH44"],"manualChapter":"CH44"},{"id":977,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"年約40歲的病患，被民眾發現倒臥在三溫暖的蒸氣室內而打電話求助119，身為高級救護技術員的你抵達現場後，發現病患意識不清且身體乾熱，請問下列有關熱急症的敘述何者為非？","options":{"A":"體溫過高或熱病主要是導因於病患超出體溫調節機轉所能調節的範圍或是體溫調節中樞失效","B":"熱病可依程度分為熱痙擊.熱昏厥.熱衰竭及熱中暑","C":"若此位40歲的病患全身濕熱.不停出汗，即可排除熱中暑之診斷","D":"治療熱中暑的病患度時，一般建議當中心體溫低於39度時，降溫就要停止，以避免發生反彈性低體溫"},"answer":"C","matchedChapters":["CH44"],"manualChapter":"CH44"},{"id":979,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"下列有關潛水急症的敘述，何者為非？","options":{"A":"因潛水下降時的壓力創傷又叫擠壓性（squeeze）創傷","B":"縱膈腔氣腫.皮下氣腫及氣胸都常見於下降時所產生的擠壓性創傷","C":"任何病患在潛水後12至36小時內出現症狀，都應懷疑減壓病（decompression sickness）的可能","D":"氮醉（Nitrogen narcosis）是因為在較深的水下，血中的氮分壓較正常高，產生類似酒精的鎮靜作用"},"answer":"B","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":980,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"50歲男性於台北市登象山（海拔約183公尺）返家後，於家中產生頭暈及步態不穩之現象，家人發現後打119求助。經到場初步評估後，病患生命徵象穩定但有步態不穩及口齒不清之狀況，現場處置後轉送醫院。請問下列有關此病患的敘述何者為非？","options":{"A":"此病患疑似急性腦中風，應送往有能力處置急性腦中風之急救責任醫院","B":"此病患因為登象山後產生神經學異常，應該將急性高山病列入鑑別診斷，情況惡化有可能產生腦水腫","C":"急性高山病是常見的高山疾病，症狀可在到高地4～6小時內產生，最嚴重的症狀常在到達高地的24～48小時內發生","D":"急性高山病可用藥物預防，如丹木斯（Diamox）.類固醇（Steroid）等等，但發生急性高山病症狀後，最重要的是趕緊下降高度"},"answer":"B","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":987,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關於冷熱急症的特色，何者為是？","options":{"A":"熱痙攣多因劇烈運動或做吃重的工作，產生肌肉疲憊所致，通常為短暫的.間歇性的，但也可以很嚴重","B":"熱衰竭的特質是有輕度的神智失常.頭暈.噁心.頭痛等症狀，及輕度至中度的中心體溫升高，可高至39℃","C":"重度低體溫病人可能沒有生命徵象，包括測不到呼吸.脈搏及血壓","D":"以上皆是"},"answer":"D","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":998,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關於低體溫病人之處理，何者為非？","options":{"A":"體溫若攝氏三十二度以上，身體會顫抖來產熱","B":"若是重度低體溫，應該以主動體內回溫處理","C":"體溫低於攝氏三十度，存活機會不大，可直接宣布死亡","D":"台灣低體溫患者以低血糖和敗血症為多"},"answer":"C","matchedChapters":["CH44"],"manualChapter":"CH44"},{"id":1002,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"下列有關人體體溫調節的敘述，何者為非？","options":{"A":"皮膚是調節熱散失最重要的組織","B":"人體熱散失主要的機轉為輻射.傳導.對流與蒸發","C":"增加食慾可以增加熱產生","D":"環境溼度越高，蒸發散熱的效果越好"},"answer":"D","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":1012,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關於重度低體溫中心體溫＜攝氏30度病人的照顧，下列何者為是？","options":{"A":"評估呼吸及脈搏10秒，再決定是否開始心肺復甦術","B":"如脈搏摸不到，立即每5分鐘靜脈給予急救藥腎上腺（Epinephrine）1 mg","C":"竇性心搏過慢，須使用心臟節律器","D":"根據2015新版美國心臟學會（AHA）建議，對心跳停止後恢復自發性循環（ROSC）維持32～36℃至少24小時"},"answer":"D","matchedChapters":["CH44"],"manualChapter":"CH44"},{"id":1027,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"急性高山症的敘述，下列何者為非？","options":{"A":"症狀可能在到達高地後數個小時內發生","B":"緊急處置包括給氧及盡快降低高度","C":"吃低碳水化合物食物可預防高山症","D":"位於梨山賓館還不至於會引發高山症"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":1032,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"你和山域搜救隊搭乘直升機直達海拔3,311公尺的嘉明湖畔紮營。一夜失眠後，你在隔天清晨發現自己劇烈頭痛，頭重腳輕，食不下嚥。下列敘述何者為是？","options":{"A":"這是感冒症狀，為了完成任務，可往更高海拔的地方前進","B":"這急性高山病，除了降低高度和給氧，沒有任何藥物和其他方式可以治療","C":"如果開始出現步態不穩，可能會在24小時內昏迷","D":"如果會對丹木斯（Diamox）過敏，則沒有其他可替代的治療藥物"},"answer":"C","matchedChapters":["CH44"],"manualChapter":"CH44"},{"id":2075,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"29歲男性跟團攀登嘉明湖，第一天晚上在向陽山屋（海拔約2850公尺）過夜，第二天清晨起床後有輕微頭痛，並且合併有頭暈噁心及全身無力等症狀。你是隨行的救護技術員，以下作為何者為非？","options":{"A":"這個病人罹患了急性高山病，在症狀緩解前應避免上升高度。","B":"可以給予丹木斯（Diamox，Acetazolamide）以加速高度適應。","C":"可以給予威而鋼（Viagra）或犀利士（Cialis）來治療病人。","D":"病人如果執意繼續上升高度，則可能會進展成高海拔腦水腫。"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":2076,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"33歲男性到蘭嶼水肺潛水，最後一次潛水後約13小時產生突發性下肢無力、完全無法走路的症狀，病人經海巡的船隻轉送回本島。救護隊奉派至港口將病人轉送適當醫院，以下敘述何者為是？","options":{"A":"轉送過程中需給予高濃度氧氣，並以頭低腳高的姿勢運送。","B":"病人可能罹患減壓病，需轉送至有高壓氧治療的適合醫院。","C":"病人可能罹患空氣栓塞，需轉送至有高壓氧治療的適合醫院。","D":"病人如需空中轉送，飛行器高度無需限制，但過程要給氧氣。"},"answer":"B","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":2156,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列何者最不是影響溺水事件病人的臨床預後因素？","options":{"A":"水溫。","B":"淡水或海水。","C":"水的乾淨度。","D":"受難者年齡。"},"answer":"B","manualChapter":"CH44"},{"id":2250,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"關於局部皮膚冷傷害的描述，下列何者最不適當？","options":{"A":"吸菸、酒精及穿著限制性的衣服是皮膚冷傷害的加重因子。","B":"身體最容易發生凍瘡的部位為下肢。","C":"當處置患肢時，應以溫毯或其他回溫器材緩慢的回溫。","D":"大風、潮濕的環境以及病人本身的內科問題亦會加重傷害的程度。"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":2251,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"一位30歲男性於東北角龍洞潛水50米後因憋氣上升，至水面後立即喪失意識，呼吸急促，您是EMTP到現場進行處置，下列何者最不適當？","options":{"A":"現場立即進行氣管內管插管。","B":"應該要考慮進行基本救命術與給予氧氣。","C":"病人的鑑別診斷可能是動脈氣體栓塞。","D":"應考慮送往高壓氧的醫療院所進行高壓氧治療。"},"answer":"A","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":2346,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"溺水事件救護，病患從上游高山清澈溪水中搜救出後交到你的手上；目測約為一名20歲男性，溺水時間初估為10分鐘，當地水溫預估8度C，初步評估發現病人意識不清(GCS=3)，體溫31度，全身濕冷蒼白，血壓血氧仍在量測當中。請問關於此起溺水救護，以下描述何者正確？","options":{"A":"此年紀男性發生溺水事件，意識不清應為低體溫、溺水缺氧造成，不需考量其他因素。","B":"溺斃者常產生嚴重的喉部呼吸道痙攣，因此幾乎沒有或很少液體吸入肺中，約佔15%。","C":"除了積極回溫之外，低體溫病人脈搏不易偵測，應延長評估脈搏時間跟增加藥物使用量。","D":"水源清澈、時間不長以及年輕病人是預後較佳因素，但水溫過低則會導致死亡率上升。"},"answer":"B","manualChapter":"CH44"},{"id":2357,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"45歲潛水教練於工作中發生溺水意外，當你抵達現場病人已經直接升至水面，意識不清且呼吸淺快；據同事表示此次使用氣瓶為氮氧混和氣且下潛深度較過往深，事件發生前病患已連續工作多日，曾表示有些胸悶不適、關節疼痛等症狀，有關這位病人的可能臆斷何者最不適當？","options":{"A":"氮醉(nitrogen narcosis)是造成病人意識不清的可能臆斷。","B":"若肺音聽起來對稱且正常，可以排除空氣栓塞(air embolism)。","C":"下水前就有症狀，減壓病(decompression sickness)惡化是可能臆斷","D":"低體溫造成的心室心律不整也是可能的臆斷。"},"answer":"B","manualChapter":"CH44"},{"id":2359,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"下列關於低體溫病人救護的相關敘述，何者最不適當？","options":{"A":"心律監測器可能會發現無脈搏性電氣活動(PEA)，也可能發現如駱駝峰突起的Osborn波。","B":"應輕柔地處置病人，輕微的動作都可能誘發病人發生心室纖維顫動(Vf)等致命性的心律不整。","C":"在中心體溫未接近正常體溫時，我們不該假設病人已經死亡，應該持續積極回溫並持續治療。","D":"積極施救及回溫下病人常會有不錯的預後，中斷壓胸評估脈搏不該超過10秒。"},"answer":"D","manualChapter":"CH44"},{"id":2442,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"30歲女性被困在冷涷庫中30分鐘，救出時身上無明顯外傷，但已無生命徵象，量測病人中心體溫為20°C。請問關於此病患的急救，下列何者最適當？","options":{"A":"呼吸及脈搏不易評估，評估脈搏至少需45秒以上。","B":"氧氣需求量少，因此氣管內插管對病人並無幫助。","C":"若發現病人身體已完全結凍、口鼻已冰封，則可以停止急救。","D":"在體溫回升到30°C前不應給予Epinephrine，以免造成組織毒性。"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":2445,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"33歲男性到綠島水肺潛水，最後一次潛水後約12小時產生突發性雙下肢無力、完全無法走路的症狀。關於這位病人的描述，下列何者最適當？","options":{"A":"發生此症狀的原因，最可能是血中的氧氣氣泡阻塞血管所致。","B":"轉送過程中需給予高濃度氧氣，並以頭低腳高的姿勢運送。","C":"病人可能罹患減壓病，需轉送至有高壓氧治療的適合醫院。","D":"病人如需空中轉送，機艙內壓力應儘量維持較海平面壓力為低。"},"answer":"C","manualChapter":"CH44"},{"id":2536,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"請問關於低體溫，以下何者為是？","options":{"A":"低體溫病患，呼吸與脈博不易評估，因此應評估脈搏30-45秒。","B":"凍瘡之合適處置，應該儘快乾熱回溫。","C":"竇性心博過緩之低體溫患者，應立即使用心臟節律器。","D":"一般中心體溫低於30度C以下，應該優先給與心血管藥物，緊急治療。"},"answer":"A","matchedChapters":["CH44"],"manualChapter":"CH44"},{"id":2537,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"請問關於影響溺斃病患預後之因素，以下何者為非？","options":{"A":"水溫。","B":"溺水時間長短。","C":"乾溺或溼溺。","D":"水的乾淨度。"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":2538,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"高山症預防藥物，請問以下何者不適合？","options":{"A":"丹木斯(Diamox)。","B":"類固醇。","C":"乙型阻斷劑。","D":"威而剛。"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"],"explanation":"威而鋼（Sildenafil）與犀利士（Tadalafil）用於高海拔肺水腫（HAPE）的預防或輔助治療，對急性高山病（AMS）或高海拔腦水腫（HACE）完全沒有治療效果"},{"id":2539,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"關於溺水的治療，下列敘述何者為是？","options":{"A":"儘早使用類固醇可改善預後。","B":"使用哈姆立克法，有助於將水分自肺部排出。","C":"無論何種溺水機轉，都應例行性頸椎固定。","D":"神智清楚且血氧飽和度≧ 95%的溺水病人，仍應建議到醫院檢查。"},"answer":"D","manualChapter":"CH44"},{"id":2541,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"下列有關潛水相關急症的敘述，何者為是？","options":{"A":"壓力創傷(Barotrauma)為水肺潛水員最常見的傷害，與之相對應的物理定律為亨利定律。","B":"減壓病是因為氧氣氣泡產生在組織之間所導致，與之相對應的物理定律為波以耳定律。","C":"造成潛水人員死亡的主要原因是空氣栓塞，與之相對應的物理定律為道耳頓定律。","D":"減壓病又叫潛水夫病，與之相對應的物理定律為亨利定律。"},"answer":"D","manualChapter":"CH44"},{"id":2632,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"您在環境溫度為零下3度的高山上進行山難搜救，發現一名登山客倒臥在空曠處，中心體溫為攝氏30度，下列處置步驟何者最適當？","options":{"A":"必須先採取被動回溫、減少病人的熱散失，同時動作應保持輕柔，避免誘發Vf。","B":"病人發生OHCA，AED顯示為Vf，此時急救重點應該是心肺復甦術、回溫及去顫，並在每次分析需要電擊時都及時電擊、不可延誤。","C":"病人經過處置後中心體溫回升至攝氏32度，若仍然OHCA，可每3分鐘給予Epinephrine 1mg IVP。","D":"經過復甦後病人ROSC，但此時心律顯示為竇性心搏過緩，建議立即使用心臟節律器，避免再次OHCA。"},"answer":"A","manualChapter":"CH44","matchedChapters":["CH44"]},{"question":"救護車到場，一名32歲男性潛水者，在接近水面時突發意識喪失，懷疑為空氣栓塞。下列關於空氣栓塞院前處置的敘述，何者不正確？","options":{"A":"高級救護技術員應立即施行BLS及ALS處置","B":"病人應盡速轉送到有加壓艙治療的醫院","C":"插管時充氣囊（Cuff）建議注入生理食鹽水而不要充入空氣","D":"懷疑空氣栓塞的病人，應立即以坐姿運送，使氣泡盡快排出"},"answer":"D","manualChapter":"CH44","id":3389,"source":"TP題庫 (圖片匯入)"},{"question":"熱痙攣常發生在高溫且運動的時候，伴隨著大量流失的水與鈉，如不及時補充就可能發生熱痙攣，請問熱痙攣通常沒有好發於下列哪個部位？","options":{"A":"大腿","B":"小腿","C":"手臂","D":"腹部"},"answer":"D","manualChapter":"CH44","id":3397,"source":"TP題庫 (圖片匯入)"},{"question":"有關增加熱產生的代償機轉，下列何者為是？","options":{"A":"發抖","B":"周邊血管收縮","C":"減少散熱表面積","D":"豎立汗毛"},"answer":"A","source":"圖片匯入","manualChapter":"CH44","id":3602,"matchedChapters":["CH44"]},{"source":"EMT-P 第 44 章 P.1155","question":"凍傷對身體產生的最主要傷害性影響為何？","options":{"A":"神經傳導過速","B":"組織缺血","C":"脂肪栓塞","D":"血管過度擴張"},"answer":"B","manualChapter":"CH44","matchedChapters":["CH44"],"id":3629},{"source":"EMT-P 第 44 章 P.1165","question":"高海拔肺水腫初期症狀，通常在到高地，多久內開始出現？","options":{"A":"6小時","B":"12小時","C":"22小時","D":"24-72小時"},"answer":"D","manualChapter":"CH44","matchedChapters":["CH44"],"id":3633},{"source":"EMT-P 第 44 章 P.1153","question":"針對瑞士體溫分級，下列何者錯誤？","options":{"A":"輕度：體溫32度-35度","B":"中度：意識清楚、不發抖","C":"重度：第三級低體溫","D":"極重度：無生命徵象"},"answer":"B","manualChapter":"CH44","matchedChapters":["CH44"],"id":3636},{"source":"EMT-P 第 44 章 P.1147","question":"以下何者不是熱散失的機轉？","options":{"A":"傳導","B":"輻射","C":"代謝","D":"呼吸"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"],"id":3640},{"source":"EMT-P 第 44 章 P.1159-1162","question":"潛水員在上升時如果恐慌或空氣用盡而憋氣，會導致肺部氣體膨脹甚至破裂，產生肺過度受壓症候群（POPS）。這種因周圍壓力降低導致氣體體積膨脹的物理現象，主要是根據下列哪一個氣體定律？","options":{"A":"亨利定律（Henry's law）","B":"道耳頓定律（Dalton's law）","C":"查理定律（Charles's law）","D":"波以耳定律（Boyle's law）"},"answer":"D","manualChapter":"CH44","matchedChapters":["CH44"],"id":3642},{"source":"EMT-P 第 44 章 P.1154-1156-1158","question":"關於體溫調節與環境急症之處置，下列敘述何者最適當？","options":{"A":"發生凍瘡（Frostbite）時，應立即以 50℃ 以上的高溫熱水進行快速復溫","B":"溺水（Drowning）病患最主要的生理變化為缺氧，到院前急救應優先給予高濃度氧氣與供氧","C":"潛水急症中的減壓病，主要原因來在深水區加壓溶解在組織或血液中的二氧化碳形成氣泡","D":"高海拔疾病之預防，最有效的根本治療為立即給予高濃度純氧且留在原高度觀察"},"answer":"B","manualChapter":"CH44","matchedChapters":["CH44"],"id":3643},{"source":"EMT-P 第 44 章 P.1164","question":"根據台灣本土研究，不同體態的人在高海拔缺氧環境中發生急性高山病的機率不同，下列哪一個BMI組別發生急性高山病的機率高達80%？","options":{"A":"過輕","B":"正常","C":"過重","D":"肥胖"},"answer":"D","manualChapter":"CH44","matchedChapters":["CH44"],"id":3648},{"source":"EMT-P 第 44 章 P.1165","question":"一名登山客在海拔3500公尺處出現嚴重呼吸困難、咳出粉紅色泡沫痰、聽診有明顯濕囉音以及發紺。應高度懷疑其罹患何種高海拔急症？","options":{"A":"急性高山病","B":"高海拔腦水腫","C":"高海拔肺水腫","D":"換氣過度"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"],"id":3656},{"source":"EMT-P 第 44 章 P.1146","question":"當身體面臨嚴重的寒冷刺激時，骨骼肌會透過發抖來代償。請問發抖機轉最大可增加約多少百分比的熱產生？","options":{"A":"100%","B":"200%","C":"400%","D":"800%"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"],"id":3662},{"source":"EMT-P 第 44 章 P.1149","question":"熱衰竭病患的中心體溫通常會升高到攝氏多少度左右？","options":{"A":"43°C","B":"39°C","C":"37°C","D":"41°C"},"answer":"B","manualChapter":"CH44","matchedChapters":["CH44"],"id":3663},{"source":"EMT-P 第 44 章 P.1153","question":"關於低體溫患者的回溫處置，下列何者非屬主動回溫?","options":{"A":"照射烤燈","B":"蓋上溫暖的毛毯等","C":"灌注熱空氣","D":"靜脈注射溫的點滴"},"answer":"B","manualChapter":"CH44","matchedChapters":["CH44"],"id":3666},{"source":"EMT-P 第 44 章 P.1155 - 1156","question":"冬季山區搜救現場，EMT-P 正要處置一名因山難受困導致低體溫且疑似合併凍瘡的男性病人。病人神智不清、對疼痛刺激僅有微弱、無發抖現象。題目：根據環境急症之病理生理學及到院前處置原則，下列哪一項敘述是「錯誤」的？","options":{"A":"當病人中心體溫降到 30°C 以下時，發抖反應就會停止，主要是因為體內葡萄糖、肝醣消耗殆盡，或胰島素無法被葡萄糖利用所致。","B":"若心電圖上看到 Osborn 波（駱駝峰突起），代表低體溫已影響心臟傳導，此時病人隨時有發生自發性心室纖維顫動（VF）的風險，必須全時全心電圖監看。","C":"到院前針對局部凍瘡，若可能發生「肢體再冰凍」的狀況，只要救護車上有保暖器材，仍應積極使用 37～39°C 的溫水進行部分且緩慢的快速回溫，以保存活組織。","D":"低體溫病人的呼吸與脈搏不易偵測，到院前評估脈搏應長達 30～45 秒以決定是否進行 CPR；若病人發生心臟停止且體溫高於30°C，給予 epinephrine 的間隔時間須延長為原本的兩倍。"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"],"id":3669},{"source":"EMT-P 第 44 章 P.1146","question":"下列調節熱產生的代償機轉，何者變化與其他機轉不一樣？","options":{"A":"周邊血管收縮","B":"發抖","C":"增加自主性活動","D":"增加食慾"},"answer":"A","manualChapter":"CH44","matchedChapters":["CH44"],"id":3671},{"source":"EMT-P 第 44 章 P.1163","question":"當高海拔疾病病患出現「步態不穩、判斷力變差、沒有方向感」等症狀時，應強烈懷疑病情已惡化為下列何種狀況？","options":{"A":"嚴重熱衰竭","B":"氮醉","C":"高海拔肺水腫 (HAPE)","D":"高海拔腦水腫 (HACE)"},"answer":"D","manualChapter":"CH44","matchedChapters":["CH44"],"id":3674},{"source":"EMT-P 第 44 章 P.1153","question":"在處理「第二級(HT II)」低體溫病人（意識變差、無發抖）時，救護技術員應特別注意什麼以避免誘發心室顫動(VF)？","options":{"A":"給予大量冰冷輸液","B":"強制病人起身運動","C":"搬運時動作應極度輕柔，避免過度震動病人","D":"立即進行插管"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"],"id":3683},{"source":"EMT-P 第 44 章 P.1146","question":"減少熱散失的機轉，有哪些？","options":{"A":"周邊血管收縮","B":"減少散熱表面積","C":"豎立汗毛","D":"以上皆是"},"answer":"D","manualChapter":"CH44","matchedChapters":["CH44"],"id":3687},{"source":"EMT-P 第 44 章 P.1148","question":"天氣炎熱，小明運動不小心發生熱痙攣，在極高溫環境下，流汗每小時可達1~3公升，請問每一公升的汗水約含幾毫克的氯化鈉？","options":{"A":"30~50","B":"100~200","C":"80~90","D":"800~900"},"answer":"A","manualChapter":"CH44","matchedChapters":["CH44"],"id":3690},{"source":"EMT-P 第 44 章 P.1149","question":"關於熱衰竭 (heat exhaustion)之描述，下列何者正確？","options":{"A":"因血管內容積減少，突然坐起來時，可能發生姿勢性低血壓或姿勢性頭暈。","B":"體溫可能會上升至41度以上。","C":"流汗每小時可達1-3公升","D":"因水分和鹽缺乏可能導致肌肉痙攣。"},"answer":"A","manualChapter":"CH44","matchedChapters":["CH44"],"id":3694},{"source":"EMT-P 第 44 章 P.1148-1150","question":"關於\"熱痙攣\"的病因與處置方式，下列敘述何者正確？","options":{"A":"病患通常會出現神智不清，且中心體溫會產生顯著升高。","B":"痙攣主因為鈣離子流失，應優先透過口服鈣片進行補充。","C":"應優先給予口服鹽片，以加速身體電解質水平之平衡。","D":"主因為鈉與水流失，建議給予補充等張之含鹽飲料。"},"answer":"D","manualChapter":"CH44","matchedChapters":["CH44"],"id":3696},{"source":"EMT-P 第 44 章 P.1153","question":"請問體溫26度達到低體溫的哪一個嚴重程度？","options":{"A":"輕度","B":"中度","C":"重度","D":"極重度"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"],"id":3701},{"source":"EMT-P 第 44 章 P.1146","question":"調節熱產生的代償機轉，下列哪一個會造成減少熱散失的狀態？","options":{"A":"發抖","B":"增加荷爾蒙分泌","C":"周邊血管收縮","D":"增加食慾"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"],"id":3703},{"source":"EMT-P 第 44 章 P.1153","question":"請問瑞士低體溫分級系統，臨床表徵意識不清、不發抖為第幾級低體溫？","options":{"A":"第一級","B":"第二級","C":"第三級","D":"第四級"},"answer":"B","manualChapter":"CH44","matchedChapters":["CH44"],"id":3706},{"source":"EMT-P 第 44 章 P.1164 - 1165","question":"依據路易絲湖急性高山症之評分項目，何項病徵為定義急性高山症之必要病徵？","options":{"A":"噁心、嘔吐","B":"疲憊虛弱","C":"頭暈/頭重腳輕","D":"頭痛"},"answer":"D","manualChapter":"CH44","matchedChapters":["CH44"],"id":3711},{"source":"EMT-P 第 44 章 P.1155","question":"凍瘡造成最主要的傷害性影響為何","options":{"A":"低血壓","B":"心跳慢","C":"組織缺血","D":"發燒"},"answer":"C","manualChapter":"CH44","matchedChapters":["CH44"],"id":3713},{"question":"對於中重度低體溫病人發生心室顫動，到院前急救應如何考慮電擊次數？","options":{"A":"每2分鐘電擊一次，直到恢復心律","B":"嚴格禁止使用任何型式的電擊規範中允許嘗試初步電擊。","C":"電擊一次後，第二次電擊原則應延後","D":"連續電擊三次，無效後即停止復甦"},"answer":"C","manualChapter":"CH44","source":"TPP","id":3767,"matchedChapters":["CH44"]},{"question":"對於體內中樞溫度接收器的敘述，下列何者錯誤？","options":{"A":"是對溫度改變非常敏感的神經元，直接對血液溫度的改變產生反應","B":"這些神經元由中樞神經系統送訊息到骨骼肌","C":"經由交感神經輸出訊號到皮膚的小血管、汗腺及腎上腺皮質","D":"影響血管的張力、出汗、代謝速率。維持體溫在攝氏37度左右"},"answer":"C","manualChapter":"CH44","source":"TPP","id":3768,"matchedChapters":["CH44"]},{"id":45571,"question":"何種病患常見的中心體溫範圍最高通常不超過攝氏39度？","options":{"A":"熱中暑","B":"熱衰竭","C":"熱痙攣","D":"以上皆是"},"answer":"B","source":"大白p1149","manualChapter":"CH44"},{"id":45675,"question":"你參與旅行團前往玉山攻頂，在排雲山莊睡到凌晨時，發現室友嚴重失眠並且抱怨自己頭痛難耐，吃了止痛藥也沒有效果，你懷疑他高山症(Acute Mountain Sickness)發作；連忙跟導遊反應，決定透過無線電與山下支援醫院求助。下列的描述，何者最不適當？","options":{"A":"回報時，為利後援判斷高山症的嚴重程度，可依評分系統一併報告症狀，如有無呼吸道症狀、頭痛、虛弱、頭暈。","B":"病人表示登山前有吃丹木斯(Acetazolamide)，也有攜帶上山，這個藥也可用來當作治療建議病人服用。","C":"病人出現呼吸困難、咳嗽帶粉紅色泡泡，此時應儘速下降高度、給氧、使用藥物。","D":"在下山途中病人開始步態不穩、意識不清，此時應給予氧氣治療，可考慮至鄰近山屋拿取加壓艙來為病人進行治療，等待救援。"},"answer":"A","source":"同學出題","manualChapter":"CH44"},{"id":45692,"question":"關於急性高山病的敘述何者較不適當?","options":{"A":"上升高度時需注意，在快速上升的狀況下，急性高山病的發生率超過六成","B":"症狀可能有嘔吐、腹瀉、頭暈、激動、記憶力失常及活動時呼吸困難","C":"可使用丹木斯(Acetazolamide)作為於第一線預防藥物","D":"可以使用路易斯湖急性高山病評分系統來評估急性高山病的嚴重程度"},"answer":"B","source":"同學出題","manualChapter":"CH44"},{"id":45703,"question":"有關環境急症中的熱病，下列敘述何者正確？","options":{"A":"熱痙攣患者應優先予以口服鹽類添加物（鹽片）","B":"熱痙攣患者通常神智清醒且中心體溫正常","C":"中暑的患者如果沒有及早積極治療，有可能繼續進展到熱衰竭","D":"降溫治療的目標，一般建議當中心體溫降溫至37度時，就要停止降溫"},"answer":"B","source":"同學出題","manualChapter":"CH44"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

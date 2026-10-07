@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 5 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：16 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH05</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":99,"source":"105 高級救護技術員甄試筆試題目.doc","question":"於2016年2月的台南大地震，其EMS與醫療指導介入的過程，以下何者為非？","options":{"A":"地震造成513人傷亡，是我國自921大震後死傷最多的地震","B":"地震初期仍是由消防EMTP作為現場救護總指揮，24小時後方有醫療指導介入接手","C":"救護過程中醫療指導特別關注救護救災人員的職業傷害，例如徹底執行現場工作人員一律配戴N95以減少粉塵吸入","D":"本案有進行救護救災人員的現場與事後心理評估，以預防創傷後壓力症後群"},"answer":"B","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":364,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"救護技術員執行業務時常會造成職傷害，以下何者為非？","options":{"A":"注射藥物時若發生針扎事件，會導致A型或C型肝炎，甚至HIV的感染可能性","B":"姿勢不良的搬運常會造成背痛，搬運過重傷患時建議以輔具協助","C":"若有暴露到水痘患者，僅配置口罩與手套無法保護自身安全而不被傳染","D":"執行業務導致之創傷後壓力症候群，為救護技術員職業傷害之一"},"answer":"A","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":466,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"化學槽車事故現場，槽車載運物質不明。下列應變作為何者最不妥當？","options":{"A":"出勤前和出勤中，持續指揮中心或派遣中心聯絡，以取得化學物資訊","B":"小心從上風、高處接近事件現場","C":"若環保署環境事故專業技術小組在現場，可依專業技術小組的建議進行現場分區和處置","D":"若傷患未除污就逃出管制範圍，救護技術員在完成防護之前接觸到此類傷患也必須進行除污和監測。若傷患沾染會和水反應的化學物質，可使用消毒用酒精來除污"},"answer":"D","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":949,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"救護員運送這兩歲半清醒女童，發燒39℃、燥動不安、皮膚有出血性紫斑、四肢冰冷並有酸血症的現象，心跳速率為148下/分、呼吸速率為38下/分、血壓為80/56 mmHg，酸鹼度為7.25，運送後救護員除了標準車內清潔消毒外，應注意的事為：","options":{"A":"EMT應儘速返隊全車高規格消毒並靜置車輛6小時後才能再使用","B":"EMT應追蹤病患診斷並尋求醫師建議暴露後預防性投藥","C":"EMT應立即掛急診施打抗生素及免疫球蛋白","D":"EMT應掛門診追蹤胸部X光檢查"},"answer":"B","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":1103,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於後天免疫缺乏症候群（愛滋病）病患的處置原則何者為非？","options":{"A":"愛滋病病患在無症狀潛伏期不易由外表觀察得知，而病患也往往不知道自己已經被感染","B":"對於已知有愛滋病之患者也不要輕忽同時有其他傳染性疾病，例如肺結核的可能","C":"要避免發生針扎事件，萬一不幸發生時，應該立刻擠壓傷口，使血液流出並在流動水下清洗傷口五分鐘","D":"感染愛滋病毒感的機率，遠比B型肝炎來得低，若針扎事件對象已確知有愛滋病之病患，可待檢驗確診後，再開始使用抗病毒藥物以降低感染率"},"answer":"D","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":1131,"source":"第四章 非創傷急症(2015-2018).doc","question":"你執行創傷救護時，傷患告訴你他有人類免疫病毒（HIV）感染但有規則服藥、且上次回診時醫師說他的病毒量已測不到。請問下列敘述何者為非？","options":{"A":"若病毒量已經量測不到，即不具有傳染性","B":"不論是接觸懷疑感染或已確認感染的病人，都應須遵守標準防護措施","C":"若遇到此類患者，應戴兩層手套並穿B級以上防護衣才能避免感染","D":"落實個人防護觀念及步驟是最有效的保護方法"},"answer":"C","manualChapter":"CH05"},{"id":2004,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"關於救護車物品與環境的清潔消毒作為，下列何者正確？","options":{"A":"針具使用後應回套針蓋完整，才可丟入尖銳物品收集筒，以免噴出傷人。","B":"載運呼吸道傳染性疾病個案，勤務後應打開車窗使其通風至少1小時。","C":"勤務結束後須以100 ppm濃度之次氯酸鈉溶液(漂白水)擦拭車內物品環境。","D":"救護車內大面積清消時，應以噴灑方式使用漂白水以便能完整覆蓋清消處。"},"answer":"B","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":2048,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"依據台灣疾病管制署公告，因應嚴重特殊傳染性肺炎（新冠肺炎, COVID - 19）感染的緊急醫療照護人員防護措施，下列敘述何者正確？","options":{"A":"載送疑似個案時，救護人員建議使用非拋棄式防水隔離衣及N95。","B":"載送疑似個案時，若無負壓艙使用，則需緊閉車窗，避免飛沫外洩。","C":"救護車載送完建議以漂白水清消，執行消毒工作時，需戴外科口罩。","D":"車艙內消毒前，開窗讓空氣流通，艙內消完，艙外以一般程序清潔即可。"},"answer":"D","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":2190,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"執行愛滋病病人救護時病人不配合，救護員被尖銳物扎傷左手，接著噴濺的血液飛入救護員眼中，關於處理流程建議何者正確？","options":{"A":"以肥皂及水清潔左手傷口，眼睛沖水即可，一周內向工作單位通報。","B":"被扎者並不需要立即檢測HIV，因為會有空窗期。","C":"預防性投藥不要超過72小時，超過7天則無預防效果。","D":"定期追蹤3次抗體，3個月後追蹤結果為陰性，即可排除感染之虞。"},"answer":"C","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":2227,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"指揮中心通報，化工廠有一名員工接觸到不明物質，請您協助前往救護。有關此病人的處置與敘述何者為是？","options":{"A":"到場發現患者身上有不明白色粉末，雙手暴露有紅腫起水泡，立即使用大量清水沖洗。","B":"鹼性燒傷通常比酸性燒傷來的嚴重，因為強鹼性物質造成的傷害方式是液化性壞死。","C":"廠區員工查出化學物質後提供中和試劑，隊員應使用中和試劑來沖洗化學性灼傷的部位。","D":"眼睛遭受到鹼性燒傷初期，不建議使用乳酸林格氏液持續沖洗。"},"answer":"B","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":2562,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"醫事警消等人員因執行業務意外暴露愛滋病毒之處理流程建議，下列敘述何者最不適當？","options":{"A":"針扎後應以肥皂及水清潔傷口，並於24小時內向工作單位通報。","B":"病人體液接觸到眼睛應沖水，並於24小時內向工作單位通報。","C":"於發生暴露後須於1週內將「醫事、警消等人員因執行業務意外暴露愛滋病毒通報單」送所在地衛生局備查。","D":"預防性投藥要愈早愈好，若已超過72小時，則無預防性投藥之必要。"},"answer":"D","matchedChapters":["CH05"],"manualChapter":"CH05"},{"question":"口咽、鼻咽呼吸道使用後不可以如何處理？","options":{"A":"使用75%酒精擦拭。","B":"使用後即丟棄","C":"以1000ppm濃度次氯酸鈉溶液擦拭","D":"浸泡於1000ppm濃度次氯酸鈉溶液至少30分鐘後再以清水沖洗"},"answer":"A","id":3425,"source":"TP題庫 (圖片匯入)","matchedChapters":["CH05"],"manualChapter":"CH05"},{"question":"在救護車內部清潔時，若車內地板與設備表面附著可見血液已凝固，最適當的處理方式為何？","options":{"A":"先用清水沖洗，再用酒精消毒","B":"先用雙氧水分解血液，再用 1000 ppm 次氯酸鈉消毒","C":"直接用酒精擦拭","D":"直接使用高壓水槍沖洗"},"answer":"B","id":3429,"source":"TP題庫 (圖片匯入)","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":45510,"question":"下列何種疾病主要採接觸傳播防護？","options":{"A":"腸道病原體引起之急性腹瀉","B":"肺結核","C":"水痘","D":"麻疹"},"answer":"A","explanation":"P106 腸道病原體：接觸傳播防護 P105空氣傳播疾病，如開放性肺結核、麻疹及水痘，救護人員需配戴N95口罩。","source":"同學出題","manualChapter":"CH05"},{"id":45701,"question":"下列何種疾病主要採接觸傳播防護？","options":{"A":"腸道病原體引起之急性腹瀉","B":"肺結核","C":"水痘","D":"麻疹"},"answer":"A","source":"同學出題","manualChapter":"CH05"},{"id":45802,"question":"救護車在載運完一名大量吐血的病患後，車廂地板與擔架上殘留了一大灘（約 50 cc）的血液。依據感染管制原則，救護員應如何正確泡製與使用漂白水（次氯酸鈉）來進行環境清消？","options":{"A":"血液量大於 10 cc，應直接使用低濃度 (1,000 ppm) 的漂白水進行覆蓋與擦拭","B":"血液量大於 10 cc，應先使用高濃度 (5,000 ppm) 的漂白水進行去汙，清除有機物質後再進行徹底清消","C":"為求方便，可一次泡製好大量 5,000 ppm 漂白水，分裝在噴霧罐中存放半年以便隨時使用","D":"為了達到「完全消毒 (Sterilization)」，必須將漂白水濃度提高至 10,000 ppm，才能殺死所有細菌內孢子"},"answer":"B","explanation":"大於 10 cc 的大量血液/有機物汙染，會消耗漂白水的有效成分，因此必須先用 5,000 ppm 的高濃度漂白水進行覆蓋與初步去汙。此外，漂白水極易自然衰減，必須「新鮮泡製」，且於 24 小時內使用完畢，不可久放。","source":"AI","manualChapter":"CH05"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

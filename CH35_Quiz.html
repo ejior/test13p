@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 35 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：45 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH35</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":41,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列呼吸道急症與其主要造成原因的配對，何者為非？","options":{"A":"嚴重氣喘：通氣","B":"會厭炎：通氣","C":"一氧化碳中毒：擴散","D":"肺栓塞：擴散"},"answer":"D","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":55,"source":"105 高級救護技術員甄試筆試題目.doc","question":"OHCA現場急救，你在插管時發現看不見氣管入口。下列作法可幫助聲帶三角容易呈現，但何者除外？","options":{"A":"選擇適當大小的喉鏡葉片","B":"請人施行甲狀軟骨按壓術","C":"插管者姿勢蹲低或趴在地上","D":"將病患枕部下墊高約10公分。"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":133,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"下列呼吸道急症與其主要造成原因的配對，何者為非？","options":{"A":"會厭炎-通氣","B":"肌肉萎縮-通氣","C":"一氧化碳中毒-灌流","D":"肺栓塞-灌流"},"answer":"C","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":160,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"一位六歲的孩童被一輛汽車撞傷之後，意識警醒，組織灌流正常，但是有呼吸窘迫的現象，他的頸椎已經被固定並已經使用100％的氧氣面罩，呼吸速率為60次/每分鐘，血壓為60mmHg，右側胸部呼吸音減弱，氣管向左偏移，此時最合適的處置是：","options":{"A":"立即給予氣管內插管","B":"等待胸部X光的檢查報告","C":"立即給予氣管內插管並於右側胸部放置胸管","D":"先於右側胸部施行針頭減壓，再於右側胸部放置胸管"},"answer":"D","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":206,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"有關呼吸病理生理學，下列敘述何者為是？","options":{"A":"肺氣腫的患者因其其缺氧，應給予高濃度氧氣治療為佳","B":"急救項目中首要目標就是暢通呼吸道","C":"意識清醒者呼吸道阻塞的原因多是由於自身舌頭失去張力所致","D":"意識不清患者呼吸道阻塞的原因大多是因分泌物過多造成阻塞"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":232,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"下列有關危及生命的成人呼吸急症的徵象，以下敘述何者為是？","options":{"A":"意識狀態改變以及嚴重發鉗","B":"胸骨上凹陷，肋間凹陷或使用呼吸輔助肌","C":"心跳過快，臉色蒼白，冒汗","D":"以上皆是"},"answer":"D","manualChapter":"CH35"},{"id":244,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"下列關於呼吸道處置與給藥的敘述，何者正確？","options":{"A":"有顏面創傷，或疑顱底骨折的病患，最適合使用鼻咽呼吸道","B":"若患者頭或頸部受傷，應使用推顎法，避免移動頸部","C":"LMA（喉罩氣道）可以防止吸入性肺炎，是很好的氣管插管替代品","D":"當建立氣管內管後，非脂溶性的藥物皆可經由氣管內管給藥"},"answer":"B","manualChapter":"CH35"},{"id":604,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"57歲男性已抽煙35年，EMTP發覺病人吐氣時總是會噘嘴，請問他噘嘴的原因為何？","options":{"A":"幫助維持氣管和肺泡內的壓力","B":"急速用力呼氣，使肺泡內的空氣吐出","C":"只是顯示病人可以控制呼吸，沒有特別用途","D":"增加病人過度換氣"},"answer":"A","manualChapter":"CH35"},{"id":607,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"下列何種因素會使病患呼吸更加費力？","options":{"A":"缺乏肺泡表面活性劑（surfactant）","B":"氣道內阻力減少","C":"肺部順應性（compliance）增加","D":"體溫下降"},"answer":"A","manualChapter":"CH35"},{"id":616,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"你出勤救護一位呼吸困難的病患。現場家屬表示：「病患有發燒多痰現象及慢性阻塞性肺病（COPD），最近因天氣冷常反覆COPD發作進出醫院。」病患目前血壓120／60 mmHg，心跳每分鐘102下、呼吸淺快每分鐘20下，血氧值SpO2為80%，意識為E3M6V5。請問下列敘述，正確的是？","options":{"A":"此病患維持呼吸剌激的趨力主要是靠血中paC02值","B":"若病患意識不清，應使用高濃度氧氣面罩，持續維持病患到院前血氧值SpO2 100%","C":"若病患意識清楚，應使用一般氧氣面罩、流速開2～3L／min，以減少過度換氣效應","D":"若病患由E3M6V5轉為E2M4V2，應使用袋瓣罩（BVM）裝置進行過度換氣"},"answer":"D","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":621,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"高級救護技術員需了解插管的程序，一般我們以來協助記憶。請問以下有關的順序，何者為是？","options":{"A":"準備（preparation）→前置給氧（preoxygenation）→前置給藥（pretreatment）→給藥（paralysis）→插管（placement）→插管後處置（postintubation management）","B":"前置給氧（preoxygenation）→準備（preparation）→前置給藥（pretreatment）→給藥（paralysis）→插管（placement）→插管後處置（postintubation management）","C":"前置給氧（preoxygenation）→準備（preparation）→給藥（paralysis）→前置給藥（pretreatment）→插管（placement）→插管後處置（postintubationmanagement）","D":"前置給氧（preoxygenation）→前置給藥（pretreatment）→準備（preparation）→給藥（paralysis）→插管（placement）→插管後處置（postintubation management）"},"answer":"A","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":632,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"呼吸道異物阻塞，最常見卡在何處？","options":{"A":"喉部或聲帶","B":"右側主支氣管","C":"左側主支氣管","D":"氣管"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":660,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"有關呼吸病理生理學，下列敘述何者為是？","options":{"A":"肺氣腫的患者因其缺氧，應給予高濃度氧氣治療為佳","B":"急救項目中首要目標就是暢通呼吸道","C":"意識清醒者呼吸道阻塞的原因多是由於自身舌頭失去張力所致","D":"意識不清患者呼吸道阻塞的原因大多是因分泌物過多造成阻塞"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":853,"source":"第五章 創傷急症(2015-2018).doc","question":"關外傷病人呼吸道處置，下列何者為非？","options":{"A":"喉罩呼吸管（Laryngeal mask airway，LMA）的置放，可作為困難插管時的選擇，是屬於確切呼吸道（Definitive airway）","B":"需要插氣管內管的病患，如無特殊禁忌，應考慮施行快速程序插管（Rapid Sequence Intubation，RSI）","C":"顏面部嚴重受傷病人，如無法以氣管內管建立呼吸道，應考慮外科呼吸道如環甲切開術（cricothyrotomy）","D":"鼻咽呼吸道可用於半昏迷或仍有喉頭反射（gag reflex）的病人，但疑似顱底骨折的病人應避免使用"},"answer":"A","manualChapter":"CH35"},{"id":1020,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"下列病史或症狀最不可能是肺栓塞的危險因子？","options":{"A":"單侧下肢腫脹水腫","B":"惡性腫病史","C":"長期臥床","D":"糖尿病"},"answer":"D","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":1034,"source":"第四章 非創傷急症(2012-2014).doc","question":"OHCA現場急救，你在插管時發現看不見氣管入口。下列作法可幫助聲帶三角容易呈現，但何者除外？","options":{"A":"選擇適當大小的喉鏡葉片","B":"將病患雙肩下墊高","C":"插管者姿勢蹲低或趴在地上","D":"請人施行環狀軟骨按壓術"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":1044,"source":"第四章 非創傷急症(2012-2014).doc","question":"70歲男性因呼吸困難來到急診，脈搏40次／min，血壓70／40mmHg，以下處置何者為是：","options":{"A":"儘快做完12 lead的EKG，若為3度AV block，給予同步電擊150 J","B":"O2 I.V. monitor，準備做心導管，因為心肌梗塞可能以bradycardia來表現","C":"病人呈現心因性休克合併肺水腫應優先快速大量體液補充，並密切觀察心律變化","D":"可重複給atropine 0.5 mg I.V. push 5到6次，並觀察病人反應，若反應不佳，節律器使用"},"answer":"D","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":1091,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關於成人呼吸窘迫症（adult respiratory distress syndrome,ARDS）的敘述，下列何者為非？","options":{"A":"是一種猛爆型的呼吸衰竭","B":"急性的肺發炎和廣泛性的肺泡及微血管傷害為特徵","C":"這症候群通常不會因為其他的傷害或疾病所引起","D":"這類病患的肺部會變得又濕又重，肺泡彈性變差使氣體擴散能力大幅下降"},"answer":"C","manualChapter":"CH35"},{"id":1115,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於呼吸道處置與給藥的叙述，何者正確？","options":{"A":"有顔面創傷，或疑顱底骨折的病患，最適合使用鼻咽呼吸道","B":"若患者頭或頸部受傷，應使用推顎法，避免移動頸部","C":"LMA（喉罩氣道）可以防止吸入性肺炎，是很好的氣管插管替代品","D":"當建立氣管内管後，非脂溶性的藥物皆可經由氣管内管給藥"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":1145,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於會厭炎的敘述，何者為非？","options":{"A":"某些族群罹患會厭炎的盛行率比較高，包括免疫功能低下、脾臟切除的病患","B":"引起會厭炎的病原菌，以A型嗜血桿菌感染最常見","C":"會厭炎通常會使病患出現發燒和喉嚨痛","D":"到院前照護主要是給予病患支持性療法，但要特別注意病患是否出現呼吸窘迫的徵兆"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":1158,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於快速程序插管（Rapid Sequence Intubation，RSI），以下七個P的口訣步驟，正確順序為？","options":{"A":"Preparation準備→Pretreatment前置給藥→Positionin擺位→Preoxygenation前置給氧→Paralysis鎮靜肌肉麻痺Placement插管→Post-intubationmanagement插管後處置。","B":"Preparation準備→Pretreatment前置給藥→Positionin擺位→Paralysis鎮靜肌肉麻痺→Preoxygenation前置給氧→Positionin擺位→Placement插管→Post-intubation management插管後處置","C":"Preparation準備→Preoxygenation前置給氧→Pretreatment前置給藥→Positionin擺位→Paralysis鎮靜肌肉麻痺→Placement插管→Post-intubation management插管後處置。","D":"Preparation準備→Pretreatmentfifj前置給藥→Positionin擺位→Preoxygenation前置給氧→Placement插管→Paralysis鎮靜肌肉麻痺→Post-intubationmanagement插管後處置。"},"answer":"C","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":2140,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"25歲女性有氣喘病史，在門診定期拿藥，今日表示呼吸喘，救護車到場病人表示呼吸道症狀(咳嗽、痰多)數日，今有發燒情形，血氧88%，雙側明顯喘鳴音。有關氣喘急性發作處置，下列何者敘述最不適當？","options":{"A":"可協助給予短效型支氣管擴張劑吸入使用，如albuterol。","B":"可考慮給予類固醇、硫酸鎂等藥物。","C":"若病人意識不清，但還有呼吸，則給予非侵入性正壓呼吸(NIPPV)使用。","D":"嚴重氣喘若心跳停止，需考慮缺氧、張力性氣胸。"},"answer":"C","manualChapter":"CH35"},{"id":2163,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列有關於哮吼病(Croup)的敘述，何者最不適當？","options":{"A":"常見的感染源為病毒：Parainfluenza virus(副流行感冒病毒)，經常會微燒，但通常不需要使用抗生素。","B":"臨床上常有哮鳴(stridor)聲，普遍會發生(90%)。","C":"頸部(Neck Soft tissue)X光側面照可見似歐洲教堂的尖塔(Steeple sign)。","D":"使用類固醇可較快改善，減少氣管內管插管及縮短住院天數。"},"answer":"C","manualChapter":"CH35"},{"id":2195,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"一位罹患慢性阻塞性疾病病人，主訴呼吸喘。臨床發現雙側有哮喘音(Wheezing)，病人未使用氧氣時，血氧濃度88%。以下敘述，何者為非？","options":{"A":"病人噘嘴呼吸，肋間肌凹陷，有呼吸窘迫現象。","B":"病人有下呼吸道阻塞現象。","C":"可考慮使用Ventri-mask(凡德里面罩)，以提供低流速、高濃度氧氣。","D":"考慮給予吸入型支氣管擴張劑。"},"answer":"C","manualChapter":"CH35"},{"id":2232,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"下列對於肺氣腫病人臨床症狀的描述，何者為非？","options":{"A":"胸廓拉長、桶狀胸。","B":"發出哮鳴音(wheezing)及乾囉音。","C":"體重增加、身形肥胖。","D":"膚色呈現粉紅色。"},"answer":"C","manualChapter":"CH35"},{"id":2233,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"阻塞性呼吸道疾病是三種不同疾病的統稱，分別是慢性支氣管炎、肺氣腫以及氣喘，關於此疾病下列敘述何者為是？","options":{"A":"在氣喘及慢性支氣管炎病人身上，肺泡不能吐出空氣是因為肺泡壁受到破壞和失去回復的彈力，造成吐氣時氣道的狹窄。","B":"在肺氣腫病人身上，肺泡不能吐出空氣是因為黏液塊和氣道狹窄造成吐氣時氣體無法流出而造成肺泡過度擴張。","C":"慢性支氣管炎的病人在吸氣跟吐氣時都會有呼吸道阻力升高的現象，但肺氣腫的病人卻只有在吐氣時才會有呼吸道阻力升高的情形。","D":"肺氣腫的病人會出現紅血球增生(polycythemia)的情形，這在慢性支氣管炎的病人中並不常見。"},"answer":"C","manualChapter":"CH35"},{"id":2327,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"慢性阻塞性肺病包含肺氣腫與慢性支氣管炎；下列有關兩者的敘述，何者不正確？","options":{"A":"肺氣腫的病患，外表瘦、胸廓拉長、會有桶狀胸。","B":"慢性支氣管炎的病患，會呈現慢性發紺。","C":"肺氣腫的病患，咳嗽通常無痰，為乾咳。","D":"慢性支氣管炎的病患，較常出現噘嘴呼吸。"},"answer":"D","manualChapter":"CH35"},{"id":2356,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"哮吼(Croup)的常見症狀，何者為非？ (多選)","options":{"A":"犬吠咳嗽聲(Barking cough)。","B":"呼吸出現喘鳴音(Stridor)。","C":"說話聲音沙啞(Hoarseness)。","D":"呼吸出現喘鳴音(Wheezing)。"},"answer":"D,B","manualChapter":"CH35"},{"id":2398,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"下列有關於「哮喘音(Wheezes)」和「喘鳴音(Stridor)」兩種肺音的比較，下列敘述何者有誤？","options":{"A":"「哮喘音」屬於肺內異常肺音；「喘鳴音」屬於肺外異常肺音。","B":"「哮喘音」以呼氣期為主；「喘鳴音」以吸氣期為主。","C":"「哮喘音」較為高頻；「喘鳴音」較為中頻。","D":"「哮喘音」為空氣通過狹窄的上呼吸道氣管；「喘鳴音」為空氣收縮狹窄的小細支氣管。"},"answer":"D","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":2480,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"體重150公斤身高160公分男性OHCA救護，欲進行氣管插管，墊高原則以下何者最適當？","options":{"A":"下巴對肩線。","B":"耳垂對肩線。","C":"嘴角對肩線。","D":"喉結對肩線。"},"answer":"B","manualChapter":"CH35"},{"id":2484,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"呼吸作用的過程包括下列四個步驟：換氣作用→外呼吸→循環→內呼吸；四個步驟中，任一發生問題，皆可以誘發其相對應的疾病；有關疾病與呼吸四步驟的配對，下列配對何者為非？","options":{"A":"肺栓塞–外呼吸。","B":"一氧化碳中毒–內呼吸。","C":"張力性氣胸–外呼吸。","D":"嚴重氣喘發作–換氣作用。"},"answer":"C","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":2570,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"對於一位蜂螫嚴重過敏反應的OHCA的患者上，在你準備插管時請以HEAVEN法則判斷哪一個較符合？","options":{"A":"出血。","B":"困難解剖構造。","C":"頸部活動受限。","D":"低血容。"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":2571,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"肺臟通氣（V:Ventilation）與灌流（Q:Perfusion）對於身體組織是否可得到足夠的氧氣有很大的關係，一個正常的人V除以Q值（V/Q）約略等於0.8，試問下列疾病如果發生在同一個人身上（非同時發生），其V/Q值由大到小為下列哪一個選項？甲：氣喘、乙：過度換氣、丙：肺栓塞、丁：氣管異物梗塞","options":{"A":"丁>甲>乙>丙。","B":"丙>甲>乙>丁。","C":"甲>丁>乙>丙。","D":"丙>乙>甲>丁。"},"answer":"D","manualChapter":"CH35"},{"id":2572,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"關於快速程序插管(RSI)的步驟6P，下列敘述何者錯誤？","options":{"A":"在「前置給藥」步驟，給予Lidocaine可防止顱內壓升高。","B":"在「給藥使病人麻痺」步驟，若血氧濃度分析儀低於90％，則必須停止輔助呼吸。","C":"在「給藥使病人麻痺」步驟，會先給鎮定劑再給肌肉麻痺劑。","D":"在「前置給氧」步驟，建議將血氧濃度拉升至盡可能接近100％。"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":2573,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"80歲男性，過去病史為咽喉癌患者經放射線治療術後、病態性肥胖，今天早上家屬發現病人口吐鮮血，意識變差，使用非再吸入型面罩可維持在血氧100%但病患呼吸極為緩慢，你評估此病患已進展至呼吸衰竭，經聯絡醫療指導醫師，同意於現場執行氣管內管插管。請問下列哪一項處置方式對此病患順利完成氣管內管置入的幫助最少？","options":{"A":"SALAD（Suction assisted laryngoscopy airway decontamination）技術。","B":"影像喉頭鏡。","C":"快速氧氣沖洗（Flush O 2）。","D":"斜坡擺位（ramp position）。"},"answer":"C","manualChapter":"CH35"},{"id":2626,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"一名病人因不明原因導致嘴唇和舌頭腫大，但外觀皮膚顏色正常。下列敘述何者最適當？","options":{"A":"可能是血管性水腫，病人經常會主訴疼痛或壓力感。","B":"血管性水腫是因為組織胺刺激皮膚淺層血管擴張所致。","C":"由於沒有合併出現蕁麻疹，可以排除是過敏反應導致。","D":"由於病人腫脹位於臉部，發生上呼吸道阻塞的風險極低。"},"answer":"A","manualChapter":"CH35"},{"question":"關於這兩類阻塞性肺病病人的呼吸阻力比較，下列何者符合來源內容？","options":{"A":"肺氣腫病人在吸氣跟吐氣時都有阻力升高現象","B":"慢性支氣管炎病人在吸氣跟吐氣時都有呼吸道阻力升高的現象","C":"肺氣腫病人主要在吸氣時感到困難","D":"兩者都只有在吐氣時才會感到呼吸困難"},"answer":"B","manualChapter":"CH35","id":3413,"source":"TP題庫 (圖片匯入)"},{"question":"針對呼吸困難之病人，儘量以氧氣面罩維持血氧濃度大於幾％即可？","options":{"A":"93%","B":"94%","C":"95%","D":"96%"},"answer":"B","manualChapter":"CH35","id":3418,"source":"TP題庫 (圖片匯入)"},{"question":"一名病人氣喘急性發作，經短效型支氣管擴張劑治療後， EtCO2 從 35 逐漸上升至 50 mmHg下列臨床思路何者為是？","options":{"A":"氣喘症狀改善。","B":"需考慮其他藥物治療如：albuterol等。","C":"氣喘導致的代謝性酸中毒惡化。","D":"氣喘惡化導致灌流不佳進而使EtCO2 上升，需靜脈輸液。"},"answer":"B","manualChapter":"CH35","id":3458,"source":"TP題庫 (圖片匯入)"},{"question":"呼吸道疾病可分為通氣、擴散、灌流三大類，請問以下配對哪一個錯誤？","options":{"A":"灌流-肺栓塞","B":"通氣-肺水腫","C":"擴散-一氧化碳中毒","D":"通氣-會厭炎"},"answer":"B","source":"圖片匯入","manualChapter":"CH35","id":3579,"matchedChapters":["CH35"]},{"id":45615,"question":"關於可能形成靜脈血栓的危險因子，下列敘述何者錯誤?","options":{"A":"靜脈損傷，如骨盆骨折或下肢手術後","B":"血液凝集能力增加，如懷孕或惡性腫瘤","C":"疾病，如心房顫動、糖尿病或大球性貧血","D":"靜脈滯留(Venostasis)如經濟艙症候群、肥胖或靜脈曲張"},"answer":"C","source":"同學出題","manualChapter":"CH35"},{"id":45783,"source":"大白p938","question":"下列有關會厭炎的敘述，下列何者錯誤?","options":{"A":"引起會厭發炎的原因有很多，可以分為感染以及外傷","B":"引起感染的病原菌，以B型嗜血桿菌最常見，其他的病原菌還有肺炎鏈球菌、A 型鏈球菌、B型鏈球菌、C型鏈球菌、念珠菌、水痘病毒","C":"給予高濃度的氧氣會有幫助","D":"會厭炎導致呼吸窘迫的患者給予類固醇可以很快地減輕水腫的現象"},"answer":"D","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":45784,"source":"大白p948","question":"有關肺炎的敘述，下列何者正確?","options":{"A":"由細菌引起的肺間質性發炎也容易讓病人罹患繼發性的病毒性肺炎","B":"由病毒引起的肺間質性發炎也容易讓病人罹患繼發性的細菌性肺炎"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":45785,"source":"大白p948","question":"下列有關病毒性肺炎的敘述，下列何者正確?","options":{"A":"引起肺炎的病毒並不多見，其中以流行性感冒病毒(即流感病毒)佔大多數","B":"大多發生於夏天季節","C":"近年來由於免疫抑制藥物廣泛應用於腫瘤、器官移植以及愛滋病人，所以發病人數逐年增多","D":"B型流感是最常見引發病毒性肺炎的原因"},"answer":"A","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":45786,"source":"大白p948","question":"在所有急性呼吸道感染中，病毒感染占絕大多數，在非細菌性肺炎中，病毒感染約占多少比例?","options":{"A":"5-10%","B":"30-70%","C":"25-50％","D":"80-90%"},"answer":"C","manualChapter":"CH35","matchedChapters":["CH35","背誦題"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

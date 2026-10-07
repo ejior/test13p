@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 36 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：53 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH36</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":32,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列有關辛辛那提到院前腦中風評量表（CPSS）的描述，何者為非？","options":{"A":"要求病患雙手平舉10秒鐘，評估是否有單側無力或手臂下垂的情形","B":"請病患露齒微笑，評估臉部嘴唇是否對稱","C":"請病患重複你說的話，評估是否有口齒不清，答非所問或無法表達的情形","D":"評估症狀發生在24小時內"},"answer":"D","manualChapter":"CH36"},{"id":40,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於腦中風病患急性期的血壓控制，何者為非？","options":{"A":"對缺血性中風病患，血壓應控制在正常或患病前的範圍內以免讓症狀加重","B":"除非有合併主動脈剝離，心衰竭等，否則缺血性中風病患，在收縮壓超過220mmHg或舒張壓超過120mmHg時方需要處理","C":"出血性中風病患，因考慮到其出血範圍會增加及再出血的可能性，血壓控制應較缺血性中風積極","D":"考慮要接受血栓溶解劑的病患其血壓應控制在收縮壓185mmHg，舒張壓110mmHg以下"},"answer":"A","manualChapter":"CH36"},{"id":42,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於貝爾氏麻痺（Bell's palsy）之敘述，下列何者為非?","options":{"A":"主要造成原因不明或者是病毒感染","B":"貝爾氏麻痺的預後良好，大部分會自行恢復","C":"其神經學表徵為可以皺前額及眉頭","D":"在急性期不可使用含類固醇的藥物治療"},"answer":"C","matchedChapters":["CH36"],"manualChapter":"CH36"},{"id":261,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"洛杉磯到院前腦中風評量表準確度可達？","options":{"A":"72％","B":"85％","C":"95％","D":"97％"},"answer":"D","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":262,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"有關中樞型暈眩會出現的症狀下列何者為錯誤？","options":{"A":"多方向眼震","B":"暈眩","C":"耳鳴","D":"語言不清"},"answer":"C","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":482,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列對於瞳孔反射的描述何者為誤？","options":{"A":"兩側瞳孔放大且失去光反射，可能出現在抗乙烯膽鹼藥物中毒之病患身上","B":"兩側瞳孔放大且失去光反射，可能出現在嗎啡中毒之病患身上","C":"兩側瞳孔對稱縮小且失去光反射，可能出現在橋腦出血的病患身上","D":"兩眼瞳孔大小不等，可能出現在腦疝脫的病患身上"},"answer":"B","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":585,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位45歲頭部外傷病患，數小時前人還清楚，之後意識越來越模糊，關於針對意識不清病患進行腦幹功能的神經學檢查，何者為非？","options":{"A":"角膜反射","B":"瞳孔反射","C":"Babinski sign的檢查","D":"Doll's eye sign的檢查"},"answer":"C","manualChapter":"CH36"},{"id":587,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"45歲病患因騎摩托車車禍撞到後腦，到達現場時，發現病患無酒醉，四肢運動正常，但走路會搖晃不穩。關於本病患小腦的神經學檢查，何者為非？","options":{"A":"腳跟接腳尖走直線檢查平衡（Tandem Gait）","B":"指尖－鼻尖－指尖的檢查（Finger-Nose-Finger）","C":"看病患坐著會不會歪一邊（Sitting Balance）","D":"眼睛上下左右看眼球運動是否受到限制（EOM）"},"answer":"D","manualChapter":"CH36"},{"id":623,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"下圖的敘述，何者為是？","options":{"A":"左側第三對腦神經麻痺","B":"週邊型面神經麻痺","C":"中樞型面神經麻痺","D":"若發生在三小時內，應考慮血栓溶解劑治療"},"answer":"B","manualChapter":"CH36","matchedChapters":["需要圖片"],"image":"題庫圖片/623.png"},{"id":681,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"55歲男性，早上起床時現自己臉歪一邊，右眼無法緊閉且口水會自右嘴角不自主流下，擔心自己是中風，所以請求119協助。現場估現發現，病患除了臉歪以外，說話表達流暢且無肢體無力的情形，下列敘述何者為非？","options":{"A":"是第七對腦神經有病灶","B":"受影響的腦神經源自延腦","C":"此腦神經為包含感覺與運動的混合型神經","D":"可以評估抬頭紋來區分是中樞型或是周邊型"},"answer":"B","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":779,"source":"第五章 創傷急症(2012-2014).doc","question":"關於GCS（昏迷指數）的評估敘述，以下「何者為非」？","options":{"A":"去皮質姿勢（decorticate posturing）：患者呈現現上肢彎屈、下肢僵直伸展，表示大腦皮質的損傷","B":"去大腦姿勢（decerebrate posturing）：昏迷傷患呈現上、下肢均呈僵直伸展，表示腦幹的損傷","C":"若病患因腦中風導致左側肢體偏癱無力，右側肢體仍可以依照命令活動，則此病患GCS評估時，M應該為滿分","D":"若病患與以疼痛刺激時，眼睛才會睜開，並且手可以準確撥開疼痛刺激的位置，口中僅能發出無意義的聲音，則此病患的GCS為9分"},"answer":"A","manualChapter":"CH36"},{"id":1092,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列有關洛杉磯到院前腦中風評量表的評量項目，以下敘述何者為非？","options":{"A":"症狀發生在24小時內。","B":"下列三項中任何之一有單側不對稱的情形：臉部表情、握力、手臂力量的強度","C":"年紀大於35歲","D":"病患平常不是坐輪椅或長期臥床"},"answer":"C","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":1105,"source":"第四章 非創傷急症(2015-2018).doc","question":"一名65歲男性過去僅有高血壓病史，無抽搐或癲癇之病史，突然感到右側肢體無力無法行走而立即打119求救，你到現場發現嘴歪、口齒不清、右手無法平舉現象，他的血糖130mg/dL、血壓210/80mmHg，以下明何者為非？","options":{"A":"依據辛辛那提到院前腦中風評量表（CPSS），該病患有85%可能性為腦中風","B":"依據洛杉磯到院前腦中風評量表（LAPSS），其陽性預測值為97%","C":"為了改善血液灌流不足，可以給予含糖的輸液，以增加腦細胞之存活性","D":"血栓溶解劑（t-PA）被證實可以有效減輕缺血性腦中風的神經症"},"answer":"C","manualChapter":"CH36"},{"id":1129,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關周邊型眩暈和中樞型眩暈的區分，下列敘述何者為非？","options":{"A":"周邊型眩暈多因內耳迷路問題造成","B":"周邊型眩暈經多次轉頭可減輕眩暈程度","C":"中樞型眩暈的眼震方向多為單向，且合併對側肢體無力","D":"中樞型眩暈常合併如手腳不協調等症狀"},"answer":"C","manualChapter":"CH36"},{"id":1132,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於中風的敘述，何者為非？","options":{"A":"單純從病人臨床上的症狀表現很難區分此病人發生出血性或缺血性腦中風","B":"一般急性腦中風除了大片腦梗塞、腦出血或腦幹中風外，鮮少會造成病患意識不清，所以如病患發生意識不清時，應先排除其他造成病患意識不清的情形，例如低血糖","C":"一般來說，缺血性腦中風特別容易發生在睡眠中或剛睡醒時","D":"如病患之辛辛那提到院前腦中風評量表為陽性時，由於其可能是腦中風的機會高達七成，而高血糖會造成腦中風病患腦部進一步的傷害，因此就算檢測發現病患發生低血糖的情形，也不應給予50%的葡萄糖水或含糖輸液"},"answer":"D","manualChapter":"CH36"},{"id":1146,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於周邊型眩暈和中樞型眩暈的敘述，何者為非？","options":{"A":"周邊型眩暈病患會出現聽力減弱、耳鳴、耳痛及腫脹","B":"周邊型眩暈病患發生眼震時，為多方向眼震","C":"多次轉頭不會減輕中樞型眩暈病患的眩暈程度","D":"中樞型眩暈病患可出現言語不清、站立不穩、手腳不協調等其他神經症狀"},"answer":"B","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":1157,"source":"第四章 非創傷急症(2015-2018).doc","question":"64歲女性，求救原因為剛剛看電視時突發右側肢體無力。初評生命跡象為血壓169/63mmHg，心跳54下/分，呼吸12下/分，給予鼻導管氧氣2L/分後血氧99％，體溫36.1℃。家人說她平時有吃高血壓跟糖尿病藥物，35分鐘之前突然走路往右偏倒，說話也咬字不清。依據中風流程AHA/ASA Guidelines，以下步驟何者必須先執行？","options":{"A":"12導程心電圖","B":"快速血糖檢測","C":"腦部電腦斷層掃描","D":"腦部核磁共振掃描"},"answer":"B","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":2045,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"到院前腦中風病人的評估，下列何者正確？","options":{"A":"FAST的FAS部分為手部下垂，臉下垂及口齒不清，T是發作時間。","B":"G-FAST可協助及早辨識大血管阻塞腦中風，G是指gait步態。","C":"若無糖尿病病史，不需測量指尖血糖，直接給予含糖輸液即可。","D":"適合機械取栓者，需影像確認大血管阻塞，所以可延後tPA給藥。"},"answer":"A","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":2051,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"關於急性腦中風病人的到院前評估與處置，下列何者為是？","options":{"A":"詢問病人相關症狀，沒有胸痛胸悶心悸等症狀，不裝設心律監視器。","B":"詢問病人過去病史沒有糖尿病無使用相關藥物，省略血糖測量，儘速送醫。","C":"測量病患血壓180/90 mmHg，為了增加腦部血液循環，給予等張輸液。","D":"測量病患血氧SpO2= 92％，呼吸平緩無費力，速率正常，給予氧氣。"},"answer":"D","manualChapter":"CH36"},{"id":2056,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"有關神經系統疾病的「時間」定義，下列敘述何者正確？","options":{"A":"短暫性腦缺血發作（TIA）是指症狀發生後一週內完全恢復。","B":"譫妄的發病症狀為漸進式且緩慢、而失智的發病症狀為快速且起伏不定。","C":"癲癇重積症（Status epilepticus）定義是指抽搐發生的時間超過1分鐘。","D":"若病人發生中風症狀的時間在6小時內，有機會做動脈內取栓（IA）治療。"},"answer":"D","manualChapter":"CH36"},{"id":2141,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"48歲男性突發性構音不清，臉部表情不對稱，右側肢體麻木。關於此患者可能為中風的敘述，下列何者最不適當？","options":{"A":"臉部表情的表現為貝爾氏麻痺(Bell's palsy)。","B":"巴賓斯基反射(Babinski sign)可能呈陽性。","C":"若洋娃娃眼徵象(doll's eye sign)呈陽性，代表腦幹功能正常。","D":"若符合條件，血栓溶解劑t-PA可以在症狀發生3~4.5小時內施打。"},"answer":"A","manualChapter":"CH36"},{"id":2142,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於急性腦中風的到院前處置，何者最不適當？","options":{"A":"選擇區域內合適的急性中風處理醫院，必要時繞過(bypass)中風照護資源不足的醫院。","B":"後送時讓病人維持平躺的姿勢，若病人意識不清懷疑有IICP的徵兆時，可將病人頭部抬高但不要超過30度。","C":"必要時建立靜脈路徑，若有低血壓的情形必須積極處理。","D":"輸液選擇首選為5%葡萄糖溶液，提供腦細胞直接養分來源，以避免二度傷害。"},"answer":"D","manualChapter":"CH36"},{"id":2204,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"病人主訴頭暈及嘔吐，對於協助區分此病人為中樞型或周邊型眩暈之相關檢查何者為非？","options":{"A":"病人以腳跟接著腳尖連續直線行進(tandem walking)。","B":"病人以手指頭摸鼻子接著摸您的手指頭之反覆點對點運動(point-to-point movement)。","C":"觀察患者眼球活動，檢查患者眼球活動及眼震方向。","D":"利用叩診槌檢查患者深部肌腱反射(deep tendon reflexes)。"},"answer":"D","manualChapter":"CH36"},{"id":2211,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"出血性休克傷患，若對初始輸液反應不佳，則需要考慮輸血。下列有關輸血時的注意事項，何者為非？","options":{"A":"血品的選擇：對於有懷孕能力的婦女，為避免母體產生抗體，造成將來懷孕時之併發症，建議可使用O型Rh陰性血輸血。","B":"避免低體溫：最有效避免大量輸血或輸液後低體溫的方法，是輸液前先將輸液加熱至39°C，晶質液可使用微波加熱及血液可放在保溫器加熱。","C":"大量輸血：預測需要大量輸血的方法為ABC score，其內容包含心跳>100次/分，血壓<90mmHg，穿刺傷及FAST超音波呈陽性，符合2項或以上。","D":"凝血功能異常：嚴重創傷出血可能會快速消耗凝血因子，大量輸液亦會造成血小板及凝血因子被稀釋而影響功能，低體溫則可能影響血小板凝集。"},"answer":"C","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":2241,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"40歲男性無過去病史，因全身無力一個月報案，現場初步評估無休克現象，但病史詢問部分發現病人最近有體重增加，皮膚容易瘀青出血，視野模糊問題，其外觀如下圖所示，請問此病人如產生視野缺損，最有可能產生哪種型態視野缺損？","options":{"A":"雙眼顳側視野缺損。","B":"雙眼鼻側視野缺損。","C":"單眼視野缺損。","D":"一眼鼻側，另一眼顳側視野缺損。"},"answer":"A","manualChapter":"CH36","matchedChapters":["CH36"],"image":"題庫圖片/2241.png"},{"id":2342,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"70歲女性早上05：00起床時發現右側無力，你是到場的EMT，關於此病人的處置，下列何者最為適當？","options":{"A":"病患發作時間明確，建議轉送至最近可施打血栓溶解劑的醫院。","B":"病患符合r-tPA施打條件，應該在08：00前施打完成。","C":"如過去病史有曾經服用抗凝血劑，就不建議施打r-tPA。","D":"即使只是事先通報醫院，也可以提升病人接受r-tPA施打的機率。"},"answer":"D","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":2345,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於顏面神經的敘述，下列何者正確？","options":{"A":"顏面神經可分為上、中、下三支。","B":"周邊性顏面神經麻痺可能合併舌頭後三分之一的味覺喪失。","C":"貝爾氏麻痺（Bell’s palsy）如未治療，大部份會造成永久性眼歪嘴斜之後遺症。","D":"中樞性的顏面神經麻痺，僅對側臉下半部麻痺，無法做露齒、吹口哨、鼓氣等動作，但仍可以皺前額、皺眉頭、閉眼。"},"answer":"D","matchedChapters":["CH36"],"manualChapter":"CH36"},{"id":2397,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"50歲男性，求救原因為視力突然變模糊，不敢自行騎摩托車就醫，你現場評估的結果發現，只有病患往右看時，會出現複視的現象，做神經學檢查時，視力是正常的，但右眼無法往右看，但往上往左往下的旋轉都是正常的，左眼沒有轉動限制的問題，下列敘述何者最適當？","options":{"A":"第三對腦神經出現病灶。","B":"第四對腦神經出現病灶。","C":"受影響的腦神經是屬於具備感覺與運動功能的混合型神經。","D":"第六對腦神經出現病灶。"},"answer":"D","manualChapter":"CH36"},{"id":2410,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"60歲男性，因高血壓造成左側基底核顱內出血，併發經天幕疝脫(transtentorial herniation)導致昏迷，最可能伴隨以下哪一種狀況？","options":{"A":"右眼瞳孔放大，右側肢體無力。","B":"左眼瞳孔放大，左側肢體無力。","C":"右眼瞳孔放大，左側肢體無力。","D":"左眼瞳孔放大，右側肢體無力。"},"answer":"D","manualChapter":"CH36"},{"id":2412,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"有關中風病人到院前處置，何者最適當？","options":{"A":"皆須建立靜脈路徑，並快速且大量給予輸液避免低血壓。","B":"若病人出現高血壓狀況，立即請病人服用平常之降血壓藥物。","C":"若病人意識不清懷疑有IICP的徵兆時，可將病人頭部抬高超過45度。","D":"選擇合適的急救責任醫院，必要時繞過中風照護資源不足的醫院。"},"answer":"D","manualChapter":"CH36"},{"id":2413,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"有關眩暈(vertigo)描敘，何者為非？","options":{"A":"是一種神經學的症狀，感覺自身或環境在轉動的現象。","B":"周邊型眩暈常為短暫發作，中樞型持續時間則不一定。","C":"周邊型眩暈可能伴隨聽力減弱、耳鳴、耳痛及腫脹。","D":"周邊型眩暈會合併多方向、持續性眼震。"},"answer":"D","manualChapter":"CH36"},{"id":2416,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"56歲女士，無特殊過去病史，被家人發現倒在客廳沙發，檢查後發現右側手腳無力，疑似中風，以下何者符合施打血栓溶解劑之適應症？","options":{"A":"四個月前有腸胃道出血病史。","B":"量測血糖為30 mg/dL。","C":"經藥物控制後血壓為190/115 mmHg。","D":"最後一次看見病人正常時間為5小時前。"},"answer":"A","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":2496,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"46歲女性，因左半邊臉突然僵硬、臉歪嘴斜，自覺中風故求救119。若她有下列何種症狀，比較像是貝爾氏麻痹而非中風？","options":{"A":"右側肢體無力。","B":"吞嚥困難、流口水。","C":"舌頭前三分之二味覺異常。","D":"前額皺紋不受影響(仍可皺額頭與皺眉)。"},"answer":"C","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":2505,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"美國心臟醫學會與中風醫學會提出的「腦中風病人的存活復原之鏈(stroke chain of survival and recovery)」7D，與119有關的“D”，不包括？","options":{"A":"Detection：教導民眾及時判斷腦中風的前兆。","B":"Dispatch：派遣緊急救護系統，事先通知送至醫院。","C":"Door：119快速到達病人家門、執行辛辛那提與黃金時間判斷。","D":"Delivery：119快速將病送達適當醫院的急診處。"},"answer":"C","manualChapter":"CH36"},{"id":2615,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"有關腦幹功能的理學檢查評估，下面敘述何者為非？","options":{"A":"照光的一眼瞳孔沒有如同另一眼同時縮小時，表示該側的第三對腦神經受損或是中腦、腦幹有病兆。","B":"洋娃娃眼徵象陽性是指，轉動頭部時眼球會往頭轉動方向對側移動，代表腦幹反射正常。","C":"巴賓斯基反射如果單側呈現陽性時，代表著對側的腦部有受損的情形。","D":"痛刺激後雙側的上、下肢皆呈伸張的僵直姿勢，代表大腦半球皮質受到傷害。"},"answer":"D","manualChapter":"CH36"},{"id":2616,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"有關重症肌無力(Myasthenia gravis)之敘述，下列敘述何者最不適當？","options":{"A":"是一種自體免疫疾病。","B":"有些病人會合併胸腺瘤（thymoma），治療時可能需要手術處理。","C":"如果發生肌無力危象時，會緊急進行血漿置換術和靜脈注射免疫球蛋白。","D":"眼皮下垂通常是對稱的，如果是單側眼皮下垂，則不考慮是重症肌無力。"},"answer":"D","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":2617,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"左側中大腦動脈第一分支阻塞的腦中風病人，下列何者為最可能出現的臨床表現？","options":{"A":"左側無力、眼睛往右看。","B":"右側無力、眼睛往左看。","C":"左側無力、眼睛往左看。","D":"右側無力、眼睛往右看。"},"answer":"B","manualChapter":"CH36"},{"id":2618,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"下列何者無法用來區分「中樞性顏面麻痺」與「周邊性顏面麻痺」？","options":{"A":"是否上下半部臉部肌群都受影響。","B":"是否有聽覺過敏或耳朵內部症狀。","C":"是否合併語言功能損傷症狀。","D":"症狀是否持續超過一週。"},"answer":"D","manualChapter":"CH36"},{"id":2981,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"家屬報案，50歲男性癲癇持續發作，過去有創傷性腦傷與癲癇的病史；您到達現場，發現病患倒臥在客廳地上，意識不清，膚色發紺，持續抽搐中，最優先的處置為？","options":{"A":"測量血氧，使用BVM給氧。","B":"確認意識，施打Midazolam。","C":"給予口咽呼吸道，保護頸椎。","D":"打開呼吸道，確認脈搏。"},"answer":"D","manualChapter":"CH36","matchedChapters":["CH36"]},{"question":"關於缺血性中風與出血性中風的臨床特徵，下列敘述何者錯誤？","options":{"A":"暫時性腦缺血發作（TIA）不會留下後遺症","B":"出血性腦中風絕少在睡眠中發作","C":"蜘蛛膜下腔出血 (SAH) 常見於高齡且伴隨糖尿病的病人","D":"缺血性腦中風約占所有腦中風的 85%"},"answer":"C","manualChapter":"CH36","id":3371,"source":"TP題庫 (圖片匯入)"},{"question":"有關洛杉磯到院前腦中風評量表(LAPSS) 與辛辛那提到院前中風指標(CPSS)的敘述下列何者為是?","options":{"A":"意識不清需要快速評估病人是否急性腦中風更適合使用CPSS。","B":"CPSS中風指標3項全數符合陽性預測值高達97%。","C":"CPSS同時也需要檢查動眼測試以及檢測血糖。","D":"LAPSS單側不對稱這一項只需要符合臉部、握力或手臂力量強度其中之一即可。"},"answer":"D","manualChapter":"CH36","id":3404,"source":"TP題庫 (圖片匯入)"},{"question":"常見的腦中風症狀，何者為不是？","options":{"A":"失語症","B":"視野缺損","C":"顱神經障礙","D":"全身肢體無力"},"answer":"D","manualChapter":"CH36","id":3417,"source":"TP題庫 (圖片匯入)"},{"id":3494,"source":"醫/護考古題","question":"有關重症肌無力之敘述，下列何者正確？①屬於自體免疫疾病，體內產生攻擊Ach接受器的抗體　②第一型僅侵犯眼肌，造成複視和眼瞼下垂　③四肢肌肉的無力發生在遠端和下肢且為不對稱　④當侵犯肋間肌，通氣容積會減少，嚴重呼吸困難致死","options":{"A":"①②③","B":"①②④","C":"①③④","D":"②③④"},"answer":"B","manualChapter":"CH36"},{"id":3503,"source":"AI出題","question":"關於神經系統評估中的反射行為，下列哪項敘述是正確的？","options":{"A":"格拉斯哥昏迷指數（GCS）中，眼睛對疼痛有反應評為 3 分","B":"成人出現巴賓斯基徵象（Babinski sign）代表上運動神經元受損","C":"瞳孔對光反射完全由交感神經控制縮瞳肌","D":"膝跳反射屬於一種複雜的多突觸自主神經反射"},"answer":"B","manualChapter":"CH36","matchedChapters":["CH36"]},{"question":"下列關於急性腦中風敘述何者錯誤？","options":{"A":"出血性腦中風發生率大約占所有腦中風病人的15%，可分為腦內出血(ICH)和蜘蛛網膜下腔出血(SAH)","B":"缺血性腦中風發生率約占所有腦中風病人的85%","C":"缺血性腦中風有兩種,一為腦血管(動脈)發生硬化狹窄而產生血栓。另一原因為栓子(如血塊、硬化塊、細菌贅生物、脂肪、氣泡等)堵塞","D":"暫時性腦缺血發作(TIA)，每次發作的時間從數秒鐘至12小時，不超過24小時。約有20%的病人於一個月內變成腦中風"},"answer":"D","source":"圖片匯入","manualChapter":"CH36","id":3578,"matchedChapters":["CH36"]},{"question":"持續性的鈍痛，好像戴著一頂過緊的帽子或頭箍，常常和持續的壓力或緊繃的頭頸部肌肉有關，大部分會自己改善，為哪一種原發性頭痛？","options":{"A":"張力性頭痛","B":"偏頭痛","C":"叢聚性頭痛","D":"心理性頭痛"},"answer":"A","source":"圖片匯入","manualChapter":"CH36","id":3594,"matchedChapters":["CH36"]},{"id":3717,"source":"背誦題","question":"人體會有自動調節的機制讓平均動脈壓上升以維持腦部灌流壓力在多少左右?","options":{"A":"60mmHg","B":"70mmHg","C":"80mmHg","D":"90mmHg"},"answer":"C","matchedChapters":["CH36","背誦題"],"manualChapter":"CH36"},{"id":45562,"question":"人體內腦脊髓液的總體積約為幾毫升?","options":{"A":"10-30","B":"50-80","C":"125-150","D":"200-300"},"answer":"C","source":"大白p962","manualChapter":"CH36"},{"id":45633,"question":"在神經學檢查中，若病人對疼痛刺激呈現「去大腦僵直」（decerebrate rigidity），通常暗示損傷部位在何處？","options":{"A":"脊髓腰椎段","B":"大腦半球皮質","C":"中腦、腦幹","D":"小腦"},"answer":"C","source":"同學出題","manualChapter":"CH36"},{"id":45654,"question":"關於辛辛那提到院前腦中風評量表(CPSS)的敘述何者錯誤?","options":{"A":"要求病人雙手平舉10秒鐘，評估是否有單側無力或手臂下垂的情形","B":"請患者微笑或露齒，以觀察兩側臉部是否對稱。","C":"請病人重複你說的話，評估是否錯漏字的情形","D":"若其中一個異常，72％的可能性為腦中風。若3個皆為異常則有85％的可能性為腦中風。"},"answer":"C","source":"同學出題","manualChapter":"CH36"},{"id":45662,"question":"一名 68 歲男性突然出現右側肢體無力約 2 小時，救護人員到場評估：患者過去無癲癇病史，平時可自行行走，血糖 126 mg/dL。請患者微笑時發現右側嘴角下垂，雙手平舉時右手明顯下垂。依據洛杉磯到院前腦中風評量表（LAPSS），下列何者最適當？","options":{"A":"因患者有臉部不對稱及手臂無力，故 LAPSS 為陽性","B":"因患者年齡超過 45 歲且血糖正常，故 LAPSS 為陽性","C":"患者符合 LAPSS 的年齡、癲癇病史、發作時間、活動能力及血糖條件，且有單側神經學異常，因此 LAPSS 為陽性","D":"LAPSS 必須同時出現臉部不對稱、握力下降及手臂無力三項，才能判定為陽性"},"answer":"C","source":"同學出題","manualChapter":"CH36"},{"id":45712,"question":"當血中二氧化碳分壓(PCO2)控制在多少mmHg左右時，可以減少腦部血流量，但並不一定會持續降低顱內壓","options":{"A":"10","B":"30","C":"50","D":"80"},"answer":"B","source":"大白p964","manualChapter":"CH36"},{"id":45756,"question":"有關區分周邊型和中樞型眩暈的症狀，下列何者為非?","options":{"A":"只要患者有任何耳朵症狀，如聽力減弱、耳鳴、耳痛及腫脹，即可排除中樞眩暈","B":"周邊型眩暈的持續時間較短","C":"僅中樞型眩暈會出現眼震，且持續時間少於一周","D":"若患者多次轉頭不會減輕眩暈程度，即是中樞型眩暈"},"answer":"C","source":"大白P977","manualChapter":"CH36"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

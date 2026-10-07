@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 48 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：102 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH48</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":31,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列有關成人與小孩呼吸道解剖構造不同的地方，何者正確？","options":{"A":"小孩喉部軟骨較成人硬","B":"小孩最狹窄處為聲帶，而成人則在聲帶之下環形骨環","C":"小孩舌部相對較大","D":"小孩的會厭較成人平而有彈性"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":50,"source":"105 高級救護技術員甄試筆試題目.doc","question":"小兒腹部鈍傷中，最容易受傷的器官為何？","options":{"A":"十二指腸","B":"肝臟與脾臟","C":"小腸","D":"腎臟"},"answer":"B","manualChapter":"CH48"},{"id":53,"source":"105 高級救護技術員甄試筆試題目.doc","question":"嬰幼兒休克時給予輸液急救，建議每次的輸液量為？","options":{"A":"10 cc / kg Normal Saline","B":"15 cc / kg Normal Saline","C":"20 cc / kg Normal Saline","D":"30 cc / kg Normal Saline"},"answer":"C","manualChapter":"CH48"},{"id":77,"source":"105 高級救護技術員甄試筆試題目.doc","question":"一位兩歲的幼童，咳嗽流鼻水已經一週，目前僅對痛覺刺激有反應並有發紺現象，心跳速率為188次/每分鐘，呼吸速率為65次/每分鐘，肋間肌嚴重凹陷，微血管回填充時間小於兩秒鐘，到院前下列何項立即性的處理最為優先：","options":{"A":"建立靜脈管路並給予液體輸注","B":"打開呼吸道，使用甦醒球連接100％氧氣以提供輔助性正壓通氣","C":"提供100％氧氣面罩，並立即測血氧濃度分析","D":"提供100％氧氣面罩，並立即進行神經學檢查"},"answer":"B","manualChapter":"CH48"},{"id":102,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"新生兒急救時，所需的急救措施，最少用到的是？","options":{"A":"擦乾和保暖","B":"给氧","C":"胸外按壓","D":"藥物"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":150,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"下列有關成人與小孩呼吸道解剖構造不同的地方，何者為非？","options":{"A":"小孩喉部軟骨較成人軟","B":"小孩最狹窄處為聲帶，而成人則在聲帶之下環形軟骨環","C":"小孩舌部相對較大","D":"成人的會厭較小孩平而有彈性"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":157,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"關於急產後新生兒之處置，下列何者為非？","options":{"A":"新生兒出生後必須執行擦乾-擺位-抽吸-刺激四項處置","B":"新生兒呼吸約每分鐘40-60下，若有呼吸衰竭，應盡早給予正壓給氧","C":"檢查臍動脈脈搏，若是小於每分鐘100下即需正壓給氧，小於每分鐘60下即需CPR","D":"可以搓揉新生兒背部來刺激呼吸，危急時可以倒吊新生兒並擊打臀部的方式來刺激呼吸"},"answer":"D","matchedChapters":["CH48"],"manualChapter":"CH48"},{"id":158,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"小兒呼吸衰竭，插呼吸管時，其氣管內管的大小號碼選擇為多少？","options":{"A":"Age（Y）/ 4 +4","B":"[Age（Y）+4] / 4","C":"Age（Y）/ 2 +4","D":"[Age（Y）+ 4] / 2"},"answer":"A","manualChapter":"CH48"},{"id":203,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"關於小兒氣管內插管與氣管內管選擇，下列何者為是？","options":{"A":"因為嬰兒骨頭脆弱，所以插管時挑起來不可將葉片前端直接壓在會厭軟骨上","B":"可能為嬰兒痺死症的初生嬰兒應選擇3.5＃（mm）無氣囊","C":"太小的嬰兒插管喉頭鏡不宜使用直式葉片","D":"4歲女童疑似家暴，無呼吸心跳，選擇5.0＃（mm）有氣囊"},"answer":"B","manualChapter":"CH48"},{"id":297,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"新生兒發生癲癇重積狀態，常見的原因不包刮?","options":{"A":"生產受傷","B":"先天性代謝異常","C":"腦部感染","D":"腦部腫瘤"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":578,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"根據AHA 2015年規範，關於小兒生命之鏈的敘述何者為是？","options":{"A":"第一個環為早期辨識心跳停止並啟動緊急醫療應變網","B":"與成人不同的地方在於強調需盡早取得AED並啟動緊急醫療應變網","C":"第三個環與成人OHCA生命之鏈不同","D":"與成人相同的地方在於先啟動緊急醫療應變系統接著盡快開始CPR"},"answer":"C","manualChapter":"CH48"},{"id":605,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一歲半的兒童發現單側肺部有哮鳴音，最有可能的原因為何？","options":{"A":"氣喘","B":"異物阻塞支氣管","C":"心臟衰竭","D":"會厭炎"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":633,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"兒童的呼吸道解剖構造和成人有許多不同之處，關於兒童呼吸道的描述何者為非？","options":{"A":"較為脆弱容易受傷","B":"兒童的上呼吸道較狹窄，舌頭相對較大","C":"喉部相對於舌根的位置較為往後往下","D":"環狀軟骨是兒童呼吸道最狹窄的部位"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":644,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"關於小兒氣管内插管與氣管内管選擇，下列何者為是？","options":{"A":"因為嬰兒骨頭脆弱，所以插管時挑起來不可將葉片前端直接壓在會厭軟骨上","B":"可能為嬰兒猝死症的初生嬰兒應選擇3.5#（mm）無氣囊","C":"太小的嬰兒插管喉頭鏡不宜使用直式葉片","D":"4歲女童疑似家暴，無呼吸心跳，選擇5.0#（mm）有氣囊"},"answer":"B","manualChapter":"CH48"},{"id":672,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"以下針對氣管內管相關的敘述何者為非？","options":{"A":"病人無法維持呼吸道通暢、或無法自行呼吸需提供人工呼吸都是氣管內管插管的適應症","B":"小於8歲的兒童因為環狀軟骨段的氣管較大，所以一定要選擇有氣囊的氣管内管","C":"兒童的會厭軟骨較為細長柔軟，不易控制，故常使用直式葉片","D":"插管前先以100％氧氣給病人自行呼吸或施以人工呼吸至少15～30秒"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH15"]},{"id":715,"source":"第五章 創傷急症(2012-2014).doc","question":"在嬰幼兒休克時給予輸液急救，建議每次的輸液量為？","options":{"A":"10c.c.／kg normal saline or L-R solution","B":"20c.c.／kg normal saline or L-R solution","C":"30c.c.／kg normal saline or L-R solution","D":"20c.c.／kg D5 & 1／4 saline"},"answer":"B","manualChapter":"CH48"},{"id":730,"source":"第五章 創傷急症(2012-2014).doc","question":"獅潭仙山發生遊覽車翻覆事件，你與一新進EMT2同仁共同到現場，指揮官指定你們救護一名兩歲幼童，體重約12公斤，左小腿明顯大量出血，此EMT2同仁，於測量血壓時突然詢問，學長此小孩最低可接受的收縮壓為多少？點滴打上後EMT2同仁又詢問，學長我要先給多少normal saline？","options":{"A":"74 mmHg，120 c.c.","B":"74 mmHg，240 c.c.","C":"84 mmHg，120 c.c.","D":"84 mmHg，240 c.c."},"answer":"B","manualChapter":"CH48"},{"id":794,"source":"第五章 創傷急症(2015-2018).doc","question":"幼兒的各項受傷中，可能懷疑有兒童虐待的情形何者為非？","options":{"A":"Corner骨折","B":"Epiphyseal-metaphyseal的肋骨骨折","C":"旋轉性上臂肱骨骨折","D":"二次以上的肘關節脫臼"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":871,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於急產後新生兒之處置，以下何者為非？","options":{"A":"新生兒出生後必須執行擦乾－擺位－抽吸－刺激四項處置","B":"新生兒呼吸約每分鐘40～60下，若有呼吸衰竭，應盡早給予正壓給氧","C":"檢查臍動脈脈搏，若是小於每分鐘100下即需正壓給氧，小於每分鐘60下即需CPR","D":"可以搓揉新生兒背部來刺激呼吸，危急時可以倒吊新生兒並擊打臀部的方式來刺激呼吸"},"answer":"D","matchedChapters":["CH48"],"manualChapter":"CH48"},{"id":872,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"有關小兒與大人之呼吸道在結構上之差異何者不正確？","options":{"A":"舌頭相對於囗腔之比例較大","B":"咽喉呈漏斗狀","C":"最窄的部位在聲帶","D":"為防止昏迷平躺的小朋友呼吸道受到壓迫，可將肩部墊高預防"},"answer":"C","manualChapter":"CH48"},{"id":876,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"兒童心室頻脈/心室顫動VTⅣF之去顫術的起始計量為","options":{"A":"10焦耳/kg","B":"5焦耳/kg","C":"2焦耳/kg","D":"1焦耳/kg"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":877,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一位新生兒出生時，您已經給予乾燥、保暖、適當之姿勢、抽吸及給予刺激，但此新生兒仍發紺、心搏過慢、呼吸困難，您下一步要做的是？","options":{"A":"以抽吸管抽吸囗鼻","B":"強力刺激新生兒的背部或足底","C":"使用簡單型面罩給予氧氣","D":"使用BVM給予100％氧氣正壓通氧"},"answer":"D","manualChapter":"CH48"},{"id":880,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於新生兒急救，如果發現呼吸暫停或心跳低於幾下，須施行正壓呼吸（bag-mask ventilation）？","options":{"A":"0／min","B":"＜60／min","C":"＜100／min","D":"＜120／min"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":883,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"「根據2010年美國心臟醫學會所建議的心肺復甦術指引，以下關於兒童心肺復甦術的敘述何者為非？","options":{"A":"在建立高級呼吸道之前，單一施救者對於兒童的胸部按壓與通氣建議為30：2","B":"在建立高級呼吸道之前，兩名醫護人員對於兒童的胸部按壓與通氣建議為15：2","C":"如果已建立高級呼吸道，建議呼吸應配合胸部按壓進行，每次呼吸約1秒且可見胸部起伏","D":"如果已建立高級呼吸道，建議每6～8秒給予1次呼吸，也就是每分鐘約給予8～10次呼吸"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":885,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據2010年美國心臟醫學會所建議的心肺復甦術指引，以下關於新生兒心肺復甦術的敘述，何者為非？","options":{"A":"一旦開始正壓通氣或氧氣補充供給，應評估新生兒的充氧狀態，而且以脈衝式血氧計會比單純評估膚色來得更為可靠","B":"新生兒心臟停止的病例大部分為心臟問題，因此仍維持C-A-B的復甦步驟，並配合3：1的按壓通氣比率","C":"對於足月出生的嬰兒，開始進行急救時最好使用空氣，而不要使用100％的氧氣","D":"只有發生明顯自行呼吸障礙或需要正壓通氣的嬰兒，才需要在出生後立即進行抽吸（包c括使用球形注射器抽吸）的動作"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":891,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"小兒呼吸衰竭，插呼吸管時，其氣管內管的大小號碼選擇為多少？","options":{"A":"Age（Y）／4＋4","B":"［Age（Y）＋4］1／4","C":"Age（Y）／2＋4","D":"［Age（Y）＋4］／2"},"answer":"A","manualChapter":"CH48"},{"id":892,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一位十一個月大，有反應的嬰兒，發燒體溫39℃、燥動不安、皮膚出現斑塊、並有四冰冷。心跳速率為168下/分、呼吸速率為62下/分、血壓為78∕56 mmHg，酸鹼度為7.25。進行評估此嬰兒之後何者為是？","options":{"A":"外觀正常","B":"呼吸正常","C":"循環正常","D":"血壓正常"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":903,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於兒科病患的休克，下列敘述何者？","options":{"A":"兒科病患因為代償功能較差，休克早期血壓就會顯著下降","B":"微血管沖填延遲雖是一種休克的生理指標，但是對於診斷休克沒有幫助","C":"雖不同年齡的血壓值有所不同，但收縮壓的下限值估算可以用70＋（年齡X 2）估是否為低血壓","D":"對於低血容性休克病患給予輸液急救是指快速給予0.33％G/S，劑量為20 ml/kg，最多給兩次"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":962,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"新生兒（第一個月）發生癲癇重積狀態，常見的原因不包括？","options":{"A":"生產受傷","B":"先天性代謝異常","C":"腦部感染","D":"腦部腫瘤"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":963,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"新生兒急救時，所需的急救措施，依頻率而言，最常用到的措施是？","options":{"A":"擦乾、保暖、抽吸、剌激","B":"胸外按壓","C":"氣管插管","D":"強心劑藥物"},"answer":"A","matchedChapters":["CH48"],"manualChapter":"CH48"},{"id":971,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"以下關於小兒急救的敘述，何者為非？","options":{"A":"小兒若感冒發燒期間發生竇性頻脈（sinustachy cardia），應儘速用藥物控制心搏過速","B":"Atropine建議劑量為0.02 mg/kg，最小劑量為0.1 mg，因為太小劑量反而會造成心搏過緩","C":"出現上心室頻脈（SVT），在迷走神經刺激失敗後，可以考慮靜脈快速注射腺酸（adenosine 0.1 mg/kg）","D":"有脈搏的心室頻脈（VT）時，立即施予心臟電器整流術0.5～1焦耳/公斤"},"answer":"A","manualChapter":"CH48"},{"id":972,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"以下關於兒童生理學和解剖學臨床應用之重點，何者為非？","options":{"A":"兒童頭部佔全身面積之比率較大，兒童事故傷害常造成頭部損傷","B":"將摺疊之毛巾置於大於3歲之兒童的枕部有助於建立嗅鼻吸姿勢以維持呼吸道通暢","C":"而兒童呼吸道最狹窄的位置是在聲帶下方的環狀軟骨","D":"小於6個月的嬰兒主要是依賴嘴巴呼吸，即使鼻孔被分泌物阻塞也不會造成呼吸窘迫"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":973,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關於下列兒童的血壓數值描述，何者為是？","options":{"A":"一名5歲男童發燒畏寒，手腳冰冷，收縮壓86 mmHg，應為敗血性休克","B":"一名8歲女童騎腳踏車摔倒撞到腹部，臉色蒼白，收縮壓76 mmHg，應為出血性休克","C":"一名4歲男童拉肚子一天，活動力降低，收縮壓82 mmHg，應為低血容性休克","D":"一名6歲女童頭部外傷合併頭皮血腫，大聲哭鬧，收縮壓84 mmHg，應為神經性休克"},"answer":"B","manualChapter":"CH48"},{"id":975,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"有關兒童外傷，下敘述何者為是？","options":{"A":"常常是單一器官受傷","B":"小兒肋骨沒斷，但肺部常常已經受到嚴重的挫傷","C":"處理原則與大人差異很大","D":"骨折時，常常完全折斷"},"answer":"B","manualChapter":"CH48"},{"id":981,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"在面對兒童急症時，我們常常會使用到兒童評估評估三角來初步評估兒童的病情，有關兒童評估三角，何者為非？","options":{"A":"兒童外觀，視其意識狀態及肌肉張力","B":"兒童呼吸，視其呼吸速率及其呼吸費力程度","C":"兒童瞳孔，視其有無放大或縮小","D":"兒童循環，視其膚色及皮膚狀況"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":982,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"年輕媽媽神情緊張的抱著出生不久的小孩衝進分隊，表示小朋友剛在家餵完奶後，呼吸淺慢且呼吸音嘈雜。你診視後發現此名嬰兒膚色發紺，意識不清，於是在請求支援後馬上進行復甦。請問下列有關小兒呼吸道及胸腔的敘述，何者為非？","options":{"A":"小於6個月的嬰兒主要是依賴鼻部呼吸，鼻孔被分泌物阻塞即會造成嬰兒呼吸窘迫，適時的抽吸鼻部分泌物是很重要的","B":"將折疊之毛巾置於大於3歲的兒童枕部，有助於建立嗅吸姿勢以維持呼吸道暢通","C":"兒童呼吸道最窄的位置在聲帶下方的環狀軟骨，這點與大人不同","D":"兒童胸腔肋骨因含有較多軟骨而有彈性，故發生胸腔創傷時較能吸收外來的能量，不易產生肺挫傷和壓力損傷"},"answer":"D","manualChapter":"CH48"},{"id":989,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關新生兒急救流程，何者為是？","options":{"A":"只要心跳有大於每分鐘100下，都不需要正壓給氧","B":"給予正壓呼吸後，心跳仍小於每分鐘60次，則開始胸部按壓","C":"新生兒在還有心跳時都不需給予腎上腺素","D":"保暖並非初步穩定措施的選項"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":990,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"下列何者為兒童評估三角的要素？","options":{"A":"意識狀態","B":"肌肉張力","C":"呼吸速率","D":"以上皆是"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":991,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關於小兒無脈搏心跳停止的評估處置，下列何者為是？","options":{"A":"分為可電擊（心室頻脈/心室顫動）以及不可電擊（無脈搏電氣活動/心搏停止）","B":"可電擊的情況下，第一次電擊電量為4焦耳/公斤","C":"腎上腺素只能靜脈給予，不可骨內注射或經氣管內管給予","D":"低血容，鹼中毒，高低血鉀，高體溫均為可能之原因"},"answer":"A","manualChapter":"CH48"},{"id":999,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"小兒急救最重要的是？","options":{"A":"呼吸道暢通。","B":"建立輸液途徑（IV lines）","C":"拿電擊器Quick look paddle看是否心律不整","D":"給予毛毯，以免失溫"},"answer":"A","manualChapter":"CH48"},{"id":1010,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關於新生兒須接受正壓呼吸的適應症，下列何者為非？","options":{"A":"呼吸暫停","B":"呼吸窘迫","C":"心跳小於每分鐘120下","D":"雖然給予100%氧氣仍有持續發紺的情況"},"answer":"C","manualChapter":"CH48"},{"id":1011,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關於嬰幼兒發生陣發性心室上頻脈（PSVT），下列何者為非？","options":{"A":"在嬰兒陣發性心室上頻脈速率多大於每分鐘220下，小孩心跳速率多大於每分鐘180下","B":"可藉由刺激迷走神經而延緩房室結傳導來終結陣發性心室上頻脈，所以應該優先使用頸動脈竇按摩","C":"Adenosine是治療陣發性心室上頻脈首選藥物，快速靜脈注射0.1 mg/kg，也可經由骨針給予","D":"在嬰幼兒，最有效的迷走刺激為冰敷臉10至15秒"},"answer":"B","manualChapter":"CH48"},{"id":1022,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"氣喘與急性細支氣管炎都是造成小兒哮鳴（wheezing）的常見呼吸道急症，下列關於兩者的比較敘述何者為是？","options":{"A":"細支氣管炎好發在3歲以上的幼兒，而氣喘兒大多從嬰兒時期就被診斷出來","B":"兩者的X光表現都為單側肺部過度換氣","C":"類固醇為氣喘的建議用藥，但卻不是細支氣管炎病童的標準治療","D":"吸入性氣管擴張劑可減緩兩者的症狀，且縮短兩者的住院天數"},"answer":"C","manualChapter":"CH48"},{"id":1080,"source":"第四章 非創傷急症(2012-2014).doc","question":"依ACLS 2010年建議，須作15：2按壓換氣比的情況是？","options":{"A":"成人急救，兩名一般施救者","B":"兒童急救，一名一般施救者","C":"兒童急救，兩名專業醫療人員","D":"新生兒急救，一名專業醫療人"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":2010,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"關於兒童氣管插管的描述何者為非？","options":{"A":"小於8歲的兒童因為環狀軟骨段的氣管較寬大，一定要選擇有氣囊的氣管內管。","B":"兒童的會厭軟骨較為細長柔軟，不易控制，故插氣管內管常使用直式葉片。","C":"兒童喉部相對於舌根的位置較為往前往上，比成人更難直接目視。","D":"兒童的上呼吸道較狹窄，舌頭相對較大，容易阻塞，插管時較不容易進行。"},"answer":"A","manualChapter":"CH48"},{"id":2039,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"有關小兒外傷之敘述，下列敘述何者為是？","options":{"A":"小兒發生出血性休克時應給予2次20 ml/kg快速推注的生理食鹽水，如無反應則需要立刻輸血。","B":"小兒因為身體循環血量較成人少，即使是10 %的出血量，也很容易造成血壓下降。","C":"2歲以上的小兒頭部外傷若出現頭痛和嘔吐，應和家屬討論是否要安排電腦斷層。","D":"小兒外傷傷患出現低血容休克時，應該直接考慮建立骨針輸液以爭取時效。"},"answer":"C","manualChapter":"CH48"},{"id":2164,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於新生兒急救的四大措施：A.給予腎上腺素(epinephrine)或輸液、B.胸部按壓、C.保暖、擺位、清呼吸道、擦乾、刺激及重新擺位、D.正壓通氣與修正通氣步驟。依急救措施的相對頻率由多至少，也是急救先後次序，以下何者最適當？","options":{"A":"CBAD","B":"CDAB","C":"CDBA","D":"CABD"},"answer":"C","manualChapter":"CH48"},{"id":2259,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"下列有關新生兒急救時的擺位與呼吸道清理的相關敘述，何者為是？","options":{"A":"新生兒出生後，建議常規性進行口、鼻的抽吸，以確保呼吸道暢通。","B":"進行呼吸道抽吸的步驟，建議以吸球先抽吸鼻部，再做口部的抽吸。","C":"為了維持呼吸道通暢，可將毛巾置於新生兒的枕部，以保持嗅吸姿勢。","D":"目前準則並不建議常規性地為羊水胎便染色的新生兒進行呼吸道抽吸。"},"answer":"D","manualChapter":"CH48"},{"id":2292,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"新生兒出生時為了脫離母體血液循環，會做出一些生理上的調整與變化，下列何者為非？","options":{"A":"體循環血管阻力的上升。","B":"主動脈、左心室與左心房壓力的上升。","C":"肺循環的血管阻力上升。","D":"右心室與右心房的壓力下降。"},"answer":"C","manualChapter":"CH48"},{"id":2297,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"2歲兒童因誤食硬幣求救。您到達現場後進行身體檢查，目視其呼吸淺快，進一步胸部聽診發現異常呼吸音，以下評估結果何者為非？","options":{"A":"此異常呼吸音為喘鳴音(Stridor)，為連續性雜音，清楚的聽診位置常位於頸部。","B":"此異常呼吸音為空氣通過阻塞狹窄的胸腔外上呼吸道氣管，為中頻連續音。","C":"此異常呼吸音也常發現於腫瘤、氣管內結核、痰液阻塞的病人。","D":"此異常呼吸音於呼吸期出現時間，以吸氣期為主，嚴重狹窄時呼氣期亦會出現。"},"answer":"C","manualChapter":"CH48"},{"id":2351,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"下列有關於新生兒使用腎上腺素，何者為非？","options":{"A":"新生兒急救很少使用到急救藥物。","B":"不論何種途徑均稀釋10倍後才可使用。","C":"若有需要，可在3～5分鐘重覆給予相同劑量。","D":"經臍靜脈給予腎上腺素是最快速且方便的途徑。"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":2352,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"下列有關產婦羊水栓塞之敘述，何者為非？","options":{"A":"常見症狀為突然的缺氧、低血壓、休克及凝血功能障礙。","B":"可能為羊水雜質經子宮頸靜脈進入母體肺部血管造成。","C":"胎兒娩出後，就不可能發生產婦羊水栓塞。","D":"最好犯於多胞胎產婦第一產程。"},"answer":"C","manualChapter":"CH48"},{"id":2361,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"美國Pediatric Education for Paramedics (PEP)課程發展出的兒童評估三角(Pediatric Assessment Triangle，PAT)為兒童急救教育的核心，請問下列何者不屬於評估的內容？","options":{"A":"昏迷指數。","B":"膚色循環。","C":"肌肉張力。","D":"呼吸作功。"},"answer":"A","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":2362,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"當你在轉送一名6歲主訴胸悶的病童至醫院的路上，生理監測器上發現病童突然心跳加快、呼吸急促，關於下列相關治療的敘述何者最為適當？","options":{"A":"當病童尚為有脈的心室頻脈(VT)時，應採用同步整流的劑量為2 J/kg。","B":"當你判斷此病童心律為心室上頻脈(PSVT)時，不得進行迷走神經刺激術。","C":"當病童已進展至致命性的心室顫動(VF)時，首次的電擊劑量為2 J/kg。","D":"當第一次電擊無法成功結束心室顫動，需要再次嘗試的電擊劑量為3 J/kg。"},"answer":"C","manualChapter":"CH48"},{"id":2443,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於足月新生兒接受正壓通氣的描述，下列何者最適當？","options":{"A":"娩出時若無哭聲，需立即給予正壓通氣。","B":"給予正壓給氧的速率約為40-60下/分鐘。","C":"為避免缺氧，通氣時應使用100%的氧氣。","D":"除非心跳小於60下/分鐘，否則不需給予正壓通氣。"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":2454,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"8歲男童體重約30公斤。吃果凍吃到一半突然臉色紫青，而後轉為心跳停止。你抵達現場時已有家人在進行心肺復甦術。接下來的急救措施，何者正確？","options":{"A":"當預計進行氣管置入時，無氣囊的氣管內管號數應挑選為5.5號以上。","B":"當成功置入後，無氣囊氣的管內管置入深度應為15公分以上。","C":"在急救過程中，施打腎上腺素(Epinephrine)的劑量每次為0.03mg。","D":"在回復自主呼吸心跳後，此男童收縮壓的標準應維持在86mmHg以上。"},"answer":"D","manualChapter":"CH48"},{"id":2455,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"請問下列救護情境，何者最不像是兒童虐待的案件？","options":{"A":"母親表示3歲大女嬰在家人睡午覺時，自己從床上翻落導致腹部瘀傷。","B":"父親表示10個月男嬰練習走路時不慎跌倒，X光發現移位性股骨骨折。","C":"老師表示4歲女童早上跌倒導致頭部撕裂傷，傍晚帶來急診傷口縫合。","D":"教練表示6歲男童在跆拳道集訓過程中，雙側前臂瘀青疼痛活動困難。"},"answer":"D","manualChapter":"CH48"},{"id":2478,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"以下針對氣管內管相關的敘述何者為非？","options":{"A":"小於8歲的兒童因為環狀軟骨段的氣管較寬大，所以一定要選擇有氣囊的氣管內管。","B":"兒童的會厭軟骨較為細長柔軟，不易控制，故常使用直式葉片。","C":"若插管太深，通常是進入右側支氣管。","D":"潮氣末二氧化碳濃度可以用來評估插管是否正確置於氣管中。"},"answer":"A","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":2532,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"一名3歲大的兒童有癲癇病史，這幾天感冒高燒不退。病童突然失去意識。你到現場發現他眼睛上吊，右臉與右手右腳不斷抽動，臉色有發紺現象。家屬說已經這樣抖動15分鐘了。此時下列急救處置何者最應優先執行？","options":{"A":"打上週邊靜脈並給予適當劑量的Midazolam。","B":"從病童肛門塞入退燒塞劑。","C":"插入適當大小的鼻咽呼吸道並給予正壓呼吸。","D":"請家屬從病童嘴巴灌入平常服用的抗癲癇藥物。"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":2533,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"有關小兒存活之鏈(Chain of Survival)的施救步驟，下列何者順序正確？(1)啟動緊急應變系統(EMS) (2)施行高級小兒救命術(3)心跳停止後的復甦照顧(4)盡快給予電擊(5)立即給予高品質CPR (6)預防","options":{"A":"1  2  4  3  6。","B":"1  5  4  2  3。","C":"6  1  5  2  3。","D":"6  5  1  2  3。"},"answer":"D","manualChapter":"CH48"},{"id":2603,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"為一位失去意識且無嘔吐反射的3歲兒童放置口咽呼吸道（OPA），何者最適當？","options":{"A":"反向插入達軟顎後旋轉180度。","B":"應使用壓舌板輔助平行置入。","C":"尺寸應選擇更大號避免脫落。","D":"兒童舌頭小不易造成呼吸道阻塞。"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":2637,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"34週新生兒急救，剛剛已經給過15秒甦醒球正壓通氣，你發現雖然bagging時新生兒胸部有起伏，但心跳數卻與正壓通氣前一樣約45次/min，請問下一步急救措施何者最適當？","options":{"A":"抽吸口鼻分泌物。","B":"檢查面罩是否有漏氣。","C":"開始3:1壓胸與吹氣。","D":"再bagging15秒。"},"answer":"D","matchedChapters":["CH48"],"manualChapter":"CH48"},{"id":2638,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"院前急產38週約3公斤之新生兒進行急救，關於下列急救步驟的描述，何者最適當？","options":{"A":"若羊水為黃色，高度懷疑有胎便吸入症，須立即插管。","B":"正壓呼吸時建議給予低濃度氧氣（1-3 L/min）。","C":"雙手環抱壓胸時，拇指並排頂端切齊兩乳頭連線。","D":"從氣管內管給Epinephrine時，以1:1,000濃度給0.3cc。"},"answer":"C","manualChapter":"CH48"},{"question":"比較成人5H5T與小孩6H5T有何不同？","options":{"A":"Toxins中毒","B":"Hypothermia低體溫","C":"Thrombosis，coronary 栓塞,心肌梗塞","D":"Hypoglycemia低血糖"},"answer":"D","manualChapter":"CH48","id":3358,"source":"TP題庫 (圖片匯入)"},{"question":"關於新生兒氣管插管深度的鼻耳屏長度法( NTL method)，下列何者正確？","options":{"A":"僅適用於足月兒","B":"僅適用於早產兒","C":"適用於足月兒與早產兒","D":"僅適用於低出生體重兒"},"answer":"C","manualChapter":"CH48","id":3360,"source":"TP題庫 (圖片匯入)"},{"question":"有關小兒解剖生理構造，何者為是？","options":{"A":"肝和小腸所相對體積較大","B":"3歲以上平躺時需墊肩以維持呼吸道暢通","C":"會厭傾斜45度","D":"最狹窄處在聲門"},"answer":"C","manualChapter":"CH48","id":3362,"source":"TP題庫 (圖片匯入)"},{"question":"小兒癲癇重積狀態原因會因年齡有所不同，請問跟新生兒有關的原因，何者敘述有錯？","options":{"A":"代謝疾患","B":"感染","C":"先天性不正常","D":"大腦退化性疾病"},"answer":"D","manualChapter":"CH48","id":3363,"source":"TP題庫 (圖片匯入)"},{"question":"關於TEN-4瘀傷準則與兒童虐待通報標準，下列何者正確？","options":{"A":"TEN-4指的是：10歲以下兒童任何部位超過4處瘀傷即通報","B":"TEN-4指的是：4歲以下兒童軀幹、耳朵、脖子的瘀傷；或4個月以下嬰兒全身任一處瘀傷，應高度懷疑身體虐待","C":"符合下列任意一項即應通報：①超過三次以上急診外傷就醫紀錄；②病史不一致；③延遲就醫","D":"2歲以下任何骨折才需通報，1歲以下頭部外傷不在通報條件內"},"answer":"B","manualChapter":"CH48","id":3364,"source":"TP題庫 (圖片匯入)"},{"question":"有關剛出生的新生兒若需插管注意事項，下列描述何者正確？","options":{"A":"懷孕30週新生兒使用內徑2.5mm的氣管內管","B":"鼻兒屏長度法為測量鼻中隔至耳屏長度，此為氣管適當深度","C":"插管過程不應超過15秒","D":"體重1500公克新生兒使用內徑3mm的氣管內管"},"answer":"D","manualChapter":"CH48","id":3376,"source":"TP題庫 (圖片匯入)"},{"question":"有關癲癇重積處置流程何者正確？","options":{"A":"靜脈注射lorazepam 0.1mg/kg，單次最大劑量2mg","B":"靜脈注射diazepam 0.1-0.3mg/kg,單次最大劑量5mg","C":"靜脈注射midazolam 0.1mg/kg，單次最大劑量10mg","D":"若在使用過phenobarbital後，痙攣仍持續10分鐘，可考慮以10mg/kg的劑量再給予一次，直到達到最大劑量40mg/kg"},"answer":"D","manualChapter":"CH48","id":3391,"source":"TP題庫 (圖片匯入)"},{"question":"何者不是新生兒 (第一個月) 癲癇重積狀態之原因","options":{"A":"生產受傷(缺氧、出血)","B":"天生的代謝錯誤","C":"大腦退化性疾病","D":"腦膜炎"},"answer":"C","manualChapter":"CH48","id":3393,"source":"TP題庫 (圖片匯入)"},{"question":"根據新生兒急救流程，若新生兒出生後心跳低於每分鐘 100 次且有呼吸暫停(apnea) 現象，應在多久時間內開始提供正壓通氣 (PPV) ？","options":{"A":"出生後 1 分鐘內","B":"出生後 2 分鐘內","C":"出生後 30 秒內","D":"出生後 5 分鐘內"},"answer":"A","manualChapter":"CH48","id":3394,"source":"TP題庫 (圖片匯入)"},{"question":"下列何者錯誤？","options":{"A":"兒童遭受胸部外傷後易產生肺挫傷","B":"兒童的縱膈腔比較具活動性","C":"兒童胸壁較薄，因此比較好確認氣管內管位置","D":"嬰幼兒用橫膈呼吸"},"answer":"C","manualChapter":"CH48","id":3398,"source":"TP題庫 (圖片匯入)"},{"id":3528,"source":"TP題庫","question":"下列敘述何者正確","options":{"A":"當嬰兒臍帶被夾住後，全身循環壓力上升，心臟右半部壓力升高導致卵圓孔關閉","B":"懷孕滿四十周出生稱為足月兒","C":"新生兒極易產生缺氧、酸血症、低血糖、心搏過速所以要多加注意。","D":"新生兒體表面積的三倍體積比例為頭頸臉部的水分開始增加，胎兒循環變成成人循環，體溫恆定"},"answer":"D","manualChapter":"CH48"},{"question":"關於新生兒正壓通氣的效能評估，若前 15 秒通氣後心跳無上升且胸部無起伏，下一步應為何？","options":{"A":"增加氧氣濃度至 100%","B":"執行通氣校正步驟","C":"直接進行氣管內插管","D":"立即開始胸部按壓"},"answer":"B","source":"圖片匯入","manualChapter":"CH48","id":3603,"matchedChapters":["CH48"]},{"source":"APLS 第 14 章 P.93","question":"一位 10 歲病童因車禍造成嚴重出血性休克 (Hemorrhagic shock) 。已給予總計 60 mL/kg 等張晶體液，但病童血壓依然偏低，心跳持續加快，且血紅素持續下降。此時最優先的血液動力學處置為何？","options":{"A":"繼續給予晶質溶液，總量可達80 mL/kg","B":"給予等張晶質溶液合併高張食鹽水","C":"使用升壓劑 (如Dopamine)以維持血壓","D":"輸注濃厚紅血球 (PRBCs) 10-20ml/kg"},"answer":"D","matchedChapters":["APLS"],"manualChapter":"CH48","id":3626},{"source":"EMT-P 第 48 章 P.1288","question":"依據「TEN-4 瘀傷準則」，下列哪位兒童須高度懷疑兒虐？","options":{"A":"4個月大的嬰兒手肘瘀青","B":"3歲的小兒前額頭瘀傷","C":"1歲小兒小腿前側有瘀傷","D":"4歲的小兒膝蓋及手掌根有瘀青"},"answer":"A","matchedChapters":["CH48"],"manualChapter":"CH48","id":3627},{"source":"EMT-P 第 48 章 P.1264","question":"大白課本中，以下相對之日數何者正確","options":{"A":"兒童：介於1歲和青春期的孩童","B":"早產兒：出生時懷孕週數小於36週之嬰兒","C":"新生兒：為出生滿30天內之嬰兒","D":"嬰兒：年齡超過2個月但未超過1歲的幼兒"},"answer":"A","manualChapter":"CH48","matchedChapters":["CH48"],"id":3638},{"source":"EMT-P 第 48 章 P.1265","question":"新生兒離開母體後，為了生存會產生重要的生理轉變，下列何者為非？","options":{"A":"排除肺部的水分並開始進行通氣","B":"由胎兒循環轉變成近似於成人的循環","C":"維持體溫恆定","D":"PACO2累積後刺激呼吸中樞"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"],"id":3644},{"source":"EMT-P 第 48 章 P.1271","question":"關於兒童解剖構造對急救的影響，下列敘述何者正確？","options":{"A":"兒童呼吸道最狹窄處位於聲門聲帶處","B":"小於3歲孩童平躺時應在肩膀下方墊薄毯以維持呼吸道暢通","C":"兒童喉部位置相較於成人較低且靠後","D":"兒童舌頭比例較小，不易造成呼吸道阻塞"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"],"id":3646},{"source":"EMT-P 第 48 章 P.1290-1293","question":"面對有特殊醫療需要兒童 (CSHCN) 遭遇管路緊急情況時，救護技術員可使用「DOPE」口訣來進行臨床評估與故障排除。其中字母 「P」 代表的臨床意義為何？","options":{"A":"Displacement (管路滑動移位)","B":"Obstruction (管路堵住或阻塞)","C":"Equipment failure (機械故障)","D":"Complications (各種併發症，如氣胸、心包膜填塞等)"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"],"id":3657},{"source":"EMT-P 第 48 章 P.1268","question":"建議35週以下早產兒正壓通氣應給予多少%的FiO²?","options":{"A":"17~21%","B":"21~30%","C":"30~45%","D":"100%"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"],"id":3658},{"source":"APLS 第 2 章 P.11","question":"嬰兒(小於1歲)與小兒CPR比較不同之處，下列選項何者不正確?","options":{"A":"摸脈搏之處不同","B":"壓胸的深度","C":"人工呼吸為口對口","D":"壓胸位置為兩乳頭連線中央下緣之胸骨處"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH2","APLS"],"id":3660},{"source":"EMT-P 第 48 章 P.1267","question":"在評估一名剛出生的新生兒是否需要立即急救時，根據新生兒急救流程，下列哪一項不是初步評估的三個核心問題之一？","options":{"A":"新生兒是否會哭跟呼吸","B":"新生兒的膚色是否紅潤","C":"新生兒是否為足月產","D":"新生兒的肌肉張力是否良好"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"],"id":3661},{"source":"EMT-P 第 48 章 P.1283","question":"關於小兒急救，下列何者錯誤？","options":{"A":"小兒OHCA時第一次電擊應用 2 J/KG","B":"小兒OHCA給予氣管內管Bosmin，劑量應為 0.01mg/kg","C":"給予氣管內管時，ETCO2可以用來確認氣管內管位置","D":"小兒與大人亦同，皆須高品質CPR"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"],"id":3665},{"source":"EMT-P 第 48 章 P.1288","question":"根據「TEN-4 瘀傷準則」，下列何種情況應高度懷疑為身體虐待？","options":{"A":"6歲兒童在膝蓋處有瘀青","B":"5歲兒童在手肘處有擦傷","C":"2歲兒童在額頭正中央有單一瘀青","D":"3個月大的嬰兒大腿處有不明瘀青"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"],"id":3667},{"source":"EMT-P 第 48 章 P.1279","question":"小兒童節中，對於病童常造成心搏過緩的原因以下何者為非","options":{"A":"毒藥物中毒","B":"低體溫","C":"低血糖","D":"缺氧"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"],"id":3668},{"source":"EMT-P 第 48 章 P.1264","question":"下列選項哪個錯誤？ 1.新生兒為出生21天內嬰兒 2.早產兒為年齡超過1個月 3.兒童介於一歲與青春期的兒童 4.嬰兒為超過一個月但未超過一歲的幼兒","options":{"A":"1.3.4","B":"1.2.3.4","C":"1.2.4","D":"1.2"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"],"id":3675},{"source":"EMT-P 第 48 章 P.1282","question":"關於到院前兒童急性病態生理的評估、休克輸液處置、心律不整給藥以及兒虐辨識，下列敘述何者最不適當？","options":{"A":"評估兒童休克時切勿只依賴血壓作為唯一指標。若遇到嚴重低血容休克病童，到院前可快速給予0.9%生理食鹽水，其初始劑量為20mL/kg","B":"當病童持續呈現有症狀之心搏過緩且伴隨循環不良，若通暢呼吸道與給氧後心跳仍小於每分鐘60下，應給予腎上腺素或實施胸外按壓","C":"治療兒童上心室頻脈(Supraventricular Tachycardia)時，腺苷酸(Adenosine)為首選藥物，其第一劑給藥劑量為快速推注1.0mg/kg","D":"依據TEN-4瘀傷準則，若發現4個月以下嬰兒全身任一處出現瘀傷，或4歲以下兒童在軀幹、耳朵及脖子有瘀傷，應高度懷疑身體虐待"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"],"id":3678},{"source":"APLS 第 23 章 P.999","question":"一位 2 歲男孩被母親帶來急診，主訴是嘔吐不止，腹痛安排檢查後，X 光有 Meniscus or Crescent Sign：","options":{"A":"巨結腸症 megacolon","B":"腸扭轉 Midgut volvulus","C":"麥克氏憩室炎 Meckel diverticulitis","D":"腸套疊 intussusception"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH23","APLS"],"id":3689},{"source":"EMT-P 第 48 章 P.1270","question":"若要經由骨內輸液 (IO) 給予新生兒腎上腺素，建議的劑量與濃度為何？","options":{"A":"1:10000，0.5～1 cc/kg","B":"1:1000，0.5～1 cc/kg","C":"1:10000，0.1～0.3cc/kg","D":"1:1000，0.1～0.3cc/kg"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"],"id":3698},{"source":"APLS 第 12 章 P.74","question":"在急救進行 RSI 時，針對臨床情境選擇適當的鎮靜或麻醉藥物，下列何者處置「最不適當」？","options":{"A":"對於低血壓、休克或氣喘發作的兒童，選用 Ketamine 作為鎮靜劑","B":"對於頭部創傷且懷疑腦壓上升的兒童，事先給予 Lidocaine 以減緩腦壓升高","C":"對於嚴重低血容或休克的病人，選用 Thiopental 作為首選鎮靜引導藥物","D":"對於大面積燒傷或嚴重肌肉受傷的病人，應避免使用 Succinylcholine 以免引發致命性高血鉀"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH12","APLS"],"id":3700},{"source":"EMT-P 第 48 章 P.1280","question":"評估兒童休克時，微血管充填時間 (CRT) 是一個極佳的初期生理徵候。在正常環境下輕壓病童手掌或腳背後放開，當超過幾秒才恢復顏色時，即代表病童可能處於休克狀態？","options":{"A":"超過 1 秒","B":"超過 2 秒","C":"超過 3 秒","D":"超過 5 秒"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"],"id":3702},{"question":"有關兒童(Child)與成人在解剖構造及生理功能上的相異性，關於高級救護技術員的到院前臨床處置考量，下列敘述何者最適當？","options":{"A":"小於三歲的孩童因枕部較為突出，平躺時需於肩膀下方放置捲筒狀薄毯以維持呼吸道暢通","B":"兒童呼吸道最狹窄的位置與成人相同，皆位於聲帶發育不健全的環狀軟骨上方聲門處","C":"兒童肋骨含有較少的軟骨且膠質比例極低，故胸部遭受鈍傷時非常容易發生多發性肋骨骨折","D":"一歲以下之嬰兒在評估循環與脈搏速率時，應以頸動脈作為第一線最安全且最優先的觸摸部位"},"answer":"A","manualChapter":"CH48","source":"TPP","id":3766,"matchedChapters":["CH48"]},{"question":"為肺部進行通氣，是新生兒急救術中最重要及有效的急救步驟*新生兒須接受正壓呼吸的適應症，何者適當？","options":{"A":"呼吸暫停 (apnea)","B":"呼吸窘迫致瀕死式呼吸 (gasp)","C":"心跳小於100下每分鐘","D":"以上皆正確"},"answer":"D","manualChapter":"CH48","source":"TPP","id":3770,"matchedChapters":["CH48"]},{"question":"新生兒急救流程中，所謂的「黃金1分鐘」是指在出生後缺氧且心跳小於每分鐘100下，需於多久應開始給予正壓通氣？","options":{"A":"出生後30秒內","B":"心跳停止後1分鐘","C":"出生後1分鐘內","D":"完成胸部按壓後1分鐘"},"answer":"C","manualChapter":"CH48","source":"TPP","id":3772,"matchedChapters":["CH48"]},{"id":45487,"question":"下列哪項非新生兒發生癲癇重積的代謝疾患原因？","options":{"A":"低血糖","B":"低血鈣","C":"低血鉀","D":"低血鈉"},"answer":"C","source":"大白","manualChapter":"CH48"},{"id":45627,"question":"派遣時告知為一名8個月大的嬰兒(7公斤)，失去呼吸心跳。此時急救的處置下列何者正確？","options":{"A":"單人急救時，壓胸及正壓給樣比例為15:2。","B":"插管Endo尺寸選擇為3.0有氣囊，深度為11cm。","C":"靜脈給藥Epinephrine(1:10000) 為0.7mL。","D":"氣管內管給藥Epinephrine(1:10000) 為7mL。"},"answer":"C","source":"同學出題","manualChapter":"CH48"},{"id":45639,"question":"有關新生兒急救術的敘述，下列何者最適當？","options":{"A":"若要給予腎上腺素(Epinephrine)，稀釋的方式單純是為了方便給正確的濃度，若能確保給予正確的濃度，不一定要稀釋。","B":"阿普加量表(Apgar score)為評估外觀、心跳、血液氧氣濃度、活動力、呼吸。","C":"若要插管，可依週數或體重選擇適當號數。","D":"量測心跳的方式有很多，手摸脈搏比EKG監測器準確。"},"answer":"C","source":"同學出題","manualChapter":"CH48"},{"id":45672,"question":"一名9個月大的患童外傷時，若觀察到其「囟門突出」，下列敘述何者錯誤?","options":{"A":"雖沒有昏迷，仍有可能顯示其顱內壓增高或潛在的腦出血","B":"可能會噁心嘔吐，年紀較大的孩童可能會視力異常、步態不穩","C":"因年紀小，不可能會有庫欣氏三徵象（Cushing's triad）","D":"治療上應將床頭略微抬高，保持呼吸道通暢，可考慮過度換氣"},"answer":"C","source":"同學出題","manualChapter":"CH48"},{"id":45674,"question":"派遣時告知一孕婦急產，到場為一名32週的新生兒( 2 kg )無呼吸心跳。此時急救的處置下列何者錯誤？","options":{"A":"壓胸及正壓給氧比例為3:1，每循環約時2秒鐘。","B":"插管Endo尺寸選擇為3.0有氣囊，深度為11cm。","C":"靜脈給藥Epinephrine(1:10000) 為0.2mL。","D":"氣管內管給藥Epinephrine(1:10000) 為2mL。"},"answer":"B","source":"同學出題","manualChapter":"CH48"},{"question":"小兒低血糖定義? 新生兒血糖值小於多少以及嬰兒血糖值小於多少?","options":{"A":"90、90","B":"45、60","C":"70、60","D":"70、70"},"answer":"B","source":"大白p1277","id":45815,"manualChapter":"CH48"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

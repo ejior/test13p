@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 40 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：48 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH40</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":36,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列有關致命性過敏的描述，何者為非？","options":{"A":"致命性過敏最常引起死亡的原因是上呼吸道阻塞","B":"對於清醒的病患，如果有聲音沙啞，舌頭水腫和後口咽腫大則可以選擇性的早期插管（須依循當地的預立醫囑施行，並尋求線上醫療指導","C":"如果臨床上有休克、呼吸道腫脹或呼吸困難的微候，則給予腎上腺素。腎上腺素可以經由肌肉注射給予。","D":"區分致命性過敏與其他內科急症的關鍵為得到正確的病史，因為致命性過敏通常在抗原進入體內的數小時至數天後發生，所以有足夠的時間作鑑別診斷"},"answer":"D","manualChapter":"CH40"},{"id":272,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"甲男40歲與乙女至枕頭山郊遊，於登山途中遭遇蜂螫，EMT到達時乙女表示甲男過去病史有高血壓，心臟病，現場生命徵象如下1.E2V2M4、2.Strider、3血壓88/45、4.律不整、5.血糖59、6胸悶，請問上述生命徵象何者為致命性過敏的臨床表現？","options":{"A":"1、2、3、4、5、6","B":"2、3、4、5","C":"2、3、4、6","D":"1、2、3、4、6"},"answer":"D","manualChapter":"CH40","matchedChapters":["CH40"]},{"id":625,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一名病患在山區被蜂螫，發生過敏性休克。您是EMT-P，所屬縣市預立醫可以給瞽上腺（epinephrine）以及給予點滴（normal saline）。請問您會如何處理此一病患，請選擇最適的答案？","options":{"A":"打上16號I.V.，立即給予normal saline 500 ml以及epinephrine 1 mg I.V push","B":"立即給予epinephrine 1 mg舌下含","C":"打上16號I.V.，立即給予normal saline 500 ml以及epinephrine 0.3 mg I.M.","D":"立即給予epinephrine 0.3 mg I.V. push"},"answer":"C","manualChapter":"CH40","matchedChapters":["CH40"]},{"id":679,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"在嚴重過敏反應期間，循環系統的血管會____，而呼吸道會變得____。依序應填入：","options":{"A":"收縮、擴張","B":"收縮、狹窄","C":"舒張、擴張","D":"舒張、狹窄"},"answer":"D","manualChapter":"CH40"},{"id":1081,"source":"第四章 非創傷急症(2015-2018).doc","question":"年輕男性在吃了花生之後突然出現呼吸困難，以下作法何者為非？","options":{"A":"若頸部出現喘鳴聲，而周邊呼吸音降低，應考慮進行哈姆立克法","B":"若血中氧氣濃度下降可考慮先給正壓呼吸","C":"若有起紅疹、血壓降低，可考慮給予epinephrine0.3～0.5mg皮下或肌肉注射","D":"若正壓呼吸仍無法改善血氧濃度，可給予LMA或Combitube做為進階呼吸道"},"answer":"D","manualChapter":"CH40"},{"id":1098,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關致命性過敏反應，下列敘述何者為非？","options":{"A":"過敏性抗原進入人體後造成白血球釋放組織胺以及白三烯素等物質有關","B":"組織胺以及白三烯素會造成血管擴張以及氣管痙攣而引起循環崩潰和休克進而致命","C":"人體接受抗原的刺激次數越多，越容易產生免疫作用而使過敏反應越輕微","D":"治療的藥物包括腎上腺素、抗組織胺以及類固醇等"},"answer":"C","manualChapter":"CH40"},{"id":1110,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關全身立即致命過敏性休克，下列敘述何者為非？","options":{"A":"組織胺釋放","B":"發生血管舒張","C":"心輸出增加，循環崩潰與休克","D":"發生氣管痙攣"},"answer":"C","manualChapter":"CH40"},{"id":2152,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"25歲男性，在務農時遭到蜜蜂螫傷求救，你到達時發現病人意識清楚，呼吸淺快、膚色蒼白、冒冷汗，血壓為70/40mmHg，針對病患的評估及處置，何者最適當？","options":{"A":"病人因為蜂毒的毒性反應而導致呼吸窘迫。","B":"肥大細胞和嗜鹼性細胞去顆粒化釋出白三烯素是導致低血壓的主因。","C":"可以給予病人Epinephrine 0.5 mg皮下注射。","D":"若對腎上腺素反應不佳，可給予1-2公升生理食鹽水輸液。"},"answer":"D","manualChapter":"CH40","matchedChapters":["CH40"]},{"id":2153,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"25歲女性在露營區突發性呼吸喘，病患意識清楚，橈動脈對稱但微弱、脈搏105次/分鐘、SpO 2：85%、體溫35.5 °C、末梢皮膚濕冷。朋友表示病人無特別過去病史及過敏史，剛在玩大地遊戲時病人突然呼吸喘、身上有多處紅疹，下列敘述何者最適當？","options":{"A":"詢問病人無藥物過敏史，則可排除過敏性休克，須盡速找尋其他休克原因。","B":"過敏反應可能會影響心臟血管系統，導致心臟的後負荷減少，進而造成心輸出量減少。","C":"嚴重過敏反應對呼吸系統而言，可能產生上呼吸道阻塞及下呼吸道支氣管痙攣、造成呼吸窘迫。","D":"致命性過敏易引起上呼吸道阻塞，考慮早期插管時，需使用鎮靜劑及肌肉鬆弛劑輔助插管。"},"answer":"C","manualChapter":"CH40"},{"id":2246,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"肥大細肥和嗜鹼性細胞內的去顆粒化，會釋放出誘發過敏反應的物質，下列物質何者為非？","options":{"A":"組織胺。","B":"白三稀素。","C":"肝素。","D":"抗凝血因子。"},"answer":"D","manualChapter":"CH40"},{"id":2406,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於成人的致命性過敏反應，請問以下何者為最可能的主訴與病徵？","options":{"A":"病人主訴喘，呼吸有喘鳴聲，同時合併持續腹痛。","B":"病人全身皮膚起疹子且發紅發癢。","C":"病人主訴昏厥，EMT接觸時已清醒，血壓120/74 mmHg。","D":"病人持續胸悶胸痛冒冷汗，心跳90次/分鐘，血壓126/92 mmHg。"},"answer":"A","manualChapter":"CH40","matchedChapters":["CH40"]},{"id":2494,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"當病人發生全身立即致命性過敏反應，可考慮使用的藥物下列何者為非？","options":{"A":"Diphenhydramine抗組織胺","B":"Hydrocortisone腎上腺皮質素","C":"Nitroglycerin硝化甘油","D":"Epinephrine腎上腺素"},"answer":"C","manualChapter":"CH40"},{"id":2625,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"40歲男性，被蜜蜂螫傷後約5分鐘，主訴：喉嚨緊、呼吸困難，並出現全身性蕁麻疹。初步評估：意識對聲音有反應但躁動不安，呼吸音有明顯喘鳴（Stridor），橈動脈微弱，皮膚潮紅、濕冷，下列何者為最優先的關鍵處置？","options":{"A":"建立靜脈輸液並快速輸注生理食鹽水1至2公升。","B":"將病人擺位後給予高濃度氧氣，並於大腿中外側肌肉注射腎上腺素。","C":"將病人送醫，同時監測生命徵象，並在送醫途中準備好氣管內管以防呼吸道完全阻塞。","D":"考慮給予抗組織胺藥物（如Diphenhydramine）緩解皮膚症狀。"},"answer":"B","manualChapter":"CH40"},{"question":"救護人員在執行氣管內管插管前進行口腔檢查，若發現病人舌頭或上顎出現「一塊塊白色膜狀物且可輕易刮除」，這通常代表病人患有口腔念珠菌感染，這項發現最重要的臨床意義為何？","options":{"A":"病人最近剛服用完抗生素","B":"病人有嚴重的口腔衛生問題","C":"病人可能處於免疫功能低下狀態（如未控制的糖尿病或愛滋病）","D":"病人有長期的吸菸習慣"},"answer":"C","manualChapter":"CH40","id":3346,"source":"TP題庫 (圖片匯入)"},{"question":"下列哪種物質被認為在支氣管收縮的作用時間上比組織胺「更長」？","options":{"A":"肝素","B":"白三烯素","C":"類胰蛋白酶","D":"補體蛋白質"},"answer":"B","manualChapter":"CH40","id":3414,"source":"TP題庫 (圖片匯入)"},{"question":"有關自體免疫系統疾病敘述，何者正確？","options":{"A":"系統性紅斑性狼瘡，台灣全民健保資料庫顯示盛行率約每10 萬人中有8人，男女發病比約7.3:1","B":"類風濕性關節炎 (Rheumatoid arthritis , RA)是一種以關節病變為主的自體免疫系統疾病，全球盛行率約1%、好發年齡為35～50 歲，女性罹病率較高","C":"修格蘭氏症候群可分為原發性(primary)及繼發性(secondary)，繼發性最常見合併系統性紅斑性狼瘡及類風濕性關節炎，好發於40～50 男性(男：女約4-5:1)","D":"僵直性脊椎炎(Ankylosing spondylitis)是中軸骨的慢性發炎疾病，屬於血清陰性脊椎病變(seronegative spondyloarthropathy , SpA)的一種，在台灣人口一般盛行率可達2%。目前認為與遺傳強烈相關，但實際機轉不明，男女罹病比約1:3"},"answer":"B","source":"圖片匯入","manualChapter":"CH40","id":3585,"matchedChapters":["CH40"]},{"question":"在第一型（立即型）過敏反應中，扮演最關鍵角色的抗體與細胞配對，下列何者正確？","options":{"A":"IgG 與 巨噬細胞","B":"IgE 與 肥大細胞 (Mast cell) 及嗜鹼性球 (Basophil)","C":"IgM 與 T淋巴球","D":"IgA 與 嗜酸性球 (Eosinophil)"},"answer":"B","source":"AI出題","manualChapter":"CH40","id":3810},{"question":"關於過敏反應的「敏感化 (Sensitization)」過程，下列敘述何者最為正確？","options":{"A":"第一次接觸過敏原時，即會引發嚴重的全身性過敏反應","B":"敏感化是指人體再次接觸過敏原時，IgE抗體開始大量製造的過程","C":"第一次接觸過敏原時，免疫系統會製造特異性IgE抗體附著於肥大細胞上，通常不會有明顯過敏症狀","D":"敏感化過程主要由T細胞直接吞噬過敏原所引起"},"answer":"C","source":"AI出題","manualChapter":"CH40","id":3811},{"question":"在嚴重過敏反應中，肥大細胞去顆粒化 (Degranulation) 會釋放多種化學介質。下列何種化學介質是引起早期嚴重血管擴張、血管通透性增加與支氣管平滑肌收縮的最主要且作用最快的物質？","options":{"A":"類胰蛋白酶 (Tryptase)","B":"白三烯素 (Leukotrienes)","C":"組織胺 (Histamine)","D":"前列腺素 (Prostaglandins)"},"answer":"C","source":"AI出題","manualChapter":"CH40","id":3812},{"question":"關於嚴重過敏反應 (Anaphylaxis) 引起的病生理變化，下列敘述何者錯誤？","options":{"A":"血管通透性增加會導致液體從血管內移至間隙空間，引起相對性低血容","B":"白三烯素 (Leukotrienes) 是強效的支氣管收縮劑，反應時間通常比組織胺慢，但持續時間更長","C":"全身性的血管擴張會導致心臟前負荷 (Preload) 大幅增加","D":"嚴重過敏反應可能引起心律不整及心肌缺血"},"answer":"C","source":"AI出題","manualChapter":"CH40","id":3813},{"question":"依據世界過敏組織 (WAO) 的臨床準則，下列哪一種情境最符合「嚴重過敏反應」的診斷？","options":{"A":"病人吃完花生後，全身出現大量蕁麻疹且極度搔癢，但生命徵象穩定，無呼吸道症狀","B":"病人被蜜蜂螫傷後數分鐘，僅出現突發性低血壓 (收縮壓降至 80 mmHg)，無皮膚或呼吸道症狀","C":"病人吸入花粉後，出現頻繁打噴嚏、流鼻水及眼結膜紅腫","D":"病人注射青黴素後，手臂注射部位出現局部紅腫熱痛，且持續擴大"},"answer":"B","source":"AI出題","manualChapter":"CH40","id":3814},{"question":"救護人員到達現場，發現一名60歲男性在餐廳用餐到一半突然倒下。病人全身潮紅、嘴唇腫脹，呼吸有明顯喘鳴音 (stridor)，血壓 70/40 mmHg。病人的妻子表示他沒有任何過敏史。此時救護人員最優先的處置藥物與途徑為何？","options":{"A":"靜脈推注 (IV bolus) Epinephrine 1 mg (1:10,000)","B":"肌肉注射 (IM) Epinephrine 0.3~0.5 mg (1:1,000) 於大腿中外側","C":"肌肉注射 (IM) Diphenhydramine (抗組織胺) 50 mg","D":"靜脈滴注 (IV infusion) Dopamine 5~20 mcg/kg/min"},"answer":"B","source":"AI出題","manualChapter":"CH40","id":3815},{"question":"承上題，病人在接受首劑藥物治療後 5 分鐘，血壓仍只有 75/45 mmHg，呼吸道水腫未見改善。下列哪一項後續處置「最不適當」？","options":{"A":"準備執行早期氣管內管插管，甚至準備環甲狀軟骨切開術","B":"快速給予大量生理食鹽水靜脈輸液 (1~2公升)","C":"再次肌肉注射 (IM) Epinephrine 0.3~0.5 mg","D":"立即靜脈推注 (IV bolus) Epinephrine 1 mg 以快速提升血壓"},"answer":"D","source":"AI出題","manualChapter":"CH40","id":3816},{"question":"嚴重過敏反應病人在症狀緩解後，即使沒有再次接觸過敏原，仍有高達 20% 的機率在 8~72 小時內再次發作。此現象稱之為：","options":{"A":"反彈性休克 (Rebound shock)","B":"延遲性自體免疫反應 (Delayed autoimmune reaction)","C":"雙相反應 (Biphasic reaction)","D":"交叉過敏反應 (Cross-allergic reaction)"},"answer":"C","source":"AI出題","manualChapter":"CH40","id":3817},{"question":"一名25歲女性被黃蜂螫傷後出現全身蕁麻疹、呼吸困難與頭暈。血壓 85/50 mmHg。在給予肌肉注射 Epinephrine 卻發現效果極差時，詢問病史得知病人因甲狀腺亢進，長期服用 Propranolol (一種乙型阻斷劑，Beta-blocker)。此時最適合考慮給予下列何種藥物來突破乙型阻斷劑的影響？","options":{"A":"升糖素 (Glucagon)","B":"鈣離子通道阻斷劑 (Calcium channel blocker)","C":"高劑量抗組織胺 (Diphenhydramine)","D":"類固醇 (Dexamethasone)"},"answer":"A","source":"AI出題","manualChapter":"CH40","id":3818},{"question":"關於嚴重過敏反應的呼吸道評估與處置，下列敘述何者錯誤？","options":{"A":"喘鳴音 (stridor) 或聲音沙啞代表上呼吸道腫脹，有完全阻塞的風險","B":"若病人出現嚴重的喉頭水腫，應盡快嘗試建立進階呼吸道","C":"過敏引發的支氣管痙攣 (下呼吸道阻塞)，主要表現為哮喘音 (wheezing)","D":"嚴重的血管性水腫 (angioedema) 通常發生在皮膚表面淺層，伴隨強烈搔癢，但不影響呼吸道"},"answer":"D","source":"AI出題","manualChapter":"CH40","id":3819},{"question":"在鑑別診斷時，必須將嚴重過敏反應與其他疾病區分。若病人突然出現呼吸急促、血壓下降，但皮膚「溫暖乾燥」、心跳「緩慢」，最可能是下列哪一種狀況？","options":{"A":"敗血性休克","B":"心因性休克","C":"神經性休克","D":"嚴重氣喘發作"},"answer":"C","source":"AI出題","manualChapter":"CH40","id":3820},{"question":"關於腎上腺素 (Epinephrine) 用於治療嚴重過敏反應的藥理作用，下列敘述何者正確？","options":{"A":"作用於 Alpha 受體造成血管擴張，增加組織血流","B":"作用於 Beta-1 受體降低心率，減少心肌耗氧","C":"作用於 Beta-2 受體造成支氣管平滑肌舒張，緩解呼吸困難","D":"直接抑制肥大細胞生成 IgE 抗體"},"answer":"C","source":"AI出題","manualChapter":"CH40","id":3821},{"question":"系統性紅斑性狼瘡 (SLE) 是一種自體免疫疾病，會對全身多個器官造成影響。若一名年輕女性 SLE 病人突然主訴劇烈胸痛與呼吸喘，到院前救護人員應高度懷疑下列哪一種潛在的致命併發症？","options":{"A":"氣胸","B":"早期動脈硬化引發的急性冠心症 (心肌梗塞)","C":"胃食道靜脈曲張破裂","D":"僵直性脊椎炎引發的肋骨骨折"},"answer":"B","source":"AI出題","manualChapter":"CH40","id":3822},{"question":"類風濕性關節炎 (RA) 病人除了關節變形外，在到院前進行「氣管內管插管」或「建立呼吸道」時，最需要注意下列哪一種潛在致命風險？","options":{"A":"下顎骨質疏鬆易造成骨折","B":"寰樞關節半脫位 (Atlantoaxial subluxation) 導致頸部過度伸展時壓迫脊髓","C":"聲帶麻痺導致插管空間狹小","D":"頸動脈狹窄引發腦缺血"},"answer":"B","source":"AI出題","manualChapter":"CH40","id":3823},{"question":"一名45歲男性病人，病史有僵直性脊椎炎 (Ankylosing spondylitis)，因在家中浴室滑倒背部著地，主訴雙下肢麻木無法移動。對於此類病人的處置，下列考量何者最正確？","options":{"A":"僵直性脊椎炎病人的脊椎韌性極佳，跌倒通常只會造成肌肉拉傷","B":"病人脊椎已完全黏連成竹竿狀，即使輕微機轉的跌倒也極易造成嚴重的脊椎骨折","C":"因為脊椎已經僵硬固定，所以搬運時不需使用長背板或限制頸椎移動","D":"此疾病好發於女性，男性極少見，應懷疑其他診斷"},"answer":"B","source":"AI出題","manualChapter":"CH40","id":3824},{"question":"修格蘭氏症候群 (Sjögren syndrome，乾燥症) 的病人，若突發全身無力甚至癱瘓，除了懷疑腦中風外，救護技術員應高度懷疑下列何種電解質異常？","options":{"A":"高血鈣","B":"高血鈉","C":"低血鉀","D":"低血鎂"},"answer":"C","source":"AI出題","manualChapter":"CH40","id":3825},{"question":"下列何種自體免疫疾病的典型臨床表徵為臉部出現「蝴蝶斑 (Butterfly rash)」，且常伴隨光敏感及關節發炎？","options":{"A":"類風濕性關節炎 (RA)","B":"僵直性脊椎炎 (AS)","C":"系統性紅斑性狼瘡 (SLE)","D":"修格蘭氏症候群 (Sjögren syndrome)"},"answer":"C","source":"AI出題","manualChapter":"CH40","id":3826},{"question":"關於使用「腎上腺素自動注射筆 (EpiPen / 艾筆)」的敘述，下列何者正確？","options":{"A":"應注射於臀部外上四分之一處","B":"兒童專用劑量通常為 0.3 mg","C":"注射後應在該部位停留約數秒鐘以確保藥物完全注入","D":"若無 EpiPen，成人可直接口服 1 mg 腎上腺素安瓿液體"},"answer":"C","source":"AI出題","manualChapter":"CH40","id":3827},{"question":"在嚴重過敏反應中，若病人心跳停止 (OHCA)，關於其急救處置之考量，下列何者「錯誤」？","options":{"A":"上呼吸道水腫可能導致傳統氣管內管插管極度困難","B":"嚴重血管擴張會造成體液大量滯留周邊，因此需要快速且大量的靜脈輸液","C":"首選急救藥物仍為腎上腺素 (Epinephrine)","D":"由於過敏原仍在體內，急救無效機率極高，不建議進行長時間的 CPR 搶救"},"answer":"D","source":"AI出題","manualChapter":"CH40","id":3828},{"question":"一位病人在接受顯影劑靜脈注射後 5 分鐘，出現全身紅疹、嚴重呼吸喘鳴及血壓降至 60/40 mmHg。此時給予第一線急救藥物 (腎上腺素) 的「最大禁忌症」為何？","options":{"A":"病人患有嚴重的冠狀動脈疾病","B":"病人為懷孕第三孕期的孕婦","C":"病人年齡超過 80 歲","D":"在危及生命的嚴重過敏性休克中，腎上腺素沒有絕對的禁忌症"},"answer":"D","source":"AI出題","manualChapter":"CH40","id":3829},{"question":"所謂「血管性水腫 (Angioedema)」最常侵犯的解剖部位「不包括」下列何者？","options":{"A":"嘴唇與舌頭","B":"肺泡微血管","C":"眼眶周圍","D":"咽喉與聲帶"},"answer":"B","source":"AI出題","manualChapter":"CH40","id":3830},{"question":"在嚴重過敏反應中，組織胺的作用會導致多種臨床症狀。下列哪一項症狀「並非」主要由組織胺的直接作用所引起？","options":{"A":"全身性血管擴張","B":"胃液與淚液分泌增加","C":"微血管通透性增加導致蕁麻疹","D":"補體系統活化導致的紅血球溶解"},"answer":"D","source":"AI出題","manualChapter":"CH40","id":3831},{"question":"一名兒童不慎誤食含花生餅乾後，出現嚴重過敏反應。救護人員欲以 1:1,000 的腎上腺素安瓿抽出藥物進行肌肉注射。若該名兒童體重為 20 公斤，應抽取的正確體積為多少毫升 (mL)？","options":{"A":"0.02 mL","B":"0.2 mL","C":"2.0 mL","D":"0.5 mL"},"answer":"B","source":"AI出題","manualChapter":"CH40","id":3832},{"question":"若成人病人因嚴重過敏反應引發休克，在肌肉注射首劑腎上腺素後，仍持續低血壓。建立靜脈管路後，建議的初始快速輸液 (生理食鹽水) 量大約為何？","options":{"A":"250 ~ 500 mL","B":"1 ~ 2 公升","C":"3 ~ 4 公升","D":"50 ~ 100 mL"},"answer":"B","source":"AI出題","manualChapter":"CH40","id":3833},{"question":"下列何種自體免疫疾病，其主要侵犯目標為淚腺與唾液腺，導致嚴重的眼乾與口乾症狀？","options":{"A":"類風濕性關節炎","B":"僵直性脊椎炎","C":"修格蘭氏症候群 (Sjögren syndrome)","D":"系統性紅斑性狼瘡"},"answer":"C","source":"AI出題","manualChapter":"CH40","id":3834},{"question":"一名30歲男性被蜜蜂螫傷，主訴皮膚癢，身體理學檢查發現雙手臂有數個膨疹(蕁麻疹)，但呼吸平順、無喘鳴音、血壓 120/80 mmHg、意識清楚。依據 WAO 準則與急救原則，下列處置何者最為適切？","options":{"A":"立即肌肉注射 Epinephrine 0.3 mg，預防休克","B":"立即靜脈推注 Epinephrine 1 mg","C":"將病人留在現場，告知若變嚴重再自行就醫","D":"持續監測生命徵象，評估是否進展為嚴重過敏反應，可考慮給予抗組織胺並送醫觀察"},"answer":"D","source":"AI出題","manualChapter":"CH40","id":3835},{"question":"關於靜脈注射 (IV bolus) 腎上腺素在過敏反應的應用，下列敘述何者最為正確？","options":{"A":"為了讓藥效更快發揮，所有嚴重過敏反應皆應優先使用靜脈注射","B":"靜脈注射腎上腺素風險極高，易引發致命心律不整及高血壓，僅限於心跳停止或對IM完全無效的極重度休克使用","C":"靜脈注射的標準劑量與肌肉注射完全相同，皆為 0.3~0.5 mg","D":"若病人意識清醒但有低血壓，應立刻給予 1 mg (1:10,000) 靜脈推注"},"answer":"B","source":"AI出題","manualChapter":"CH40","id":3836},{"question":"一名類風濕性關節炎 (RA) 病人，其手部外觀最常出現下列何種特徵性的變形？","options":{"A":"扳機指 (Trigger finger)","B":"杵狀指 (Clubbing finger)","C":"天鵝頸變形 (Swan neck deformity)","D":"腕隧道症候群引起的魚際肌萎縮"},"answer":"C","source":"AI出題","manualChapter":"CH40","id":3837},{"question":"嚴重過敏反應中出現的「潮紅(Flushing)」，其主要病生理機轉為何？","options":{"A":"表皮下微血管強烈收縮","B":"組織胺引發的全身性血管擴張","C":"缺氧導致的代償性微循環增加","D":"血小板凝集引發的局部充血"},"answer":"B","source":"AI出題","manualChapter":"CH40","id":3838},{"question":"關於「蕁麻疹(Urticaria)」與「血管性水腫(Angioedema)」的比較，下列敘述何者錯誤？","options":{"A":"兩者皆與組織胺造成的血管擴張及通透性增加有關","B":"蕁麻疹通常位於表皮層，常伴隨嚴重的搔癢感","C":"血管性水腫通常位於皮膚或黏膜較深層，常表現為疼痛或壓力感而非搔癢","D":"血管性水腫外觀必定會呈現明顯的鮮紅色且伴隨水泡"},"answer":"D","source":"AI出題","manualChapter":"CH40","id":3839},{"id":45663,"question":"哮吼(Croup)的常見症狀，何者為非？","options":{"A":"Barking cough(犬吠咳嗽聲)。","B":"Stridor(喘鳴音)。","C":"Hoarseness(說話聲音沙啞)。","D":"Wheezing(哮鳴音)。"},"answer":"D","source":"同學出題","manualChapter":"CH40"},{"id":45706,"question":"嚴重過敏反應時會產生許多的症狀，但有些疾病可能產生類似的症狀導致誤判，關於容易產生誤判的症狀與疾病下列何者最不適當?","options":{"A":"喘鳴音(stridor)：哮吼、上呼吸道阻塞、異物吸入","B":"意識喪失或暈厥：迷走性暈厥、抽搐、低血糖、心律不整","C":"哮喘音(wheezing)：氣喘、慢性阻塞性肺病、支氣管炎","D":"蕁麻疹或搔癢：血管性水腫、病毒性敗血性休克、紅斑性狼瘡"},"answer":"D","source":"同學出題","manualChapter":"CH40"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

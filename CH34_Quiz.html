@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 34 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：42 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH34</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":38,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於心包填塞（Cardiac Tamponade）的敘述，何者為是？","options":{"A":"會造成胸痛，可以比照缺血性胸痛給予MONA","B":"心包膜腔液體過多的話，會先壓迫左心房以及左心室，造成無脈性的電氣活動（PEA）","C":"會影響到回心血流是在心臟收縮期時","D":"高度懷疑心包膜填塞之病患，可以考慮到院前建立靜脈管路，給予生理食鹽水"},"answer":"D","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":119,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"一位中年男性主要臨床表現是壓迫性胸痛，上腹部不適，合併噁心，冒冷汗，呼吸困難，理學檢查發現低血壓，心搏過速，頸靜脈怒張，雙側肺音對稱清楚，請問他最可能是以下何種疾病？","options":{"A":"右心心肌梗塞合併急性右心衰竭","B":"左心心肌梗塞合併急性左心衰竭","C":"主動脈剝離維合併急性心包膜填塞","D":"心包膜炎合併心包膜填塞"},"answer":"A","manualChapter":"CH34","explanation":"本題呈現的是非常經典的右心室心肌梗塞（RV Infarction）三聯徵：低血壓、頸靜脈怒張（JVD）(右心室收縮衰竭，血液無法順利打入肺循環，導致體循環靜脈回流受阻)、中心靜脈壓（CVP）顯著飆升)、雙側肺音對稱乾淨（Clear Lung Fields）：因為血液積在右心與體靜脈，沒有鬱積在左心與肺微血管，因此聽診不會出現肺水腫的細囉音（Crackles/Rales）。\n\n配合臨床表現壓迫性胸痛、上腹不適、噁心、冒冷汗（常為下壁/右室心肌梗塞刺激迷走神經的典型表現），診斷首選右心室梗塞。"},{"id":124,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"下列以心電圖來定位「ST節段上升心肌梗塞」心肌梗塞的位置，何者為非？","options":{"A":"導程II、III、aVF的ST節段上升：下壁心肌梗塞，通常因右冠狀動脈阻塞所致","B":"導程V1、V2的ST節段上升：心室中隔心肌梗塞；通常因左前降枝冠狀動脈阻塞所致","C":"導程I、aVL的ST節段上升：高位側壁心肌梗塞；通常因右冠狀動脈阻塞所致","D":"導程V3、V4的ST節段上升：右心室心肌梗塞；通常因右冠狀動脈阻塞所致"},"answer":"D","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":128,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"有關急性下壁心肌梗塞合併右心室心肌梗塞之敘述，何者為非?","options":{"A":"常會出現血壓降低情形","B":"病患血壓降低（70/40 mmHg）合併雙側肺部濕囉音（moist rales），給予生理食鹽水可改善病情","C":"右側心電圖的胸前導程V4呈現ST節段上升Imm即可診斷","D":"避免使用會降低前負荷（Preload）的藥物如Morphine以及NTG"},"answer":"B","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":131,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"65歲男性，因胸痛而被診斷有急性心肌梗塞，準備要給予纖維蛋白溶解治療時，心電圖監視器呈現寬而規則QRS，心跳每分鐘180下，病患抱怨心悸及胸痛加劇，下列處置何者為是？","options":{"A":"立刻開始執行心肺復甦術，等電擊器到達後再給予去顫（defibrillation）","B":"手握拳，實施胸前重擊","C":"靜脈注射Amiodarone 150 mg後，再開始同步電擊100焦耳","D":"给病人鎮靜止痛後，馬上同步電擊100焦耳"},"answer":"D","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":184,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"關於急性肺栓塞的敘述，何者為非？","options":{"A":"肺栓塞的血栓可能來自深部靜脈栓塞","B":"肺栓塞的血栓可能造成急性腦中風","C":"病患常見的臨床症狀是呼吸窘迫與休克","D":"心電圖可能出現竇性心搏過速，right bundle branch block或SIQ3T3，型態"},"answer":"B","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":230,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"對於有冠狀動脈性心臟病病史的急性胸痛病患，以下敘述何者為非？","options":{"A":"進行到院前12導程心電圖檢查有助於縮短ST波段上升型心肌梗塞進行心導管的時間","B":"對於典型胸痛且無相關禁忌症的病患，應給予Aspirin服用","C":"建議給予氧氣鼻管3L / min，以改善潛在的心臟缺氧狀況","D":"如果使用NTG，無論男女應先確認遍患有無服用Viagra這類磷酸二酯抑制劑藥物"},"answer":"C","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":233,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"下列有關心電圖導程ST節段上升與冠狀動脈阻塞的配對，以下敘述何者為非？","options":{"A":"導程Ⅱ，Ⅲ，aVF代表下壁心肌梗塞：因右冠狀動脈阻塞所致","B":"導程V1，V2代表心室中隔心肌梗塞：因右前降支冠狀動脈阻塞所致","C":"導程V3，V4代表前壁心肌梗塞：因左前降支冠狀動脈阻塞所致","D":"導程V5，V6代表側壁心肌梗塞：因左迴旋枝冠狀動脈阻塞所致"},"answer":"B","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":582,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"肥胖的54歲男性病患飯後在餐桌上與友人閒聊抽煙時發生胸悶，但使用硝化甘油舌下含片三次才可緩解。現場十二導程心電圖沒有ST波段改變，此病患最可能的診斷為何？","options":{"A":"穩定性心絞痛","B":"不穩定性心絞痛","C":"ST節段上升心肌梗塞","D":"張力性氣胸"},"answer":"B","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":599,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"作頸動脈按摩術可以治療部份心律不整，請問其原理為何？","options":{"A":"刺激頸動脈竇，啟動間腦的心臟抑制中樞，經由交感神經，使心跳變慢","B":"刺激頸動脈竇，啟動延腦的心臟抑制中樞，經由副交感神經，使心跳變慢","C":"刺激主動脈竇，啟動間腦的心臟刺激中樞，經由交感神經，使心跳變快","D":"刺激頸動脈竇，啟動延腦的心臟刺激中樞，經由副交感神經，使心跳變快"},"answer":"B","manualChapter":"CH34"},{"id":1070,"source":"第四章 非創傷急症(2012-2014).doc","question":"關於心包膜填塞（cardiac tamponade）的敘述，何者為是？","options":{"A":"會造成胸痛，可以比照缺血性胸痛給予MONA","B":"心包膜腔液體過多的話，會先壓迫左心房以及左心室，造成無脈性的電氣活動（PEA）","C":"會影響到回心血流是在心臟收縮期時","D":"高度懷疑心包膜填塞之病患，可以考慮到院前建立靜脈管路，給予生理食鹽水等靜脈注射"},"answer":"D","manualChapter":"CH34"},{"id":1076,"source":"第四章 非創傷急症(2012-2014).doc","question":"在心臟整流（cardioversion）的過程中，病患突然變成VF，你應該馬上採取下列那一步驟？","options":{"A":"開始胸部按壓，建立氣管內管","B":"立即靜脈快速注射epinephrine 1 mg然後給予去顫電擊","C":"關掉同步開關，立即進行非同步的心臟電擊","D":"立即進行第二次同步的心臟整流"},"answer":"C","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":1083,"source":"第四章 非創傷急症(2015-2018).doc","question":"對於有冠狀動脈性心臟病病史的急性胸痛病患，以下敘述何者為非？","options":{"A":"進行到院前12導程心電圖檢查有助於縮短ST波段上升型心肌梗塞進行心導管的時問","B":"對於典型胸痛且無相關禁忌症的病患，應給予Aspirin服用","C":"建議給予氧氣鼻管3L/min，以改善潛在的心臟缺氧狀況","D":"如果使用NTG，無論男女應先確認病患有無服用Viagra這類磷酸二酯抑制劑藥物"},"answer":"C","manualChapter":"CH34"},{"id":1094,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關於肺動脈栓塞的維爾氏評分系統（well's scoring system），下列敘述何者為是？","options":{"A":"臨床上懷疑深部靜脈血栓：3.0分","B":"其他替代診斷可能性低：3.0分","C":"在過去四周曾接受外科手術或臥床少動：1.5分","D":"以上敘述皆為正確"},"answer":"D","manualChapter":"CH34"},{"id":1095,"source":"第四章 非創傷急症(2015-2018).doc","question":"3有關於急性肺水腫無合併低血壓及休克第一線治療的敘述，下列何者為非？","options":{"A":"furosemide（lasix）靜脈注射是第一線治療","B":"morphine靜脈注射是第一線治療","C":"nitroglycerin舌下片是第一線治療，nitroglycerin靜脈滴注則是第二線治療","D":"此類病患心臟不佳，氣管插管的刺激太大會惡化病情，故絕不考慮使用"},"answer":"D","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":1147,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列何者為典型胸痛的表現？","options":{"A":"與呼吸相關的胸痛","B":"與姿勢相關的胸痛","C":"有壓痛點的胸痛","D":"與運動相關的胸痛"},"answer":"D","manualChapter":"CH34"},{"id":2044,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"80歲女性跌倒後右側股骨頸骨折，因為家屬不願開刀便回家臥床休養，三天後凌晨突發性胸痛與喘，血氧下降、但呼吸音正常。下列關於此情況，何者正確？","options":{"A":"根據病人因骨折臥床的病史，這次有很高機會是肺靜脈栓塞。","B":"心電圖檢查，最常見者是竇性頻脈，S1Q3T3出現機率小。","C":"標準診斷工具為心臟超音波，可見左心室膨大、左心室肥厚。","D":"臨床上診斷不易，會搭配Troponin來決定是否做影像檢查。"},"answer":"B","manualChapter":"CH34","matchedChapters":["Combine"]},{"id":2070,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"下列何者不是急性心肌梗塞的主要危險因子？","options":{"A":"糖尿病。","B":"高血壓。","C":"喝酒。","D":"抽菸。"},"answer":"C","manualChapter":"CH34"},{"id":2231,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"關於肺栓塞之敘述，下列何者為是？","options":{"A":"血栓會造成肺靜脈系統堵塞，造成病人有低血氧的症狀產生。","B":"靜脈疾病為肺栓塞危險因子之一，而骨盆以及下肢靜脈系統為最常形成血栓的部位。","C":"肺栓塞病人最常見的表現為心電圖S1Q3T3與右側束支傳導阻滯(RBBB)。","D":"對於高度懷疑急性肺栓塞之病人，可依預立醫囑於院前給予抗血小板藥物。"},"answer":"B","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":2334,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"有關主動脈剝離（aortic dissection）之陳述，下列何者為非？","options":{"A":"可能造成心肌梗塞，急性心包膜填塞或主動脈破裂。","B":"所有主動脈剝離皆應早期施行外科手術治療。","C":"電腦斷層攝影有相當高的診斷率。","D":"血壓過高建議使用交感神經乙型阻斷劑控制血壓。"},"answer":"B","manualChapter":"CH34"},{"id":2343,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"根據2020 ACLS指引，下列何種情形最不需要及早心導管介入治療？","options":{"A":"90歲男性主訴胸痛，心電圖顯示II、III、aVF出現ST段上升。","B":"38歲女性長期使用口服避孕藥，運動後猝死，經急救後恢復自發性循環，心電圖顯示S1Q3T3。","C":"70歲男性冠心病史，到院前心跳停止，電擊兩次後恢復自發性循環，心電圖無ST段上升。","D":"45歲男性主訴胸痛，至急診就診後，診斷為非ST段上升心肌梗塞，在急診待床時，出現急性肺水腫、心室頻脈。"},"answer":"B","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":2408,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"一名急性右心室心肌梗塞合併右心室衰竭病患，血壓80/46 mmHg，心跳53次/分鐘，呼吸18次/分鐘，肺部聽診發現有兩側濕囉音。下列何種處置最適當？","options":{"A":"靜脈注射乙型阻斷劑(β blocker)。","B":"靜脈滴注心臟收縮藥物Dopamine。","C":"靜脈滴注心臟收縮藥物Dobutamine。","D":"Normal saline快速靜脈注射。"},"answer":"B","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":2605,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"關於心電圖出現有意義ST - T波變化的所在導極與心臟解剖位置的相關性配對，下列何者正確？","options":{"A":"中隔區為導極V3, V4。","B":"前壁為導極V5, V6。","C":"側壁為導極V1, V2。","D":"下壁為導極II, III, aVF。"},"answer":"D","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":2608,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"56歲男性餐後出現胸悶、血壓84/52mmHg、脈搏54次/min、血氧96％、體溫36.5ºC。十二導程心電圖結果如下圖，依據此心電圖變化，對於判斷病變位置及正確的到院前處置下列何者最適當？","options":{"A":"前壁STEMI，立即給予硝化甘油與高流量氧氣。","B":"下壁STEMI，避免硝化甘油並維持靜脈輸液。","C":"前壁NSTEMI，給予腎上腺素與阿斯匹靈。","D":"下壁NSTEMI，給予硝化甘油並將病人採半坐臥姿勢。"},"answer":"B","manualChapter":"CH34","image":"題庫圖片/2608.png","matchedChapters":["CH34"]},{"id":2609,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"一名頻脈且有血行動力學「不穩定」的病人，依據最新版本的ACLS建議，同步心臟整律(synchronized cardioversion)的初始劑量配對何者正確？","options":{"A":"窄波且規則：同步整律120J雙相，或200J單相。","B":"窄波且不規則：同步整律50~100J。","C":"寬波且規則：同步整律100J。","D":"寬波且不規則：同步整律150J。"},"answer":"C","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":2611,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"關於急性冠心症中「非ST段上升心肌梗塞」與「不穩定心絞痛」之差異，下列何者正確？","options":{"A":"兩者心肌酵素皆不會上升。","B":"後者12導程心電圖會出現Q波。","C":"兩者皆需於到院90分鐘內完成心導管治療。","D":"前者因心肌壞死，血中心肌酵素上升。"},"answer":"D","manualChapter":"CH34","matchedChapters":["CH34"]},{"question":"有關主動脈剝離 (aortic dissection) 之陳述，下列何者為非？","options":{"A":"(A) 可能造成心肌梗塞，急性心包膜填塞或主動脈破裂。","B":"(B) 所有主動脈剝離皆應早期施行外科手術治療。","C":"(C) 電腦斷層攝影有相當高的診斷率。","D":"(D) 血壓過高建議使用交感神經乙型阻斷劑控制血壓。"},"answer":"B","manualChapter":"CH34","id":3342,"source":"TP題庫 (圖片匯入)"},{"question":"一名已知患有 Wolff-Parkinson-White (WPW) 症候群的病患，因心悸與頭暈被送至急診。心電圖顯示為不規則的寬 QRS 波頻脈，強烈懷疑為心房顫動 (Atrial Fibrillation) 合併附屬路徑傳導 (Accessory pathway conduction)。在藥物治療的選擇上，下列何種藥物絕對禁忌使用，以免誘發心室顫動 (Ventricular Fibrillation) 導致猝死？","options":{"A":"Amiodarone (胺碘酮)","B":"Procainamide (普魯卡因胺)","C":"Diltiazem (地爾硫草)","D":"Labetalol (拉貝洛爾)"},"answer":"C","manualChapter":"CH34","id":3345,"source":"TP題庫 (圖片匯入)"},{"question":"心電圖的動態變化指ST段上升心肌梗塞的心電圖變化會隨時間進行有所不同，下列何者非ST段上升心肌梗塞演進變化？","options":{"A":"ST段上升是常見的心電圖變化，也是心電圖上第一個出現的異常","B":"超級性T波是ST段上升心肌梗塞心電圖的第一個變化","C":"超過前WRS幅度75%可視為超級性T波","D":"ST段上升後若出現T波倒置表示有重注灌流現象，是好的現象"},"answer":"A","manualChapter":"CH34","id":3407,"source":"TP題庫 (圖片匯入)"},{"question":"關於「主動脈剝離的診斷方式」何者為非？","options":{"A":"經食道心臟超音波檢查","B":"電腦斷層掃描","C":"核磁共振攝影","D":"血液生化檢查"},"answer":"D","manualChapter":"CH34","id":3416,"source":"TP題庫 (圖片匯入)"},{"question":"下列敘述何者錯誤？","options":{"A":"懷疑心肌梗塞患者，過多的氧氣有害無益，血氧小於90%才考慮使用氧氣，但呼吸困難者，應給予高流量氧氣。","B":"懷疑主動脈剝離患者，過多的氧氣有害無益，血氧小於90%才考慮使用氧氣，但呼吸困難者，應給予高流量氧氣。","C":"懷疑肺動脈栓塞患者，過多的氧氣有害無益，血氧小於90%才考慮使用氧氣，但呼吸困難者，應給予高流量氧氣。","D":"以上皆是"},"answer":"C","manualChapter":"CH34","source":"TP題庫 (圖片匯入) - EMT-P 第 34 章 P.912","id":3470},{"question":"關於疑似主動脈剝離病患的到院前氧氣給予原則，下列何者正確？","options":{"A":"氧氣飽和度應盡可能維持在100%,以減少心肌耗氧量","B":"無論血氧飽和度為何,皆應常規以氧氣鼻管給予每分鐘4公升氧氣","C":"只有在病人血氧飽和度小於94%時才考慮使用,目標維持在94~98%","D":"為了預防缺氧,所有病患皆應給予高流量氧氣"},"answer":"C","manualChapter":"CH34","source":"TP題庫 (圖片匯入) - EMT-P 第 34 章 P.907","id":3471},{"question":"據現行診斷 ST 節段上升型心肌梗塞 (STEMI) 的心電圖標準，年齡與性別會影響特定導程的判讀閾值。一名 35 歲男性因突發性劇烈胸痛被送至急診，其十二導程心電圖顯示 V2 及 V3 導程的 J 點 (J-point) 有明顯上升。若要符合 STEMI 的診斷標準，此病患在 V2 及 V3 導程的 ST 節段(J 點)上升幅度至少需達到多少？","options":{"A":"> 0.1 mV (1 mm)","B":"> 0.15 mV (1.5 mm)","C":"> 0.2 mV (2 mm)","D":"≥ 0.25 mV (2.5 mm)"},"answer":"D","source":"圖片匯入","manualChapter":"CH34","id":3574,"matchedChapters":["CH34"]},{"question":"何者非左心衰竭臨床表現？","options":{"A":"陣發性夜間呼吸困難","B":"頸靜脈怒張","C":"心包膜炎","D":"心律不整"},"answer":"C","source":"圖片匯入","manualChapter":"CH34","id":3577,"matchedChapters":["CH34"]},{"question":"關於頸動脈竇按摩，下列敘述何者正確？","options":{"A":"適用於穩定的規則寬QRS波頻脈。","B":"對於中止上心室頻脈，既安全又少副作用。","C":"正確的頸動脈竇按摩，應按摩右側頸動脈竇，每次按摩不應超過10秒。","D":"如果有adenosine,建議按摩後再給藥，避免藥物副作用。"},"answer":"C","source":"圖片匯入","manualChapter":"CH34","id":3593,"matchedChapters":["CH34"]},{"question":"一位 55 歲男性因突發性胸口「撕裂般」劇痛呼叫救護車，理學檢查發現雙手收縮壓差達 25 mmHg 且左手橈動脈搏動較弱。關於此病患的到院前處置，下列敘述何者最適當？","options":{"A":"應立即採取平躺姿勢並抬高下肢，以確保腦部灌流並預防休克發生。","B":"若病患感到焦慮，可常規給予高流量氧氣 (15 L/min) 以提升心肌含氧量。","C":"應維持病患於舒適姿勢，並監測心電圖及血氧，若無低血壓可給予舌下 NTG。","D":"為了預防血栓擴大，應立即協助病患服用高劑量阿斯匹靈 325 mg。"},"answer":"C","source":"圖片匯入","manualChapter":"CH34","id":3595,"matchedChapters":["CH34"]},{"question":"急性肺水腫無合併低血壓及休克的第一線治療，下列何者最不適當？","options":{"A":"Lasix：劑量為0.5~1.0mg/kg快速靜脈注射。","B":"NTG：可於間隔5~10分鐘內給予一顆0.4毫克的舌下含片。","C":"Morphine：劑量為2~4mg/每5分鐘。","D":"氧氣的使用以40% FiO2開始，根據需求可以調至100%的非再吸入型面罩。"},"answer":"B","source":"圖片匯入","manualChapter":"CH34","id":3599,"matchedChapters":["CH34"]},{"question":"當病人生急性心肌梗塞時，因心肌細胞壞死會將特定酵素釋放至血液中。下列哪一項「不屬於」目前台灣醫院在急診或臨床上最常用於評估此類心肌損傷的血清檢查項目？","options":{"A":"肌酸酐磷酸酵素 (Creatine Phosphokinase, CPK)","B":"CPK的同位酵素 CK-MB","C":"腦鈉肽 (Brain Natriuretic Peptide, BNP)","D":"肌鈣蛋白 (Troponin-C, Troponin-T)"},"answer":"C","manualChapter":"CH34","source":"TPP","id":3758,"matchedChapters":["CH34"]},{"id":45565,"question":"STEMI 發生多久後的 T 波倒立，在臨床上被視為重灌流現象?","options":{"A":"1小時內","B":"24-48小時","C":"5-7天","D":"1-3週"},"answer":"D","source":"大白p903","manualChapter":"CH34"},{"id":45616,"question":"有關心臟急症「心包膜填塞」，下列敘述何者正確?","options":{"A":"臨床處置適合使用胸痛流程中的MONA治療","B":"即使患者產生低血壓或休克等情形，到院前仍不考慮建立靜脈管路並予生理食鹽水","C":"臨床表現包含奇脈(pulsus paradoxus)現象，在吸氣時SBP出現了異常的下降","D":"所謂貝克氏三症狀(Beck's triad)指的是「呼吸不規則」、「頸靜脈怒張」，及「心音遙遠模糊」三典型症狀"},"answer":"C","source":"同學出題","manualChapter":"CH34"},{"id":45781,"source":"大白p908","question":"經驗豐富的急診醫師也往往被局部症狀誘導而無法在第一時間正確的診斷出來。甚至有報告顯示，第一時間的誤診率，可達多少比例?","options":{"A":"13%","B":"25%","C":"47%","D":"64%"},"answer":"C","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":45782,"source":"大白p908","question":"有關史丹福主動脈剝離分類法，下列敘述何者最正確？","options":{"A":"A 型主動脈剝離首選治療為積極降血壓藥物治療，手術僅保留給藥物無效者","B":"A 型患者接受手術治療，可大幅降低約一半的死亡率，且長期存活率優於單純藥物治療","C":"B 型急性主動脈剝離之標準首選為緊急開放性外科手術","D":"B 型急性主動脈剝離以藥物治療為主，其核心控制目標為提高心輸出量而非控制血壓"},"answer":"B","manualChapter":"CH34","matchedChapters":["CH34"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

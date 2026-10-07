@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 33 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：70 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH33</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":26,"source":"105 高級救護技術員甄試筆試題目.doc","question":"一名中年男子血壓70 / 40mmHg，全身冒冷汗，一直喊胸口悶痛，監視器呈現心電圖如下。此時應請求線上醫療指導予以電氣治療是：","options":{"A":"雙向波同步電擊100焦耳","B":"雙向波非同步電擊100焦耳","C":"單向波同步電擊200焦耳","D":"單向波非同步電擊200焦耳"},"answer":"A","manualChapter":"CH33","image":"題庫圖片/26.png"},{"id":34,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列有關房室結傳導阻斷（atrio-ventricular block）的描述，何者為非?","options":{"A":"三級房室結傳導阻斷（third degree AV block）等於完全房室結傳導阻斷（complete AV | block），其P波之後完全無跟隨的QR S複合波，造成心房（P波）跳心房的、心室（QRS複合波）跳心室的，此即所謂的房室解離（AV dissociation）的情況","B":"Mobitz第一型二級房室結傳導阻斷：其阻斷位置通常在房室結或附近，心電圖的特點為P-R區間逐漸地拉長，終至傳導不下去而出現僅有P波而無跟隨的QRS複合波的情形。此型預後較差，隨時有惡化為完全房室結傳導阻斷（complete AV block）的可能","C":"Mobitz第二型二級房室結傳導阻斷：其阻斷位置較低，可能在His bundle或以下，其心電圖的特點為P-R區間在傳導中斷前一直保持不變，然而卻突發性的出現只有P波出現而無QRS複合波跟隨的情形","D":"一級房室結傳導阻斷（first degree AV block）：心電圖上的特點為P-R區間的拉長（＞200 ms），P波、QRS複合波及T波的型態均正常。一級房室結傳導阻斷的原因可能為退化或藥物因子，導致房室結傳導變慢所造成。"},"answer":"B","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":37,"source":"105 高級救護技術員甄試筆試題目.doc","question":"有關急性下壁心肌梗塞合併右心室心肌梗塞之敘述，何者為非？","options":{"A":"常會出現血壓降低情形","B":"右側心電圖的胸前導程V4呈現ST節段上升Imm即可診斷","C":"病患血壓降低合併雙側肺部濕囉音，應給予大量生理食鹽水","D":"應避免使用會降低前負荷（Preload）的藥物如Morphine以及NTG"},"answer":"C","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":80,"source":"105 高級救護技術員甄試筆試題目.doc","question":"憂鬱病史中年男性病患口服50顆10 mg的propanolol。EMTP到達時病患意識尚清醒。建立IV line並接上監視器後，心電圖如下所示。病人血壓70 / 40mmHg，體溫36⁰，呼吸22 / min，下列敘述何者正確？","options":{"A":"為Morbtiz type I 2⁰房室阻斷","B":"為Morbtiz type II 2⁰房室阻斷","C":"病患目前為穩定之緩脈，密切觀察即可","D":"應考慮給予atropine 0.5mg IV治療"},"answer":"D","manualChapter":"CH33","image":"題庫圖片/80.png"},{"id":110,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"心臟的傳導系統如圖示。請問常用藥物「腺甘酸」（Adenosine）作用位置，何者為是？","options":{"A":"甲，乙","B":"乙，丙","C":"丙，丁","D":"乙，丁"},"answer":"A","manualChapter":"CH33","image":"題庫圖片/110.png"},{"id":130,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"有關典型心電圖之描述：下列何者為是？","options":{"A":"QRS複合波代表心房去極化","B":"PR間距代表動作電位由竇房結傳到房室結的時間","C":"ST間段代表心房去極化完成，再極化即將開始","D":"T波代表心室去極化完成"},"answer":"B","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":134,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"一名30歲男性病患被路人發現倒臥橋邊，經高級教護技術員到達現場評估後發現摸得到微弱的頸動脈，心臟監視器呈現下列心律，何者為是？","options":{"A":"Torsades de pointes","B":"Ventricular fibrillation","C":"Ventricular tachycardia","D":"Atrial fibrillation"},"answer":"A","manualChapter":"CH33","matchedChapters":["需要圖片"],"image":"題庫圖片/134.png"},{"id":242,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"此心律為何？","options":{"A":"Mobitz第一型二級房室結傳導阻斷","B":"Mobitz第二型二級房室結傳導阻斷","C":"三級房室結傳導阻斷","D":"一級房室結傳導阻斷"},"answer":"D","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/242.png"},{"id":301,"source":"110年 - EMT-P 高級救護技術員教育訓練.doc","question":"關於心肌梗塞心電圖之變化，下列順序何者正確？","options":{"A":"甲，乙，丙，丁，戊","B":"甲，戊，丁，丙，乙","C":"甲，丁，戊，丙，乙","D":"甲，戊，丁，乙，丙"},"answer":"B","manualChapter":"CH33","image":"題庫圖片/301.png"},{"id":598,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"冠狀動脈的左前降支阻塞時，心電圖較可能會出現什麼變化？","options":{"A":"V1-V4 ST段上昇","B":"Ⅰ，AVL，V5，V6 ST段上昇","C":"Ⅱ，Ⅲ，AVF ST段上昇","D":"AVR ST段上昇"},"answer":"A","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":612,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"心臟的傳導系統如圖示。請問由傳導系統造成心電圖上變化的敘述，錯誤的是？","options":{"A":"甲出問題，心電圖上會沒有正常的P波","B":"乙出問題，心電圖上的P波的數目會大於QRS波的數目丁","C":"丁出問題，心電圖上將呈現雙峰形的rSR'波","D":"當高位傳導系統失能時，戊將以固有節律每分鐘60下跳動"},"answer":"D","manualChapter":"CH33","matchedChapters":["需要圖片"],"image":"題庫圖片/612.png"},{"id":624,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"下圖是一張心電圖，請問最可能是心臟的那個部位出了問題，出了什麼問題？","options":{"A":"心臟的左主冠狀動脈阻塞，併發心肌梗塞","B":"心臟的右冠狀動脈及左旋支阻塞，併發心肌梗塞","C":"心臟的左冠狀動脈，左旋支阻塞，併發心肌梗塞","D":"心臟的左冠狀動脈，左前降支阻塞，併發心肌梗塞"},"answer":"B","manualChapter":"CH33","matchedChapters":["需要圖片"],"image":"題庫圖片/624.png"},{"id":638,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"心臟的傳導系統有：（甲）竇房節、（乙）希氏束、（丙）房室節、（丁）普金吉氏纖維。請問心動的動作電位傳導的順序是？","options":{"A":"甲→乙→丙→丁","B":"甲→丙→乙→丁","C":"丙→甲→丁→乙","D":"丙→乙→甲→丁"},"answer":"B","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":729,"source":"第五章 創傷急症(2012-2014).doc","question":"你接獲中心通報至某工地救護，到達現場後一名30歲男性阿華，已遭磚塊壓住小腿約8小時以上，若你所在縣市已開放相關藥物使用，現場予以心電圖監測且十二導程心電圖如下，請問下列何者並非適當治療方式（請選最適合的答案）？","options":{"A":"大量給予點滴水分補充（Hydration）","B":"給予sodium bicarbonate","C":"給予diuresis","D":"給予dopamine維持血壓"},"answer":"D","manualChapter":"CH33","image":"題庫圖片/729.png"},{"id":738,"source":"第五章 創傷急症(2012-2014).doc","question":"20歲男性與他人發生囗角，胸囗被對方揍了一拳之後突然倒地，EMT到達現場後發現傷患已無生命徵象，急救當中心電圖監視器顯示如下：請問該傷患最可能的診斷為？","options":{"A":"心肌挫傷（cardiac contusion）","B":"心臟震盪（commotio cordis）","C":"心包膜填塞（cardiac tamponade）","D":"創傷性窒息（traumatic asphyxia）"},"answer":"B","manualChapter":"CH33","matchedChapters":["需要圖片"],"image":"題庫圖片/738.png"},{"id":878,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一3歲15 kg男童突然失去意識，沒有反應、無呼吸及脈搏。醫護人員立即給予胸部按壓及bag-mask換氣呼吸。Monitor呈現如下：下列何者為最適當之後續治療？","options":{"A":"I.V.注射amiodarone 5 mg/kg","B":"I.V.注射epinephrine 0.01 mg/kg","C":"I.V.注射lidocaine 1 mg/kg","D":"電擊去顫30J後立即繼續胸部按壓"},"answer":"D","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/878.png"},{"id":879,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一男童無反應且無自發性呼吸，你給予通暢呼吸道、100％氧氣及bag-mask換氣呼吸後，你不確定他是否有脈搏，EKG monitor呈現下面波形：下列何者為最適當之後續治療？","options":{"A":"立即開始高品質胸部按壓及換氣呼吸","B":"準備經皮心臟節律器（transcutaneous pacing）","C":"建立IV途徑後，I.V.注射atropine 0.02 mg/kg","D":"建立IV途徑後，I.V.注射epinephrine 0.01 mg/kg（0.1 ml/kg Of 1:10,000）"},"answer":"A","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/879.png"},{"id":894,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"現在是冬季，你接獲救護指揮中心通報到達一住家內，現場一位10歲的男孩主訴胸痛且呼吸不順，根據母親訴病人之前無任何病史，約一周前開始覺得倦怠就沒再上課去，今天因為呼吸時覺得不順且起身走路時會更覺得更喘而求助。你發現病人意識清楚但是說話費力臉色蒼白且有輕微發紺現象，初步評估如下呼吸每分鐘32下，心跳速率每分鐘130下，血壓90/65毫米汞柱，血氧濃度92％，耳溫37·8℃，微血管充填時間約4～5秒，兩側呼吸音稍減低且使用輔助呼吸肌肉呼吸，心電圖顯示如下。下列描述何者最適當？","options":{"A":"根據病人心電圖顯示為PSVT（陣發性心室上心搏過速），心跳過快是造成病人症狀的主因盡速使用atropine降低病人心跳","B":"根據病人血氧濃度，使用鼻導管4 L/min使用即可","C":"病人有休克現象，立即給予大量輸液，在15分鐘，內給予500毫升的點滴注射","D":"病人休克原因最可能是心因性休克，可能是心肌炎造成"},"answer":"D","matchedChapters":["需要圖片"],"manualChapter":"CH33","image":"題庫圖片/894.png"},{"id":896,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一位76歲男性於下午2點被人通報倒臥在農田中，高級救護技術員到達現場發現病人意識不清且口吐白沫，心電圖顯示如下圖，血壓70/40毫米汞柱，血氧濃度75％，耳溫39℃，送醫途中發生抽搐現象。下列處置何者最不適當？","options":{"A":"病人意識不清且血氧濃度過低，應考慮使用BVM給予強迫給氧或先插管給氧","B":"因病人體溫過高且有休克現象立即給予適當輸液，可在15分鐘內給予500毫升的點滴注射","C":"病人發生抽搐現象，可以根據預立醫囑使用diazepam或lorazepam控制抽搐","D":"因病人體溫過高可將病人泡在冰水或冷水中，盡速降低病人體溫"},"answer":"D","manualChapter":"CH33","image":"題庫圖片/896.png"},{"id":897,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"是一位高級救護技術員，你接獲勤務中心指派前往一汽車旅館執行救護，你到現場發現一位年輕男性囗鼻部有不知名白色粉末，意識不清、雙側瞳孔放大、囗吐白沫、不斷抽搐，心電圖顯示如下圖，血壓200/120毫米汞柱，血氧濃度75％，體溫40℃，全身濕透。下列處置何者最不適當？","options":{"A":"應先給予輔助呼吸道及高濃度氧氣，必要時給予插管給氧","B":"病患若持續抽搐，必要時可以給予diazepam或lorazepam","C":"可以給予適當輸液，避免高燒出汗後脫水","D":"病人心電圖心律呈現PSVT，盡早給予adenosine使用"},"answer":"D","manualChapter":"CH33","image":"題庫圖片/897.png"},{"id":974,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"5歲男童25kg在急診室目擊突然失去意識，沒有反應，無呼吸無脈搏，現場醫護人員立即給予胸部按壓以及甦醒球通氣，心電圖監視器呈現心律如下；關於下一步的急救處置，何者為是？","options":{"A":"確定無人碰觸男童後立即去顫電擊50焦耳","B":"先胸部按壓滿兩分鐘後，再進行去顫電擊50焦耳","C":"儘速選擇適當的氣管內管進行插管治療","D":"持續以胸部按壓和吹氣15：2的方式滿十個循環後，再次檢查脈搏，不需電擊"},"answer":"A","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/974.png"},{"id":978,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"在一個寒冷的冬天，民眾報案表示，有一狀似喝醉路倒的病患倒在馬路旁待援，病患經你轉送到醫院後做了一張心電圖如下圖，請問下列敘述何者為非？","options":{"A":"心電圖看到的異狀，是如駱駝峰般突起的Osborn wave","B":"此類病患在搬運移動時須特別小心，即使輕微的動作都有可能產生致命性的心律不整","C":"會產生此種現象的高風險者包括熱衷戶外運動者.老年人.非常小的小孩.及一些有精神或其他內科疾病者","D":"若病患突發心室纖維顫動，在電擊去顫治療上，選擇電擊與否及能量均與一般的病患不同"},"answer":"D","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/978.png"},{"id":1018,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"下面這張12導程心電圖，最可能發生在下列何種狀況的病患身上？","options":{"A":"低體溫","B":"急性心肌梗塞","C":"低血鉀","D":"毛地黃中毒"},"answer":"A","manualChapter":"CH33","image":"題庫圖片/1018.png"},{"id":1042,"source":"第四章 非創傷急症(2012-2014).doc","question":"心律不整的處理以下何者為非：","options":{"A":"不論快的（tachycardia）與慢的（bradycardia）心律不整都有危及生命的可能性。十二導程心電圖可供判定心律","B":"心房撲動（atrial flutter），心房顫動（atrial fibrillation）屬於快的心律不整，若是因此產生休克，同步整流電擊是可用的治療的方式","C":"Atropine是可以逆轉副交感神經所造成的症狀，可用在有症狀的心搏過緩","D":"針對心律不整且意識狀態改變的病人，儘速取得電擊器，施於至少一次的去顫電擊"},"answer":"D","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":1043,"source":"第四章 非創傷急症(2012-2014).doc","question":"以下何者心律可以出現窄的QRS波：","options":{"A":"VF","B":"VT","C":"Torsades de pointes","D":"2度Ⅱ型AV block"},"answer":"D","manualChapter":"CH33"},{"id":1046,"source":"第四章 非創傷急症(2012-2014).doc","question":"心電圖出現p-R區間逐漸地拉長，終至傳導不下去而出現僅有p波而無跟隨的QRS複合波的情形，這心電圖的判讀是：","options":{"A":"一級房室結傳導阻斷","B":"Mobitz第二型二級房室結傳導阻斷","C":"Mobitz第一型二級房室結傳導阻斷","D":"三級房室結傳導阻斷"},"answer":"C","manualChapter":"CH33"},{"id":1052,"source":"第四章 非創傷急症(2012-2014).doc","question":"一個年約60歲男性，路倒、意識昏迷、沒有正常呼吸、頸動脈摸不到脈搏，需要CPR且心電圖監視器如下：請問下列何者正確？","options":{"A":"這種一定有脈搏，不需要CPR","B":"應使用電擊器去顫","C":"應立即CPR","D":"應先打上點滴給予大量的輸液，若未改善就需CPR"},"answer":"C","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/1052.png"},{"id":1056,"source":"第四章 非創傷急症(2012-2014).doc","question":"一位81歲尿毒症患者，每週一、五上午洗腎治療。星期日晚上，忽然呼吸困難、意識昏迷，EMT到達現場時已無脈搏，EKG如下圖：請問以下何者最有可能是造成此病人PEA的原因？","options":{"A":"氣喘發作","B":"高血鉀症","C":"高血糖","D":"低體溫"},"answer":"B","matchedChapters":["需要圖片"],"manualChapter":"CH33","image":"題庫圖片/1056.png"},{"id":1072,"source":"第四章 非創傷急症(2012-2014).doc","question":"一名30歲男性病患被路人發現倒臥橋邊，經高級救護技術員到達現場評估後發現摸得到微弱的頸動脈，心臟監視器呈現下列心律，何者為是？","options":{"A":"Torsades de pointes","B":"Ventricular fibrillation","C":"Ventricular tachycardia","D":"Atrial fibrillation"},"answer":"A","manualChapter":"CH33","image":"題庫圖片/1072.png"},{"id":1073,"source":"第四章 非創傷急症(2012-2014).doc","question":"[承接題：一名30歲男性病患被路人發現倒臥橋邊，經高級救護技術員到達現場評估後發現摸得到微弱的頸動脈，心臟監視器呈現下列心律，何者為是？]對於此病患可能之病因，下列何者為是？（1）低血鉀（2）低血鎂（3）三環抗憂鬱劑中毒（4）低血鈣","options":{"A":"（1）（2）（3）","B":"（2）（3）（4）","C":"（1）（3）（4）","D":"（1）（2）（3）（4）"},"answer":"D","manualChapter":"CH33","image":"題庫圖片/1073.png"},{"id":1077,"source":"第四章 非創傷急症(2012-2014).doc","question":"VF電擊完，CPR兩分鐘五個循環後，心電圖監視器的心律呈現二度二型房室傳導障礙（2度AV block typeⅡ）波形，你下一步該如何？","options":{"A":"檢查頸動脈是否有脈搏","B":"給予atropine 0.5 mg靜脈注射","C":"給予體外經皮式心律調節器（TCP）","D":"已急救成功，趕快將病患送醫"},"answer":"A","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":1078,"source":"第四章 非創傷急症(2012-2014).doc","question":"一位年輕病患因心悸至急診，EKG顯示PSVT，心跳180／min，血壓120／80mmHg，呼吸尚平順，下列處置何者最優先？","options":{"A":"跟病患解釋後，予以鎮靜，給予同步電擊50焦耳","B":"給予adenosine 6 mg快速I.V.注射","C":"給予amiodarone 150 mg，I.V.滴注10分鐘","D":"確定無carotid bruits後，給予頸動脈竇按摩"},"answer":"D","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":1100,"source":"第四章 非創傷急症(2015-2018).doc","question":"90歲男性病患，否認特別過去病史，因全身虛弱而打119求救，到場後發現病患意識清楚、呼吸平順，生命徵象：血壓142/68mmHg、脈搏35/min、呼吸18/min、血氧濃度room air100%，無單側肢體無力等神經學症狀，僅主訴虛弱無力而無其他症狀。貼上心律監視器後，心電圖顯示如下：此病患的後續處置何者為是？","options":{"A":"優先給予Atropinemg靜脈注射，每3～5分鐘可重複，最大劑量3mg","B":"立即使用經皮心臟節律器","C":"靜脈滴注Amiodarone 150 mg 10分鐘，需要時可重複","D":"觀察症狀並持續監測心律"},"answer":"D","manualChapter":"CH33","matchedChapters":["未分類"],"image":"題庫圖片/1100.png"},{"id":1107,"source":"第四章 非創傷急症(2015-2018).doc","question":"一位65歲高血壓、心臟病合併慢性腎病之病患，近日經常噁心、嘔吐及食慾不佳，因呼吸困難而打119求救，你到達現場發現雙側肺音囉音，監視器顯示如下圖，以下何者為非？","options":{"A":"此病患呼吸困難可能是因為發生肺水腫","B":"此病患有可能發生致命性心律不整而猝死，建議可以使用calciumchloride","C":"嚴重高血鉀（＞6.5mmol/L）因腎衰竭引起是罕見的","D":"此病患接受規則血液透析治療後不久，發生頭痛、嘔吐急抽搐現象，可能發生不平衡症候群"},"answer":"C","manualChapter":"CH33","image":"題庫圖片/1107.png"},{"id":1119,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列有關量張十二導程心電圖的描述何者為非？","options":{"A":"此為Sinus Bradycardia","B":"心率約每分鐘30～36次","C":"心臟下壁的急性心肌梗塞","D":"V1～V4的ST段下降是對應變化（reciprocal changes）"},"answer":"A","manualChapter":"CH33","image":"題庫圖片/1119.png"},{"id":1133,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於心電圖操作與判定的敘述，下列何者為非？","options":{"A":"黏貼十二導程的胸前導程時，V3是貼在左胸第五肋間的鎖骨中線處","B":"一般正常的PR區間（PR interval）為0.12～0.20秒","C":"V1和V2導程主要是在觀察心室中膈的解剖位置","D":"右心室傳導束傳導阻斷（right bundle branch block，RBBB）在心電圖最大的特徵是在V1及V2導程出現RSR'型態（RSR' pattern）"},"answer":"A","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":1135,"source":"第四章 非創傷急症(2015-2018).doc","question":"中年男性昏倒求救。你在救護車上幫他接上三導程心電圖如下。請問此心律為何？","options":{"A":"第二度第一型房室傳導阻滯","B":"第二度第二型房室傳導阻滯","C":"第三度房室傳導阻滯","D":"竇性心搏過緩併單型性早期心房收縮"},"answer":"C","manualChapter":"CH33","image":"題庫圖片/1135.png"},{"id":1141,"source":"第四章 非創傷急症(2015-2018).doc","question":"請問此為何種心率？","options":{"A":"degree AV block","B":"Mobitz type I","C":"Mobitz type II","D":"degree AV block"},"answer":"C","manualChapter":"CH33","image":"題庫圖片/1141.png"},{"id":1156,"source":"第四章 非創傷急症(2015-2018).doc","question":"34歲女性，求救原因為心悸併呼吸困難與腹瀉。初評生命跡象為心跳204下/分，血壓126/74mmHg，呼吸30下/分，血氧99%（無用氧下），體溫38.1℃。上救護車後，發現病人身材消瘦，意識躁動不安。執行12導程心電圖如下：請問此病人最不可能是以下哪一種鑑別診斷？","options":{"A":"葛瑞夫茲病（Grave’s disease）合併甲狀腺風暴(thyroid storm)","B":"糖尿病酮酸血症（Diabetic ketoacidosis）","C":"庫欣氏症候群（Cushing syndrome）","D":"可能使用古柯鹼或安非他命等違禁藥物"},"answer":"C","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/1156.png"},{"id":2042,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"您在救護車上監視一位病患，他的胸悶在使用舌下NTG含片後緩解，可是EKG監視器突然出現下圖、病患並主訴心悸，其它臨床症狀穩定（血壓正常），以下最佳處置為何？","options":{"A":"同步電擊100 J。","B":"立即給予非同步電擊。","C":"給予Atropine 1 mg IV。","D":"可以先完成十二導程心電圖後,注意病患情況或考慮注射Adenosine。"},"answer":"D","manualChapter":"CH33","matchedChapters":["需要圖片"],"image":"題庫圖片/2042.png"},{"id":2060,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"中年男性有缺血性胸痛症狀、心電圖如下，請問心肌梗塞（STEMI）在何處？","options":{"A":"心臟下壁及後壁。","B":"心臟前壁及側壁。","C":"心臟前壁及下壁。","D":"心臟側壁及後壁。"},"answer":"A","manualChapter":"CH33","image":"題庫圖片/2060.png"},{"id":2064,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"病人被119送達急診，EMT表示院前為無搏脈心律（a systole）。您們EMTP學員小組在醫院實習、協助醫師施行CPR、進行插管、並成功建立靜脈路徑。兩分鐘後胸外按壓暫停，此時心電圖如下。您立即該作的事是？","options":{"A":"靜脈給予epinephrine 1mg。","B":"靜脈給予atropine 1mg。","C":"使用經皮節律器（TCP）。","D":"檢查脈搏並替換壓胸人員。"},"answer":"D","manualChapter":"CH33","matchedChapters":["需要圖片"],"image":"題庫圖片/2064.png"},{"id":2143,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於下面心電圖的判讀與後續處置，下列何者最適當？","options":{"A":"應立即協助給以舌下硝化甘油錠(NTG)來緩解胸痛症狀。","B":"V4R的ST節段上升表示有右心室心肌梗塞。","C":"心律不整是做完心導管後常見的情形，後送期間，無須使用生理監視器，以避免不必要的焦慮。","D":"懷孕患者為使用tPA的絕對禁忌症。"},"answer":"B","manualChapter":"CH33","image":"題庫圖片/2143.png"},{"id":2144,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"患有心臟病及高血壓的60歲阿伯感到胸痛及冒汗而打119求救，現場做一張EGK如下，心肌梗塞最可能的位置是？","options":{"A":"側壁心肌梗塞。","B":"前壁心肌梗塞。","C":"下壁心肌梗塞。","D":"中隔區心肌梗塞。"},"answer":"A","manualChapter":"CH33","image":"題庫圖片/2144.png"},{"id":2237,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"救護現場1名55歲女性主訴一小時前開始心悸，身體無其他任何不適，經量測生命徵象GCS 15分，血壓：121/70mmHg，心電圖監測如下，針對該病人的評估及處置何者最適當？","options":{"A":"經靜脈給予adenosine 6mg緩慢推注。","B":"該名患者的心律可能為心房顫動(atrial fibrillation)。","C":"可考使用慮迷走神經刺激術(vagal maneuvers)。","D":"給予amiodarone 150mg靜脈快速注射。"},"answer":"C","manualChapter":"CH33","image":"題庫圖片/2237.png"},{"id":2238,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"依據下圖心電圖判斷，最可能屬於何種區域之心肌梗塞？","options":{"A":"前壁(Anterior wall)。","B":"側壁(Lateral wall)。","C":"後壁(Posterior wall)。","D":"下壁(Inferior wall)。"},"answer":"B","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/2238.png"},{"id":2338,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"50歲男性十分鐘前開始胸悶及冒冷汗，到院前12導程心電圖如下，請問下列何者為是？","options":{"A":"為下壁心肌梗塞，應立即聯絡可行心導管之醫院。","B":"若無禁忌，應立即給予口服Aspirin 100mg。","C":"至急診應確認心肌酵素指數升高後才施行再灌流治療。","D":"到院後，應儘快執行心導管(PCI)於90分鐘內打通血管。"},"answer":"D","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/2338.png"},{"id":2400,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"一位20歲男性無過去病史，20分鐘前感覺心悸，心電圖監測如下。依照2020年AHA guidelines for CPR and ECC，下列處置何者最適當？","options":{"A":"若病人的血壓80/50mmHg，先完成12導程心電圖再繼續下一個處置。","B":"若病人的血壓120/80mmHg，給予Diltiazem 15mg靜脈緩慢注射。","C":"若病人的血壓120/80mmHg，嘗試Adenosine 6mg靜脈快速注射。","D":"若病人的血壓80/50mmHg，給予Amiodarone 150mg靜脈快速注射。"},"answer":"C","manualChapter":"CH33","image":"題庫圖片/2400.png"},{"id":2411,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"您在救護車上監視一位病患，他的胸悶在使用舌下NTG含片後緩解，可是EKG監視器突然出現下圖，並主訴胸悶冒汗及頭暈，量測生命徵象發現血壓70/40mmHg，以下最佳處置為何？","options":{"A":"給予同步電擊100 Joule。","B":"給予非同步電擊200 Joule。","C":"給予Atropine 1 mg IV。","D":"給予Adenosine 6mg IV。"},"answer":"A","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/2411.png"},{"id":2414,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"75歲女士主訴呼吸喘、呼吸困難、頭暈且全身無力、同時合併胸痛不適，血壓78/49mmHg，心跳約40次/分鐘，心電圖監視器顯示如下圖，下列敘述何者為是？","options":{"A":"此為第一度房室傳導阻斷(1 o AV Block)，不需要緊急治療心律，可以先觀察症狀。","B":"此為第二度房室傳導阻斷(2o AV Block) M obitz第一型，不需要緊急治療心律，可以先觀察症狀。","C":"此為第二度房室傳導阻斷(2o AV Block) M obitz第二型，先給予Atropine 1mg靜脈推注。","D":"此為第三度房室傳導阻斷(3 o AV Block)，因病人症狀不穩定，可考慮使用TCP。"},"answer":"D","manualChapter":"CH33","matchedChapters":["需要圖片"],"image":"題庫圖片/2414.png"},{"id":2422,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於心電圖的敘述，下列何者為是？","options":{"A":"心肌梗塞時出現的超急性T波(hyper acute T)，可以持續一到兩個小時。","B":"Lead I、aVL的ST段上升，通常暗示供應心室中膈的冠狀動脈出現阻塞。","C":"右心室傳導束傳導阻斷(Right Bundle Branch Block)通常暗示病人有嚴重的心臟疾病。","D":"三度房室結傳導阻斷(third degree AV block)的定義包含QRS波型均會超過心電圖的三小格。"},"answer":"A","manualChapter":"CH33"},{"id":2433,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"一名70歲男性病患主訴胸痛而報案，生命徵象穩定，現場心電圖如下圖所示，下列敘述何者最適當？","options":{"A":"需立刻再做一張右側心電圖。","B":"通報後送醫院啟動心導管小組。","C":"等到達醫院後再追蹤EKG，由醫師決定是否啟動心導管。","D":"給予初步藥物治療，就近送往一般級醫院，密切觀察追蹤。"},"answer":"B","matchedChapters":["需要圖片"],"manualChapter":"CH33","image":"題庫圖片/2433.png"},{"id":2492,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"指揮中心通報某安養中心接救護案件，求救原因為意識不清。您們到現場後發現病人躺床上、看起來沒有反應、一旁護理人員已接上的心電圖監測如下，請問下列敘述何者正確？ (選「此病人目前為心房顫動併快速心室反應(A.fib with RVR)」也對)","options":{"A":"此病人目前為心房顫動併快速心室反應(A.fib with RVR)。","B":"此病人須立刻同步整律雙向波120焦耳。","C":"此病人須立刻去顫電擊雙向波150焦耳。","D":"此病人須先確認脈搏。"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH33","image":"題庫圖片/2492.png"},{"id":2500,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"48歲男性病人家屬報案主訴突然昏倒，經派遣員線上評估疑似OHCA（到院前心肺停止），予以線上指導報案者施行心肺復甦術。您們到場後發現報案者正在為病人CPR，沒有使用AED。病人目前無意識且無適當呼吸，您們接上心電圖監視器顯示如下。下列處置何者為是？","options":{"A":"繼續心肺復甦術，盡速送醫。","B":"此病人為寬QRS不穩定心律，應立即200J去顫電擊。","C":"此病人為急性心肌梗塞，盡速給予Aspirin與NTG舌下碇。","D":"立即開始復甦後照護，給予人工呼吸並持續監控心律。"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH33","image":"題庫圖片/2500.png"},{"id":2501,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"承上題，病人送到醫院後恢復自發性循環(ROSC)，作12導程心電圖如下。下列說明，何者為是？","options":{"A":"心肌梗塞位置在右心室下壁。","B":"冠狀動脈阻塞位置在左前降支冠狀動脈近端。","C":"心電圖顯示已併發二度二房室傳導阻滯。","D":"需進行右側心電圖與後側心電圖檢查。"},"answer":"D","manualChapter":"CH33","matchedChapters":["需要圖片"],"image":"題庫圖片/2501.png"},{"id":2535,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"下列狀況，何者最能解釋這張心電圖的變化？","options":{"A":"急性心肌梗塞。","B":"毛地黃中毒。","C":"腦出血(腦壓上升)。","D":"低體溫。"},"answer":"D","matchedChapters":["需要圖片"],"manualChapter":"CH33","image":"題庫圖片/2535.png"},{"id":2567,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"關於心臟傳導系統的敘述，下列何者正確？","options":{"A":"正常情況下，心臟的電氣傳導始於房室結。","B":"正常情況下，心跳速率由普金吉氏纖維主導。","C":"心搏過速可能是因為心臟存在額外的傳導路徑。","D":"心電圖中的P波代表心室去極化。"},"answer":"C","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":2606,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"下列哪一種心電圖變化最符合「心室顫動」(Ventricular Fibrillation, VF)的特徵？","options":{"A":"連續而快速，規律一致，寬QRS波、無P波。","B":"連續而快速，無規則節律，大小、寬窄不一的QRS波。","C":"快而規則的連續波型，伴隨高尖ST段。","D":"可見P波與QRS波一一對應。"},"answer":"B","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":3320,"question":"關於十二導程心電圖的基本組成與生理意義，下列敘述何者正確？","options":{"A":"體表心電圖的第一個正向波為竇房結（SA node）去極化與再極化所產生的直接電生理訊號。","B":"PR區間（PR interval）包含了心房去極化的時間與房室結的生理性延遲，正常範圍應介於 0.12 至 0.20 秒之間。","C":"PR節段（PR segment）代表心室去極化完成後至再極化開始前的生理性延遲。","D":"正常情形下，胸前導程由 V1 移行至 V6 的過程中，S波會逐漸變大而R波逐漸變小。"},"answer":"B","source":"TP題庫","manualChapter":"CH33"},{"question":"何者不是造成右心房擴大的先天性心臟病？","options":{"A":"心房中隔缺損","B":"肺動脈狹窄","C":"法洛氏四重症候群","D":"慢性阻塞性肺病"},"answer":"D","manualChapter":"CH33","id":3348,"source":"TP題庫 (圖片匯入)"},{"question":"如果高尖P波出現，可能是什麼疾病，下列何者唯非？","options":{"A":"心中隔缺損","B":"急性肺栓塞","C":"COPD","D":"冠狀動脈心臟病"},"answer":"D","manualChapter":"CH33","id":3374,"source":"TP題庫 (圖片匯入)"},{"question":"有關急性心肌梗塞之心電圖判讀下列何者正確？","options":{"A":"Q波之出現，代表心肌細胞已發生不可逆的死亡，可確立已發生過心肌梗塞或有心肌正在發生壞死。","B":"心肌梗塞心電圖變化為 超急性T波>ST段上升>T波反轉>ST段下降回基準線>新Q波出現","C":"若左心室前壁發生急性心肌梗塞，往往是II、III、aVF導程有最為明顯之ST段上升情形","D":"T波反轉只會出現在心肌梗塞患者的心電圖，故可以利用T波反轉作為心肌梗塞的判斷標準"},"answer":"A","manualChapter":"CH33","id":3400,"source":"TP題庫 (圖片匯入)"},{"question":"心電圖上PR節段的上升可能為何種情況？","options":{"A":"心房梗塞","B":"急性心包膜填塞","C":"房室傳導阻塞","D":"心室顫動"},"answer":"A","manualChapter":"CH33","id":3411,"source":"TP題庫 (圖片匯入)"},{"id":3504,"source":"AI出題","question":"對病患實施 12 導程心電圖（12-lead ECG）檢查以排除急性心肌梗塞時，您觀察到心電圖呈現：心跳每分鐘 115 次，P波在第 II、III、aVF 導程的振幅大於 2.5 mm（P pulmonale），且心電圖軸向右偏（Right axis deviation）。下列臨床推論何者最適當？","options":{"A":"這些波形改變強烈提示患者目前正處於急性左心室衰竭引發的肺水腫。","B":"此心電圖表現很可能是由於長期 COPD 導致肺動脈高壓與右心室肥大/超載的慢性變化。","C":"出現這些波形代表病患一定合併了急性前壁 ST 段上升型心肌梗塞（STEMI）。","D":"心電圖波形完全正常，上述特徵是正常成年人常見的生理表現。"},"answer":"B","manualChapter":"CH33"},{"question":"不規則心搏過速中，病人Atrial fibrillation超過幾個小時？會增加形成血栓的風險，不建議電擊或藥物整流。","options":{"A":"9小時","B":"24小時","C":"36小時","D":"48小時"},"answer":"D","manualChapter":"CH33","source":"TPP","id":3759,"matchedChapters":["CH33"]},{"question":"心房顫動時，心房電活動可能非常快速且混亂，甚至達每分鐘600下。正常情況下，心室不會完全效頻此速度收縮，主要原因為何？","options":{"A":"心室肌完全不會接受來自心房的任何訊號","B":"竇房結會阻止所有心房訊號傳入心室","C":"房室結具有生理性傳導延遲及不反應期，可阻擋部分訊號往下傳","D":"浦金氏纖維會將心房電活動全部轉變為正常竇性節律"},"answer":"C","manualChapter":"CH33","source":"TPP","id":3763,"matchedChapters":["CH33"]},{"id":3807,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於12導程心電圖的判讀，下列敘述何者正確？","options":{"A":"右心房擴大的變化主要為P波變寬(>0.12秒)，形成所謂的P mitrale。","B":"有意義的ST-T波變化必須有連續三個或以上的導程出現變化。","C":"V3、V4導極對應到的心臟解剖位置為左心室側壁。","D":"急性心肌缺血的表現會出現高聳的T波，稱之為hyperacute T。"},"answer":"D","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":4011,"question":"下列四張心電圖分別代表心肌梗塞不同時期變化，請依時序排出正確順序。","options":{"A":"圖4→圖3→圖2→圖1。","B":"圖2→圖1→圖3→圖4。","C":"圖4→圖2→圖1→圖3。","D":"圖2→圖3→圖1→圖4。"},"answer":"D","source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","manualChapter":"CH33","image":"題庫圖片/4011.png"},{"id":1212,"question":"請問關於下圖敘述何者有誤?","options":{"A":"此心率的V5的R波＋V1的S波＞35mm，加上V6的R波＞18mm，可以懷疑其左心室肥厚。","B":"此張心電圖之心率可見窄Q、速率快的、RR interval不規則、沒有p，可能為A-fib with RVR。","C":"若需要藥物治療，可使用β-blockers 或是CCB，但其QTc較長，可能不適合使用Amiodarone控制速率。","D":"此病患的心軸因左測電氣活動牽引的影響，心軸偏左(＜-30 度)。"},"answer":"D","source":"同學出題","manualChapter":"CH33","image":"題庫圖片/1212.png"},{"id":1234,"question":"下列心電圖為何種心律不整?","options":{"A":"病竇症候群","B":"竇性心律不整","C":"3 度房室傳導阻滯","D":"心房纖維顫動"},"answer":"C","source":"民國105專科護理通論考古題","manualChapter":"CH33","explanation":"心電圖 P 波與 QRS 各自獨立(無關聯)→第三度(完全性)房室傳導阻滯。完全性(第三度)房室傳導阻滯：心房(P波)與心室(QRS)各自獨立節律、P–R 無固定關係(房室分離)，心室由交界區或心室自主逸搏維持(率慢、QRS 可寬)。病灶多在希氏束以下，atropine 多無效，常需經皮/經靜脈節律器，確定者植入永久節律器。需與高度第二度阻滯區分。","image":"題庫圖片/1234.png"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

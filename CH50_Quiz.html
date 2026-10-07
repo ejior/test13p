@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 50 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：96 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH50</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":73,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMT處置被右圖蛇類咬傷腳趾的傷患，何者為非?","options":{"A":"可以彈繃包紮壓迫腳踝，緊度為一指可插入","B":"傷肢可能在短期內出現快速腫脹及血泡","C":"傷口切開或吸吮器並無實效，甚至可能有害","D":"治療之蛇毒血清為出血性蛇毒血清"},"answer":"D","manualChapter":"CH50"},{"id":74,"source":"105 高級救護技術員甄試筆試題目.doc","question":"陽明山求救案件，你到現場發現有一名登山客吃了山產後發生意識胡言亂語、皮膚乾熱潮紅、瞳孔放大、脈搏不規則。請問他呈現了哪一種中毒症象？","options":{"A":"膽鹼性中毒","B":"致幻覺性中毒","C":"抗膽鹼性中毒","D":"仿交感神經性中毒"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":175,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"下藥物中毒皆會引起瞳孔縮小，何者為非?","options":{"A":"鴉片類","B":"有機磷","C":"安非他命","D":"乙醯膽鹼"},"answer":"C","manualChapter":"CH50"},{"id":194,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"下列有關海洋生物螫刺傷的敘述，下列何者為非？","options":{"A":"被水母螫傷時可以用海水沖洗以降低刺痛感","B":"被石頭魚（石狗公）的鰭刺傷可以浸泡熱水來減輕疼痛感","C":"海膽的刺裡有刺囊細胞可以分泌毒液造成中毒","D":"水母的觸手離開水母的身體可以保持活性達數月之久，仍會造成中毒"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":254,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列敘述何者正確？","options":{"A":"毒蛇咬傷傷患，於送醫途中應每5分鐘進行一次繼續評估","B":"CRT是評估循環的重要指標之一且成人可信度較高","C":"關鍵思考步驟為：資料判斷一概念形成一應用原則一反應評估一事後回顧","D":"以上皆是"},"answer":"A","manualChapter":"CH50"},{"id":280,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"關於台灣毒蛇下列何者正確？","options":{"A":"毒蛇咬傷時要將止血帶綁於患部上方以避免毒液傷害。","B":"遭百步蛇咬傷時需使用抗出血性蛇毒血清治療","C":"被百步蛇咬傷時會導致局部組織極為疼痛，腫服，有時還會有水泡產生；也會造成凝血功能異常","D":"遭龜殼花咬傷後毒液會破壞組織導致局部有灼熱感、腫脹、出血及水泡"},"answer":"D","manualChapter":"CH50"},{"id":281,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"關於洗胃敘述何者正確？","options":{"A":"嘗試以中和劑中和強酸強鹼，如：果汁","B":"洗胃需使用大口徑鼻胃管來進行（成人36-40號；小兒24-28號）","C":"幼兒洗胃禁止用水，只能用蒸餾過的水，這樣才不會傷害幼兒","D":"活性碳在給予病人前會先製備為水狀溶液並且視情況加入瀉劑"},"answer":"D","manualChapter":"CH50"},{"id":287,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"痛痛鴨有一天至玉山登山，在山里迷失三天後被身為EMTP的你找到，剛好你身上帶有所有經醫療醫師認可之藥物，請問下列處置何者正確？","options":{"A":"患者因三天沒吃東西，所以接觸第一時間先給予D10W以補充水分及糖分","B":"痛痛鴨内科OHCA，現場人員足夠，建議急救30-60後無法恢復心跳後應停止急救","C":"痛痛鴨表示右手被毒蛇咬傷，故應立即使用止血帶以避免中毒死亡","D":"毒蛇咬傷使用彈繃包紮，應在被咬位置至上下關節間都要包紮起來","E":"痛痛鴨表示被蜂螫傷，應立即給予Epinephrine 0.3mgIM"},"answer":"D","manualChapter":"CH50"},{"id":873,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一病人因為使用過多的海洛因造成中毒，下列敘述何者錯誤？","options":{"A":"常用解藥為naloxone","B":"具有呼吸抑制的作用","C":"可造成意識昏迷","D":"瞳孔放大"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":887,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據2010年美國心臟醫學會所建議的心肺復甦術指引，以下敘述何者為非？","options":{"A":"為避免毒液活化並阻擋毒液進一步侵入體內，受到水母螫傷時，應儘快使用大量醋（4～6％的乙酸溶液）沖洗傷處至少30秒","B":"如果患者上肢被毒蛇咬傷，那麼以介於40與70毫米汞柱的力量，將壓力穩定繃帶捲繞被咬傷的整個肢段，是減緩淋巴流從而減少毒液散播的有效安全方式","C":"建議所有呼吸短促或胸部不適的患者，都應例行給予氧氣","D":"伸展、冰敷和按摩因為熱痙攣而疼痛的肌肉，可能會有所幫助"},"answer":"C","manualChapter":"CH50"},{"id":898,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關活性碳（activated charcoal）的敘述，何者為非？","options":{"A":"可以在腸胃道中吸附毒藥的分子，使用適當的話可以吸附多達50％的食入毒藥","B":"假如食入的毒藥有囗服的解毒藥時，不要給予活性碳","C":"在出勤時常見的酒醉路倒病人，也可以給予活性碳幫助解酒","D":"毒藥食入已經發生超過一個小時的話，給予活性碳的幫助不大"},"answer":"C","manualChapter":"CH50"},{"id":899,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關毒蛇咬傷的敘述，何者為是？","options":{"A":"毒蛇咬傷的傷口可以冰敷來消腫止痛","B":"鎖鏈蛇的毒液成分為混合性毒，所以施打毒蛇血清時可以將抗出血性以及抗神經性毒蛇血清共用來治療","C":"切開毒蛇咬傷的傷口進行抽吸對病人有絕對的好處，所以要在現場緊急處置","D":"百步蛇咬傷的病人，抽血可以發現血小板低下以及凝血時間延長"},"answer":"D","manualChapter":"CH50"},{"id":912,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於安非他命類中樞神經興奮劑中毒時的可能症狀，下列敘述何者為是？","options":{"A":"嗜睡","B":"低體溫","C":"腦出血","D":"低血壓休克"},"answer":"C","manualChapter":"CH50"},{"id":931,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列台灣常見的毒蛇咬傷後，哪一種可能會引起呼吸衰竭？","options":{"A":"赤尾青竹絲","B":"龜殼花","C":"百步蛇","D":"眼鏡蛇"},"answer":"D","manualChapter":"CH50"},{"id":932,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關acetaminophen中毒之敘述何者為非？","options":{"A":"反覆嘔吐為中毒初期常見的症狀","B":"導致中毒的劑量多在150mg/kg以上","C":"中毒後，除引起肝傷害外，也可以導致腎衰竭、胰臟炎、昏迷或代謝性酸中毒等症狀","D":"中毒後引起肝傷害，一般於中毒24小時產生，且多為不可逆性的"},"answer":"D","manualChapter":"CH50"},{"id":933,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列敘述哪一個是為非？","options":{"A":"被有毒海洋生物咬螫的毒素通常為對熱穩定的蛋白質","B":"大多數蜘蛛的毒素對人體是無害的","C":"蜈蚣咬傷一般僅有局部的組織反應，不至於危害生命","D":"腔腸動物螫傷常於皮膚上呈現特殊紅棕色長條狀的風疹塊"},"answer":"A","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":939,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關活性碳（activated charcoal）的敘述，何者為非？","options":{"A":"可以在腸胃道中吸附毒藥的分子，使用適當的話可以吸附多達50％的食入毒藥","B":"假如食入的毒藥有囗服的解毒劑時，給活性碳會同時吸附解毒劑而降低療效","C":"在出勤時常見的酒醉路倒病人，也可以給予活性碳幫助解酒","D":"病人在給予活性碳之前，必須先確保病人的呼吸道可以維持暢通"},"answer":"C","manualChapter":"CH50"},{"id":940,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關洗胃（gastric lavage）的注意事項以及禁忌症，何者為非？","options":{"A":"病人如果意識不清，在洗胃之前應該要先確保呼吸道可以維持暢通","B":"幼兒病人洗胃時的沖洗液不需指定生理食鹽水，用一般蒸餾水也可以","C":"清醒的病人不會有嘔吐的問題，所以洗胃時左側躺是沒有意義的","D":"在洗胃之前就先給予活性碳是可以被接受的"},"answer":"C","manualChapter":"CH50"},{"id":941,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關肉毒桿菌素中毒的敘述，何者為是？","options":{"A":"肉毒桿菌素是一種很強的毒素，在醫學上沒有任何用途","B":"是因為被肉毒芽孢梭狀桿菌污染的泥土進人傷囗所導致的","C":"中毒病人的症狀是由末梢傳回中樞，先是四肢麻痺，再來才出現複視、眼瞼下垂以及吸衰竭等症狀","D":"中毒病人的死因是因為呼吸衰竭"},"answer":"D","manualChapter":"CH50"},{"id":943,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關毒蛇咬傷的敘述，何者為是？","options":{"A":"毒蛇咬傷的傷口可以冰敷來消腫止痛","B":"百步蛇的毒液成分為很強的出血性毒，所以施打毒蛇血清時可以將青竹絲用的抗出血性毒蛇血清加倍來使用，效果相同","C":"切開毒蛇咬傷的傷囗進行抽吸並且在咬傷部位的近心端綁上止血帶對病人有絕對的好處，所以要在現場緊急處置","D":"百步蛇咬傷的病人，抽血可以發現血小板低下以及凝血時間延長"},"answer":"D","manualChapter":"CH50"},{"id":952,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關生物咬螫刺傷的敘述，下列何者為是？","options":{"A":"鎖鏈蛇的蛇毒為混合性毒，所以對於被鎖鏈蛇咬傷的傷患可以使用抗出血性蛇毒以及抗神經性蛇毒血清合併使用來治療","B":"被石頭魚（石狗公）的鰭刺傷的傷患會感到患部異常疼痛，所以可以冰敷來減輕疼痛感","C":"蜂類離體的毒刺毒囊不具活性，所以救護技術員到達現場發現傷患身上有離體的毒刺毒囊時不需要特別的處置","D":"水母的觸手離開水母的身體仍會保持活性一段時間"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":986,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"72歲男性病，在家中因不明原因將漂白水及無煙鹽酸於密閉的浴室中混合，病患因吸入產生的氣體，約30分鐘開始感覺頭暈，並於5小時後愈來愈喘，其他臨床症狀包括頭暈、盜汗、眼睛疼痛流淚、鼻腔疼痛、流鼻水還有咳嗽。經家人撥打119後送醫，到院後的胸部X光顯示病患有急性肺水腫。請問下列有關此病患及有毒氣體的敘述，何者為非？","options":{"A":"以此病患的症狀及臨床表現加理學檢查，病患很可能是吸入了混合後產生的氯氣","B":"常見的家用瓦斯若吸入過量，同樣也會產生呼吸道刺激的問題而進一步產生肺水腫","C":"工廠及燃燒的塑膠.家具還有建築物會產生氰酸，此為高度毒性的細胞窒息劑，需趕決就醫使用氰酸的解毒劑","D":"硫化氫為類似氰酸的高毒性細胞窒息劑，具有易於辨認的特殊臭蛋味"},"answer":"B","manualChapter":"CH50"},{"id":993,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"下列有關毒蛇咬傷處置，何者為是？","options":{"A":"避開毒蛇的攻擊範圍（大約是毒蛇的一半長度），將病人移至安全的區域","B":"提供病人暢通的呼吸道.維持足夠的通氣狀況以及循環的支持，持續監視病人的生命徵象以及使用心律監視器","C":"在受咬傷的患肢上建立靜脈輸液並且使用容積擴張溶液","D":"傷囗局部的冰敷應該要持續，因為如此可延遲毒液擴散"},"answer":"B","manualChapter":"CH50"},{"id":994,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"下列有關中毒症候群的區分，何者為是？","options":{"A":"抗膽鹼性症候群徵候包括心搏過速.皮膚潮紅乾熱.瞳孔擴大.及顏面潮紅","B":"膽鹼性症候群包括頭痛.頭暈.虛弱.心搏過緩.噁心以及“濕的”表現，特點是嚴重的唾液分泌（salivation）.流淚（lacrimation）.排尿（urination）.排便（defecation）.腸胃道不適（gastrointestinal upset）以及嘔吐（emesis）","C":"仿交感神經作用徵候包括血壓升高.心搏過速.瞳孔放大以及意識改變（包括偏執性妄想症）。嚴重的病人會產生心血管衰竭。到院前的緊急處置包括：確保人身安全以及提供呼吸道.通氣以及循環的支持性治療","D":"以上皆是"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":1000,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"人體被咬螫後常於皮膚上呈現特殊性淋巴分佈紅線的有毒海洋生物為？","options":{"A":"水母","B":"河豚","C":"海膽","D":"海葵"},"answer":"A","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":1007,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"一位55歲的男性帶著一只布袋到消防分隊，自訴遭到布袋內的毒蛇（如圖）咬傷右手掌，現在右手掌異常疼痛並腫脹，咬傷處並發現清晰的毒牙咬痕與血泡，以下敘述何者為是？","options":{"A":"應該盡速在右手腕處綁上止血帶，以避免毒液擴散","B":"腫脹疼痛的右手掌應立刻給予冰敷以消腫止痛","C":"這是出血性毒蛇咬傷，根據一般原則，龜殼花咬傷以及百步蛇咬傷可以使用同一種血清治療","D":"依據外型判斷，布袋內的毒蛇是百步蛇"},"answer":"D","manualChapter":"CH50"},{"id":1008,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"救護出勤，現場為一名75歲男性老農夫，倒臥半封閉的浴室內，現場充滿農藥味。初評發現病患意識昏迷、全身出汗、口鼻充滿分泌物、瞳孔雙側皆為針狀瞳孔。關於此病患的狀況，以下敘述何者為非？","options":{"A":"這是有機磷農藥中毒，會經由呼吸以及皮膚接觸造成中毒，所以現場為不安全的環境，須盡速將病患移至通風處評估處置。","B":"病患可能會無預警的產生呼吸癱瘓或停止呼吸的現象，須考慮進階呼吸道處置。","C":"病患在送醫途中可能會產生癲癇發作的情況，可用Diazepam治療。","D":"此種農藥中毒的解毒劑是Diazepam"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":1015,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"對於常見毒素或毒藥物相對應的解毒劑，下列何者為非？","options":{"A":"有機磷（Organophosphates）：Atropine.PAM（Pralidoxime）","B":"三環抗憂鬱劑（Cyclic antidepressants）：N-acetylcysteine（Fluimucil）","C":"鴉片類麻醉劑（Opiates）：Naloxone","D":"甲醇（Methanol）：Ethanol（乙醇）"},"answer":"B","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":1026,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"下列有關台灣常見六大毒蛇及其血清的敘述，何者為是？","options":{"A":"青竹絲和無毒的青蛇在外觀上無法區分","B":"龜殼花和百步蛇同屬出血性毒液毒蛇，所以血清可共用","C":"飯匙倩以及雨傘節同屬神經性毒液毒蛇","D":"毒蛇咬傷後，須立即以止血帶綁住近心端，並在局部冰敷，以防止毒液擴散全身"},"answer":"C","manualChapter":"CH50"},{"id":1030,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"觀光客誤闖果園，吃了堆放路邊的橘子後昏倒。你出勤到達現場，發現約50歲男性，滿臉汗水眼淚口吐白沫，意識昏迷對痛無反應，皮膚溼冷發紺，呼吸呈現瀕死式呼吸但頸動脈得到，兩側瞳孔呈現針孔。當地果農說，病人吃的橘子是用來毒殺猴子的。下列敘述何者最正確？","options":{"A":"病人是巴拉刈中毒，預後不佳","B":"病人是除蟲菊精中毒，須施打解毒劑並需要呼吸支持","C":"病人是有機磷農藥中毒，解毒劑包括Atropine以及Pralidoxime","D":"病人是年年春中毒，需插管維持呼吸道以避免吸入性肺炎"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH40"]},{"id":1031,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"有關海洋生物產生的毒素，下列敘述何者最正確？","options":{"A":"海洋生物特化的毒液裝置皆是用來防衛的，很少用來捕捉獵物","B":"水母的毒液中毒程度和刺囊細胞刺人的數目有關，和受害者身體狀況無關","C":"海洋生物產生的毒素對熱敏感，將受傷部位浸泡溫水可以破壞毒素","D":"被水母螫傷後須立即以大量清水清洗，如此可以破壞刺囊細胞"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":2077,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"53歲男性在路程超過10小時的深山中遭百步蛇咬傷左小腿，傷患的左小腿立刻腫脹疼痛無法移動，您是到場支援的TP，奉派將傷患救出並轉送至適當醫院，以下作為何者為非？","options":{"A":"現場需要醫療指導醫師預立醫囑施打抗百步蛇毒蛇血清。","B":"使用彈繃以及副木固定可以有效減緩蛇毒系統性地吸收。","C":"使用彈繃的鬆緊度應該要和使用在肢體大出血的差不多。","D":"抗百步蛇蛇毒血清無法用其他出血性的蛇毒血清來代替。"},"answer":"C","manualChapter":"CH50"},{"id":2079,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"下列有關毒藥與解毒劑配對的組合，何者為非？","options":{"A":"鴉片類麻醉劑（Opiates）的解毒劑是Naloxone。","B":"BZD (Benzodiazepine)的解毒劑是N-Acetylcysteine（Fluimucil）。","C":"甲醇（Methanol）的解毒劑是乙醇（Ethanol）。","D":"有機磷的解毒劑是PAM。"},"answer":"B","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":2167,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"有關於中毒病人的處理敘述，下列何者最不適當？","options":{"A":"當病人口服解毒劑(N-acetylcysteine，福喜，acetaminophen普拿疼的解毒劑)，不應該給予活性碳。","B":"洗胃是腸胃道除污的一種方式，通常在食入的時間在一小時內執行。","C":"假酒中毒會造成身體一系列的徵候，包括眼盲瞳孔放大以及代謝性酸血症最主要是因為甲醛的毒性。","D":"乙二醇可用於散熱器防凍劑以及冷卻劑，如發生食入中毒，可使用真酒(乙醇)來治療。"},"answer":"C","manualChapter":"CH50"},{"id":2168,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"臨床發現瞳孔縮小、口水多、痰多、呼吸或嘔吐物中有濃烈大蒜味、全身汗濕等臨床症狀，最可能為何種中毒症候群？","options":{"A":"膽鹼性症候群。","B":"抗膽鹼性症候群。","C":"鴉片類止痛劑。","D":"仿交感神經作用症候群。"},"answer":"A","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":2240,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"有關心電圖判讀，下列敘述何者為非？","options":{"A":"心肌缺血可能會出現T波反轉的心電圖變化。","B":"肺動脈狹窄常導致右心房擴大，造成心電圖中P波變高。","C":"左心房擴大時，會形成P mitrale，常見於肢體導程。","D":"一般正常的心室去極化時，胸前導極R波的大小將逐漸變小，而S波則逐漸變大。"},"answer":"D","manualChapter":"CH50"},{"id":2262,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"口服以下哪一種物質中毒，是可以考慮給予活性碳除污？","options":{"A":"氰化物(cyanide)。","B":"酒精中毒(ethanol intoxication)。","C":"鋰鹽(lithium)。","D":"鴉片類止痛藥(opioids)。"},"answer":"D","manualChapter":"CH50"},{"id":2263,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"下列何種毒蛇之蛇毒為單純的神經毒？","options":{"A":"","B":"","C":"","D":""},"answer":"D","manualChapter":"CH50"},{"id":2353,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"下列有關臺灣毒蛇之敘述，何者為非？","options":{"A":"台灣目前的抗蛇毒血清共有四種。","B":"最容易造成急性腎臟衰竭為鎖鍊蛇。","C":"眼鏡蛇的毒牙為管牙。","D":"被眼鏡蛇咬傷後，局部傷口易造成組織腫脹、腐爛，有些甚至會進展壞死性筋膜炎。"},"answer":"C","manualChapter":"CH50"},{"id":2355,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"王先生聽信民間偏方，服用了大量的大花曼陀羅治療氣喘，發生中毒，下列敘述何者為非？","options":{"A":"臨床徵候包括心搏過速、瞳孔擴大。","B":"全身皮膚潮濕，口水、淚液分泌增多。","C":"以呼吸道、通氣及循環的支持性療法為主。","D":"症狀嚴重，有解毒劑physostigmine可注射使用。"},"answer":"B","manualChapter":"CH50"},{"id":2365,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"下列有關危害物質對健康的影響，何者最正確？","options":{"A":"有機磷殺蟲劑會造成神經系統作用失常，造成意識障礙或痙攣，或是導致呼吸及循環系統不穩，甚至於心肺衰竭而致命。","B":"氰化物會使血液無法攜帶氧氣至組織中而造成窒息。","C":"所有毒化災物質的病患皆可以用清水除汙。","D":"毒化物進入人體可能經由呼吸、口服、注射等方式，但不會經皮膚吸收。"},"answer":"A","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":2394,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"75歲男性求救，牙痛數天未就醫，左臉部及左頸部腫脹而打119求救，你到現場發現他有發燒、吞嚥困難、喉嚨痛，似乎快要窒息。此時問診及身體檢查其相關症狀，形成臆斷的配對何者為非？","options":{"A":"身體檢查可發現體溫上升、口腔內口水積聚、頸部皮下氣腫。","B":"誘發因子可能為頸部異物(魚刺、骨頭)傷害、牙源性感染。","C":"主要危象表現：漸進式呼吸困難。","D":"臆斷疾病：嚴重過敏合併咽喉水腫。"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":2446,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"70歲男性，通報意識不清，現場發現全身冒汗、嘔吐、大小便失禁。理學檢查發現呼吸明顯濕囉音。血壓160/80 mmHg、脈搏40次/分鐘、呼吸30次/分鐘、體溫36.5°C、血氧92%、GCS= E3V4M5、雙側瞳孔大小1mm且對光有反應。請問這位病人的症狀，與哪種中毒症候群最符合？","options":{"A":"膽鹼性中毒症候群。","B":"抗膽鹼性中毒症候群。","C":"致幻覺性中毒症候群。","D":"仿交感神經作用中毒症候群。"},"answer":"A","manualChapter":"CH50"},{"id":2448,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於臺灣毒蛇的敘述，下列敘述何者正確？","options":{"A":"眼鏡蛇的毒牙為管牙，被咬傷後因組織被破壞導致疼痛腫脹與腐爛。","B":"雨傘節的神經性毒液的毒性為台灣陸生毒蛇中毒液最強者。","C":"百步蛇蛇毒常會引起急性賢衰竭與全身性出血的症狀。","D":"台灣目前的抗蛇毒血清共有六種，僅有醫學中心六種皆有備藥隨時可用。"},"answer":"B","manualChapter":"CH50"},{"id":2483,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"55歲男性，早上九點在公司開會，突然出現眼睛無法對焦，看東西會出現複視的現象；然後接著自己右臉有麻木的感覺，想喝水卻發現自己連吞口水都會嗆到；趕緊請求119送醫，您9點30分至現場，評估後發現病患的辛辛那提中風指標皆呈現陰性反應，下列敘述何者為非？","options":{"A":"此病患仍可能為腦中風，須通報醫院啟動中風小組並送至可以施打血栓溶解劑的醫院。","B":"「眼睛無法對焦，看東西會出現複視」，有可能是第三、四、六對的腦神經當中，有某些神經受影響。","C":"「右臉有麻木的感覺」，應該是第七對腦神經有受影響。","D":"「連吞口水都會嗆到」，有可能是第九對腦神經有受影響。"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":2542,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"中年男子在海邊釣魚時，遭到釣上來的魟魚尾巴毒刺刺傷右手掌。你到現場發現他臉色蒼白冒冷汗，有休克現象，右手掌以及右前臂疼痛難當，血壓為80/60 mmHg，其餘生命徵象正常。關於該病人處置，以下敘述何者為是？","options":{"A":"這個病人是過敏性休克，應該要線上醫療指導請求給予epinephrine 0.5 mg靜脈注射。","B":"病人應該給予靜脈注射，但輸液量不宜太多，以免對心臟造成負擔。","C":"右手掌以及右前臂的疼痛，可以將患肢浸泡在超過攝氏40度的溫水，以緩解疼痛。","D":"若可見毒刺，切勿將其移除，以免造成大出血。"},"answer":"C","manualChapter":"CH50","explanation":"魟魚毒刺毒素對熱不穩定，將患肢浸泡在超過40°C（最好45°C）的溫水中，可使毒素失去活性並緩解劇烈疼痛，選C正確。\n病患的休克更可能是因劇烈疼痛引起的迷走神經反應（神經性休克），而非過敏性休克，不應直接給epinephrine靜脈注射；應適當輸液治療休克，無需特別限制；若毒刺可見且不在血管附近，可嘗試小心移除以減少持續毒素釋放。\n技巧：魟魚毒＝熱水浸泡（>40°C）可緩解疼痛，是考試常出現的急救方法。"},{"id":2640,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"一名農夫疑似有機磷（Organophosphate）中毒，出現流涎、縮瞳、支氣管分泌物增多。下列描述何者最適當？","options":{"A":"常見症狀為急性癲癇發作。","B":"以阿托品（Atropine）治療。","C":"給予活性碳協助吸附除汙。","D":"大量輸液以促進腎臟排毒。"},"answer":"B","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":2641,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"懷疑下列何者中毒時，使用活性碳(activated charcoal）最適當？","options":{"A":"氰化物（cyanide）。","B":"酒精中毒（ethanol intoxication）。","C":"甲醇（methanol）。","D":"鴉片類止痛藥（opioids）。"},"answer":"D","manualChapter":"CH50"},{"id":3322,"question":"對於海洋生物螫傷，若病患遭水母螫傷產生局部風疹塊與劇痛，下列何種處理方式有助於避免毒素進一步釋放？","options":{"A":"使用乾沙用力摩擦受傷區域以移除觸手","B":"使用 4~6% 的醋酸溶液 (醋) 沖洗患部","C":"利用大量淡水沖洗傷口","D":"立即使用冰袋強力冰敷患部"},"answer":"B","source":"TP題庫","manualChapter":"CH50"},{"question":"台灣地處亞熱帶，森林茂密，氣候溫暖潮濕，是毒蛇生長繁殖的最佳環境。台灣疾管署之抗蛇毒血清的製備中，除了鎖鏈蛇血清(出血性及神經性混合毒)外，何種血清亦可抗鎖鏈蛇蛇毒？","options":{"A":"抗百步蛇蛇毒血清","B":"抗雨傘節及飯匙倩蛇毒血清","C":"抗龜殼花及赤尾鮐蛇毒血清","D":"抗蛇毒血清有專一性，無法併用"},"answer":"D","manualChapter":"CH50","id":3361,"source":"TP題庫 (圖片匯入)"},{"question":"關於藥物中毒與解毒劑的配對下列何者不正確??","options":{"A":"乙醯胺酚與Fluimucil","B":"BZD與Flumazenil","C":"甲醇與乙醇","D":"Beta-blockers與Atropine"},"answer":"D","manualChapter":"CH50","id":3375,"source":"TP題庫 (圖片匯入)"},{"question":"一名患者因蓄意吞服大量不明藥物被送至急診。在考慮給予活性碳（Activated charcoal）進行腸胃道除污時，下列哪一種物質的攝入為使用活性碳的「絕對禁忌症」？","options":{"A":"卡馬西平 (Carbamazepine)","B":"硫酸亞鐵或其他金屬鹽類 (Ferrous sulfate or other iron salts)","C":"茶鹼 (Theophylline)","D":"苯巴比妥 (Phenobarbital)"},"answer":"B","manualChapter":"CH50","id":3378,"source":"TP題庫 (圖片匯入)"},{"question":"三環抗憂鬱劑常被處方來治療憂鬱症以及某些疼痛症候群，下列何者「非為」嚴重的三環抗憂鬱劑中毒的症狀？","options":{"A":"呼吸抑制","B":"昏迷","C":"口腔濕潤","D":"腸胃道不適"},"answer":"C","manualChapter":"CH50","id":3390,"source":"TP題庫 (圖片匯入)"},{"question":"在辨識膽鹼性中毒時，口訣「SLUDGE」中的「S」代表什麼？","options":{"A":"流口水 (Salivation)","B":"癲癇 (Seizure)","C":"震顫 (Spasm)","D":"嗜睡 (Sleepiness)"},"answer":"A","manualChapter":"CH50","id":3396,"source":"TP題庫 (圖片匯入)"},{"question":"有機磷中毒產生的「SLUDGE」症狀群，主要是由於哪一種物質堆積所致？","options":{"A":"Norepinephrine","B":"Acetylcholine","C":"Dopamine","D":"MAO"},"answer":"B","manualChapter":"CH50","source":"TP題庫 (圖片匯入) - EMT-P 第 50 章 P.1344","id":3478},{"question":"下列何者為活性碳的禁忌症？","options":{"A":"茶鹼中毒","B":"Carbamazepine中毒","C":"Phenobarbital中毒","D":"強酸或強鹼中毒"},"answer":"D","manualChapter":"CH50","source":"TP題庫 (圖片匯入) - EMT-P 第 50 章 P.1318","id":3479},{"question":"在台灣，哪種毒蛇咬傷的發生率最高，且傷口常表現為一路往軀幹延伸的腫脹？","options":{"A":"雨傘節","B":"百步蛇","C":"鎖鏈蛇","D":"赤尾鮐"},"answer":"D","source":"圖片匯入","manualChapter":"CH50","id":3600,"matchedChapters":["CH50"]},{"question":"一名登山民眾遭蛇咬傷，現場描述該蛇頭呈三角形，身體較粗。咬傷後局部快速出現腫脹、疼痛、出血及皮下瘀血，送醫後發現凝血功能異常，到院後疑似出現肢體麻痺或覺異常等神經症狀。依據症狀判斷，最可能為下列何種毒蛇咬傷？","options":{"A":"飯匙倩（眼鏡蛇）","B":"雨傘節","C":"鎖鏈蛇","D":"赤尾青竹絲"},"answer":"C","source":"圖片匯入","manualChapter":"CH50","id":3601,"matchedChapters":["CH50"]},{"question":"乙二醇中毒的臨床徵候通常分為三階段，其中第三階段主要影響哪一個系統？","options":{"A":"造血系統，出現溶血性貧血","B":"中樞神經系統，出現運動失調與昏迷","C":"腎臟系統，出現結晶尿與急性腎衰竭","D":"心肺系統，出現肺水腫與心臟衰竭"},"answer":"C","source":"圖片匯入","manualChapter":"CH50","id":3607,"matchedChapters":["CH50"]},{"question":"關於腸胃道除汙(gastrointestinal decontamination)，下列敘述何者錯誤？","options":{"A":"病人在食入毒物後1小時內就接受處置，腸胃道除污是有用的。1小時以後，食入的毒物就會由胃中進入小腸，然後在小腸被吸收，這時候中毒病人需要的主要支持性治療","B":"洗胃 (gastric lavage)是腸胃道除污的一種方式，洗胃可以提供一個讓我們立刻知道一部分胃內容物的方法，當食入的是具有強烈毒性，如鈣離子通道阻斷劑或三環抗憂鬱劑(TCA)，並且食入的時間在3小時內的，洗胃這種方式在急診室還是有其效果的。","C":"洗胃的禁忌症：病人意識不清而且呼吸道無法保護，食入的毒素是低黏度的碳氫化合物(例如：汽油、煤油、家具亮光劑或無機醇)或腐蝕性的物質","D":"全腸灌洗(whole-bowel irrigation)是另一種在醫院內使用的腸胃道除污的醫療方式，他的方法是利用快速灌入大量的平衡式溶液來沖洗腸胃道，溶液的注入可以經由口服的方式或是經由鼻胃管"},"answer":"B","source":"圖片匯入","manualChapter":"CH50","id":3610,"matchedChapters":["CH50"]},{"question":"在台灣的區域毒物中心設置中，北部地區是由哪家醫院負責 24 小時諮詢業務？","options":{"A":"台北榮民總醫院","B":"輔大醫院","C":"林口長庚醫院","D":"台大醫院"},"answer":"A","source":"圖片匯入","manualChapter":"CH50","id":3611,"matchedChapters":["CH50"]},{"source":"EMT-P 第 50 章 P.1337","question":"發現典型的標靶狀的外觀(bull's eye appearance) ，請推斷病人發生什麼事。","options":{"A":"褐色隱蛛咬傷","B":"黑寡婦蜘蛛咬傷","C":"雨傘節咬傷","D":"龜殼花咬傷"},"answer":"A","matchedChapters":["CH50"],"manualChapter":"CH50","id":3622},{"source":"EMT-P 第 50 章 P.1339","question":"一名農夫整理果園時右手遭毒蛇咬傷。10分鐘後傷口疼痛腫脹。救護人員抵達現場，下列處置何者最適當？","options":{"A":"使用止血帶完全阻斷血流，避免毒液擴散","B":"切開傷口並吸出蛇毒","C":"保持患者安靜，固定患肢並儘速送醫","D":"使用冰敷降低毒素活性"},"answer":"C","matchedChapters":["CH50"],"manualChapter":"CH50","id":3624},{"source":"EMT-P 第 50 章 P.1344","question":"有機磷 (organophosphate) 中毒的臨床症狀可以使用 SLUDGE 口訣來記憶，其中字母「E」代表什麼？","options":{"A":"水腫(Edema)","B":"眼睛發紅(Erythema of eyes)","C":"癲癇(Epilepsy/seizure)","D":"嘔吐(Emesis)"},"answer":"D","matchedChapters":["CH50"],"manualChapter":"CH50","id":3625},{"source":"EMT-P 第 50 章 P.1338","question":"蠍子毒液注入後的症狀以及徵候何者為非？","options":{"A":"併發的眼睛活動（顱神經功能不良）","B":"抽筋、心律不整","C":"起初是心搏過速，緊接著心搏過緩","D":"膽鹼性中毒"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"],"id":3632},{"source":"EMT-P 第 50 章 P.1319","question":"在急診毒物處置中，「洗胃（Gastric lavage）」有其嚴格的適應症與風險評估。下列哪一種臨床情境為執行洗胃的「禁忌症」？","options":{"A":"吞服大量三環抗憂鬱劑(TCA)，且確認食入時間在1小時內。","B":"食入具強烈毒性的鈣離子通道阻斷劑，且到院時間距離食入未滿1小時。","C":"昏迷病患在執行洗胃前，已先使用快速引導插管（RSI）置入氣管內管以保護呼吸道。","D":"意識不清且呼吸道無法保護，食入低黏度的碳氫化合物（如汽油、煤油）。"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"],"id":3635},{"source":"EMT-P 第 50 章 P.1316","question":"救護車到場，一名50歲男性，誤服抗膽鹼性藥物（anticholinergic agents）過量，出現散瞳、皮膚乾燥、心跳加速、意識混亂（Mad as a hatter）。抗膽鹼性藥物中毒的正確解毒劑為何？","options":{"A":"Flumazenil","B":"Naloxone","C":"Physostigmine","D":"Calcium"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"],"id":3637},{"source":"EMT-P 第 50 章 P.1319","question":"關於活性炭劑量相關內容何者錯誤？","options":{"A":"劑量計算：1～4克/公斤 (以體重來算)","B":"成人劑量：30～100公克","C":"兒童劑量：15～30公克","D":"使用方法：將活性炭和生理食鹽水、水或軟便劑製備成泥漿狀，由嘴巴或胃管置入胃中"},"answer":"A","manualChapter":"CH50","matchedChapters":["CH50"],"id":3639},{"source":"EMT-P 第 50 章 P.1315","question":"下列何者不是毒物進入人體的途徑？","options":{"A":"食入 (ingestion)","B":"吸入 (inhalation)","C":"皮膚吸收 (absorption)","D":"放射治療 (radiation)"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"],"id":3641},{"source":"EMT-P 第 50 章 P.1316","question":"有機磷中毒常使用下列哪一組藥物？","options":{"A":"Atropine + PAM","B":"Calcium + Glucagon","C":"Flumazenil + Naloxone","D":"Digoxin immune Fab + Calcium"},"answer":"A","manualChapter":"CH50","matchedChapters":["CH50"],"id":3647},{"source":"EMT-P 第 50 章 P.1332","question":"在氰化物 (Cyanide) 中毒的傳統三步驟解毒套件中，給予亞硝酸鈉 (Sodium Nitrite) 的主要生理目的為何？？","options":{"A":"補充維生素 B12","B":"直接與氰離子結合為硫氰酸鹽","C":"矯正代謝性酸中毒","D":"產生變性血紅素"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"],"id":3652},{"source":"EMT-P 第 50 章 P.1338","question":"下列毒蛇何者不是出血性毒蛇？","options":{"A":"雨傘節","B":"龜殼花","C":"青竹絲","D":"百步蛇"},"answer":"A","manualChapter":"CH50","matchedChapters":["CH50"],"id":3670},{"source":"EMT-P 第 50 章 P.1351","question":"Naloxone對於鴉片類藥物中毒患者，主要作用為何？","options":{"A":"讓病人完全清醒，並且能清楚對答","B":"劑量不需太多，只需足夠重建立病人的呼吸道反射及維持適當呼吸","C":"應持續施打至瞳孔恢復正常大小","D":"為防止病人再度睡著，應一次給予最大劑量"},"answer":"B","manualChapter":"CH50","matchedChapters":["CH50"],"id":3672},{"source":"EMT-P 第 50 章 P.1315","question":"病人出現呼吸抑制特別是在美國，應考慮使用下列何種藥物同時也可以是診斷性治療？","options":{"A":"Atropine","B":"Flumazenil","C":"Naloxone","D":"Calcium"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"],"id":3676},{"source":"EMT-P 第 50 章 P.1318","question":"下列哪一項化學毒素被人類誤食後可以使用活性碳去吸附？","options":{"A":"氰化物(cyanide)","B":"鋰鹽(lithium)","C":"甲醇(methanol)","D":"茶鹼(theophyline)"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"],"id":3686},{"source":"EMT-P 第 50 章 P.1344","question":"高級救護技術員（EMT-P）救護一名疑似農藥中毒患者，現場發現病人呈現大量流涎（Salivation）、流淚（Lacrimation）、瞳孔極度縮小（Pinpoint pupils）、呼吸道分泌物極多且伴隨明顯的肌肉纖維顫動（Fasciculations）。關於該病人的病理生理機轉與解毒劑處置，下列敘述何者最為正確？","options":{"A":"該病人的症狀屬於典型的抗膽鹼性中毒症候群（Anticholinergic toxidrome）","B":"施打阿托品（Atropine）的主要目的是為了逆轉造成肌肉無力與呼吸肌麻痺的菸鹼鹼（Nicotinic）症狀","C":"解磷定（PAM/Pralidoxime）的作用是與被有機磷結合的乙醯膽鹼酯酶結合，使其「重新活化」，但必須在酶發生「老化（Aging）」前給予才有效","D":"評估阿托品（Atropine）是否達到足夠劑量的臨床終點（Endpoint），最主要是觀察病人的瞳孔是否完全放大（Mydriasis）以及心跳是否大於 100 次/分"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"],"id":3688},{"source":"EMT-P 第 50 章 P.1359","question":"有關普拿疼中毒的病生理階段，肝損傷的高峰通常發生在第幾個階段？","options":{"A":"第一階段 (0~24小時)","B":"第二階段 (24~48小時)","C":"第四階段 (4~14天)","D":"第三階段 (72~96小時)"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"],"id":3691},{"source":"EMT-P 第 50 章 P.1369","question":"在處理有機磷 (Organophosphate) 中毒時，醫護人員常用「SLUDGE」口訣來辨識症狀，其中「L」代表什麼？","options":{"A":"嗜睡 (Lethargy)","B":"肝腫大 (Liver enlargement)","C":"淚 (Lacrimation)","D":"腰痛 (Loin pain)"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"],"id":3693},{"source":"EMT-P 第 50 章 P.1318","question":"腸胃道除污、在病人食入毒物後多久內實施，效果最好？","options":{"A":"1小時內","B":"2小時內","C":"3小時內","D":"4小時內"},"answer":"A","manualChapter":"CH50","matchedChapters":["CH50"],"id":3697},{"source":"EMT-P 第 50 章 P.1339","question":"下列哪種毒蛇為神經性毒？","options":{"A":"百步蛇","B":"眼鏡蛇","C":"赤尾青竹絲","D":"龜殼花"},"answer":"B","manualChapter":"CH50","matchedChapters":["CH50"],"id":3704},{"source":"EMT-P 第 50 章 P.1372","question":"EMT-P 小組接獲通報前往救治一名誤服鹽酸（強酸）的病人。抵達現場時病人痛苦萬分，家屬急切詢問是否可以趕快灌一大杯牛奶或檸檬汁來中和。針對此狀況，下列到院前處置原則何者正確？","options":{"A":"立即給予大量活性碳溶液，以吸附殘餘強酸","B":"著重於維持呼吸道暢通、點滴給予並安全快速送醫，禁止進行中和嘗試","C":"立刻給予果汁或醋進行酸鹼中和，以減低毒性","D":"當場使用粗口胃管進行洗胃，迅速移除胃內強酸"},"answer":"B","manualChapter":"CH50","matchedChapters":["CH50"],"id":3705},{"source":"EMT-P 第 50 章 P.1377","question":"在毒物學評估中，將毒性物質依據臨床表現分類，可以幫助救護技術員更有效率地評估與處置病人。下列哪一項不屬常見的中毒症候群（toxic syndrome）範疇？","options":{"A":"膽鹼性中毒症候群 (Cholinergic)","B":"抗膽鹼性中毒症候群 (Anticholinergic)","C":"鴉片類止痛劑中毒症候群 (Opioid)","D":"缺氧性中毒症候群 (Hypoxic)"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"],"id":3708},{"source":"EMT-P 第 50 章 P.1316","question":"甲醇中毒之解毒劑為","options":{"A":"atropin","B":"naloxone","C":"乙醇","D":"重碳酸根"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"],"id":3710},{"source":"EMT-P 第 50 章 P.1318","question":"活性碳的適應症下列何者為非？","options":{"A":"卡馬西平","B":"鴉片類止痛藥","C":"茶鹼","D":"氰化物"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"],"id":3716},{"source":"EMT-P 第 50 章 P.1324","question":"當幼兒誤食超過60mg/kg鐵離子時，最可能出現哪種危險的併發症？","options":{"A":"心血管衰竭與死亡","B":"嚴重的低血糖症","C":"慢性肌肉萎縮","D":"視神經萎縮"},"answer":"A","id":3723,"manualChapter":"CH50","matchedChapters":["CH50"]},{"source":"EMT-P 第 50 章 P.1320","question":"一名病人於45分鐘前吞服大量強鹼性水管清潔劑，目前口咽明顯灼傷且吞嚥困難。下列何項最符合院前處置？","options":{"A":"立即給予活性碳降低吸收","B":"給予牛奶或大量清水稀釋，再以醋中和強鹼","C":"優先維持呼吸道與通氣，快速送醫","D":"立即催吐以降低胃內毒物濃度"},"answer":"C","id":3728,"manualChapter":"CH50","matchedChapters":["CH50"]},{"id":3756,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"50歲男性，通報意識不清，現場發現全身冒汗且呼吸明顯有雜音，血壓160/80 mmHg、脈搏70次/分鐘、呼吸26次/分鐘、體溫36.5°C，血氧濃度92%，GCS: E3V4M5，雙側瞳孔大小1mm且對光有反應。身旁有一罐名為達馬松的農藥空罐，依你對藥理學的認識，下列敘述何者為非？","options":{"A":"病患的血壓偏高是由於菸鹼受體（nicotinic receptor）受到毒物的作用。","B":"病患的瞳孔偏小是由於蕈毒鹼受體（muscarinic receptor）受到毒物的作用。","C":"病患全身冒汗且呼吸有雜音是由於菸鹼受體（nicotinic receptor）受到毒物的作用。","D":"可以給予Atropine作為解毒劑，用以緩解毒物對呼吸道的影響。"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"]},{"question":"下列哪種物質中毒時，給予活性碳 (Activated charcoal) 是無效且不被建議？","options":{"A":"阿斯匹林 (Aspirin)","B":"鴉片類藥物 (Opioids)","C":"甲醇 (Methanol)","D":"三環抗憂鬱劑 (TCA)"},"answer":"C","manualChapter":"CH50","source":"TPP","id":3769,"matchedChapters":["CH50"]},{"question":"教材中提到的「CHAMP」記憶口訣，主要用於判斷哪些碳氫化合物食入後可能需要考慮洗胃？","options":{"A":"強酸、強鹼與醇類混合物","B":"含有重金屬、芳香環或殺蟲劑成分的碳氫化合物","C":"僅限於醫療用的液態石蠟","D":"低黏稠度、高揮發性的所有家用油類"},"answer":"B","manualChapter":"CH50","source":"TPP","id":3771,"matchedChapters":["CH50"]},{"id":45489,"question":"乙二醇的毒性作用可以影響中樞神經、心肺系統以及腎臟系統，並且會造成哪種電解質異常?","options":{"A":"高血鉀","B":"低血鈣","C":"高血鈣","D":"低血鎂"},"answer":"B","source":"大白","manualChapter":"CH50","explanation":"p1373 CH50 乙二醇的毒性來自於有毒代謝物的累積，特別是代謝以後產生的乙醇酸及草酸。這些主要發生在肝臟及腎臟。這個毒性作用可以影響中樞神經、心肺系統以及腎臟系統，並且會造成低血鈣。"},{"id":45668,"question":"在台灣，哪種毒蛇咬傷的發生率最高，且傷口常表現為一路往軀幹延伸的腫脹？","options":{"A":"雨傘節","B":"眼鏡蛇","C":"鎖鏈蛇","D":"赤尾青竹絲"},"answer":"D","source":"同學出題","manualChapter":"CH50"},{"question":"血紅素中何種帶電的狀態稱為變性血紅素?","options":{"A":"鐵離子帶3價正電","B":"鐵離子帶3價負電","C":"鐵離子帶2價正電","D":"鐵離子帶2價負電"},"answer":"A","source":"大白","id":45818,"manualChapter":"CH50"},{"question":"病人在食入毒物後幾小時內就接受處置，腸胃道除污是有用的","options":{"A":"1","B":"3","C":"5","D":"8"},"answer":"A","source":"大白p1318","id":45820,"manualChapter":"CH50"},{"question":"有關活性碳進行腸胃道除污敘述，何者錯誤?","options":{"A":"活性碳在給予病人之前會先製備為水狀溶液並且視情況加入瀉劑","B":"併發症包含病人接受度很差(兒童尤其是如此)以及嘔吐","C":"活性碳加入瀉劑可以讓腸子的輸送時間降低，並且讓活性碳在很短的時間內排出體外","D":"活性碳是將木材稍微加熱後(約攝氏78度)所製成的，是一種惰性的、無毒的木質材質的產物"},"answer":"D","source":"大白p1318","id":45822,"manualChapter":"CH50"},{"question":"嚴重的鐵中毒指的是食入超過每公斤多少毫克(mg/kg)則會產生心血管衰竭以及死亡。","options":{"A":"10","B":"60","C":"100","D":"300"},"answer":"B","source":"大白","id":45823,"manualChapter":"CH50"},{"question":"對大部分的植物毒素來說，血液透析有移除效果嗎?","options":{"A":"有","B":"沒有","C":"","D":""},"answer":"B","source":"大白p1328","id":45825,"manualChapter":"CH50"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

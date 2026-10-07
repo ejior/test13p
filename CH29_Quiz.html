@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 29 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：23 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH29</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":54,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列何者外傷病患最不像是有尿道損傷？","options":{"A":"受傷機轉為騎馬鞍式撞擊骨盆","B":"尿道口有血跡","C":"雙大腿腫脹","D":"攝護腺於指診時高位或換八"},"answer":"C","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":698,"source":"第五章 創傷急症(2012-2014).doc","question":"下列關於骨盆骨折的描述與處置，何者為誤？","options":{"A":"不穩定的骨盆骨折，可能合併膀胱、尿道、直腸、子宮及陰道等損傷","B":"若患者無其他外傷而呈現休克狀態，應高度懷疑合併後腹腔出血","C":"其出血量可高達1,000～2,000 ml以上，而適當的骨折固定可減少疼痛及出血量","D":"按壓骨盆時出現不正常移動或疼痛，表示為不穩定骨盆骨折，待適當骨折固定後須再次按壓以確認是否已使骨盆趨於穩定"},"answer":"D","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":707,"source":"第五章 創傷急症(2012-2014).doc","question":"二十歲男性騎摩托車發生車禍，被貨車撞擊造成腹部鈍挫傷。經EMTP理學檢查懷疑有腹腔內出血。請問以下的理學檢查發現與可能的內出血部位敘述，何者為非？","options":{"A":"腰部瘀青（Turner sign）為後腹腔出血之徵候","B":"肚臍周圍瘀青（Cullen sign）為後腹腔出血之徵候","C":"安全帶徵候（Seat-belt sign）為骨盆腔出血之徵候","D":"Kehr徵象（Kehr sign）可能為脾臟血腫之徵候"},"answer":"C","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":714,"source":"第五章 創傷急症(2012-2014).doc","question":"創傷病患有骨盆骨折，應注意是否有尿道損傷的可能。以下何者徵象較不懷疑尿道受傷？","options":{"A":"尿道口有血跡","B":"雙下肢疼痛","C":"陰囊腫脹","D":"攝護腺於指診時高位或摸不到"},"answer":"B","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":798,"source":"第五章 創傷急症(2015-2018).doc","question":"KTV發生打架互毆事件，其中一傷患自行步人急診，主訴腹部被棒球鋁棒重擊後，疼痛異常，經你檢查此腹部鈍傷的傷患後，安排腹部Ⅹ-光檢查，你於X-光影像中發現腰肌影像（psoas shadow）旁有游離空氣（free air），此時要高度懷疑傷患何處受傷？","options":{"A":"脾臟","B":"十二指腸","C":"胰臟","D":"空腸"},"answer":"B","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":807,"source":"第五章 創傷急症(2015-2018).doc","question":"關於腹部創傷之敘述何者為是？","options":{"A":"傷患被他人用尖刀刺入右前胸第6肋間位置，這個高度已經沒有腹部臟器，不會造成腹內傷害","B":"後腹腔創傷之體徵包括Turner sign（腰部瘀青）與Cullen sign（肚臍周圍瘀青），為早期病程之常見發現","C":"傷患被他人以步槍射擊，彈孔出現於右上背肩胛骨脊，此位置已經高於後腹腔，不會造成腹內傷害","D":"腹部創傷是所有創傷中最容易被忽略或延誤者。尤其是當傷患意識不清.頸椎受傷導致感覺異常.其他部位有嚴重傷勢.老年人或兒童，均可能影響理學檢查的正確性"},"answer":"D","manualChapter":"CH29"},{"id":821,"source":"第五章 創傷急症(2015-2018).doc","question":"下列關於腹部創傷傷患的處置，何者為非？","options":{"A":"維持呼吸道暢通，並保護頸椎","B":"給予足夠氧氣，維持血氧濃度95%以上","C":"對於不穩定骨盆骨折患者，給予骨盆固定及適當輸液治療","D":"外露臟器可嘗試一次將其推回腹腔，若失敗則以無菌濕敷料保護，避免因乾燥而壞死"},"answer":"D","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":828,"source":"第五章 創傷急症(2015-2018).doc","question":"關於Kehr徵象（Kehr sign）主要為描述下列何種器官受損？","options":{"A":"肝臟","B":"脾臟","C":"小腸","D":"胰臟"},"answer":"B","manualChapter":"CH29"},{"id":834,"source":"第五章 創傷急症(2015-2018).doc","question":"關於腹部臟器創傷，下列描述何者為非？","options":{"A":"胰臟損傷很常見，最常見的機轉為外力直接撞擊上腹部壓迫胰臟撞擊脊椎所致，例如向盤或機踏車把手直接撞擊上腹部症狀包括上腹部瘀青.傷口，上腹痛並放射至背部","B":"脾臟為腹部鈍挫傷中最常見的臟器損傷，約佔40～55%。60%傷患有Kehr徵象，即疼痛會放射至左肩","C":"肝臟為腹部最大的實質器官，為腹部刀刺傷中最常受損的器官，約佔40%。部分傷患疼痛會放射至右肩。小腸為腹部槍傷中最常見的臟器損傷，約佔40%","D":"小腸損傷初期主要症狀為腹部疼痛，理學檢查沒有腹膜炎徵象並不能排除小腸損傷的可能"},"answer":"A","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":2035,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"關於腹部創傷敘述，下列何者為是？","options":{"A":"肝臟損傷為腹部鈍挫傷中最常見的臟器損傷，約佔40~55%。","B":"胰臟損傷為腹部槍傷中最常見的臟器損傷，約佔40％。","C":"骨盆骨折約有20%為動脈出血，80％為靜脈或靜脈叢出血。","D":"骨盆骨折中，側面壓迫型傷害很容易造成危及生命的低血壓。"},"answer":"C","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":2130,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"70歲女性，本身因有心律不整長期服用心得安(inderal，乙型阻斷劑)，因機車碰撞事故請求救護。抵達現場時發現傷患神情痛苦、身體捲曲、大喊腹痛。初步評估傷患意識清醒，呼吸24次/分鐘，血氧95%，脈搏95次/分鐘，血壓100/65mmHg。身體檢查發現上腹部有疑似把手撞擊的瘀痕，腹部檢查發現上腹部有明顯壓痛。基於上述臨床徵象，以下敘述何者最適當？","options":{"A":"送醫過程中可使用e-FAST檢查有無腹水，若檢查無腹水則可排除出血可能性。","B":"依據傷患的生命徵象顯示，目前可以排除低血容休克。","C":"肚臍周圍身體檢查若有瘀青時，名為Turner sign。","D":"救護過程需再次檢查生命跡象，若需要輸液治療，維持收縮壓90mmHg即可。"},"answer":"D","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":2219,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"50歲男性駕駛汽車發生交通事故，因車體變形受困車內，脫困後膚色蒼白、呼吸淺快，請問以下哪個徵候會讓您最合理懷疑傷患可能有脾臟損傷？","options":{"A":"腰部瘀青(Turner sign)。","B":"肚臍周圍瘀青(Cullen sign)。","C":"右上腹挫傷。","D":"Kehr徵象(Kehr sign)。"},"answer":"D","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":2220,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"23歲男性工地高處跌落，右下腹遭巨型鋼片穿刺留於腹壁上，下列關於腹骨盆創傷評估與處置何者最不適當？","options":{"A":"血壓測量80/50毫米水銀柱，直接給予大量生理食鹽水2公升。","B":"穿刺傷口周圍出血，給予直接加壓止血，並嘗試固定穿刺物。","C":"按壓骨盆不穩定懷疑骨盆骨折，使用骨盆固定帶進行固定。","D":"評估患者出現休克徵候，呼吸急促，給予氧氣面罩使用。"},"answer":"A","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":2308,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"50歲男性，報案人說被人刺傷腹部後倒地，有明顯臟器外露，現場GCS：E2V2M5，其心跳每分鐘150次，血壓70/30mmHg，呼吸速率每分鐘30次，血氧85%，理學檢查：腹部有明顯壓痛及反彈痛，瞳孔等大且對光有反應(左3/右3)，氣管無偏移，頸靜脈無怒張，呼吸音：正常，以下描述何者為非？","options":{"A":"在到院前收縮壓可以控制在80~90mmHg。","B":"此病患不需要戴頸圈。","C":"此病患需要大量輸血。","D":"可以先快速給予靜脈輸液2000ml林格式液。"},"answer":"D","manualChapter":"CH29"},{"id":2313,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於腹部創傷之描述下列何者為是？ (多選)","options":{"A":"小腸損傷初期症狀為腹部疼痛，但沒有腹膜炎徵候無法排除小腸損傷。","B":"胰臟損傷在電腦斷層上仍不易評估，藉由澱粉酶的指數評估較準確。","C":"脾臟為腹部鈍挫傷最常見的臟器損傷，60%傷患會有Kehr’s徵候。","D":"前胸傷害若非第9~12肋間，不需考慮腹部臟器損傷。"},"answer":"A,C","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":2523,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"年輕男性傷者騎機車自摔。您到達現場時，傷者因為意識混亂疑似酒駕，拒絕送醫，但身上無明顯外傷，呼吸每分鐘30下，脈搏每分鐘140下，血壓100/50mmHg，血氧測值：93％；請問下列那些徵兆，可能代表傷者有腹內出血？","options":{"A":"傷者腹部視診時腹脹、並出現鼓脹的腹部表淺靜脈。","B":"傷者腹部扣診為鼓音，並且肚子脹痛。","C":"傷者腹部聽診發現幾乎沒有腸音，並且偶有金屬聲。","D":"傷者腹部觸診時腹部僵直、有反彈痛。"},"answer":"D","manualChapter":"CH29"},{"id":2622,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"在到院前評估和處置急性腹痛病人時，下列評估或處置何者最適當？","options":{"A":"腹痛超過6小時應考慮給予止痛，避免病人因疼痛加劇而休克。","B":"即使生命徵象穩定，仍應囑咐病人禁食，以降低到院後緊急手術的麻醉風險。","C":"可以透過聽診腸音確定病因，例如腸音太快即表示腸胃炎，腸音太慢則表示腹膜炎。","D":"急性腹痛患者常有脫水或出血的風險，應積極給予20mL/kg的等張溶液。"},"answer":"B","manualChapter":"CH29","matchedChapters":["CH29"]},{"question":"根據呼吸調節的負回饋路徑，當機體發生「減少換氣」導致酸中毒時，下列神經傳導路徑何者正確？","options":{"A":"頸動脈體化學感受器經由面神經 (CN VII) 傳遞訊號至延腦。","B":"主動脈體化學感受器經由舌咽神經 (CN IX) 傳遞訊號至延腦。","C":"延腦呼吸中樞經由橫膈神經 (Phrenic nerve) 傳導運動訊號至呼吸肌。","D":"血液 pH 值上升會直接刺激運動神經元，增加呼吸頻率。"},"answer":"C","manualChapter":"CH29","id":3330,"source":"TP題庫 (圖片匯入)"},{"question":"下列哪一個器官是腹部槍傷最容易受損的器官？","options":{"A":"小腸","B":"大腸","C":"十二指腸","D":"膽囊"},"answer":"A","manualChapter":"CH29","id":3336,"source":"TP題庫 (圖片匯入)"},{"question":"關於後腹腔（Retroperitoneum）器官受損與相關徵候的敘述，下列何者正確？","options":{"A":"後腹腔器官僅包含胰臟與十二指腸，受損時主要表現為急性腹膜炎","B":"Grey Turner's sign 指的是肚臍周圍出現瘀青，代表可能有後腹腔出血","C":"骨盆或腰椎骨折可能導致後腹腔大量出血，進而引發嚴重的休克症狀","D":"Cullen's sign 與 Grey Turner's sign 通常在受傷後 1 小時內會立即顯現"},"answer":"C","manualChapter":"CH29","id":3349,"source":"TP題庫 (圖片匯入)"},{"id":45521,"question":"臨床解剖與超音波檢查常將腹部及骨盆內部空間劃分，下列何者為構成腹部內部空間的三個主要腔室？","options":{"A":"胸膜腔、縱隔腔、腹膜腔","B":"腹膜腔、後腹腔、骨盆腔","C":"腹膜腔、心包膜腔、胸膜腔","D":"後腹腔、胸膜腔、骨盆腔"},"answer":"B","source":"大白","manualChapter":"CH29"},{"id":45625,"question":"關於腹部創傷之描述下列何者為是？","options":{"A":"小腸損傷初期症狀為腹部疼痛，但沒有腹膜炎徵候無法排除小腸損傷。","B":"胰臟損傷在電腦斷層上仍不易評估，藉由澱粉酶的指數評估較準確。","C":"脾臟為腹部鈍挫傷最常見的臟器損傷，小部分傷患會有Kehr’s徵候。","D":"前胸傷害若非第9~12肋間，不需考慮腹部臟器損傷。"},"answer":"A","source":"同學出題","manualChapter":"CH29"},{"id":45730,"question":"處理無法壓迫止血的軀幹出血或內出血時，可使用急救性血管內氣球阻斷術(REBOA)，關於REBOA的敘述，下列何者錯誤？","options":{"A":"該技術是將導管從總股動脈置入到主動脈，導管中的氣球擴張來阻斷血流","B":"REBOA目前廣泛用於在心臟血管外科領域，尤其在腹主動脈瘤破裂出血時","C":"此技術在使用於阻斷部分腹部器官及下肢血流有效，但骨盆骨折無法使用","D":"目前針對REBOA的不同研究仍存在差異和限制，需要更多研究來證實效益"},"answer":"C","source":"大白p784","manualChapter":"CH29","explanation":"無法壓迫止血的軀幹出血(NCTH)或內出血造成的低血容性休克，如腹部實質器官/ 大血管/ 骨盆骨折，是必須立即採取行動控制出血的急症。REBOA是當今用來控制NCTH的最新技術"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

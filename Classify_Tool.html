@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>未分類題目整理工具</title>
+  <style>
+    body { font-family: sans-serif; background: #f0f4f8; padding: 20px; color: #334155; }
+    .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
+    h1 { color: #6a8caf; text-align: center; }
+    .q-block { border-left: 4px solid #6a8caf; padding-left: 15px; margin-bottom: 30px; }
+    .q-text { font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; color: #1e3a8a; }
+    .options { margin-left: 10px; margin-bottom: 15px; }
+    .option { margin-bottom: 5px; color: #475569; }
+    .answer { font-weight: bold; color: #10b981; margin-bottom: 10px; }
+    .sys-cat { font-weight: bold; color: #eab308; margin-bottom: 10px; }
+    .cat-input { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 10px; border-radius: 6px; }
+    input[type="text"] { padding: 5px; font-size: 1rem; border: 1px solid #cbd5e1; border-radius: 4px; width: 100px; }
+    #export-btn { display: block; width: 100%; padding: 15px; font-size: 1.2rem; background: #6a8caf; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px; }
+    #export-btn:hover { background: #557596; }
+    #output { width: 100%; height: 150px; margin-top: 15px; padding: 10px; font-family: monospace; display: none; }
+  </style>
+</head>
+<body>
+<a href="Dashboard_Quiz.html" class="no-print" style="position: absolute; left: 20px; top: 20px; color: #334155; text-decoration: none; font-size: 1.2rem; background: #ffffff; padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#ffffff'" title="返回首頁">🏠 返回</a>
+  <div class="card">
+    <h1>未分類題目整理工具 (共 0 題)</h1>
+    <p style="text-align:center; color: #64748b;">請在下方輸入框為題目填上章節 (例如：CH05)。<br>部分題目附有「系統建議分類」，可供您參考。<br>填寫完畢後點擊最下方按鈕，將結果複製並貼給 AI 幫手即可！</p>
+    
+    <div id="questions-container">
+      
+    </div>
+
+    <button id="export-btn">產生分類代碼，交給 AI 幫手！</button>
+    <textarea id="output" readonly></textarea>
+  </div>
+
+  <script>
+    document.getElementById('export-btn').addEventListener('click', () => {
+      const inputs = document.querySelectorAll('input[type="text"]');
+      let result = "AI 幫手你好，請幫我把以下題目更新分類：\n\n";
+      let count = 0;
+      
+      inputs.forEach(input => {
+        const val = input.value.trim().toUpperCase();
+        if (val) {
+          result += `ID ${input.getAttribute('data-id')} -> ${val}\n`;
+          count++;
+        }
+      });
+      
+      if (count === 0) {
+        alert('您還沒有填寫任何分類喔！');
+        return;
+      }
+      
+      const outBox = document.getElementById('output');
+      outBox.value = result;
+      outBox.style.display = 'block';
+      outBox.select();
+      document.execCommand('copy');
+      alert('已複製到剪貼簿！共有 ' + count + ' 題設定了新分類。請直接將文字貼到聊天室給 AI 幫手。');
+    });
+  </script>
+</body>
+</html>

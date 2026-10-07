@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 26 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：61 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH26</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":39,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列何者不屬於因血管性張力調節失常（體液重新分佈）所造成的休克？","options":{"A":"神經性休克","B":"敗血症休克","C":"過敏性休克","D":"心因性休克"},"answer":"D","manualChapter":"CH26"},{"id":52,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMT救護外傷病患，檢查到下列何者生命徵象，最不像是低血容性休克？","options":{"A":"血壓下降，心跳變快，尿量減少","B":"血壓下降，心跳變快，膚色蒼白濕冷","C":"血壓下降，心跳不快，膚色溫暖","D":"血壓下降，心跳變快，意識躁亂"},"answer":"C","manualChapter":"CH26"},{"id":66,"source":"105 高級救護技術員甄試筆試題目.doc","question":"一名35歲男性自約6米高處墜樓後送醫，到院時意識清楚，但血壓低合併休克症狀，同時患者失去對大腸及膀胱的感覺，且合併陰莖持續勃起，此時其休克的原因最可能？","options":{"A":"心因性休克Cardiogenic shock","B":"神經性休克Neurogenic shock","C":"脊髓性休克Spinal shock","D":"低血容性休克Hypovolemic shock"},"answer":"C","manualChapter":"CH26"},{"id":141,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"有關失血量與生理變化的評估，下列何者為非？","options":{"A":"失血量超過50％者，將失去脈搏","B":"失血量30-40％者，意識混亂","C":"失血量高達30％者，血壓可能仍為正常","D":"失血量15-30％者，心率不變"},"answer":"D","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":247,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"對於休克描述，下列何者為非？","options":{"A":"只要收縮壓小於90 mmHg就是休克","B":"休克患者會有皮膚冰冷，心跳過速，冒冷汗，呼吸困難症狀","C":"休克主要是組織灌流不足，造成氧氣運送不能應付組織代謝所需","D":"可依rate，volume，pump（律水壓）的原則，對休克依序做初步處理"},"answer":"A","manualChapter":"CH26"},{"id":581,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位35歲病患車禍後，發現兩大腿開放性骨折合併肢體疼痛無力。現場血壓80／40毫米汞柱，心跳50下／分鐘，最可能為何種休克？","options":{"A":"過敏性休克","B":"低血容性休克","C":"敗血性休克","D":"神經性休克"},"answer":"D","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":589,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位65歲長年高血壓病史之病患，發生摩托車自摔後，出現右上臂閉鎖性骨折合併胸口疼痛，現場血壓80／40毫米汞柱，心跳50下／分鐘，請問他最不可能出現下列何種休克？","options":{"A":"心因性休克","B":"出血性休克","C":"神經性休克","D":"藥物過量引發休克"},"answer":"B","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":701,"source":"第五章 創傷急症(2012-2014).doc","question":"創傷引起的休克成因有很多種，下列配對何者錯誤？","options":{"A":"胸部穿刺傷造成心包膜填塞：心因性休克","B":"腹部挫傷導致脾臟破裂：出血性休克","C":"腸道破裂引發腹膜炎：敗血性休克","D":"脊髓損傷造成交感神經系統控制消失：神經性休克"},"answer":"A","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":716,"source":"第五章 創傷急症(2012-2014).doc","question":"下列何者生命徵象，最不可能是低血容性休克？","options":{"A":"心跳加快，血壓降低，尿量減少","B":"心跳加快，血壓降低，臉色潮紅","C":"心跳變慢，血壓降低，意識清楚","D":"心跳加快，血壓降低，下肢水腫"},"answer":"C","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":748,"source":"第五章 創傷急症(2012-2014).doc","question":"在到院前創傷性休克傷患給予靜脈輸液方面，以下何者是目前較被接受的原則？","options":{"A":"休克傷患且預計現場時間或後送時間超過10分鐘者，應給予靜脈輸液治療","B":"若須給予靜脈輸液，應以建立小管徑的靜脈管路為佳","C":"靜脈管路建立的部位，應盡量在骨折部位","D":"若要給予靜脈輸液，建議給予溫的生理食鹽水或林格氏液"},"answer":"D","manualChapter":"CH26"},{"id":763,"source":"第五章 創傷急症(2012-2014).doc","question":"有關失血量與生理變化的評估，下列何者為非？","options":{"A":"失血量超過50％者，將失去脈搏","B":"失血量30～40％者，意識混亂","C":"失血量高達30％者，血壓可能仍為正常","D":"失血量15～30％者，心率不變"},"answer":"D","manualChapter":"CH26"},{"id":764,"source":"第五章 創傷急症(2012-2014).doc","question":"有一車禍救護案件，摩托車撞倒的路人，主訴腹痛、頭暈、嘔心感，血壓80／50 mmHg，脈搏130／min，皮膚濕冷，臉色蒼白。最有可能是那一種休克？","options":{"A":"出血性休克","B":"神經性休克","C":"阻塞性休克","D":"敗血性休克"},"answer":"A","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":765,"source":"第五章 創傷急症(2012-2014).doc","question":"在創傷性休克傷患給予靜脈輸液時，下列何者為是？","options":{"A":"休克傷患一律給與靜脈輸液治療","B":"EMT-P應優先使用膠質輸液（colloids）而非晶質輸液（crystalloids）","C":"若須給予靜脈輸液，應以建立大管徑的靜脈管路為佳","D":"靜脈輸液的流速和留置導管的長度呈正比"},"answer":"C","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":766,"source":"第五章 創傷急症(2012-2014).doc","question":"關於創傷性休克的敘述，下列何者為非？","options":{"A":"創傷病患出現休克，最常見的是出血性休克","B":"可以用血液中的乳酸值，來評估休克的嚴重程度","C":"因低血容休克造成的代謝性酸中毒，施打sodium bicarbonate（碳酸氫鈉）就可以","D":"給予輸液復甦後，仍需評估患者對輸液復甦的反應，因為這可能會影響到接下來的方向，諸如是否手術等"},"answer":"C","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":788,"source":"第五章 創傷急症(2012-2014).doc","question":"35歲男性自約6米高處墜樓後送醫，到院時意識清楚，但血壓低合併休克症狀，同時患者失去對大腸及膀胱的感覺，且合併陰莖持續勃起，此時你認為其休克的原因最可能為？","options":{"A":"心因性休克（cardiogenic shock）","B":"神經性休克（neurogenic shock）","C":"脊隨性休克（spinal shock）","D":"低血容性休克（hypovolemic shock）"},"answer":"B","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":804,"source":"第五章 創傷急症(2015-2018).doc","question":"關於創傷休克的敘述，以下何者為是？","options":{"A":"頸靜脈不可能同時又怒張又塌陷，所以低血溶性休克不可能跟阻塞性休克同時發生","B":"若研判創傷傷患有心因性休克，需立刻給予傷患阿斯匹靈（Aspirin）300 mg口服","C":"顱內硬腦膜上出血最容易造成神經性休克","D":"出血性休克第二期為失償性休克，常見的理學檢查體徵是脈搏壓變小"},"answer":"D","manualChapter":"CH26"},{"id":819,"source":"第五章 創傷急症(2015-2018).doc","question":"一名50歲左右男性，自約10公尺高處墜落，你與分隊同仁到達現場時，傷患意識清楚，但血壓低合併休克症狀，同時傷患失去對大腸及膀胱的感覺，且合併陰莖持續勃起，此時你認為其休克的原因最可能為？","options":{"A":"心因性休克（cardiogenicshock）","B":"脊髓性休克（spinalshock）","C":"阻塞性休克（obstructiveshock）","D":"敗血性休克（septicshock）"},"answer":"B","manualChapter":"CH26"},{"id":843,"source":"第五章 創傷急症(2015-2018).doc","question":"有關斷指的處理，以下現場處理順序何者為是？","options":{"A":"用生理食鹽水紗布濕敷→放入塑膠袋內→放入冰水之中→送往醫院","B":"用無菌紗布泡稀釋Epinephrine包起來→放入塑膠袋內→把冰水倒入塑膠袋內→送往醫院","C":"用無菌紗布包起來放入塑膠袋內→把常溫水倒入塑膠袋內→送往醫院","D":"不須包覆，直接放入塑膠袋內→倒入冰塊→送往醫院"},"answer":"A","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":858,"source":"第五章 創傷急症(2015-2018).doc","question":"有關外傷病患出血性休克的處置，下列何者為是？","options":{"A":"治療出血性休克，最重要的是積極補充體液或血液，好讓血壓恢復正常","B":"為了盡快恢復血壓，出血性休克病人應該常規使用升壓藥","C":"接受輸血的病人，應常規補充鈣離子，因為血袋中添加的檸檬酸鹽會造成低血鈣","D":"如果沒有加溫器，可考慮以微波爐加溫晶質液，以避免大量輸液造成低體溫"},"answer":"D","manualChapter":"CH26"},{"id":1051,"source":"第四章 非創傷急症(2012-2014).doc","question":"對於休克描述，下列何者為韭？","options":{"A":"收縮壓小於90 mmHg就是休克","B":"休克患者會有皮膚冰冷，心跳過速，冒冷汗，呼吸困難症狀","C":"休克主要是組織灌流不足，造成氧氣運送不能應付組織代謝所需","D":"依rate→volume→pump，對休克做初步處理"},"answer":"A","manualChapter":"CH26"},{"id":1118,"source":"第四章 非創傷急症(2015-2018).doc","question":"對於休克描述，下列何者為非？","options":{"A":"只要收縮壓小於90mmHg就是休克","B":"休克患者會有皮膚冰冷，心跳過速，冒冷汗，呼吸困難症狀","C":"休克主要是組織灌流不足，造成氧氣運送不能應付組織代謝所需","D":"可依rate、volume、pump（律水壓）的原則，對休克依序做初步處理"},"answer":"A","manualChapter":"CH26"},{"id":1128,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關影響腦部灌流壓力高低，與下列何項因素無關？","options":{"A":"收縮壓","B":"舒張壓","C":"顱內壓","D":"頸動脈壓"},"answer":"D","manualChapter":"CH26"},{"id":1143,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列何者不屬於體液分佈形休克（Distributive Shock）？","options":{"A":"敗血性休克","B":"神經性休克","C":"過敏性休克","D":"張力性氣胸導致休克"},"answer":"D","manualChapter":"CH26"},{"id":2018,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"某些休克的時期會出現四肢變暖的狀況，下列何者為非？","options":{"A":"頸椎損傷造成的休克。","B":"食物過敏造成的休克。","C":"肺部感染引起的休克。","D":"肺部感染引起的休克。ABC"},"answer":"C","manualChapter":"CH26"},{"id":2022,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"20歲男性遭人持刀剌傷右腹部。目前意識為對聲音有反應、呼吸淺快無雜音，呼吸次數28/min，血壓80/40 mmHg，脈搏130/min，血氧濃度為92%，膚色蒼白濕冷。下列敘述何者較為正確？","options":{"A":"依據「微血管組織細胞的微循環休克」分期，傷患已達第三期瀰漫性血管內凝血。","B":"依據「出血性休克」分級，可推測此傷患血液中的鹼基缺乏至少是- 6 meq/L。","C":"輸液選擇建議以溫暖的晶質液進行急救，首選是生理食鹽水、其次為林格氏液。","D":"此傷患尚不符合外傷ABC score,尚不需要大量輸血。"},"answer":"B","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":2024,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"36歲男性左側大腿下端遭槍擊。病人意識清楚可對答，但傷口有持續性出血，經直接加壓止血仍無法止血。有關此位病人評估及處置，您應該優先執行以下哪一項？","options":{"A":"找出槍傷的入口及出口，釐清受傷機轉。","B":"打上點滴，快速給予晶質溶液的輸液。","C":"維持呼吸道暢通及評估有無鼾聲雜音。","D":"使用止血帶，到院前不需要再間歇性鬆開。"},"answer":"D","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":2027,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"有關止血帶的使用，以下描述何者為非？","options":{"A":"應盡早使用，為傷口止血的第一步。","B":"使用後，需要確認遠端摸不到脈搏。","C":"放在接近出血處的近心端，避開關節處。","D":"商品化的止血帶優於自製止血帶。"},"answer":"A","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":2122,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於休克下列敘述何者最適當？","options":{"A":"阻塞性休克因為進入心臟的血流受阻，所以一定會看見頸靜脈怒張。","B":"代償性休克因為周邊血管收縮，皮膚變得濕冷蒼白。","C":"神經性休克雖然也會微血管充填時間延長，卻無反射性心跳增快，皮膚也非冰冷。","D":"當傷患休克時，生命徵象最先反應的是脈搏上升，這時出血程度為第一級休克。"},"answer":"B","manualChapter":"CH26"},{"id":2138,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於止血治療的敘述，下列何者最不適當？","options":{"A":"傷口非常靠近鼠蹊部或腋下等連接部位，首選方式為傷口填塞。","B":"C.A.T.戰術止血帶放在接近肢體出血處的近心端，距離傷口約5~8公分。","C":"C.A.T.戰術止血帶打上後，應確認止血且遠端脈搏摸不到。","D":"止血帶無法使用在胸部及腹部傷口，傷口填塞的方式也一樣。"},"answer":"A","manualChapter":"CH26"},{"id":2307,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於脈壓(pulse pressure)的生理描述，以下何者為是？","options":{"A":"脈壓主要反映動脈系統張力。","B":"出血性休克時脈壓會變寬。","C":"對於周邊組織灌流變化不敏感。","D":"其定義為收縮壓加上舒張壓。"},"answer":"A","manualChapter":"CH26"},{"id":2311,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於神經性休克(neurogenic shock)和脊髓性休克(spinal shock)，下列敘述何者為非？ (多選)","options":{"A":"脊髓性休克是脊髓損傷後產生暫時性的失能。","B":"神經性休克通常表現為四肢溫暖、心搏過緩和低血壓。","C":"脊髓性休克通常在第六節胸椎之上的脊髓損傷才會產生。","D":"神經性休克屬於分佈性休克的一種。B(送分) 32對於胸部創傷時，適時使用超音波可以協助診斷，下列胸腔超音波的敘述何者為是？(A)若在M-mode下看到條碼症候(barcode sign)，代表傷患一定有氣胸。(B)若在胸腔超音波看到肺點(lung point)，代表傷患一定有氣胸。(C)若在M-mode下看到海浪徵候(seashore sign)，代表傷患一定沒有氣胸。(D)若在胸腔超音波下看到與肋膜平行的A line，代表傷患一定沒有氣胸。"},"answer":"C,B","manualChapter":"CH26"},{"id":2319,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"請問C.A.T.戰術止血帶正確的順序為何？(1)將束帶透過扣環拉緊，旋桿朝肢體外側。(2)將旋桿旋緊至出血減緩且遠端脈搏摸不到。(3)註記時間之固定帶貼緊固定槽，於固定帶上並記錄時間。(4)將創傷用止血帶放在接近肢體出血處的近心端，距離傷口約5~8公分。","options":{"A":"(4)→(2)→(1)→(3)。","B":"(4)→(1)→(3)→(2)。","C":"(2)→(1)→(4)→(3)。","D":"(4)→(1)→(2)→(3)。"},"answer":"D","manualChapter":"CH26"},{"id":2320,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於止血方式的描述，下列何者為是？","options":{"A":"直接加壓止血的效果，不如傳統的止血點止血法來得有效。","B":"加壓式包紮是於出血點上方加厚敷料以達到局部加壓，纏越寬止血效果越好。","C":"止血敷料直接於出血處加壓也很有效，現代止血敷料使用幾乎不需要太多額外的訓練。","D":"止血帶應該作為最後一線的止血手段，且每30分鐘要鬆開，組織才不易壞死。"},"answer":"C","manualChapter":"CH26"},{"id":2321,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"35歲男性因騎機車與汽車擦撞，患者外觀無明顯大出血，能說話，但意識混亂E4V3M5，頭頸部無傷口及疼痛情形。胸腹部大面積瘀傷，右上腹處疼痛，輔助檢查評估心率124下/分鐘，血壓110/82mmHg，血氧值為92%，呼吸次數24下/分鐘。若以出血性休克評估最可能為第幾期？","options":{"A":"第一期(出血量<15%)。","B":"第二期(出血量15~30%)。","C":"第三期(出血量31-40%)。","D":"第四期(出血量>40%)。"},"answer":"C","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":2341,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於休克的敘述，下列何者正確？","options":{"A":"心包膜填塞屬於心因性休克(Cardiogenic shock)。","B":"張力性氣胸屬於再分佈性休克(Redistributive shock)。","C":"休克定義雖然為組織灌流不足，但四肢不一定呈現冰冷。","D":"休克代表組織灌流不足，心跳會變快，只有神經性休克會以緩脈表現。"},"answer":"C","manualChapter":"CH26"},{"id":2428,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於出血性休克，以下敘述何者為非？","options":{"A":"所有創傷性休克傷患需積極排除出血性休克的可能性。","B":"輸液首選為林格氏液，其次為生理食鹽水。","C":"給予1,000cc生理食鹽水，生命跡象短暫改善後，復發性心跳上升，血壓下降，預估出血量為總血量的15-40%。","D":"同時合併腦外傷病患血壓低時，應按照允許性低血壓維持≧ 90mmHg即可。"},"answer":"D","manualChapter":"CH26"},{"id":2435,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於出血性休克分級與表現徵候，下列敘述何者為非？","options":{"A":"Class I代表出血量小於全身血量的15%。","B":"Class II臨床表徵可能會出現脈搏壓減少。","C":"Class III通常是需要輸血治療。","D":"Class IV代表出血量大於全身血量的30%。"},"answer":"D","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":2530,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"第十版ATLS所做的外傷急救方式更新，建議出血性休克時要有允許性低血壓(permissive hypotension)的概念。關於此概念的說明，何者正確？","options":{"A":"對於穿刺傷傷者若運送路程短(<30分鐘)且意識清楚橈動脈摸得到，不建議常規給予到院前輸液。","B":"對於評估後需要給予到院前輸液的傷者，則是以重複給予1公升輸液後再評估的方式，直到收縮壓90~100mmHg。","C":"出血性休克合併腦外傷的60歲傷者，目標血壓建議收縮壓維持≧ 110mmHg。","D":"出血性休克合併腦外傷的70歲傷者，目標血壓建議收縮壓維持≧ 100mmHg。"},"answer":"A","manualChapter":"CH26"},{"id":2591,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"以下創傷休克之急救處置，何者最適當？","options":{"A":"應該要予以適當的通氣及給氧，以維持血氧濃度（SpO 2）大於90%。","B":"對於出血性休克之傷患，建議以溫暖的林格氏乳酸溶液為輸液首選。成人首次輸液量為2公升。","C":"若大出血處無法做到確實止血前，「允許性低血壓（permissive hypotension）」是可接收之作法。","D":"若創傷患者合併合併腦損傷，為維持腦部灌流，建議收縮壓維持120mmHg。"},"answer":"C","manualChapter":"CH26"},{"id":2592,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"關於出血在院前的處置方式，下列敘述何者正確？","options":{"A":"執行加壓止血時，手持一般敷料於出血處加壓，3到5分鐘後須打開確認是否已止血。","B":"在到院前早期使用骨盆固定帶，雖能減少骨盆出血量，但無法改善病人預後。","C":"研究證實，出血病人即使在休克後再打上止血帶，存活率仍然相當良好。","D":"肢體出血致病人生命危急時，應盡快剪除衣服，快速打上止血帶以求確實止血。"},"answer":"B","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":3318,"question":"請問大量輸血定義為多少小時內輸血量足以置換全身的血液？","options":{"A":"8","B":"12","C":"24","D":"48"},"answer":"C","source":"TP題庫","manualChapter":"CH26"},{"id":3319,"question":"下列何者屬於「阻塞性休克 ( Obstructive shock )」的常見原因？","options":{"A":"嚴重感染導致敗血症","B":"脊髓損傷導致血管擴張","C":"張力性氣胸","D":"心肌梗塞導致收縮力下降"},"answer":"C","source":"TP題庫","manualChapter":"CH26"},{"question":"小維在醫院實習遇到一名患者，在醫生旁聽見，患者器官功能無法恢復了，而且血壓下降、心跳減緩、多重器官衰竭、心肺功能隨時停止及死亡，請問患者在休克分期是第幾期？","options":{"A":"第一期代償性休克","B":"第二期失常償性休克","C":"第三期不可逆休克","D":"第四期低血容休克"},"answer":"C","manualChapter":"CH26","id":3332,"source":"TP題庫 (圖片匯入)"},{"question":"有關輸血時，血品的選擇，下列何者不正確？","options":{"A":"一般人，優先使用交叉配對完成的同血型血液。","B":"一般人，次優先為使用 O型血。","C":"有懷孕能力者，使用Rh陰性血。","D":"全血適合給外傷患者使用。"},"answer":"B","manualChapter":"CH26","id":3334,"source":"TP題庫 (圖片匯入)"},{"question":"微血管在組織細胞於休克時出現循環血流緩慢，甚至停滯，氧氣、養分供應遠不及組織細胞的需求，細胞進行無氧代謝，導致酸性代謝產物堆積，是在那個時期？","options":{"A":"血管收縮","B":"微血管及小靜脈舒張","C":"瀰漫性血管內凝血病變","D":"多重器官衰竭"},"answer":"B","manualChapter":"CH26","id":3338,"source":"TP題庫 (圖片匯入)"},{"question":"患者若出現大量血胸，以下何者錯誤？","options":{"A":"咳血及泡沫的痰","B":"呼吸困難","C":"脈搏增快","D":"頸靜脈怒張"},"answer":"D","manualChapter":"CH26","id":3350,"source":"TP題庫 (圖片匯入)"},{"question":"以下休克敘述何者正確？","options":{"A":"神經性休克有心跳增快，皮膚冰冷情形","B":"低血容性休克有血壓低，皮膚濕冷情形","C":"心因性休克有意識清楚，皮膚蒼白情形","D":"阻塞型休克有血壓升高，頸靜脈一定怒張情形"},"answer":"B","manualChapter":"CH26","id":3351,"source":"TP題庫 (圖片匯入)"},{"id":3501,"source":"AI出題","question":"一名脊髓損傷（T6 以上）患者出現嚴重的自主神經反射異常（Autonomic Dysreflexia），下列哪項生理現象最不可能出現？","options":{"A":"收縮壓顯著上升（甚至超過 200 mmHg）","B":"損傷平面以下的皮膚發紅且多汗","C":"劇烈搏動性的頭痛（Throbbing headache）","D":"心率產生代償性的過緩（Bradycardia）"},"answer":"B","manualChapter":"CH26"},{"question":"請問胸壁上的孔洞直徑大於氣管直徑多少會造成開放性氣胸？","options":{"A":"1/2","B":"1/4","C":"1/3","D":"1/5"},"answer":"A","source":"圖片匯入","manualChapter":"CH26","id":3571,"matchedChapters":["CH26"]},{"question":"下列關於「出血」的敘述，何者正確？","options":{"A":"靜脈出血的失血速度最快，最不容易止血","B":"內出血因為血液流失於體腔內，較難從外觀判斷，通常有較高的致死率","C":"大部分外出血無法透過直接加壓方式止血","D":"微血管出血通常會快速噴濺，難以透過人體凝血機轉止血"},"answer":"B","manualChapter":"CH26","source":"AI出題","id":3777,"matchedChapters":["CH26"]},{"question":"人體受傷後的凝血機制是一個複雜的化學反應，下列關於凝血基本步驟的順序，何者正確？","options":{"A":"凝血酶原活化因子形成 → 凝血酶原轉化為凝血酶 → 纖維蛋白原轉換為纖維蛋白絲","B":"凝血酶轉化為凝血酶原 → 凝血酶原活化因子形成 → 纖維蛋白絲轉換為纖維蛋白原","C":"纖維蛋白原轉換為纖維蛋白絲 → 凝血酶原轉化為凝血酶 → 凝血酶原活化因子形成","D":"凝血酶原轉化為凝血酶 → 纖維蛋白原轉換為纖維蛋白絲 → 凝血酶原活化因子形成"},"answer":"A","manualChapter":"CH26","source":"AI出題","id":3778,"matchedChapters":["CH26"]},{"question":"當外傷病人因失血過多，身體的代償機制已無法負荷，此時「血壓開始下降（收縮壓下降、脈搏壓變小）」，心輸出量更低，意識狀態變差，這屬於休克的哪一個分期？","options":{"A":"代償性休克","B":"失償性休克","C":"不可逆休克","D":"神經性休克"},"answer":"B","manualChapter":"CH26","source":"AI出題","id":3779,"matchedChapters":["CH26"]},{"question":"目前對於嚴重外傷出血病患的「控制性急救輸液（或稱允許性低血壓，Permissive hypotension）」，其主要目的為何？","options":{"A":"快速將血壓拉高至正常值，以確保所有器官的絕對灌流","B":"完全不給予任何點滴輸液，以免造成低體溫","C":"藉由維持比正常稍微低的血壓，避免過高血壓沖刷掉剛形成的血塊而造成再度大出血","D":"利用大量晶質液稀釋血液，以促進凝血因子的生成"},"answer":"C","manualChapter":"CH26","source":"AI出題","id":3780,"matchedChapters":["CH26"]},{"question":"一名車禍病患受困於車內，雙側大腿嚴重變形，腹部有大面積瘀傷。病患表現出：意識模糊、皮膚濕冷蒼白、呼吸 30 次/分、脈搏 135 次/分、血壓 80/50 mmHg。在到院前的處置中，下列哪一項作法「最不適當」？","options":{"A":"優先考量其為低血容性休克，應利用骨盆固定帶或長背板等器材固定患肢，減少骨折造成的二次傷害與內出血。","B":"若建立靜脈管路，應給予大量且快速的林格氏乳酸溶液（>3公升），直到其血壓恢復至 120/80 mmHg 以上，以確保腦部灌流。","C":"可考慮在受傷後 3 小時內，給予靜脈注射傳明酸（TXA）1公克，以抑制纖維蛋白分解，減少血塊崩解。","D":"應積極預防病患失溫，若需要輸注晶質液，應盡可能將輸液預先加熱至 39℃。"},"answer":"B","manualChapter":"CH26","source":"AI出題","id":3781,"matchedChapters":["CH26"]},{"question":"戰術或緊急醫療中常使用各類「止血敷料（Hemostatic Dressing）」來處理軀幹交界處或深部傷口的嚴重出血。關於這些敷料的作用機制與特性，下列敘述何者正確？","options":{"A":"QuikClot（第一代）是由沸石（Zeolite）製成，藉由快速吸收血液中的水分使血液濃稠，但在吸水過程中會產生放熱反應，有導致灼傷的風險。","B":"Celox 是由甲殼素（Chitosan）製成，其主要作用原理是透過活化血纖維蛋白溶解酶，加速血塊崩解。","C":"TraumaDEX 屬於強效的化學血管收縮劑，會劇烈收縮動脈，因此使用時需嚴格監測病患的中心血壓。","D":"X-stat 是一種粉狀的傳明酸製劑，專門設計用於大面積的淺層擦傷。"},"answer":"A","manualChapter":"CH26","source":"AI出題","id":3782,"matchedChapters":["CH26"]},{"question":"在休克發展的「第二期：微血管及小靜脈舒張」階段，微循環會發生顯著的變化。下列對於此階段生理機制的描述，何者最精確？","options":{"A":"小動脈前的動靜脈分流血管（arteriovenous shunt）大量打開，血液完全不經過微血管而直接進入靜脈端。","B":"微血管前括約肌舒張，導致微血管內容積相對增加，血液淤滯於微血管及小靜脈，使靜脈回流量降低。","C":"組織內 pH 值上升，導致微血管通透性降低，進而將大量水分保留在血管內。","D":"微血栓開始大量形成，消耗體內凝血因子，直接導致多重器官衰竭。"},"answer":"B","manualChapter":"CH26","source":"AI出題","id":3783,"matchedChapters":["CH26"]},{"id":45509,"question":"關於休克下列敘述何者最適當？","options":{"A":"阻塞性休克因為進入心臟的血流受阻，所以一定會看見頸靜脈怒張。","B":"代償性休克因為周邊血管收縮，皮膚變得濕冷蒼白。","C":"神經性休克雖然也會微血管充填時間延長，卻無反射性心跳增快，皮膚也非冰冷。","D":"當傷患休克時，生命徵象最先反應的是脈搏上升，這時出血程度為第一級休克。"},"answer":"B","explanation":"1.阻塞性休克確實可能會有頸靜脈怒張情況，但病人有大量失血時，頸靜脈怒張的情形也許不會出現。\n2.代償性休克因為周邊血管收縮，皮膚變得濕冷蒼白，使得微血管充填時間延長。\n3.神經性休克雖然血壓降低，卻無反射性心跳增快，皮膚呈現溫暖紅潤，所以CRT並不會延長。\n4.休克分為四期，第一期通常沒有症狀，第二期可能表現心跳加快及脈搏壓減少。","source":"同學出題","manualChapter":"CH26"},{"id":45617,"question":"根據外傷與休克的相關生理與臨床表現，下列敘述何者錯誤？","options":{"A":"成人外傷出血性休克時，初期建議以溫晶質溶液進行急救，首次輸液量為 1 公升","B":"當病人符合 ABC score 中 2 項或以上時，可預測需要大量輸血","C":"敗血性休克極少在外傷後短時間發生，其初期的表現為高心輸出量及低血壓","D":"神經性休克是由於交感神經受損，臨床表現上病人的皮膚會呈現濕冷且蒼白"},"answer":"D","source":"同學出題","manualChapter":"CH26"},{"id":45635,"question":"關於大量輸血的描述何者錯誤?","options":{"A":"大量輸血定義為 24 小時內輸血量足以置換超過半身的血液","B":"院前可用 ABC score 辨認需要大量輸血的病人","C":"ABC score 內容包含HR＞120、SBP＜90、穿刺傷、FAST陽性，符合 2 項以上需要大量輸血","D":"在大量輸血的情況下，早期以 1 : 1 : 1 的比例給予濃縮紅血球、血漿與血小板"},"answer":"A","source":"同學出題","manualChapter":"CH26"},{"id":45693,"question":"下列有關外傷造成出血性休克傷患到院前的評估與處置的描述，何者為是？","options":{"A":"到院前使用靜脈輸液，是否會提高休克傷患存活機率，目前尚無定論，故晶質或膠質輸液通常保留至到院後再給予，不建議使用於到院前。","B":"若有需要使用晶質溶液，應以溫暖的的晶質溶液進行急救，林格氏乳酸溶液為輸液首選，其次為生理食鹽水溶液。","C":"靜脈輸液的流速與留置導管的內徑呈現4次方正比(即導管內徑增為2倍，最大流速可提高為16倍)、與導管的長度成正比。","D":"老年傷患對副交感神經刺激反應較差，因此失血造成的心跳加速或心收縮力增加不如年輕人顯著，因此老人傷患需早期進行積極復甦及監測。"},"answer":"B","source":"同學出題","manualChapter":"CH26"},{"id":45705,"question":"關於休克下列敘述何者最適當？","options":{"A":"阻塞性休克因為進入心臟的血流受阻，所以一定會看見頸靜脈怒張。","B":"代償性休克因為周邊血管收縮，皮膚變得濕冷蒼白。","C":"神經性休克雖然也會微血管充填時間延長，卻無反射性心跳增快，皮膚也非冰冷。","D":"當傷患休克時，生命徵象最先反應的是脈搏上升，這時出血程度為第一級休克。"},"answer":"B","source":"同學出題","manualChapter":"CH26"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

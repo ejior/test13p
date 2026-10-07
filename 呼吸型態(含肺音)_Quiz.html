@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">呼吸型態(含肺音) 測驗</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：18 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：呼吸型態(含肺音)</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":18,"source":"105 高級救護技術員甄試筆試題目.doc","question":"一名76歲臥床多年的男性，您觀察到他的呼吸型態如下圖。請問此種呼吸型式，最不可能是下列哪一種疾病所引起？","options":{"A":"慢性阻塞性肺病","B":"心臟衰竭","C":"尿毒症","D":"陳舊性腦中風造成的間腦損傷"},"answer":"A","manualChapter":"呼吸型態(含肺音)","image":"題庫圖片/18.png"},{"id":118,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"EMTP評估病患時，發現病患呼吸型態忽深忽淺，還會暫停幾秒（如示意簡圖）。請問該病患可能的疾患，何者為非？","options":{"A":"心臟衰竭","B":"藥物中毒","C":"急性腎衰場併酸血症","D":"陳舊性腦中風後遺症"},"answer":"C","manualChapter":"呼吸型態(含肺音)","matchedChapters":["NeedImage"],"image":"題庫圖片/118.png"},{"id":127,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"下列呼吸型態的描述，何者代表呼吸衰竭的徵候？","options":{"A":"逆理性呼吸（paradoxical respiration）","B":"噘嘴氣式呼吸（obstructive breathing）","C":"庫斯毛耳氏呼吸（Kussmaul respiration）","D":"陳施氏呼吸（Cheyne-Stokes respiration）"},"answer":"A","manualChapter":"呼吸型態(含肺音)"},{"id":253,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列哪個是肺內連續異常肺音？","options":{"A":"Crackles","B":"Rhonchi","C":"Rales","D":"Stridor"},"answer":"B","manualChapter":"呼吸型態(含肺音)","matchedChapters":["CH20"]},{"id":480,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列對於庫斯毛耳氏呼吸（Kussmaul respiration）的敘述，何者為是？","options":{"A":"病人會出現這種呼吸型式大部分都是因為體內產生代謝性鹼性物質","B":"會出現這種呼吸型式主要是因為體內產生的代謝物質刺激了位在小腦的呼吸中樞，所引發的代償性深度呼吸型態","C":"這種呼吸型態的特色為呼吸淺而快","D":"甲醇中毒有可能在臨床上出現這種呼吸型態"},"answer":"D","manualChapter":"呼吸型態(含肺音)"},{"id":481,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列哪種疾病臨床上不易出現庫斯毛耳氏呼吸（Kussmaul respiration）型態？","options":{"A":"糖尿病酮酸中毒","B":"延腦損傷","C":"腎衰竭","D":"甲醇中毒"},"answer":"B","manualChapter":"呼吸型態(含肺音)"},{"id":485,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列呼吸型態的描述，何者見於糖尿病酮酸中毒的身上？","options":{"A":"逆理性呼吸（paradoxical respiration）","B":"噘嘴吐氣式呼吸（obstructive breathing）","C":"庫斯毛耳氏呼吸（Kussmaul respiration）","D":"陳施氏呼吸（Cheyne-stokes respiration）"},"answer":"C","manualChapter":"呼吸型態(含肺音)"},{"id":486,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列對於呼吸型態的描述何者為是？","options":{"A":"陳施氏呼吸（Cheyne-stokes respiration）常見於小腦損傷的病患","B":"喟嘆氏呼吸（Apneustic respiration）常見於大腦損傷的病患","C":"畢歐氏呼吸（Biot's respiration）常見於延腦損傷的病患","D":"庫斯毛耳氏呼吸（Kussmaul respiration）常見於橋腦損傷的病患"},"answer":"C","manualChapter":"呼吸型態(含肺音)"},{"id":487,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列對於喘鳴音（stridor）的描述何者為是？","options":{"A":"喘鳴音是屬於連續的肺內異常的肺音","B":"對於喘鳴音最清楚的聽診位置為肺部","C":"喘鳴音通常出現在呼氣期時","D":"喘鳴音可以出現在雙側聲帶麻痹的患者身上"},"answer":"D","manualChapter":"呼吸型態(含肺音)"},{"id":498,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"出現下列理學檢查表現的病患必須考慮氣管內管插管治療，除了何者之外？","options":{"A":"頸部喘鳴音（stridor）","B":"逆理性呼吸（paradoxical respiration）","C":"庫斯毛耳氏呼吸（Kussmaul respiration）","D":"意識不清（昏迷指數（GCS）：8分）且呼吸速率每分鐘十下之病患"},"answer":"C","manualChapter":"呼吸型態(含肺音)"},{"id":530,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"據報在高速公路上發生了小客車追撞車禍，身為高級救護技術員的你到達現場後發現，有一名年約40歲的男性病患正呆坐在車道上，囗中喃喃自語，在確認現場環境安全及詢問病史後，發現此名傷患是其中一台小客車的副駕駛座乘客，同一台的駕駛因嚴重外傷在駕駛座上沒有生命跡象。請問下列有關此病患的敘述，何者有誤？","options":{"A":"若此名病患神智清楚，生命徵象穩定，仍需因其屬於嚴重創傷機轉而儘速送創傷中心。","B":"若此名病患開始抱怨胸囗會痛且有點呼吸不過來，理學檢查時發現其胸骨上方有一瘀青，聽診時心音遙遠，要小心心包膜填塞的可能性。","C":"此名病患在轉送過程中，突然發生心跳停止，聽診發現右側沒有呼吸音，視診發現其頸靜脈怒張及氣管偏移，此時應開始心肺復甦術且儘速行針刺減壓，因這名病患很有可能產生右側張力性氣胸。","D":"現場評估病患時，發現其腰側有一瘀青，要小心這可能是腹腔出血所造成的Cullen's sign"},"answer":"D","manualChapter":"呼吸型態(含肺音)"},{"id":606,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"EMTP到達現場，發現病人意識不清，開始呼吸淺慢，以後逐漸加快加深，達高潮後，又逐漸變淺變慢，而後呼吸暫停數秒（約5～30秒）後，再次出現上述狀態的呼吸，如此週而復始的呼吸變化稱為？","options":{"A":"瀕死呼吸（agonal respirations）","B":"陳施氏呼吸（潮氏呼吸）（Cheyne-stokes respirations）","C":"庫斯毛耳氏呼吸（Kussmaul's respirations）","D":"畢歐氏呼吸（Biot's respiration）"},"answer":"B","manualChapter":"呼吸型態(含肺音)"},{"id":2016,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"異常呼吸音所代表的疾病何者配對最正確？","options":{"A":"細囉音：肺水腫、肺纖維化病變。","B":"哮喘（Wheezes）：肋膜積水。","C":"喘鳴音（Stridor）：支氣管擴張症。","D":"粗囉音（Coarse crackles）：肋膜炎。"},"answer":"A","matchedChapters":["CH20"],"manualChapter":"呼吸型態(含肺音)"},{"id":2203,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"以下呼吸模式與對應的可能的臨床疾病組合，何者正確？","options":{"A":"庫斯毛耳氏呼吸(Kussmaul respiration) –慢性阻塞性肺病。","B":"陳施氏呼吸(Cheyne-Stokes respiration) –糖尿病酮酸中毒。","C":"逆理式呼吸(paradoxical respiration) –呼吸衰竭。","D":"畢歐氏呼吸(Biot’s respiration) –大腦損傷。"},"answer":"C","manualChapter":"呼吸型態(含肺音)","matchedChapters":["CH20"]},{"question":"當肺音在急性發作期常常出現如氣喘病人吐氣期哮喘音，但也可以同時因為次發性的感染發炎痰液而增加吸氣期粗囉音的是什麼肺病？","options":{"A":"肺氣腫","B":"肋膜炎","C":"血胸","D":"慢性支氣管炎"},"answer":"A","manualChapter":"呼吸型態(含肺音)","id":3423,"source":"TP題庫 (圖片匯入)"},{"question":"病人因支氣管受到刺激而發生劇烈收縮(如氣喘發作) 時，其呼吸道的氣流阻力會大幅增加，導致呼吸肌必須作更多功才能維持換氣。此時，救護技術員在臨床理學檢查中，觀察到病人因換氣耗能上升而使用輔助呼吸肌 (accessory muscle) 的現象，何者最適當？","options":{"A":"觀察到病人的鼻腔阻力大幅下降，且全肺量 (total lung capacity) 呈現等比例上升","B":"觀察到病人胸骨上凹口、鎖骨上凹窩、肋間肌及肋下肌等處出現明顯的肌肉內縮凹陷。","C":"觀察到病人的潮氣末二氧化碳(end-tidal CO2) 波形呈現快速上升且立刻進入水平高原期。","D":"觀察到病人的解剖死腔(anatomical dead space) 範圍擴大至原本正常生理狀態的十倍以上。"},"answer":"B","manualChapter":"呼吸型態(含肺音)","id":3448,"source":"TP題庫 (圖片匯入)"},{"id":3517,"source":"TP題庫","question":"請問心臟衰竭、大腦損傷的患者會出現什麼樣的呼吸型態？","options":{"A":"畢歐式呼吸","B":"庫斯毛耳式呼吸","C":"陳施氏呼吸","D":"逆理氏呼吸"},"answer":"C","manualChapter":"呼吸型態(含肺音)"},{"source":"EMT-P 第 20 章 P.538","question":"比較「哮鳴音(Wheezes)」與「鼾音(Rhonchi)」的音質特性，下列敘述何者正確？","options":{"A":"兩者皆為高頻，僅出現時機不同","B":"哮鳴音是不連續的爆裂聲；鼾音是連續的音樂聲","C":"哮鳴音聲音粗糙；鼾音聽起來像揉頭髮","D":"哮鳴音為高頻輕柔多人口哨聲；鼾音為中低頻單音"},"answer":"D","id":3721,"manualChapter":"呼吸型態(含肺音)","matchedChapters":["CH20"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

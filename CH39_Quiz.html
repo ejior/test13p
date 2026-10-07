@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 39 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：30 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH39</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":165,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"傷口的凝血機轉包含三大步驟：甲，纖維蛋白形成；乙，凝血因子串聯反應；丙：血小板凝集活化。請問發生時序依序是：","options":{"A":"乙→丙→甲","B":"丙→乙→甲","C":"甲→乙→丙","D":"乙→甲→丙"},"answer":"B","manualChapter":"CH39"},{"id":182,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"下列有關血友病（hemophilia）的描述，何者為非？","options":{"A":"缺乏第八因子的稱為A型血友病","B":"缺乏第九因子的則稱為B型血友病","C":"血友病是建立靜脈路徑的禁忌症，即使病患的狀況符合需建立靜脈路徑的條件，也不應該在到院前建立靜脈路徑","D":"血友病患受傷時，中樞神經出血是造成這類病患死亡的最主要原因"},"answer":"C","manualChapter":"CH39"},{"id":265,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"依據白血球分類計數，下列白血球分類與功能配對，何者錯誤？","options":{"A":"嗜酸性白血球，對抗細菌","B":"嗜鹼性白血球，引發過敏反應","C":"單核球，對抗結核菌","D":"淋巴球，對抗病毒"},"answer":"A","manualChapter":"CH39"},{"id":302,"source":"110年 - EMT-P 高級救護技術員教育訓練.doc","question":"男性患者於醫院實施睪丸手術後即反應傷口劇痛，發現陰囊有巨大血腫塊。病人血球計數正常，凝血酶原時間（PT）正常，部分促凝血酶原激酶時間（aPTT）延長，血纖維蛋白原（fibrinogen）正常。除了aPTT矯正測試和出血時間還必須加做下列那些測試才能獲得正確之診斷？","options":{"A":"第五凝血因子測試","B":"第十三凝血因子測試","C":"第八或第九凝血因子測試","D":"第七凝血因子測試"},"answer":"C","manualChapter":"CH39"},{"id":592,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"以下有關於血液中的鈉、鉀離子平衡的描述，何者為是？","options":{"A":"細胞內鈉離子濃度較高、鉀離子濃度較低","B":"當我們為病患注入大量的碳酸氫納（NaHCO3），鉀離子將由細胞內轉到細胞外","C":"細胞膜上具有一個「鈉一鉀交換幫浦」不斷的消耗ATP以維持細胞內外鈉、鉀的平衡。這就是物質運輸中的「被動運輸」","D":"物質由低濃度往高濃度的移動，是「主動運輸」"},"answer":"D","manualChapter":"CH39"},{"id":1086,"source":"第四章 非創傷急症(2015-2018).doc","question":"對於身上突然出現多處瘀斑的病患，以下敘述何者為非？","options":{"A":"此為凝血功能障礙，應檢查血小板數量與功能以及肝臟製造凝血因子能力","B":"血友病病患雖無外傷，也可能有自發性出血，但多以深部組織出血為主","C":"對於自發性出血的病患，為避免造成傷口及出血不止，不應進行靜留置針注射","D":"即便血小板數量正常，仍有可能出現自發性的出血"},"answer":"C","manualChapter":"CH39"},{"id":1150,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列對於血液疾病的敘述，何者為非？","options":{"A":"地中海型貧血屬於小球性貧血","B":"缺乏第八因子稱為B型血友病","C":"如果血小板小於20,000/uL，可能引起重要器官自發性出血，如腦出血、腸胃道或肺部出血","D":"非何杰金氏淋巴癌早期通常沒有明顯症狀，大多數人開始的症狀就是頸部、腋下或鼠蹊部出現腫大的淋巴結、發燒、夜間流汗或疲倦等"},"answer":"B","manualChapter":"CH39","matchedChapters":["CH39"]},{"id":2062,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"急性白血病是指不成熟的白血球增生，侵入骨髓外的其他身體部位，這些常見會被侵犯而會變的腫大或疼痛的部位，不包括？","options":{"A":"淋巴結。","B":"關節。","C":"脾臟。","D":"腎臟。"},"answer":"D","manualChapter":"CH39"},{"id":2149,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列關於血液組成及相關疾病之敘述何者最不適當？","options":{"A":"當肝臟製造不足或由腎臟、腸道流失太多白蛋白時，就容易造成水腫，患有肝病的病人的腹水便是如此造成的。","B":"當血友病的病人受傷時，出血速度與正常人無明顯差異，但血液不容易凝固是因為缺乏凝血因子。","C":"腫瘤溶解症候群之病人，可能有高尿酸血症、高血鉀症、高磷酸血症、低血鈣症等症狀。","D":"惡性淋巴瘤包括了非何杰金氏(non- Hodgkin lymphoma )淋巴瘤與何杰金氏症( Hodgkin lymphoma)兩種類型。東方人以何杰金氏症居多。"},"answer":"D","manualChapter":"CH39"},{"id":2150,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"以下關於貧血的描述，何者最不適當？","options":{"A":"缺鐵性的貧血，很容易出現黃疸的症狀。","B":"貧血嚴重者可能會有嗜睡、食慾不振、心臟擴大，甚至心衰竭等症狀產生。","C":"臨床上輕微的貧血並不會干擾到脈衝式血氧計的判讀。","D":"貧血可以血球的大小，大致分為三類(大球性、正球性、小球性貧血)。"},"answer":"A","manualChapter":"CH39","matchedChapters":["CH39"]},{"id":2151,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"貧血的分類，可依血球之大小分類，下列何者會造成正球性貧血？","options":{"A":"葉酸缺乏。","B":"缺鐵性貧血。","C":"維他命B12缺乏。","D":"急性腸胃出血。"},"answer":"D","manualChapter":"CH39"},{"id":2229,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"反應複雜的凝血機制可以精要地分為三大基本步驟，下列何者為非？","options":{"A":"由受傷處釋放出血小板因子。","B":"凝血因子串聯反應形成凝血酶(thrombin)。","C":"凝血酶結合纖維蛋白原(fibrinogen)形成(血)纖維蛋白，進而網住紅血球形成血塊。","D":"血塊因血小板因子作用黏附後成形，大過傷口並將其完整封閉。"},"answer":"","manualChapter":"CH39"},{"id":2243,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"當人體內的紅血球數目或血紅素不足時，就會出現貧血的症狀，針對貧血的敘述何者正確？","options":{"A":"造成貧血的常見原因可分為紅血球的製造出問題或是紅血球的破壞增加。","B":"貧血本身是一個疾病的診斷、可能會有會有頭暈目眩、蒼白、氣喘、心悸等症狀。","C":"臨床上不論何種貧血種類皆不會干擾到脈衝式血氧計的判讀。","D":"貧血症狀和它的成因、輕重程度、及進展的速度與是否合併其他疾病無關。"},"answer":"A","manualChapter":"CH39"},{"id":2245,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"根據下列各種白血球分類計數，相對應對抗致病菌功能，下列何者為非？","options":{"A":"嗜中性白血球(neutrophil) 85%，臨床上偏向細菌感染。","B":"嗜酸性白血球(eosinophil) 15%，可能為寄生蟲感染。","C":"單核球(monocyte) 15%，可能為結核菌感染。","D":"淋巴球(lymphocyte) 60%，臨床上偏向過敏反應。"},"answer":"D","manualChapter":"CH39"},{"id":2330,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"一位50歲女性為右側乳癌病人做過乳房及淋巴切除，三天前剛做完化療出院。家屬表示今日開始發燒昏迷。現場的評估與處置，下列敘述何者為非？","options":{"A":"若量到她血壓偏低，可選擇在右上肢建立大管徑的靜脈途徑以補充輸液。","B":"雖然發燒可能讓病人意識不清，但仍須排除低血糖或嗎啡過量的問題。","C":"骨頭轉移好發於乳癌病人，因此須詢問病人的腫瘤分期與治療的近況。","D":"病人的發燒可能與化療後的白血球低下有關，打針處置時須更加小心無菌措施。"},"answer":"A","manualChapter":"CH39"},{"id":2337,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"65歲男性過去病史為肺癌接受治療中，主訴右側胸痛及呼吸急促，身體檢查發現病人臉部及頸部水腫、頸靜脈怒張及胸壁靜脈擴張，關於此病人之診斷及處置何者為是？","options":{"A":"為肺癌導致之續發性張力性氣胸，須給予針刺減壓。","B":"為腫瘤治療過程中導致之腫瘤溶解症候群，須給予適當輸液補充及矯正電解質。","C":"為腫瘤影響到心包膜導致之心包膜填塞，須給予心包膜穿刺術處置。","D":"為腫瘤造成之上腔靜脈症候群，應抬高頭部及上肢並給氧。"},"answer":"D","manualChapter":"CH39","matchedChapters":["CH39"]},{"id":2388,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於血液的組成，何者為是？","options":{"A":"血液大部分由紅血球組成，佔55~60%。","B":"紅血球壽命約為120天，血球比例僅次於白血球。","C":"O型血中血漿抗體不含A或B抗體，只可接受O型血輸血。","D":"血漿中水份約佔九成。"},"answer":"D","manualChapter":"CH39"},{"id":2507,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"白血病又稱「血癌」，可以分成四類，其中最常發生在年幼兒童身上的是哪一種？","options":{"A":"急性淋巴性白血病(ALL)。","B":"慢性淋巴性白血病(CLL)。","C":"急性骨髓性白血病(AML)。","D":"慢性骨髓性白血病(CML)。"},"answer":"A","manualChapter":"CH39"},{"id":2623,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"對於血液疾病的敘述，下列敘述何者最適當？","options":{"A":"地中海型貧血屬於大球性貧血。","B":"缺乏第八因子稱為B型血友病。","C":"血小板小於50,000/uL，就會引起重要器官自發性出血。","D":"非何杰金氏淋巴癌早期通常沒有明顯症狀。"},"answer":"D","manualChapter":"CH39","matchedChapters":["CH39"]},{"id":2624,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"腫瘤溶解症候群（Tumor Lysis Syndrome, TLS）是腫瘤細胞快速被破壞後，細胞內物質大量釋放所導致的嚴重併發症，可能引起下列哪一組代謝性異常？","options":{"A":"低尿酸血症、低血鉀症、低磷酸血症、高血鈣症。","B":"高尿酸血症、高血鉀症、高磷酸血症、低血鈣症。","C":"高尿酸血症、低血鉀症、高磷酸血症、高血鈣症。","D":"低尿酸血症、高血鉀症、低磷酸血症、低血鈣症。"},"answer":"B","manualChapter":"CH39"},{"question":"在輸血反應中，TRALI (輸血相關急性肺損傷) 與 TACO (輸血相關循環負荷過重) 臨床表現相似，下列何者是區分兩者的關鍵？","options":{"A":"TRALI 患者通常會伴隨血壓升高與頸靜脈怒張","B":"TRALI 是免疫介導的非心因性肺水腫，而 TACO 是容量過載","C":"兩者皆是因 ABO 血型不合引起","D":"TACO 患者給予利尿劑後症狀不會改善"},"answer":"B","manualChapter":"CH39","id":3370,"source":"TP題庫 (圖片匯入)"},{"question":"關於血友病（Hemophilia）的致病機轉與臨床特徵，下列敘述何者正確？","options":{"A":"血友病病人受傷時，其最大的問題是容易有自發性出血的危險，且中樞神經（顱內）出血是造成這類病人死亡的最主要原因","B":"血友病是一種後天因化療藥物所引起的血小板破壞疾病","C":"缺乏第八凝血因子的稱為B型血友病；缺乏第九凝血因子的稱為A型血友病","D":"血友病主要發生於女性，受傷時的出血速度比一般人快上數倍"},"answer":"A","manualChapter":"CH39","id":3402,"source":"TP題庫 (圖片匯入)"},{"id":3516,"source":"TP題庫","question":"有關TRM團隊資源管理的四大模組，下列何者為非？","options":{"A":"心理支持(Mental Support)","B":"領導能力(Leadership)","C":"有效溝通(Communication)","D":"狀況監控(Situation Monitoring)。"},"answer":"A","manualChapter":"CH39"},{"question":"下列何者非凝血機制內在途徑？","options":{"A":"凝血因子12","B":"凝血因子7","C":"凝血因子11","D":"凝血因子9"},"answer":"B","source":"圖片匯入","manualChapter":"CH39","id":3575,"matchedChapters":["CH39"]},{"question":"在到院前詢問腫瘤病人病史時，下列哪項資訊最能協助判斷是否為化療併發症？","options":{"A":"病人最初被診斷出癌症的年份","B":"病人罹癌前的生活習慣","C":"最後一次接受化療的時間","D":"腫瘤發生的原始部位"},"answer":"C","source":"圖片匯入","manualChapter":"CH39","id":3580,"matchedChapters":["CH39"]},{"question":"臨床上一般的貧血病不會干擾到脈衝式血氧計的判讀，但是如果血紅素太低(＜___g/dL)仍有可能會造成血氧濃度的低估","options":{"A":"1","B":"6","C":"10","D":"50"},"answer":"B","source":"填空題","manualChapter":"CH39","id":3844},{"id":45457,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"根據下列各種白血球分類計數，相對應對抗致病菌功能，下列何者為非？","options":{"A":"嗜中性白血球(neutrophil) 85%，臨床上偏向細菌感染。","B":"嗜酸性白血球(eosinophil) 15%，可能為寄生蟲感染。","C":"單核球(monocyte) 15%，可能為結核菌感染。","D":"淋巴球(lymphocyte) 60%，臨床上偏向過敏反應。"},"answer":"D","manualChapter":"CH39","explanation":"CH39 p1032 淋巴球正常值 20~40％，功能為對抗病毒"},{"id":45630,"question":"反應複雜的凝血機制可以精要地分為三大基本步驟，下列何者為非？","options":{"A":"由受傷處釋放出組織因子(tissue factor)。","B":"凝血酶原反應形成凝血酶(thrombin)。","C":"凝血酶結合纖維蛋白原(fibrinogen)形成纖維蛋白，進而網住紅血球形成血塊。","D":"血塊因血小板因子作用黏附後成形，大過傷口並將其完整封閉。"},"answer":"D","source":"同學出題","manualChapter":"CH39"},{"id":45650,"question":"請問下列血液細胞中，何種不具細胞核？","options":{"A":"成熟前的紅血球","B":"白血球","C":"血小板","D":"以上皆非，都有細胞核"},"answer":"C","source":"同學出題","manualChapter":"CH39"},{"id":45812,"question":"癌症病人中多少比例的人會發生腫瘤伴隨症候群?","options":{"A":"5%","B":"15%","C":"40%","D":"65%"},"answer":"B","source":"p1042","manualChapter":"CH39"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

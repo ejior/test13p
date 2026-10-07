@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 53 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：78 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH53</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":82,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於輻射事故緊急應變的處置，以下敘述何者為是？","options":{"A":"出現輻射傷害症狀的病患，身上必定有殘餘輻射，必須先進行除污之後才能進行醫療照護","B":"若發現病患衣物上有粉狀或固體之疑似輻射污染物質，切勿以水除污，以免產生化學反應。","C":"為了避免帶有輻射之砂石顆粒殘留傷口內，務必以纱布來回擦拭除污","D":"病患除污標準是手持式輻射偵測器檢測劑量在背景值的2-3倍以下即可"},"answer":"D","manualChapter":"CH53"},{"id":83,"source":"105 高級救護技術員甄試筆試題目.doc","question":"在毒化災事故中，對於有傷口水泡的傷病患而言，以下哪種除汙方式是比較合適的？","options":{"A":"以「低水壓，高流量」的清水來沖洗","B":"以「低水壓，低流量」的清水來沖洗","C":"以「高水壓，高流量」的清水來沖洗","D":"以「高水壓，低流量」的清水來沖洗"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":85,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於危害物質災難事件層區管制的觀念，以下何者錯誤？","options":{"A":"安全區在事件開始時即需建立，將支援人員器材集結於此，並設定由下風高處做為暖區及熱區的出入位置","B":"事故周邊直接或間接（如受污染之傷惠及器材）受到危害物質影響之處，也應劃定為熱區","C":"黃區為介於污染區及安全區之之間的緩衝區域，作為除污及病人緊急醫療處理之處","D":"除污走廊應該位於暖區。"},"answer":"A","matchedChapters":["CH53"],"manualChapter":"CH53"},{"id":94,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列關於防護衣的觀念何者正確？","options":{"A":"消防人員進入火場使用的的防護衣裝載有個人自給式呼吸系統，已經提供最高呼吸保護，遇到毒化災作業時可以直接當做B級防護衣使用","B":"C式防護衣可能是全身式或二截式，可以防液體潑濺，但無法阻止有毒液體滲入","C":"A級防護衣使用自給式呼吸設備，不會吸入空氣中的有毒物質，但無法阻播空氣中的有毒物質接觸皮膚造成傷害","D":"輻射事故緊急應變跟一般毒化災應變不同，無論是熱區，暖區或安全區人員，依照規定均需使用A級防護衣"},"answer":"B","manualChapter":"CH53"},{"id":168,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"關於危險物質洩漏現場之救護，下列敘述何者為是？","options":{"A":"傷患於現場除污後，上救護車應以被單包裹全身，頭髮也必須包覆，擔架推床也須以塑膠袋包裹，盡量避免污染車廂","B":"若現場任何一位工作人員感到不適，應立刻休息並補上另一人員，以免教護工作被延遲","C":"在除污走廊進行除污之工作人員，至少需穿戴D級（級工作服）或以上之防護衣，抗化膠鞋與防毒面罩","D":"可能遭受輻射物質污染之傷口，需以生理食鹽水纱布反覆擦拭以確實除污"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":169,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"危害物質災難事件如果已經被限制在一定範圍內，事故現場可以劃分出污染區（或稱為熱區、紅區），控制區（或稱為暖區、黃區）及安全區（或稱為冷區，綠區）三個區域，稱為層區管制。關於層區管制的觀念，下列敘述何者為非？","options":{"A":"事故周邊直接或間接（如受污染之傷患及器材）受到危害物質影響之處，應劃定為熱區","B":"安全區在事件開始時即需建立，將支援人員器材集結於此，並設定由下風高處做為暖區及熱區的出入位置","C":"黃區為介於污染區及安全區之間的緩衝區域，作為除污及病人緊急醫療處理之處","D":"除污走廊應該位於暖區"},"answer":"B","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":170,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"關於輻災事故的應變觀念，下列敘述何者為非？","options":{"A":"輻射會影響傷口癒合，所以輻射汙染病患的傷口應該儘可能延遲二十四小時後再進行縫合","B":"相較於化學物質事故，輻射事故通常不會造成受污染傷者立即性的危害，因此病患除污的急迫性較低","C":"在輻災事故，如果病患的衣物可能沾有輻射物質粉末，應該在移除病患衣物時，先將衣物潤濕，以防止輻射物質擴散至空氣中","D":"輻射污染可以用輻射偵檢器檢測出，通常可以精確地定出污染範圍"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":190,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"輻射災害時的檢傷一般分五級，其第四級臨床上以哪一種症狀為主？","options":{"A":"胃腸","B":"神經","C":"呼吸","D":"皮膚"},"answer":"A","manualChapter":"CH53"},{"id":192,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"有關危害物質的防護衣，何者正確？","options":{"A":"沒有防護衣可以防護迦瑪射線的穿透，輻傷的濾毒罐是以過濾輻射塵為主","B":"有電池動力的活性炭濾毒罐是屬於A級或是B級的防護，而沒有動力的是C級","C":"防疫所穿用的俗稱白兔裝的防護衣，配合N95口罩，在化災時可以達到C級的防護","D":"有攜帶空氣瓶的是A級防護衣，其他各級都是使用濾毒罐"},"answer":"A","manualChapter":"CH53"},{"id":199,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"下圖危害物質標示，為何種物質？","options":{"A":"易燃液體","B":"氧化性物質","C":"腐蝕性物質","D":"禁水性物質"},"answer":"C","manualChapter":"CH53","matchedChapters":["NeedImage"],"image":"題庫圖片/199.png"},{"id":372,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"核災除污的方式，與一般毒化災不一樣，以下何者敘述並不合適？","options":{"A":"外表遭受放射性物質污染者，只要去除衣物，並以肥皂水清洗，便可以達到有效的除污","B":"除污時應該要以硬質刷子大力刷洗皮膚，直到紅腫，才能有效除污","C":"對於輻傷病患，即使只是簡單的開放性傷口，也必須儘早縫合","D":"除污時，沖洗污染部位的液體要儘量避免滴入眼睛，嘴巴，耳道，或開放性傷囗","E":"受到中子照射的人，並未受到輻射污染，並不需要除污"},"answer":"B","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":374,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"有關輻射污染現場處理步驟，何者有誤？","options":{"A":"以輻射偵檢器檢測現場所有病患，是否受到輻射物質污染。如無輻射污染，則以一般病患處理無須除污","B":"除污人員需戴雙層外科乳膠手套，外層手套一旦接觸污染即更換，任何的輻射污染物品均要仔細回收","C":"沖水時注意不可潑濺、污染之水要能良好收集、須用紗布棉籤來回擦拭，以免擴散污染，外層手套一旦接觸污染立即更換","D":"以輻射偵檢器檢測病患身上是否仍有輻射殘留。如果如污染區域之輻射劑量在背景值的2～3倍以上，則繼續上述清洗除污步驟"},"answer":"C","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":375,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"有關毒化災傷患緊急處理的現場處理步驟，何者有誤？","options":{"A":"在熱區中任何未著防護衣之人，均應視為受到污染，必須要除污","B":"緊急救護人員協助在熱區中無法行動之傷患脫困，儘量不在熱區中擔擱太多時間，醫療處置僅限於簡單呼吸道維持、頸椎固定及壓迫止血","C":"如眼有器傷口應先清洗，再以防水敷料包紮；眼睛受污染病人，應先以大量生理食鹽水用沖眼器沖洗","D":"如果是固體毒化物顆粒，以刷子儘量移除，再以清水沖洗，如強鹼氫氧化鈉顆粒"},"answer":"D","manualChapter":"CH53"},{"id":379,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"下列關於防護衣的觀念何者正確？","options":{"A":"消防人員進入火場使用的的防護衣裝載有個人自給式呼吸系統，已經提供最高呼吸保護，遇到毒化災作業時可以直接當做B級防護衣使用","B":"C式防護衣可能是全身式或二截式，可以防液體潑濺，但無法阻止有毒液體滲入","C":"A級防護衣使用自給式呼吸設備，不會吸人空氣中的有毒物質，但無法阻擋空氣中的有毒物質接觸皮膚造成傷害","D":"輻射事故緊急應變跟一般毒化災應變不同，無論是熱區、暖區或安全區人員，依照規定均需使用A級防護衣"},"answer":"B","manualChapter":"CH53"},{"id":383,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"你受命處理一件疑似化學物質災害事件，經由望遠鏡看到車輛上有以下圖示，請問以下敘述何者正確？","options":{"A":"這是第3類物質，為腐蝕性物質","B":"既然已經有4位數聯合國編號，直接查詢北美應變指南橘色區域，找到第1203個指南就是應變方法","C":"如果現場有煙霧但沒有聞到化學氣味，就代表沒有洩漏，1203可以安全進入現場處理","D":"如果該查詢該物質時，發現該物質名稱同時標有綠色底，表示該物質的揮發物有毒性，需要翻到綠色區域查詢所需的特別保護距離"},"answer":"D","manualChapter":"CH53","matchedChapters":["NeedImage"],"image":"題庫圖片/383.png"},{"id":384,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"某化工實驗室通報火警，抵達現場時看到如下的告示牌，請問以下敘述何者為是？","options":{"A":"此實驗室沒有依照規定提供4位數的聯合國編號，無法經由應變指南查詢，應該經由實驗室提供的物質安全資料表來查詢","B":"可以經由應變指南查詢該物質的4位數聯合國編號為1001（此數字為正確資料），翻到橘色區域編號1001就是該物質的應變指南","C":"應該立即聯絡衛生署毒藥物諮詢中心，依照地區派出相應之環境毒災應變隊","D":"若懷疑病患有遭化學物質污染但沒有立即生命危險，需先行集中於暖區，等待除污走廊設置完成進行除污之後才能後送"},"answer":"D","manualChapter":"CH53","matchedChapters":["NeedImage"],"image":"題庫圖片/384.png"},{"id":385,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於危害物質災難事件的處理，以下敘述何者為是？","options":{"A":"污染區（熱區）與控制區（暖區）的接界走道若可以選擇的話，應擇下風處","B":"如果可以選擇的話，應該經由上風處進入污染區（熱區）","C":"若該物質在北美應變指南中被畫上綠底，表示可能造成輻射傷害，需要立即疏下風處人員","D":"若病患身上有大量粉狀毒化物質，應使用大量清水除污，以免後送後污染醫療院所內部人員與環境"},"answer":"B","manualChapter":"CH53"},{"id":386,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於輻射事故緊急應變的處置，以下敘述何者為是？","options":{"A":"出現輻射傷害症狀的病患，身上必定有殘餘輻射，必須先進行除污之後才能進行醫療照護","B":"若發現病患衣物上有粉狀或固體之疑似輻射污染物質，切勿以水除污，以免產生化學反應","C":"為了避免帶有輻射之砂石顆粒殘留傷囗內，務必以紗布來回擦拭除污","D":"病患除污標準是手持式輻射偵測器檢測劑量在背景值的2～3倍以下即可"},"answer":"D","manualChapter":"CH53"},{"id":391,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於危險物質洩漏現場之救護，以下敘述何者為是？","options":{"A":"傷患於現場除污後，上救護車應以被單包裹全身，頭髮也必須包覆，擔架推床也須以塑膠袋包裹，盡量避免污染車廂","B":"若現場任何一位工作人員感到不適，應立刻休息並補上另一人員，以免救護工作被延遲","C":"在除污走廊進行除污之工作人員，至少需穿戴D級（級工作服）或以上之防護衣，抗化膠鞋與防毒面罩","D":"可能遭受輻射物質污染之傷口，需以生理食鹽水紗布反覆擦拭以確實除污"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":392,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"危害物質災難事件如果已經被限制在一定範圍內，事故現場可以劃分出污染區（或稱為熱區、紅區）、控制區（或稱為暖區、黃區）及安全區（或稱為冷區、綠區）三個區域，稱為層區管制。關於層區管制的觀念，以下何者敘述最不正確？","options":{"A":"事故周邊直接或間接（如受汙染之傷患及器材）受到危害物質影響之處，應劃定為熱區","B":"安全區在事件開始時即需建立，將支援人員器材集結於此，並設定由下風高處做為暖區及熱區的出入位置","C":"黃區為介於污染區及安全區之間的緩衝區域，作為除污及病人緊急醫療處理之處","D":"除污走廊應該位於暖區"},"answer":"B","manualChapter":"CH53"},{"id":393,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於輻災事故的應變觀念，以下何者敘述最不正確？","options":{"A":"輻射會影響傷囗癒合，所以輻射汙染病患的傷口應該儘可能延遲24小時後再進行縫合","B":"相較於化學物質事故，輻射事故通常不會造成受污染傷者立即性的危害，因此病患除污的急迫性較低","C":"在輻災事故，如果病患的衣物可能沾有輻射物質粉末，應該在移除病患衣物時，先將衣物潤濕，以防止輻射物質擴散至空氣中","D":"輻射污染可以用輻射偵檢器檢測出，通常可以精確地定出污染範圍"},"answer":"A","manualChapter":"CH53"},{"id":413,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於毒化災醫療救護，以下敘述何者為是？","options":{"A":"若傷患自行由熱區逃出但未經除污，需藉由優勢警力將他們隔離回熱區","B":"任何一位工作人員不適，其他組員需團隊合作，暫時扛起此員工作，直到補員進入為止","C":"在暖區除污走廊負責替傷患除污的人員標準防護隔離設備是B級（或更高級）防護衣，或是確認物質性質濃度之後，也可使用C級防護衣","D":"應該儘速通知衛福部所轄毒災應變諮詢中心，啟動毒災應變隊抵達現場協助處理"},"answer":"C","manualChapter":"CH53"},{"id":420,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"據報在縣市郊區發生化學工廠爆炸，傷亡人數不明。為避免進行現場評估及救護時接觸到危害物質，緊急救護人員必須穿著為毒化災設計之防護衣。請問有關各級防護衣的敘述，下列何者為非？","options":{"A":"A級防護裝備提供最高等級之皮膚黏膜及呼吸保護，防護衣為全身氣密式，緊急救護人員背負自給式的呼吸設備","B":"B級防護裝備為氣密式防護衣，不會接觸到外界空氣，提供最高等級之呼吸保護。但皮膚黏膜保護比A級防護裝備差","C":"C級防護裝備為全身式或二截式，其無法阻止液體性毒物滲入。人員呼吸為經濾毒罐過攄之空氣，為負責後送在現場除污後之病患的工作人員所穿著","D":"D級防護裝備基本上是指工作服，穿著目的是避免髒污自己衣服，並未對毒化物有特別的防護力"},"answer":"B","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":426,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關單純輻射傷害的描述，何者有誤？","options":{"A":"在暴露輻射的短期間就發生頭痛或身體不適的情況，這多半是心理因素導致","B":"輻射傷害傷患，外表無皮膚缺損，仍須做適當除汙","C":"輻射污染可以用輻射偵檢器檢測出，並且可以精確的定出污染範圍","D":"輻射傷害傷患除汙中，皮膚開始出現破損，偵測輻射劑量在背景值的2～3倍以上，仍須繼續清洗除污步驟"},"answer":"D","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":436,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關北美緊急應變指南的使用，下列何者為非？","options":{"A":"可以利用UN編號，查詢到危害物質的應變指引","B":"兩種危害物質可能使用相同一種應變指引","C":"每一種危害地上風、下風處隔離距離都不同，需要查詢相關「初期隔離與保護距離表」","D":"解針對不明危害物質，北美緊急應變指南在應變指引111，有初步的建議行動"},"answer":"C","manualChapter":"CH53"},{"id":437,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於毒化災防護衣，下列敘述何者為是？","options":{"A":"A級和B級防護衣都屬於全罩式氣密式連身防護衣","B":"A級毒化災防護衣可保護眼睛、黏膜、皮膚，但卻不能提供好的呼吸保護","C":"第一時間消防人員在熱區面對仍不清楚的毒化物質及濃度下應該穿著B級防護衣","D":"A級和B級防護衣都包含自攜式空氣呼吸器（self-containedbreathingapparatus，SCBA）"},"answer":"D","manualChapter":"CH53"},{"id":439,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於生物恐怖事件發生的流行病學和臨床線索，下列何者為非？","options":{"A":"出現大量死亡個案","B":"同時出現許多相同臨床症狀病患","C":"本土流行之感染症個案數增加","D":"常見的感染出現在不尋常季節"},"answer":"C","manualChapter":"CH53"},{"id":442,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於輻災事故的變觀念，以下敘述何者為非？","options":{"A":"輻射會影傷囗癒合，所以輻射汙染病患的傷囗應該儘可能延遲二十四小時後再進行縫合","B":"較於化學物質事故，輻射事故通常不會造成受污染傷者立即性的危害，因此病患除污的急迫性較低","C":"在輻災事故，如果病患的衣物可能沾有輻射物質粉末，應該在移除病患衣物時，先將衣物潤濕，以防止輻射物質擴散至空氣中","D":"輻射污染可以用輻射偵檢器檢測出，通常可以精確地定出污染範圍"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":455,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於毒性化學物質汙染的現場處置，何者為非？","options":{"A":"辨識危害物質並不容易，可能必須配合病患症狀以及現場資訊來一同判斷","B":"目前危害物質管轄的單位很多，包含環保署、勞動部、經濟部，消防署等等","C":"火災使用的防焰衣以及個人防護裝備，屬於B級的化災防護衣","D":"處理毒化災現場時，處理得「對」比處理得「快」還重要。如果沒有適當的防護，救災救護人員或病患都可能受到二次傷害"},"answer":"C","matchedChapters":["CH53"],"manualChapter":"CH53"},{"id":456,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於毒化災現場傷患緊急處理，下列何為非？","options":{"A":"污染傷囗應先清洗，再以防水敷料包紮","B":"傷患除污應在設置於暖區的除污走廊內進行","C":"呼吸裒竭傷患，應於熱區插管後，再送至暖區除污","D":"眼睛受污染傷患，可以大量生理食鹽水用沖眼器沖洗"},"answer":"C","manualChapter":"CH53"},{"id":457,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於危害物對健康的傷害，下列敘述何者為非？","options":{"A":"有機磷殺蟲可能造成意識障礙或痙攣","B":"氯氣主要傷害呼吸系統，嚴重可能造成呼吸衰竭","C":"氦氣度太高時，空氣中含氧量下降，造成缺氧性窒息","D":"氮氣造成紅血球破壞產生溶血，使細胞無法使用氧氣而窒息"},"answer":"D","manualChapter":"CH53"},{"id":459,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於輻災事故的應變觀念，下列敘述何者為非？","options":{"A":"輻射物質如由吸人入方式進人人體，造成之傷害十分嚴重。所以切勿在管制區琙菸或飲食，以減少吸收輻射物質的機會","B":"以前曾參與輻災救災的工作人員，因為經驗較為豐富，應該儘可能派彺第一執行或除污的工作","C":"處理輻射事故之緊急救護人員應著長袖衣服，戴雙層手套、眼罩、口罩及帽子受到可能的輻射污染","D":"所有於輻射事故工作之人員，均須佩帶個人輻射計量器"},"answer":"B","manualChapter":"CH53"},{"id":462,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"依國內災害防救法，下列哪一種災害應負責指揮、督導、協調之中央災害防救業務主管機關何者為非？","options":{"A":"重大火災為內政部","B":"毒性化學物質災害為經濟部","C":"土石流災害為行政院農業委員會","D":"震災為內政部"},"answer":"B","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":465,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"疑似輻射污染的現場，下列何種應變原則或作法是正確的？","options":{"A":"先確保必要的防護。若沒有鉛衣保護，對應變人員可能有風險，應該請隊上準備","B":"應常规服用碘片或含碘的藥物，用以拮抗輻射可能帶來的風險","C":"病輻射污染的考量不應優先於急救，若生命徵象不穩定應先急救病人","D":"輻射污染的患，不管污染或傷情嚴重程度，一律先送往輻傷/核災急救責任醫院以免污染擴大"},"answer":"C","manualChapter":"CH53"},{"id":915,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"處理危害物質事故時，必須注意工作人員的安全。因此對於參與處理危害物質事件之工作人員，必須要有醫療評估及監測機制。以下觀念何者為非？","options":{"A":"就輻射事故而言、過往曾參與類似事故的工作人員通常經驗較為豐富，應該優先派到汙染區工作","B":"在進入現場工作中，應監測其工作時間及生命徵象；如果其中一位工作人員不適，則全組人員應全部撤離，換上另一組人員","C":"在進入現場前，應評估工作人員的意識狀態、體溫、心跳、血壓、過往病史、目前服用藥物，以了解對熱傷害的忍受力","D":"體重變化可以做為工作人員是否脫水的重要依據"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":916,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於輻災事故的應變觀念，以下何者敘述最不正確？","options":{"A":"輻射會影響傷囗癒合，所以輻射汙染病患的傷囗應該儘可能延遲24小時後再進行縫合","B":"相較於化學物質事故，輻射事故通常不會造成受污染傷者立即性的危害，因此病患除污的急迫性較低","C":"在輻災事故，如果病患的衣物可能沾有輻射物質粉末，應該在移除病患衣物時，先將衣物潤濕，以防止輻射物質擴散至空氣中","D":"輻射污染可以用輻射偵檢器檢測出，通常可以精確地定出污染範圍"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":925,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"在事故應變時，「危機溝通」相當重要。與民眾或是新聞媒體溝通時，以下作法何者為非？","options":{"A":"發言時不應該偏袒特定的媒體，但如果有媒體特別想要了解某些專業的問題，可以轉介給適合的專家","B":"對大眾發言時應儘量使用專業術語，以提升應變工作人員的專業形象","C":"發言時，盡可能不要接受或引用未經證實的消息","D":"發言官必須監控新聞媒體或群眾之間是否出現謠言。如果謠言可能造成群眾嚴重的負面效應，甚至影響到事故應變進行，發言官應及時向事故指揮官報告，並在授權之下儘速澄清"},"answer":"B","manualChapter":"CH53"},{"id":935,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"「北美應變指南」主要是協助初期應變人員，可迅速確認事件所波及物質的危害，並保護自身與民眾的安全。根據2008年中文版的北美應變指南，危險物質的指引可以根據以下哪種方式查到？甲：聯合國數字編號（UN number）乙：物質的英文名稱丙：物質的中文名稱丁：物質的輻射量","options":{"A":"只有甲正確，其他錯誤","B":"只有甲、乙正確，其他錯誤","C":"只有甲、乙、丙正確，其他錯誤","D":"甲、乙、丙、丁都可以"},"answer":"C","manualChapter":"CH53"},{"id":936,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據2008年中文版的北美應變指南，以下對於「初期隔離距離」和「防護行動區域」的敘述，何者為誤？","options":{"A":"如果危害物質的蒸氣雲穿越數棟高層建築物或流經峽谷，因為蒸氣雲與大氣較不容易混合，所以防護距離可能比應變指南所表列的建議距離更長","B":"一般而言，小洩漏是指等於或小於兩百公升的液體洩漏，或是等於或小於三百公斤的固體洩漏至水中","C":"防護行動距離有可能因為天候、事故嚴重度、地形等等因素而必須調整","D":"一般而言，在夜晚時，空氣比較平穩，使得化學品擴散較慢，因此毒性影響區域範圍會小於發生在白天的狀況"},"answer":"D","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":937,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據2008年中文版的北美應變指南，對於危害物質事故的應變原則，以下何者為非？","options":{"A":"應該從上風處小心地接近事故現場；如果方向許可，應該從地勢高處接近事故現場","B":"必須小心處理空的容器，因為在容器未完全清除或排淨所有危害物質之前，空容器仍然存在著危險性","C":"可以試著由標示牌、容器標示、運送聯單、物質安全資料表、現場專業人員等等，來辨識危害物質種類","D":"大多數為危害物質都有特殊異味；穿著防護衣處理"},"answer":"D","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":938,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據2008年中文版的北美應變指南，以下對於「初期隔離距離」和「防護行動區」的敘述，何者錯誤？","options":{"A":"一般而言，大洩漏的初期隔離距離比起小洩漏來得長","B":"一般而言，具有強烈逆溫又加上穩定的風向，這時候應該增加防護行動距離","C":"一般而言，發生在白天的事故，防護行動區域比起夜晚來得廣","D":"一般而言，事故下風處的防護行動區域比起上風處來得廣"},"answer":"C","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":967,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據北美應變指南，以下對於「初期隔離距離」和「防護行動區域」的敘述，何者為非？","options":{"A":"如果危害物質的蒸氣雲穿越數棟高層建築物或流經峽谷，因為蒸氣雲與大氣較不容易混合，所以防護距離可能比應變指南所表列的建議距離更長","B":"應該從上風處小心地接近事故現場；如果方向許可，應該從地勢高處接近事故現場","C":"防護行動距離有可能因為天候、事故嚴重度、地形等等因素而必須調整","D":"一般而言，在夜晚時空氣比較平穩，使得危害物質擴散較慢，因此毒性影響區域範圍會小於發生在白天的狀況"},"answer":"D","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":2080,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"有關化學物質的標示，何者為非？","options":{"A":"每一個危害性化學品都有一個獨立的UN編號。","B":"依GHS制度，化學物質均應有安全資料表（Safety Data Sheet，SDS）。","C":"危險物運輸標示上附有聯合國之物質編號（UN number）危害物質分類及圖示，用以清楚標示運輸車輛、容器內含之危害物質。","D":"依照GHS的規定，化學物質可能有不只一種的危害類型，故可有一個以上的圖示。"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":2086,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"以下關於危害物質應變，何者為是？ (多選)","options":{"A":"強鹼例如氫氧化鈉顆粒，應以刷子盡量移除後，使用大量清水來替病人除污。","B":"輻射事故應變人員的防護衣著考量以避免污染進入身體為主，其次才是阻擋幅射線。","C":"移除輻射事故傷患的衣物時，應保持衣物乾燥，防止污染物繼續附著。","D":"輻射除污必須持續到殘留劑量與背景輻射一致時，才能停止。ABC"},"answer":"A,B","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":2088,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"核生化事件中，有關應變人員的防護衣，下列敘述何者錯誤？","options":{"A":"在冷區執行醫療工作時，穿著C級防護衣即可。","B":"化災防護衣，對於穿透式的輻射線沒有防護作用。","C":"進入毒化災現場，當毒物不明時，應穿戴A級防護衣。","D":"C級防謢衣是包括全面式面罩加上供氧呼吸裝備及全身防潑濺的防護衣。"},"answer":"D","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":2089,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"關於輻射災害事件的現場救護，以下何者為是？","options":{"A":"救護人員照護輻射汙染的傷患，即使有適當防護，也會有嚴重危害。","B":"輻射事故極有可能造成立即性的傷害。","C":"照護輻射汙染傷患，應該以除汙為優先考量、醫療其次。","D":"有生命危險的傷患應盡速後送至最近可處理之醫院，不限於核災急救責任醫院。"},"answer":"D","manualChapter":"CH53"},{"id":2171,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於毒化災事件現場應變，下列敘述何者最不適當？","options":{"A":"冷區是相對安全的區域，在這個區域可穿戴基本防護裝備。","B":"在熱區中不做任何醫療處置，以快速將傷患脫困為重點。","C":"在除汙區進行除汙時，救護人員需穿戴至少C級(或更高等級)防護衣。","D":"初期隔離區域的距離取決於物質本身、風向、日夜、洩漏量及是否起火。"},"answer":"B","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":2172,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"毒化物災害發生時正確的防護裝備等級的敘述，下列何者最適當？ (多選)","options":{"A":"電動車起火現場待火勢撲滅後，消防人員穿著特搜工作服加上SCBA(自給式的呼吸設備)，具有B級防護裝備以上之等級，即可前往現場處理。","B":"C級防護裝備能阻止液體性毒物潑濺，所以可做為暖區除汙的工作人員的防護裝備等級。","C":"冷凍工廠氨氣外洩時，需要著A級防護裝備，提供最高等級的皮膚黏膜及呼吸保護。","D":"石英工廠的氫氟酸發生洩漏，負責後送已經除汙之病人的工作人員需穿著B級防護裝備。"},"answer":"C,B","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":2267,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"有關輻射災害現場救護的觀念，下列何者為非？","options":{"A":"照護輻射污染的傷患，適當防護下，對救護人員、設備和設施不會有嚴重危害。","B":"輻射污染傷患，除污優先，醫療其次，避免後續醫療人員、醫療處所受輻射影響。","C":"有生命危險的傷患，應儘速後送至最近或最快可處理之醫院不限於核災急救責任醫院。","D":"傷患轉送前應脫除身上衣物，從頭到腳、從上而下的方式，剪下衣物，並向內捲。"},"answer":"B","manualChapter":"CH53"},{"id":2268,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"下列危害物質GHS標示說明，何者為是？ (多選)","options":{"A":"氧化性物質。","B":"刺激性物質。","C":"急毒性物質。","D":"爆炸性物質。"},"answer":"C,B","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":2272,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"穿戴防護裝備越高等級的防護裝備會使活動更加的困難。因此永遠要有風險與利益的平衡分析，若已知將遭遇有飛濺危害的已知液體，但蒸氣接觸皮膚有害的可能性低時。請問您出勤前該如何選擇最適當之個人防護裝備？","options":{"A":"A級防護衣。","B":"B級防護衣。","C":"C級防護衣。","D":"D級防護衣。"},"answer":"B","matchedChapters":["CH53"],"manualChapter":"CH53"},{"id":2364,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"有關輻射傷害的現場救護敘述，何者錯誤？","options":{"A":"照護輻射污染的傷患，適當防護下，對救護人員、設備和設施不會有嚴重危害。","B":"有生命危險的輻射污染傷患，仍應先除汙再進行醫療急救處置，以免污染救護人員。","C":"有生命危險的傷患，應儘速後送至最近或最快可處理之醫院，而不限於核災急救責任醫院。","D":"以輻射偵檢器檢測非有生命危險病患身上是否仍有輻射殘留，如果傷患污染區域之輻射劑量在背景值的2~3倍以上，則繼續上述清洗除污步驟。"},"answer":"B","manualChapter":"CH53"},{"id":2458,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於事件指揮系統中後勤組的功能，下列何者為非？","options":{"A":"建立並維護通訊系統。","B":"維護電力及衛生設備。","C":"提供工作人員食物及飲水。","D":"追蹤應變人員的工作時間。"},"answer":"D","manualChapter":"CH53"},{"id":2460,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於不明化學物質外洩現場的災害處置與救護，下列何者正確？","options":{"A":"除污走廊應設在外洩點的下風上坡處。","B":"在熱區可對傷患進行簡單的呼吸道維持治療。","C":"在暖區執行除污時，傷口應以大量高壓水沖洗清潔。","D":"執行除污時，傷患身上的固體毒化物顆粒，需立刻以清水乾淨。"},"answer":"B","matchedChapters":["CH53"],"manualChapter":"CH53"},{"id":2463,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於核生化事件的防護衣，下列敘述何者最適當？","options":{"A":"C級防護衣不可在缺氧環境下使用。","B":"化災防護衣，可防護穿透式的輻射線。","C":"進入毒化災現場，當毒物不明時，應穿戴B級防護衣。","D":"C級防護衣是包括全面式面罩加上供氧呼吸裝備及全身防潑濺的防護衣。"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":2464,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"核電廠發生輻射外洩事件，一名傷患經除汙之後，輻射應變隊偵測傷患身上沒有輻射反應，你獲派運送此傷患就醫。下列敘述何者最適當？","options":{"A":"偵測身上沒有輻射反應，表示該傷患輻射暴露劑量極低。","B":"救護人員治療此位傷患，仍需穿著防輻射衣進行。","C":"傷患出現嘔吐症狀距離輻射暴露的時間，和輻傷嚴重度有關。","D":"該傷患應至少會出皮膚紅、噁心、嘔吐或發燒其中之一的症狀。"},"answer":"C","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":2545,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"關於毒化災現場傷患緊急處理，下列何者為非？","options":{"A":"污染傷口應先清洗，再以防水敷料包紮。","B":"傷患除污，應在設置於暖區的除污走廊內進行。","C":"呼吸衰竭傷患，應於熱區插管後，再送至暖區除污。","D":"眼睛受污染傷患，可以大量生理食鹽水用沖眼器沖洗。"},"answer":"C","manualChapter":"CH53"},{"id":2546,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"關於生物恐怖事件發生的線索，下列敘述何者為非？","options":{"A":"同時出現大量死亡個案。","B":"出現非本土流行之感染症。","C":"常見感染症出現在不尋常季節。","D":"同時出現許多相同症候群病患，尤其是抵抗力較差的老人或小孩。"},"answer":"D","manualChapter":"CH53"},{"id":2552,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"處理輻射事故緊急災害時，下列何者為是？","options":{"A":"我國的輻射事故主管機關為行政院環境保護署。","B":"考量輻射劑量對人體的影響是持續累積的，除經驗豐富之救護人員外，其他人員應避免重複派往第一線執行救護。","C":"輻射傷害影響人體甚鉅，經常會發生立即性的傷害，症狀經常在輻射暴露後30分鐘內即可產生。","D":"災害現場，可以用輻射偵檢器檢測病患是否受到輻射物質汙染。如無輻射汙染，則以一般病患處理，無須除汙。"},"answer":"D","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":2553,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"個人防護裝備的分級原則應用，以下敘述何者為是？","options":{"A":"A級防護具備氣密性，可提供最好的呼吸防護，火場也適用。","B":"A級防護若採供氣的呼吸設備(SABA)，則使用時間就可不受限制。","C":"消防隊員穿著工作服背負自給式的呼吸設備(SCBA)，可視為達成B級防護。","D":"醫院急診醫護人員通常只需達成C級防護。"},"answer":"D","matchedChapters":["CH53"],"manualChapter":"CH53"},{"id":2554,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"現場經過初步除污的毒化災傷患，在後送醫院時的注意事項，以下何者為是？","options":{"A":"情況緊急時，可以不通知後送醫院。","B":"運送人員需穿著C級或以上的防護設備。","C":"除頭髮外，病人應以被單包裹全身。","D":"運送後車輛若無明顯髒污，可直接進行其他救護任務。"},"answer":"B","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":2555,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"某救護現場有輻射污染的疑慮。在除汙之後，輻射應變隊偵測傷患身上沒有輻射反應，以下敘述何者為是？","options":{"A":"該傷患應至少會出皮膚紅、噁心、嘔吐或發燒其中之一的症狀。","B":"上述症狀和現場輻射源強度沒有關係，症狀是否發作與機率有關。","C":"該傷患可確定不曾受到輻射影響。","D":"救護人員處理這樣的傷患，並不會因此受到輻射曝露。"},"answer":"D","manualChapter":"CH53"},{"id":2644,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"指揮中心接獲核電廠反應槽墜落事件，現場一名疑似放射性污染合併外傷患者，下列應變措施何者最適當？","options":{"A":"在現場完成患者全身去污後再後送，避免輻射物質污染後送載具與接收醫院。","B":"進入熱區對患者進行救治時，救護人員須穿著鉛衣以減少輻射傷害。","C":"偵檢發現同仁防護裝備有輻射反應，應以大量溫水做沖洗除污。","D":"患者於後送途中陷入昏迷，應就近送至適當急救責任醫院，不限於核災急救責任醫院。"},"answer":"D","matchedChapters":["CH53"],"manualChapter":"CH53"},{"question":"根據我國《毒性及關注化學物質管理法》，若某化學物質在曝露後立即會對人體造成危害，該物質屬於哪一類？","options":{"A":"第二類","B":"第三類","C":"第一類","D":"第四類"},"answer":"B","manualChapter":"CH53","id":3352,"source":"TP題庫 (圖片匯入)"},{"question":"依照 [毒性及關注化學物質管理法] ，若某種化學物質曝露後會立即危害人體健康，應歸類為哪一類毒性化學物質？","options":{"A":"第一類","B":"第三類","C":"第四類","D":"第二類"},"answer":"B","manualChapter":"CH53","id":3356,"source":"TP題庫 (圖片匯入)"},{"question":"窒息劑(Asphyxiants)對人體造成傷害的機轉不同。下列何種物質會使血液無法攜帶氧氣或細胞無法利用氧氣？","options":{"A":"氮氣","B":"二氧化碳","C":"氰化物","D":"氦氣"},"answer":"C","manualChapter":"CH53","id":3357,"source":"TP題庫 (圖片匯入)"},{"question":"輻射防護最重要的原則何者為非？","options":{"A":"時間","B":"距離","C":"屏蔽","D":"隔絕"},"answer":"D","manualChapter":"CH53","id":3382,"source":"TP題庫 (圖片匯入)"},{"question":"輻射防護的原則，何者為非？","options":{"A":"時間(time)","B":"空間(space)","C":"距離(distance)","D":"屏蔽(shielding)"},"answer":"B","manualChapter":"CH53","id":3387,"source":"TP題庫 (圖片匯入)"},{"question":"依照[毒性及關注化學物質管理法]，若某種化學物質曝露後會立即危害人體健康，應歸類為哪一類毒性化學物質？","options":{"A":"第一類","B":"第三類","C":"第四類","D":"第二類"},"answer":"B","manualChapter":"CH53","id":3455,"source":"TP題庫 (圖片匯入)"},{"source":"EMT-P 第 53 章 P.1456","question":"有關B級防護裝備的防護特性與主要應用位置，下列敘述何者正確？","options":{"A":"提供最高等級的皮膚黏膜保護，但呼吸保護較差，一般用於冷區","B":"在不知道化學品任何性質與高濃度氣體下，B級比A級更適合直接進入熱區源頭止漏","C":"防護衣只能防止液體潑濺且無法阻止液體滲入，人員呼吸為濾毒罐純化之空氣","D":"防護衣為全身式且非氣密，可防止液體毒物滲入但會接觸到外界空氣，一般由暖區除污人員穿著"},"answer":"D","id":3730,"manualChapter":"CH53","matchedChapters":["CH53"]},{"source":"EMT-P 第 53 章 P.無","question":"下列何種毒物主要藉由抑制氧氣利用而造成化學性窒息效應？","options":{"A":"Nitrogen (氮氣)","B":"Carbon dioxide (二氧化碳)","C":"Cyanide (氰化物)","D":"Chlorine (氯氣)"},"answer":"C","id":3733,"manualChapter":"CH53","matchedChapters":["CH53"]},{"source":"EMT-P 第 53 章 P.1466","question":"某輻射災害事故，部分患者灼燙傷皮膚外觀呈蒼白色澤，似乎感受不到痛覺；部分患者肢體對刺激有超乎預期且不成比例的疼痛。試問現場有可能為何種輻射？","options":{"A":"中子束","B":"伽瑪射線 γ rays","C":"β粒子","D":"α粒子"},"answer":"B","id":3737,"manualChapter":"CH53","matchedChapters":["CH53"]},{"source":"EMT-P 第 53 章 P.1457","question":"某日傍晚，一輛運送化學物質的槽車在公路上發生車禍並起火燃燒，救護人員（EMT-P）獲報前往現場救援。現場有數名傷患倒地，且槽車上有明顯的菱形「危險物運輸標示」及聯合國物質編號（UN number）。在未知該化學物質具體特性的情況下，若救護人員欲進入現場「熱區（紅區）」進行緊急救護工作，下列敘述何者錯誤？？","options":{"A":"救護人員必須穿著A級之防護衣，若尚未確定化學氣體種類或無法確定安全，應穿著 A 級防護衣才能進入熱區。","B":"消防隊員若僅穿著日常消防工作服（免責實裝/救災服）並背負自給式呼吸設備（SCBA），因已具備最高等級之呼吸保護，可直接等同於毒化災 B 級以上的充足皮膚與黏膜防護，安全無虞。","C":"現場管制應依事故地點遠近及風向考量，劃分為熱區（紅區）、暖區（黃區）及冷區（綠區），且救護人員應小心地從「上風高處」接近事件現場。","D":"對於熱區內生命徵象不穩定（如失去呼吸、脈搏）的疑似化災傷患，原則上應「先救命、再除污」，快速將傷患移出污染區至安全空氣處，並在緊急狀況下以脫除全身衣物的方式進行初步除污與急救。"},"answer":"B","id":3738,"manualChapter":"CH53","matchedChapters":["CH53"]},{"source":"EMT-P 第 53 章 P.1449","question":"依據我國現行《毒性及關注化學物質管理法》，主管機關將毒性化學物質劃分為四大類。下述關於各類毒化物之定義與病理生理機轉之敘述，何者最適當？","options":{"A":"第一類毒化物為在環境中不易分解或會產生生物堆積者","B":"第二類毒化物為曝露後立即會危害人體生命安全者","C":"第三類毒化物為具有致癌性或導致基因突變與慢性疾病者","D":"第四類毒化物為放射性物質意外事件造成之安全危害者"},"answer":"A","id":3741,"manualChapter":"CH53","matchedChapters":["CH53"]},{"id":45514,"question":"有關輻射災害與毒化災的比較，何者敘述正確？","options":{"A":"輻射污染相較於化學物品，很難在第一時間以簡單儀器測出患者是否有污染，更難以明確定出污染範圍","B":"輻災除污方式，應將患者視為全身污染，以大量水清洗全身","C":"因毒化物半衰期短且容易被清水稀釋毒性，所以毒化災除污區地板不一定需要覆蓋塑膠布","D":"受污染的患者若考慮脫除受污染衣物，在脫除衣物時注意以從腳到頭、從下而上的方式，剪下衣物，並由內向外捲減少污染擴散"},"answer":"C","explanation":"P1469-1471\n輻射污染可以用輻射偵檢器檢測出，並且可以精確的訂出污染範圍(如病人只有某部分肢體受污)；而毒化物種類多樣，無法使用單一儀器來辨識所有的毒化物\n大量水清洗「全面除污」適用於毒化災，以稀釋毒物濃度；輻射污染講求「精準除污」，適量水清洗以減少輻射污物擴散及污水量(輻射污水較難處理)\n脫除衣服應由上而下，避免重要部位眼口鼻的二次污染\n毒化災污水考量到半衰期短、用水可稀釋毒性以及環境可自然分解，故相較於輻射污水可考慮不使用塑膠布(污水排到環境中相對沒那麼嚴重)","source":"同學出題","manualChapter":"CH53"},{"id":45643,"question":"毒化物災害發生時正確的防護裝備等級的敘述，下列何者最適當？","options":{"A":"電動車火勢撲滅後，消防人員穿著特搜工作服加上SCBA，具有B級防護裝備之等級，即可前往現場處理。","B":"C級防護裝備能阻止液體性毒物潑濺及滲入，所以可做為暖區除汙的工作人員的防護裝備等級。","C":"冷凍工廠氨氣外洩時，需要著A級防護裝備，提供最高等級的皮膚黏膜及呼吸保護。","D":"石英工廠的氫氟酸發生洩漏，負責後送已經除汙之病人的工作人員需穿著B級防護裝備。"},"answer":"C","source":"同學出題","manualChapter":"CH53"},{"id":45661,"question":"下列危害物質GHS標示說明，何者為是？","options":{"A":"氧化性物質。","B":"環境危害物質。","C":"急毒性物質。","D":"爆炸性物質。"},"answer":"C","source":"同學出題","manualChapter":"CH53"},{"id":45685,"question":"有關輻射災害與毒化災的比較，何者敘述正確？","options":{"A":"輻射污染相較於化學物品，很難在第一時間以簡單儀器測出患者是否有污染，更難以明確定出污染範圍","B":"輻災除污方式，應將患者視為全身污染，以大量水清洗全身","C":"因毒化物半衰期短且容易被清水稀釋毒性，所以毒化災除污區地板不一定需要覆蓋塑膠布","D":"受污染的患者若考慮脫除受污染衣物，在脫除衣物時注意以從腳到頭、從下而上的方式，剪下衣物，並由內向外捲減少污染擴散"},"answer":"C","source":"同學出題","manualChapter":"CH53"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

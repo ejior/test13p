@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">非創傷 測驗</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：39 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：非創傷</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":90,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMTP到達一個自殺的現場有濃重的惡臭，牆角有一個被撕掉標籤的空瓶。經初評發現病人完全昏迷（對痛沒有反應）、口鼻分泌物大量增加、口吐白沫、呼吸每分鐘12下，頸動脈摸的到（每分鐘50下）、四肢癱瘓、全身皮膚蒼白濕冷、血糖值為180 mg / dL，距離急救責任醫院約20分鐘車程；下列敘述何者為非？","options":{"A":"高級救護技術員在這種情況下須特別注意自我防護以免吸入而造成中毒","B":"病人的瞳孔應該會呈現是擴瞳現象","C":"可請求線上醫療指導同意注射atropine","D":"此種中毒到院後有專屬的解毒劑"},"answer":"B","manualChapter":"非創傷"},{"id":152,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"30歲的男性被發現在浴室中陷入昏述，你和伙伴（都是合格的高級救護技術員）到達現場後發現士官長倒臥在寢室中的浴室，現場有濃重的農藥惡臭，牆角有兩個被撕掉標籤的空瓶，經初評發現病人完全昏迷（對痛沒有反應），口鼻分泌物大量增加，口吐白沫，呼吸每分鐘6下，頸動脈摸的到（每分鐘68下），四肢癱瘓，全身皮膚蒼白濕冷，血糖值為218mg / dL，距離急救責任醫院約45分鐘車程；下列敘述何者為非？","options":{"A":"高級救護技術員在這種情況下須特別注意自我防護，以免吸入過量農藥而造成中毒","B":"需要立即建立進階呼吸道以確保呼吸道暢通，並在病人呼吸停止時給予強迫給氧","C":"病人的瞳孔是針狀瞳，可以線上醫療指導注射atropine解毒","D":"此種農藥中毒並無特別的解毒劑"},"answer":"D","manualChapter":"非創傷"},{"id":220,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"以下配對，何皆為非？","options":{"A":"主動脈剝離一突發性撕裂或刀割般的尖銳疼痛，偶爾合併前胸到後背的轉移痛","B":"急性心肌梗塞一急性左前胸壓迫或悶痛感，常合併下巴或左上肢的轉移痛","C":"自發性氣胸一急性單側胸痛，深呼吸時可減緩疼痛感","D":"輸尿管結石一急性單側腰痛，常合併後腰到鼠蹊部的轉移痛"},"answer":"C","manualChapter":"非創傷"},{"id":473,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"一位肝癌末期患者的家屬打119求救，救護員抵達現場發現患者意識昏迷腹部腫脹，且無呼吸及脈搏，經CPR與電擊急救後回復自發心律（ROSC），此時頸動脈可以摸得到但橈動脈摸不到，以下敘述何者為非？","options":{"A":"若患者有腹水，腹部做叩診可能會出現濁音（dullness）","B":"病患意識不清可能是肝昏迷（hepatic encephalopathy），但也有可能是休克所致","C":"病患有可能為脾臟或肝臟破裂出血所導致","D":"此時病患的血壓降低，但脈搏壓（pulse pressure）可能較正常值為高"},"answer":"D","manualChapter":"非創傷"},{"id":475,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"執行救護面對意識不清的糖尿病患者，倘若無法於到院前測量血糖，下列何種病史相對會讓救護員判定不似低血糖暫不施給糖粉（或暫不靜脈注射葡萄糖液）？","options":{"A":"47歲女性，經醫師建議下最近二天開始規則於皮下施打胰島素，20分鐘前剛注射完畢","B":"14歲男孩，持續不斷嘔吐，呼吸型態偏喘而深","C":"62歲阿婆，最近二天腹瀉不止且食慾不振","D":"72歲阿公，剛起床要去買早餐的路上，雙手緊張顫抖、全身冒冷汗後暈倒在地"},"answer":"B","manualChapter":"非創傷"},{"id":490,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"傷病患對於疾病症狀性質的描述，常常可以給我們有關傷病患所患疾病種類的判斷根據，下列哪一個疾病，通常不用突發性疼痛做為表現？","options":{"A":"腦膜炎","B":"蜘蛛膜下腔出血","C":"中空臟器破裂","D":"胸主動脈剝離"},"answer":"A","manualChapter":"非創傷"},{"id":506,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"一位30歲男性病人，在被蜜蜂叮到胸部之後，突發性呼吸困難，聲音沙啞，眼眶周邊組織血管性水腫、發紺、呼吸輔助肌使用、喘鳴、肺部吐氣期哮鳴音，請問他最可能是以下何種疾病？","options":{"A":"嚴重氣喘發作","B":"張力性氣胸","C":"頸部深部感染","D":"嚴重過敏合併咽喉水腫"},"answer":"D","manualChapter":"非創傷"},{"id":563,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"下列關於病患主訴的症狀，高級救護技術員在評估過後的初步臨床判斷，下列何者是最不合理的初步臨床判斷？","options":{"A":"一位80歲的男性病患，描述在早上起床時，發現右側肢體無力，此時可能要懷疑病人有腦血管性疾病","B":"一位20歲的男性病患，描述昨晚去吃到飽的餐廳大吃大喝，今天早上起床時發現雙下肢無力，此時可能要懷疑病人有週期性低血鉀麻痺等疾病","C":"一位60歲的男性，描述左胸悶痛，平常有抽菸的習慣，最近在運動時會感到胸口有沈重壓迫感，並會延伸到左邊肩膀，休息時會緩解，此時可能要懷疑病人有氣胸等肺部疾病","D":"一位40歲的男性，描述咳嗽時會右邊胸痛，最近有發高燒及痰多的症狀，此時可能要懷疑病人有肺炎等肺部疾病"},"answer":"C","manualChapter":"非創傷"},{"id":583,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位45歲高血壓及糖尿病病患今晨人意識不清，血壓220/130 mmHg，心跳50下/min，最可能為何種原因？","options":{"A":"低血糖昏迷","B":"心肌梗塞","C":"糖尿病高滲透壓昏迷","D":"腦出血合併腦壓上升"},"answer":"D","manualChapter":"非創傷"},{"id":942,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"30歲的男性士官長被發現在浴室中陷入昏迷，你和伙伴（都是合格的高級救護技術員）到達現場後發現士官長倒臥在寢室中的浴室，現場有濃重的農藥惡臭，牆角有兩個被撕掉標籤的空瓶，經初評發現病人完全昏迷（對痛沒有反應）、口鼻分泌物大量增加、口吐白沫、呼吸每分鐘6下、頸動脈摸的到（每分鐘68下）、四肢癱瘓、全身皮膚蒼白濕冷、血糖值為218 mg/dL、距離急救責任醫院約45分鐘車程；下列敘述何者為非？","options":{"A":"高級救護技術員在這種情況下須特別注意自我防護，以免吸入過量農藥而造成中毒","B":"需要立即建立進階呼吸道以確保呼吸道暢通，並在病人呼吸停止時給予強迫給氧","C":"病人的瞳孔是針狀瞳，可以線上醫療指導注射atropine解毒","D":"此種農藥中毒並無特別的解毒劑"},"answer":"D","manualChapter":"非創傷"},{"id":1041,"source":"第四章 非創傷急症(2012-2014).doc","question":"某天，你正在分隊作教育訓練時，有來訪民眾突然倒下，與以「快看電擊板」後發現病人心律為VF，你身為訓練有素的EMT-P，馬上給與去顫電擊，請問電擊完後，接下來的最適當處置為？","options":{"A":"予以再次去顫電擊","B":"予以確認病人脈搏","C":"予以繼續高品質CPR","D":"予以插置氣管內管"},"answer":"C","manualChapter":"非創傷"},{"id":1049,"source":"第四章 非創傷急症(2012-2014).doc","question":"30歲男性病患在公車站突然發生抽搐的現象。根據他的朋友描述，病患突然倒地，先是全身僵硬，牙關緊閉；接著有適當呼吸，但四肢開始抽動，口吐白沫。病患之前並沒有發生過類似的情形。你發現病患意識不清仰躺於地，已經沒有抽搐的情形。下列何項評估或處置為佳？","options":{"A":"應將病患擺成復甦姿勢，以利囗水等分泌物的引流，同時給予病患高流量的氧氣","B":"病患的意識不清有可能是因為他現正處於抽搐後的混淆期，會慢慢恢復清醒","C":"病患的抽搐屬於所謂的「大發作」，一般包含三個階段，其中以陣攣（clonic）期時問最短","D":"在到院前應測量病患的指尖血糖值，因為低血糖可能是造成病患抽搐的原因"},"answer":"C","manualChapter":"非創傷"},{"id":1121,"source":"第四章 非創傷急症(2015-2018).doc","question":"50歲男性，求救原因為意識改變，到達現場時，家人描述今天早上開始解數次大量的便剛突然大吐血了一次後就不省人事，過去病史有肝硬化與肝癌，現場初評發現，病患皮冷，呼吸淺快有雜音，血自口鼻持續冒出，頸動脈微弱且橈動脈摸不到，脈搏約135下/分，呼吸次數約25次/分，血氧濃度85%，意識對痛有些微反應，下列哪個步驟應最優先處置？","options":{"A":"給予高濃度氧氣面罩，提升血氧濃度","B":"接上三導程心律監測器，評估心律","C":"打上兩條大號靜脈管路，快速輸液","D":"清除口鼻血塊，維持呼吸道暢通"},"answer":"D","manualChapter":"非創傷","matchedChapters":["Combine"]},{"id":1139,"source":"第四章 非創傷急症(2015-2018).doc","question":"50歲男性，與友人聊天時，突然昏倒不醒人事，EMT到現場時發現病患對痛有反應，左側肢體無力。目前生命徵象為：血壓210/140mmHg，脈搏86次/分鐘，呼吸22次/分鐘，SPO2 90％。以下敘述何者為非？","options":{"A":"可給與氧氣","B":"可能為腦血管疾病","C":"為預防呼吸抑制的發生，應放置oral airway","D":"可檢測病人的血糖值（one touch）"},"answer":"C","manualChapter":"非創傷"},{"id":1155,"source":"第四章 非創傷急症(2015-2018).doc","question":"請問下列何種診斷較不會出現喘鳴（stridor）？","options":{"A":"肺動脈栓塞","B":"火場救出傷患疑似吸入性灼傷","C":"過敏產生的上呼吸道血管性水腫","D":"急性會厭炎"},"answer":"A","matchedChapters":["Combine"],"manualChapter":"非創傷"},{"id":2046,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"20歲女性吃完日本帶回來的頭痛藥，半小時之後開始全身癢，下列何者正確？","options":{"A":"若病人有腹痛，嘔吐，則多半是因為急性腸胃炎，而非因為過敏症狀。","B":"若病人有低血壓及全身紅疹，需優先考慮蜂窩性組織炎合併敗血性休克。","C":"呼吸受影響時，可能因為支氣管收縮，而產生喘鳴聲，甚至缺氧現象。","D":"合併休克時，epinephrine為最適合的治療，要透過靜脈給予才有效。"},"answer":"C","manualChapter":"非創傷"},{"id":2078,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"39歲男性在連續喝酒數日後，突然癲癇發作並失去意識。你是轄區救護隊，到現場發現病人完全昏迷、口吐白沫，整個臉都是汗水和口水，針狀瞳孔。有關此病人現場的發現與作為，以下敘述何者為是？(選擇［應該要特別注意病人的呼吸狀況，以免分泌物太多造成呼吸道阻塞。］也給分)","options":{"A":"應該要特別注意病人的呼吸狀況，以免分泌物太多造成呼吸道阻塞。","B":"這是有機磷除草劑中毒，應該要注射atropine以及PAM來當作解藥。","C":"在沒有安全的顧慮下，現場遺留的農藥瓶應該隨病人送至醫院以供參考。","D":"病人的瞳孔放大以及臉上的汗水停止分泌後，atropine就可停止使用。"},"answer":"C","manualChapter":"非創傷","matchedChapters":["Combine"]},{"id":2115,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"一位30歲男性在打籃球時，突然目擊暈倒，您到現場後給予高品質的CPR、epinephrine、amiodarone、2次電擊，並進行插管，病人瞳孔3mm/3mm對光無反應，車上後送時ROSC，後續處置描述何者最不正確？","options":{"A":"經急救復甦成功的患者進行治療性微低溫療法(即目標體溫管理)。","B":"治療性微低溫療法(目標體溫管理)可以保護缺血後的大腦。","C":"可能的原因包含急性心肌炎、急性心肌梗塞、各種心肌病變。","D":"葉克膜"},"answer":"D","manualChapter":"非創傷"},{"id":2317,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"一名台電工人，於維修地面高壓電變電箱時突然觸電倒地，目擊者說她看到火花後，傷患四肢抽搐約2分鐘，然後一動也不動地躺在地面。此時你將進行傷患評估及處置，何者為是？","options":{"A":"聯繫相關專業人員切斷電源或就地取材尋找樹枝(木頭)將傷患移至安全區域。","B":"皮膚接觸處可能會有牛眼形狀傷口，電流出口處潰爛、爆炸翻出傷口、局部組織缺損。","C":"早期輸液補充應以葡萄糖液為主，可預防低血容量和後繼相關的腎衰竭，並避免低血糖。","D":"神經組織為較佳的電流導體，所以受到電損傷影響通常較低，受傷後復原的速度也較快。"},"answer":"B","manualChapter":"非創傷"},{"id":2328,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"家屬報案，50歲男性癲癇持續發作，過去有創傷性腦傷與癲癇的病史；您到達現場，發現病患倒臥在客廳地上，意識不清，膚色發紺，持續抽搐中，最優先的處置為？","options":{"A":"測量血氧，使用BVM給氧。","B":"確認意識，施打Midazolam。","C":"給予口咽呼吸道，保護頸椎。","D":"打開呼吸道，確認脈搏。"},"answer":"D","manualChapter":"非創傷"},{"id":2331,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"44歲男性農夫，自述開始工作20分鐘後呼吸困難。你到達現場後發現病人意識清楚，生命徵象如下：體溫36.8°C，心跳110/分鐘，呼吸24次/分鐘，血壓80/50 mmHg。關於接下來的處置與評估，下列何者為非？ (選「即使沒有看到皮膚紅疹也可以考慮給予腎上腺素肌肉注射治療。」也給分)","options":{"A":"需詢問病人是否有氣喘、心臟疾病等慢性病史以列入鑑別診斷。","B":"即使沒有看到皮膚紅疹也可以考慮給予腎上腺素肌肉注射治療。","C":"病人可能合併有嚴重的腹絞痛、噁心或嘔吐等腸胃道症狀。","D":"若病人有明顯黏膜與眼皮水腫，則不適合給予靜脈輸液注射。"},"answer":"D","manualChapter":"非創傷"},{"id":2333,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"67歲男性過去有下背痛及眩暈病史，今天他突然覺得嚴重下背痛，求助於119，身體檢查發現病人臉色蒼白，盜汗，體溫36.7°C，脈搏130次/分鐘，血壓80/50 mmHg，最有可能的診斷為何？","options":{"A":"急性心肌梗塞。","B":"乙狀結腸憩室破裂。","C":"腎結石。","D":"腹主動脈瘤破裂。"},"answer":"D","manualChapter":"非創傷","explanation":"臨床上突發嚴重下背痛/腹痛 + 低血壓/休克徵象（＋/－ 搏動性腹部腫塊），為腹主動脈瘤破裂的典型三聯徵（Classic Triad）。這屬於到院前與急診極度危急、需立即啟動大量輸血與緊急血管介入/手術修補的急症。\n\n腎結石可能引起劇烈腰背痛並伴隨轉移痛，疼痛發作時多因交感神經興奮而呈現血壓偏高、心跳快，本身不會直接引起嚴重的低血壓休克（除非合併嚴重的阻塞性尿路感染導致敗血性休克，但病患體溫 36.7°C 且為急性突發，不符此臨床進程）。"},{"id":2402,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"一位50歲男性，主訴突然上腹劇烈疼痛持續30分鐘，現場生命徵象如下：體溫36.5°C，心跳130下/分鐘，呼吸18次/分鐘，血壓110/60mmHg。病人有抽菸及酗酒病史，意識清楚，自述嘔吐多次及冒冷汗。關於接下來的評估與處置，何者為非？","options":{"A":"病人可能有低血容，若送醫距離較長，可依縣市預立醫囑考慮給予靜脈輸液。","B":"送醫途中須注意呼吸道暢通與血氧濃度，必要時給予氧氣維持SpO2>94%。","C":"病人能清楚闡明自己身體的痛點，可排除心血管疾病而不需考慮心電圖監測。","D":"若觸診腹部有明顯僵硬，表示可能有腸道穿孔所導致的腹膜炎，到院前應請病人禁食。"},"answer":"C","manualChapter":"非創傷","matchedChapters":["Combine"]},{"id":2404,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"病人主訴吐血，以下處理何者正確？","options":{"A":"由於血液碰到胃酸會呈現咖啡色，因此若是口吐鮮紅色的血，就表示不是胃部或十二指腸出血。","B":"糖尿病病人吐血，由於預期到院後要空腹，因此院前處理休克應給予大量含糖輸液。","C":"肝硬化病人食道靜脈曲張出血，相較於常見的消化道潰瘍出血，死亡率反而較高。","D":"只要病人意識清醒，吐血的病人能夠自行保護呼吸道，EMT不需介入維持呼吸道。"},"answer":"C","manualChapter":"非創傷","matchedChapters":["Combine"]},{"id":2407,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"一名主訴呼吸困難病患經評估發現皮膚發紺、血壓降低及脈搏壓變窄。並且出現奇異脈(paradoxical pulse)及深吸氣時脈搏變弱等徵象。最可能為下列何種診斷？","options":{"A":"心肌炎。","B":"心包膜填塞。","C":"心肌梗塞。","D":"房室傳導阻斷。"},"answer":"B","manualChapter":"非創傷"},{"id":2420,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"下列哪一個疾病較會造成低血壓？","options":{"A":"子癲前症。","B":"急性腦梗塞。","C":"腎上腺危象。","D":"安非他命中毒。"},"answer":"C","manualChapter":"非創傷"},{"id":2489,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"你深夜出勤一件路倒的案件，到達現場時病患渾身酒味，意識對痛有反應，暢通呼吸道後發現呼吸型態快且每次都進行深度換氣，下列敘述何者為是？","options":{"A":"此種呼吸稱為陳施氏呼吸(Cheyne-Stokes respiration)。","B":"病患可能是橋腦損傷，要檢查是否有頭部外傷。","C":"病患可能為高血糖引起的代謝性鹼中毒，要驗血糖。","D":"病患可能為喝到假酒，要搜尋四周是否有喝剩的酒。"},"answer":"D","manualChapter":"非創傷"},{"id":2491,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"60歲女性兩週前剛因為左側股骨頸骨折開刀出院，回家後持續臥床休息。兩天前開始呼吸不順、胸痛、今日下床有昏厥跌倒被119送來醫院。理學檢查發現病人血壓90/50 mmHg、心跳106/分、血氧88%、頭部和前胸有擦傷、兩側呼吸音清晰、無明顯心雜音、有頸靜脈鼓張。病人最有可能的診斷是？","options":{"A":"肺炎。","B":"肺栓塞。","C":"心肌梗塞。","D":"心包膜填塞。"},"answer":"B","manualChapter":"非創傷"},{"id":2575,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"病人因胸悶痛叫救護車，使用NTG舌下含片後出現劇烈頭痛與血壓下降，你應懷疑下列何者最適當？","options":{"A":"病人出現過敏反應。","B":"副交感神經被抑制。","C":"血管擴張過度造成顱內壓下降。","D":"硝酸鹽藥物導致顱內血管擴張。"},"answer":"D","manualChapter":"非創傷"},{"id":2585,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"75歲男性由鄰居報案，表示病人今早言語混亂、走路不穩且對時間、地點搞混。屋內空氣異常悶濁，暖爐運轉中。你發現其後腦勺有一處小擦傷，正持續滲血。藥袋上顯示他服用多種處方藥（含鎮靜劑與降壓藥）。根據上述情境，初步鑑別與處置中，何者最適當？","options":{"A":"現場應優先處理後腦出血點給予加壓止血，因其為最可能造成意識混亂的主因。","B":"若該老年人有失智症病史，可能症狀起起伏伏，評估後應送至附近本來長期就醫的精神專科醫院調整藥物。","C":"現場環境與病史提示可能有一氧化碳中毒，應考慮開窗通風，並給予病人高濃度氧氣。","D":"如病人有服用propranolol（beta blocker），低血糖時會有明顯心跳加快和手抖，有助於現場辨識。"},"answer":"C","manualChapter":"非創傷"},{"id":2586,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"65歲男性因昏厥冒冷汗叫救護車，EMT - P進行病人評估為GCS E4V5M6、呼吸12次/min、濕囉音（crackles）、血壓80/40mmHg、脈搏60次/min、SpO 2 92%、下肢水腫，病人於車上抽搐後呈現VF心律。請問病人最可能是5H5T哪個原因？","options":{"A":"低血容積（Hypovolemia）。","B":"張力性氣胸（Tension pneumothorax）。","C":"中毒（Toxins）。","D":"冠狀動脈血栓（Thrombosis/Coronary）。"},"answer":"D","manualChapter":"非創傷"},{"id":2621,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"60歲男性，在家中突然吐血，到達時發現浴室滿地都是血，病人意識清楚，呼吸淺快、膚色蒼白，血壓為70/40mmHg，針對病患的評估及處置，下列敘述何者最適當？","options":{"A":"如果吐出的血為鮮紅色，則可判定為下消化道出血。","B":"如果病人有肝硬化病史，最可能為食道動脈破裂導致出血。","C":"可以讓病人呈半坐臥以保護呼吸道。","D":"若給予輸液無效，可以給予Transamine靜脈滴注。"},"answer":"C","manualChapter":"非創傷"},{"id":3310,"source":"AI出題","manualChapter":"非創傷","question":"62歲男性，有高血壓、高血脂病史，被家屬發現在房間內行為怪異、流口水、全身大汗淋漓。EMT到場時，傷患神智不清（GCS: E2V2M4），檢查發現瞳孔極度縮小（針狀瞳孔）、肌肉局部抽搐（Fasciculations），且不斷有稀水便與嘔吐物排出，床邊散落著數瓶未知的農用化學製劑。現場生命徵象：心跳每分鐘 48 次、呼吸每分鐘 26 次且滿是濕囉音（Wheezing/Rales）、血壓 90/50 mmHg。請問下列關於此病患的評估與救護處置，何者最不適當？","options":{"A":"此症狀為典型的膽鹼性症候群（Cholinergic toxidrome），主因是體內乙醯膽鹼大量累積所致","B":"第一線救護人員應在確保自身防護（PPE）安全後再接觸病患，避免經皮吸收二次中毒","C":"到院前應遵照醫囑，立即給予解毒劑 Atropine，其主要目的是為了讓瞳孔放大以利觀察意識","D":"應維持呼吸道暢通，並隨時準備進行口鼻腔分泌物之抽吸（Suction）"},"answer":"C"},{"source":"TP題庫","question":"下列哪項病徵不會造成低體溫?","options":{"A":"低血糖","B":"嚴重敗血症","C":"甲狀腺功能低下","D":"先天性心臟病"},"answer":"D","manualChapter":"非創傷","matchedChapters":["CH20"],"id":3753,"explanation":"敗血症雖然常以發燒表現，但在年長者、免疫低下族群或新生兒/嬰幼兒身上，常因體溫調節中樞失調、全身血管劇烈擴張導致體熱大量散失，而表現為反常性低體溫（體溫<36度），在 qSOFA / SIRS 診斷標準中即包含低體溫，且低體溫往往代表預後極差。\n\n葡萄糖是大腦下視丘（Hypothalamus）體溫調節中樞及全身骨骼肌顫抖產熱（Shivering）最重要的能量基質。當發生嚴重低血糖時，中樞調節功能停擺且細胞代謝受抑、無法有效產熱，常合併冒冷汗加速體表散熱，極易引發低體溫。\n\n甲狀腺素是主導全身基礎代謝率（BMR）與細胞產熱（Thermogenesis）的關鍵荷爾蒙。甲狀腺功能低下會導致代謝率大幅滑落，最嚴重的情況可併發黏液水腫性昏迷（Myxedema coma），典型特徵即為重度低體溫、心搏過緩與意識改變。"},{"id":3755,"source":"TP題庫","question":"下列何者不會造成低血氧?","options":{"A":"肺栓塞","B":"肺炎","C":"DKA","D":"心臟衰竭"},"answer":"C","manualChapter":"非創傷","matchedChapters":["CH20"],"explanation":"DKA 本質上是代謝性疾病，因體內酮酸大量堆積導致嚴重的高陰離子間隙代謝性酸中毒（Metabolic acidosis）。病患最典型的臨床表現為庫斯毛耳氏呼吸（Kussmaul breathing，深且快的代償性換氣），目的是將體內的過量CO2排出以提高血液 pH 值。除非合併吸入性肺炎、急性肺水腫或敗血症引發的 ARDS，否則單純的 DKA 患者肺泡氣體交換功能完全正常，肺泡與動脈血氧分壓皆足夠，血氧飽和度（SpO2 / PaO2）通常是正常甚至偏高的，不會直接造成低血氧。\n\n其他選項會造成低血氧的原因：\n心臟衰竭：左心衰竭會引發肺靜脈壓力上升及肺微血管滲出，導致急性肺水腫。肺泡充斥液體妨礙氣體擴散，並造成通氣/血流比例失衡（V/Q mismatch 與 Shunt），引起顯著低血氧。\n肺炎：肺泡內充滿炎性滲出物、濃稠分泌物與實質化（Consolidation），導致灌流的血液無法接觸新鮮空氣，形成嚴重的肺內分流（Intrapulmonary shunt），是臨床上造成低血氧的常見原因。\n肺栓塞：血栓阻塞肺動脈分支後，該區域有通氣卻無血液灌流（形成無效腔死腔），其餘肺組織因血流代償性過度灌注而產生顯著的 V/Q 比例不均（V/Q mismatch），伴隨反射性肺泡塌陷與動靜脈分流，引起急性突發性低血氧。"},{"id":45724,"question":"下列哪一個選項不會造成低血壓？","options":{"A":"安非他命中毒","B":"腎上腺危象","C":"懷孕晚期孕婦平躺","D":"曝露於30戈雷以上的病人"},"answer":"A","source":"大白","manualChapter":"非創傷"},{"id":45744,"question":"若病人有尿毒症病史，近日因故未能正常洗腎，其無脈搏電氣活動的原因下列何者為非?","options":{"A":"鉀離子過高","B":"酸血症","C":"低血容量","D":"體液容積過負荷引發心包填塞"},"answer":"C","source":"大白","manualChapter":"非創傷"},{"id":45746,"question":"下列何者非右心室心肌梗塞病徵?","options":{"A":"低血壓","B":"頸靜脈怒張","C":"雙側肺音對稱、清楚","D":"意識混亂"},"answer":"D","source":"AI出題","manualChapter":"非創傷"},{"id":45757,"question":"梅尼爾氏症是屬於何種疾病?","options":{"A":"內分泌疾病","B":"神經疾病","C":"內耳疾病","D":"精神疾病"},"answer":"C","source":"大白","manualChapter":"非創傷"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

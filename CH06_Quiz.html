@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 6 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：54 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH06</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":4,"source":"105 高級救護技術員甄試筆試題目.doc","question":"火場救災中有同袍受了重傷，身為EMTP，你可以察覺其它隊友如果出現下列症狀，很可能是創傷後症候群（PTSD），但何者為非？","options":{"A":"不斷地對他人談起火場裏的事","B":"變得過度緊張","C":"失眠","D":"注意力無法集中"},"answer":"A","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":57,"source":"105 高級救護技術員甄試筆試題目.doc","question":"你出勤救護一位燒炭自殺的中年男性，到達現場時，發現他已呈現深度昏迷的狀態。請問下列敘述何者為非？","options":{"A":"到達現場必須注意通風，注意施救者的安全","B":"病患血中一氧化碳血紅素應該超過50％","C":"若測量血氧濃度（SPO2）＞94％，不必一定要給氧","D":"若測量血氧濃度（SPO2）過低，問題可能出在呼吸道未暢通"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":189,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"20歲女性，燒炭自殺不慎引起火警。EMT從火場移出後傷患意識不清，對聲音有反應，無鼻毛燒焦，全身無燒燙傷痕跡，無明顯外傷。血壓120/70，脈搏100，呼吸20，呼吸平順無雜音。下列處置何者為是？","options":{"A":"立即建立呼吸道，包括ロ咽，鼻咽甚至於LMA","B":"可給予非再吸入型氧氣面罩並調整流速至15公升/分，以提供高濃度氧氣","C":"立即以鼻翼管給予氧氣治療以提高血氧濃度","D":"應以血氧監視器評估。若無缺氧現象，可以不用氧氣治療"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":348,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"王先生是一位肺癌末期的病患，因而早已預立不施行急救的意願書，您接獲家人報案後至現場，現場家屬表示王先生由於久病厭世，服用大量嗎啡企圖自殺，初步評估:病人意識不清GCS E1V2M4，成針孔瞳孔，呼吸次數8/分鐘，血氧濃度80%，現場家屬很多，但各持一方意見，有些要你趕快送醫，有些則希望遵從患者DNR的遺願阻止你送醫，下列敘述何者為是？","options":{"A":"遵從病患自主，解釋後不予送醫","B":"病患有自殺行為，採強迫同意，強制送醫","C":"依現場家屬在安寧療護法的順位（配偶、成年子女、父母⋯·），決定送醫與否","D":"請現場家屬盡速討論，待家屬有共識後，再決定是否送醫"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":552,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關醫療救護與病患溝通四步驟與技巧（The Four Habits Model），下列何者為是？1.展現同理心（Demonstrate Empathy）2.開場（Invest the Beginning）3.確認病患認知（Elicitthe Patient's Perspective）4.結論與總結（Invest in the End）。","options":{"A":"1→2→4→3","B":"1→3→2→4","C":"2→3→1→4","D":"3→2→1→4"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":639,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"下列何者不是心肌的特性？","options":{"A":"具自動節律性（autorhythmicity/automaticity）","B":"具有相當長的不反應期（refractory period）","C":"可誘發強真收縮（tetanus）抽筋的現象","D":"細胞間彼此緊密連接·使動作電位可以同時快速地傳給其他細胞引發一致收縮"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":690,"source":"第五章 創傷急症(2012-2014).doc","question":"下列關於腹部外傷的敘述，何者為非？","options":{"A":"爆炸傷時，需懷疑中空器官（如腸胃道）破裂","B":"中空器官破裂引發的腹膜炎，傷者死亡速度往往較實質器官（如肝脾）破裂致死來得快","C":"Turner sign為後腹腔損傷的皮膚表現，可見傷者腰部出現瘀青","D":"右上腹損傷者，還需考慮右下肺及肋骨損傷可能"},"answer":"B","manualChapter":"CH06"},{"id":744,"source":"第五章 創傷急症(2012-2014).doc","question":"你出勤到現場救護一名從天橋墜落、患有憂鬱症之19歲女性傷患時，發現傷患仰躺在馬路上，眼睛張開，一直在呻吟。此時你呼喊傷患，傷患眼睛仍一直張開並持續呻吟，對你的呼喊毫無回應。當你以疼痛刺激其胸骨時，傷患眼睛仍然張開、仍一直呻吟且手會動，但無法越過傷患身體中線及其肩膀。請問下列有關傷患GCS（Glasgow coma scale）評分，何者正確？","options":{"A":"E2M4V2","B":"E2M5V2","C":"E4M4V2","D":"E4M5V2"},"answer":"A","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":761,"source":"第五章 創傷急症(2012-2014).doc","question":"20歲女性，燒炭自殺不慎引起火警。EMT從火場移出後傷患意識不清、對聲音有反應，無鼻毛燒焦、全身無燒燙傷痕跡、無明顯外傷。血壓120／70，脈搏100，呼吸20，呼吸平順無雜音。下列處置何者為是？","options":{"A":"立即建立呼吸道，包括口咽、鼻咽甚至於LMA","B":"可給予非再吸入型氧氣面罩並調整流速至15公升／分，以提供高濃度氧氣","C":"立即以鼻翼管給予氧氣治療以提高血氧濃度","D":"應以血氧監視器評估。若無缺氧現象，可以不用氧氣治療"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":776,"source":"第五章 創傷急症(2012-2014).doc","question":"根據ATLS第9版，目前對於休克病患的急救概念，以下「何者為非」？","options":{"A":"Controlled resuscitation（控制性的輸液急救治療）","B":"Balanced resuscitation（平衡性的輸液急救治療）","C":"Hypotension resuscitation（維持可接受性的低血壓）","D":"Aggressive resuscitation（積極性的輸液急救治療）"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":908,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於老人急症，下列敘述何者為是？","options":{"A":"老人突發意識混亂原因多是因腦部退化及年老失智所致","B":"老人因為常穿著過多衣物，因此容易造成體溫過高，量測不準的情形","C":"老人多有心肺功能不佳或本身就有慢性疾病，情緒及心理及自殺問題反而較年輕人少","D":"創傷為老人第五大死因，大部分創傷死亡原因為車禍，跌倒也是老人失能和死亡的原因"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":956,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"有關自殺以及準自殺行為的危險因素，下列敘述何者為非？","options":{"A":"執行一次或多次的準自殺行為","B":"單身，分居或離婚","C":"沒有職業或退休","D":"與家人或社會有良好的互動"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":960,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"以下關於老年病患到院前照護的敘述，何者為是？","options":{"A":"老年病患跌倒送往醫院時，EMT應蒐集資訊判斷是否可能有內科急重症問題讓病患跌倒，並告知檢傷相關訊息","B":"老年病患因為代謝比較慢，所以比起一般成年人容易低體溫。也因為代謝慢，所以比較不會高體溫","C":"老年病患若有自殺的行為，通常成功的比例比其他年齡層低","D":"老年病患若遇到外傷所致之顱內出血，因為頭骨與腦部之間的空間增加，因此出血早期就會出現顱內壓升高之症狀"},"answer":"A","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":985,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"18歲女性病患，去KTV唱歌因喝下他人請的飲料後自覺有異，於是起身離開並由室友打119求助。你抵達時發現此名病患情緒高亢且焦躁不安，生命徵象如下：呼吸每分鐘28下、脈搏每分鐘136下、血壓為190/100 mmHg、體溫為37.8℃。理學檢查可見瞳孔略放大、光反射不明顯，另有全身發汗的現象，其他部分則未見明顯異常。請問下列敘述及處置何者為非？","options":{"A":"這名女性病患很有可能是攝入了中樞神經刺激劑的物質","B":"古柯鹼在美國是最受歡迎的非法藥物之一，藥物治療一開始的首選為鎮靜安眠藥（ben-zodiazepines）","C":"安非他命成癮的病患，突然停用會產生所謂的“當機crash”階段，會變的憂鬱.想自殺，沒有條理的思考.行為或接近昏迷","D":"搖頭丸（MDMA）當初在醫療上的用途是用來治療注意力障礙或活動過渡症（ADHD），後來才衍生出濫用問題"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":997,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"某女士因為情場不如意又失業，在家裡燒木炭自殺，您到達現場，發現某女士已呈現昏迷的狀態，下列何者為非？","options":{"A":"到達現場必須注意通風，注意施救者的安全","B":"可以使用血氧偵測器（Pulse oximeter）測量其血一氧化碳濃度","C":"一氧化碳中毒的解毒劑是氧氣","D":"必須注意病人呼吸道"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":1014,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"老人急症中，關於瞻妄與失智的敘述，下列何者為是？","options":{"A":"瞻妄為對時間和地點慢慢進展的記憶喪失","B":"失智症為突然對時間和地點產生混亂","C":"瞻妄跟器質性腦病變有關，也跟酒精中毒和戒斷、藥物作用、發燒、代謝性疾病、腫瘤有關，多為不可逆","D":"失智症通常和中風、基因、病毒、阿茲海默症有關，多為不可回復"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":1019,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"下列於憂鬱症的描述，何者為非？","options":{"A":"可能與腦內生物傳導.內分泌.大腦構造等有關","B":"與基因遺傳無關","C":"與生活壓力.重大創傷.和嚴重失落打擊有關","D":"有些婦女在產後會有憂鬱症的狀況產生"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":1021,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"根據2015年美國心臟學會與美國兒科醫學會所共同制定的最新版新生兒急救術（Neonatal Resuscitation Program），下列敘述何者為是？","options":{"A":"黃金一分鐘是指情況緊急的新生兒，自開始接觸評估後一分鐘內要開始給予壓胸急救","B":"新生兒是否需要開始急救要先評估是否足月.膚色是否紅潤.有無呼吸與哭泣.與肌張力，上述任一項不正常則要開始進行新生兒急救術的系列評估與處置","C":"足月兒若只需要正壓呼吸，剛開始的時候給予室內空氣（Room air）即可","D":"正壓呼吸的速度為每3～5秒給一口氣"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":1033,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"下列有關準自殺行為與自殺病患的描述，何者為是？","options":{"A":"女性的準自殺行為較多，而且女性的自殺成功率也比男性高","B":"酒精成癮病患因為有酒精的鎮靜效果，所以自殺危險性較低","C":"自殺的危險因素包括單身或離婚或分居，退休或沒有職業","D":"自殺及準自殺病患大多是臨時起意，和精神疾病沒有相關"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":1035,"source":"第四章 非創傷急症(2012-2014).doc","question":"根據復甦醫學界著名的心臟停止後三階段急救模式（3-Phase Time-Sensitive Resuscitative Model），下列敘述正確的是？","options":{"A":"心跳剛停止後的4分鐘內是circulatory phase，此時徒手的CPR將是最有效的治療","B":"心跳停止後的4～10分鐘是metabolic phase，此時最有效的治療是以各種急救藥物進行處理","C":"心跳停止後的10分鐘以上是electrical phase，此時往往必須靠多次的電擊去顫術才能恢復心跳","D":"以上皆非"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":1082,"source":"第四章 非創傷急症(2015-2018).doc","question":"一位平時有酒癮的病患，突然發生抽搐，造成頭部外傷，且意識不清，以下作法何者為非？","options":{"A":"應測量血糖並給予維他命B1補充","B":"為了避免影響判斷是否為酒精戒斷所引起的抽搐，應避免給予Lorazepam此類鎮靜藥物","C":"此時不應給予Flumazenil此類鎮靜劑之拮抗藥物，因可能再引發抽搐","D":"有可能是酒精造成的意識不清，但仍需注意是否有腦出血的可能"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2001,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"對於「創傷後壓力症（PTSD）」的描述何者為非？","options":{"A":"常常與其他精神疾病並存。","B":"常常被誤診為詐病（malingering）或環境適應反應（adjustment reaction）...等等。","C":"只能靠藥物治療。","D":"適切治療後，仍然可以重返專業，繼續為民眾服務。"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2091,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"高級救護技術員在閱讀研究文獻時，可以使用Bradford Hill criteria，來審查究竟為因果關係與否，還是僅只有相關性。有關於Bradford Hill criteria，不包括下列哪一項？","options":{"A":"一致性（consistency）。","B":"類比（analogy）。","C":"敏感性（sensitivity）。","D":"特異性（specificity）。"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2098,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"EMT阿志過去無精神科病史，在參與大地震救災後三個月，開始對平時喜歡的釣魚失去興趣、經常鬱鬱寡歡、一點小事就感到憤怒、會不斷地出現事件的痛苦回憶與情緒，即使換單位這個情況仍持續了一年多，下列敘述何者為最適當？","options":{"A":"阿志經歷創傷事件後的這些情況首先考慮急性壓力症(Acute Stress Disorder，ASD)。","B":"被診斷為急性壓力症的病人，兩年內有較少機率會形成創傷後壓力症。","C":"精神科醫師治療阿志的這種情況最常使用的治療藥物為抗憂鬱劑。","D":"最可能的原因是日常業務的壓力超過阿志所能承受，因此出現適應障礙的問題。"},"answer":"C","manualChapter":"CH06","matchedChapters":["CH06"]},{"id":2121,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於出血性休克傷患輸血注意事項，下最何者最正確？","options":{"A":"為避免低體溫，輸血前需將血品放入溫水槽或微波爐中加熱至39°C。","B":"對於有懷孕能力的婦女，為避免造成將來懷孕時之併發症，建議可使用Rh陽性血輸血。","C":"傳明酸(Tranexamic acid)主要功能為促進血小板凝集，加速血栓形成以達到止血效果。","D":"大量輸血時，以濃縮紅血球：血漿：血小板=1：1：1的比例給予，進行平衡式的復甦(Balanced resuscitation)。"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2131,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"28歲女性，機車車禍。仰躺在離事發地點約5公尺遠的地上，現場無明顯大量血跡，不斷發出呻吟聲，橈動脈摸不到，但頸動脈摸得到，脈搏約130下/分鐘，理學檢查時發現右上腹有瘀傷，觸診會皺眉，發現傷患的會陰部有出血的情況，關於現場處置，請問以下何者最適當？","options":{"A":"就算會陰部有瘀青，但若骨盆觸診沒有壓痛，可以不用上骨盆固定帶。","B":"右上腹痛合併休克，因解剖位置的考量需懷疑是脾臟損傷造成出血。","C":"如果懷疑有腹內出血，可以考慮在現場掃FAST確認。","D":"像這樣的腹腔內出血，可通知院後考慮使用血管內氣球阻斷術(Resuscitative Endovascular Balloon Occlusion of the Aorta, REBOA)止血。"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2159,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列有關精神疾病敘述與處置，何者最適當？","options":{"A":"思覺失調症通常會有視幻覺。","B":"思覺失調症通常由於多巴胺(dopamine)在腦中傳導增強，藥物可用多巴胺受器的拮抗劑(dopamine receptor antagonist)治療。","C":"依據統計，女性比男性更容易自殺成功。","D":"精神病人情緒不穩定時，必須維持病人情緒平靜，盡量多與病人身體接觸安撫病人。"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2161,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"陳先生有頭暈、左上腹有不適感，生命徵象穩定。病人擔心自己有可能是心肌梗塞的可能，要求要送兩小時外的醫學中心。病人表示自從股票大賠後，這種情形已經有半年了，每次都會感覺心臟跳很慢就像要停止一樣恐怖。試問病人最有可能是哪一種精神急症？","options":{"A":"焦慮症(anxirty diordor)。","B":"思覺失調症(schizophrenia)。","C":"憂鬱症(depression)。","D":"躁鬱症(bipolar disorder)。"},"answer":"A","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2188,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"消防隊員小志支援火警任務。現場發生閃燃，分隊很照顧他的資深學長不幸往生。事發後小志腦裡還常浮現閃燃和急救學長的畫面，不斷地出現自責、生氣、失眠的現象，也不願意靠近救護車。請問您覺得小志怎麼了還有可以如何幫助他的以下敘述，何者最為正確？","options":{"A":"事件造成小志極大的痛苦並且影響到日常生活，可能會持續一個月以上。","B":"事發了解小志曾罹患焦慮症，但這病史不會讓他更容易得到創傷後壓力症。","C":"經歷嚴重的創傷事件後，出現短期急性壓力症是常見的，不用擔心。","D":"創傷後壓力症與急性壓力症的首選治療方式為「藥物治療」，所以要陪同他盡快就醫服藥。"},"answer":"A","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2189,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"根據高級救護技術員教科書(第二版)提到，當救護技術員遇到精神異常的救護時，應該快速地評估病人狀況，以下何者相對較不重要？","options":{"A":"主要求救原因。","B":"是否有攻擊行為。","C":"是否有自殺意圖或計畫。","D":"是否有精神病史。"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2254,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"您被派遣到一個跳樓救助的現場，一名女性在十層樓高的陽台外揚言要輕生，情緒非常激動。請問在這個情形下，病人評估及處置技巧的敘述，下列何者為非？","options":{"A":"由於病人的思緒處在相當混亂的階段，採取讓病人回答「是」或「不是」的是非問題，以免刺激到病人的情緒。","B":"可以考慮減少外界對病人的刺激，並減少現場的噪音、光亮，維持相對舒適的環境會對控制病人有所幫助。","C":"憂鬱症病人最令人擔心的是自殺問題，據國內研究統計，自殺死者中97%生前有精神疾病。","D":"此類病人危急處置的目標包含穩定情勢或病人的情緒、善用現場的人力資源並使病人恢復正常情緒。"},"answer":"A","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2255,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"在確立精神疾病的診斷前，應先排除其他內科急症。下列診斷何者最不可能有類似躁症的臨床表現？","options":{"A":"紅斑性狼瘡。","B":"腎衰竭。","C":"吸食安非他命。","D":"低血鉀症。"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2276,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"英國統計學家Sir Austin Bradford Hill提出Bradford Hill criteria，來審查確認推定原因與研究結果，之間因果關係。包括條件何者為非？","options":{"A":"強度(strength)：有較大的相對風險(relative risk)。","B":"可逆轉性(reversibility)：降低曝露導致較小的疾病機率產生。","C":"時序性(temporality)：因在果前面發生。","D":"特異性(specificity)：數個因導致一個特定的果。"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2281,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"如果您是因為「不想進火場、那麼只跑救護好像也不錯」的想法而參訓EMTP，根據馬斯洛需求理論，這樣的動機層次是屬於？","options":{"A":"生理需求。","B":"愛與歸屬。","C":"安全需求。","D":"自我實現。"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2287,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"下列何者最不可能是我國高級救護技術員法定之緊急救護範圍？","options":{"A":"在支援大型活動醫療站時給予頭痛病人服用普拿疼(Acetaminophen)。","B":"在高山偏遠地區，對疑似高山肺水腫低血氧病患進行氣管內管插管。","C":"在送醫途中對有脈博不穩定之心室頻脈病患進行心臟整流(Cardioversion)。","D":"在救護現場依預立醫療流程執行TOR(Termination-of-resuscitation)現場判定死亡。"},"answer":"A","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2348,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"76歲女性於凌晨三點通報胡言亂語、精神異常，請你至現場進行相關救護。你抵達現場後，病人表示聽到佛祖在跟她說話，說話顛三倒四，缺乏現實感；家屬表示病人過去病史為高血壓及糖尿病，並精神科相關病史，昨天睡覺前對答也都很正常。現場量測生命徵象為E4V5M6、體溫37.6度、心跳每分鐘110下、呼吸每分鐘24下、血壓130/100 mmHg。請問關於此病人的相關敘述何者最適當？","options":{"A":"有明顯聽幻覺應為思覺失調症發作，需送往精神科醫師值班之醫院。","B":"年齡和性別都是思覺失調症高盛行率族群，應詢問有無相關家族史。","C":"雖然GCS滿分，但意識混亂，根據過去病史，仍應先進行血糖量測。","D":"心跳較快應與情緒激動、胡言亂語有關，需要現場施作心電圖。"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2349,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"請問關於下列四位自殺病人的風險評估，何者錯誤？","options":{"A":"22歲跟男友分手後賭氣服安眠藥自殺的女性病人，其自殺高風險因素為單身。","B":"70歲退休獨居男性於家中上吊自殺，其自殺高風險因素包含老年退休男性。","C":"33歲憂鬱症女性合併酒精成癮在家燒炭，其高風險因素包含物質濫用及精神疾病。","D":"35歲無過去病史、家庭支持良好、事業有成男性作勢跳樓，並無明顯高風險因素。"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2358,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"你參與旅行團前往玉山攻頂，在排雲山莊睡到凌晨時，發現室友嚴重失眠並且抱怨自己頭痛難耐，吃了止痛藥也沒有效果，你懷疑他高山症(Acute Mountain Sickness)發作；連忙跟導遊反應，決定透過無線電與山下支援醫院求助。下列的描述，何者最不適當？ (多選)","options":{"A":"以無線電回報時，應一併報告有無呼吸道症狀、感覺疲憊/虛弱或頭暈 /頭重腳輕等症狀，以利支援後線判斷高山症的嚴重程度。","B":"病人表示登山前有吃丹木斯(Acetazolamide)，也有攜帶上山，這個藥也可用來當作治療建議病人服用。","C":"病人出現呼吸困難、咳嗽帶粉紅色泡泡，此時應立即摸黑下山不該再等。","D":"在下山途中病人開始步態不穩、意識不清，此時應給予氧氣治療，並選擇有加壓艙的醫院。"},"answer":"A,C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2447,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於準自殺行為的危險因子，下列何者為非？","options":{"A":"退休狀態。","B":"完美主義人格。","C":"婚姻處於分居狀態。","D":"曾執行一次的準自殺行為。"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2450,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"王太太因情緒不佳，去藥局買了一些普拿疼(Acetaminophen, ACT)企圖自殺，服用一小時由119送來急診。下列敘述何者為非？","options":{"A":"其主要毒性傷害為肝毒性，如未治療，症狀在第3、4天最為嚴重。","B":"病人到院時就要馬上抽測血中ACT濃度，並立刻給解毒劑治療。","C":"解毒劑是N-Acetylcysteine，8小時內使用有很高的機會完全康復。","D":"服用解毒劑N-Acetylcysteine時，不應同時給予活性炭治療。"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2453,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"你接獲通報，前往協助一名酒醉路倒的病患送醫；當你到場時，發現病患渾身酒氣、意識不清、全身瘀青倒在店家門口，老闆表示病患這幾天都沒吃東西，剛剛半小時前又跟他買酒喝，希望你載他到附近醫院就醫；在運送過程中，病患突然牙關緊閉、眼睛上吊、疑似癲癇發作(seizure)，請問引起此病患癲癇發作的鑑別診斷何者最不可能？","options":{"A":"電解質異常(Electrolyte imbalance)。","B":"酒精戒斷(Alcohol withdrawal)。","C":"創傷性腦損傷(Traumatic brain jury)。","D":"低血糖(Hypoglycemia)。"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2503,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"下列情形皆可能引發抽搐現象(seizure - like movements)，但何者為非？","options":{"A":"頭部外傷head injury。","B":"藥物戒斷drug withdraw。","C":"慢性偏頭痛migraine。","D":"心室顫動ventricular fibrillations。"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":2563,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"救護技術員在出勤時接獲報案，現場一名45歲男性在家中服用大量安眠藥，但仍有呼吸與意識反應。其妻表示，近來他常抱怨「工作壓力太大、活得沒意思」，並曾搜尋上吊與燒炭的資料。依據自殺相關名詞的區分，該病人目前的行為最接近下列何者？","options":{"A":"自殺意念。","B":"自我傷害。","C":"自殺企圖。","D":"自殺死亡。"},"answer":"C","manualChapter":"CH06"},{"id":2635,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"EMT-P出勤疑似藥物過量患者，病人表現與現實脫節及易怒衝動，伴隨自傷意圖，現場環境混亂。需配合動員警察及衛生人員處理護送就醫及穩定情勢。下列配合方式，何者最適當？","options":{"A":"病人失去理智，無法進行任何形式的交流，就應尋求警察額外的支援，採取必要的約束措施。","B":"約束患者時，至少3人團隊，上肢約束時，一臂向上、一臂向下，通常左上右下。","C":"使用Haloperidol注射對於安非他命中毒患者無益，會增加橫紋肌溶解、高血壓急症與心律不整的風險。","D":"抗精神病藥物（antipsychotic）是緊急醫療救護中常使用的藥物，但常常合併高成癮性風險。"},"answer":"A","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":3317,"question":"急性壓力症(ASD)症狀維持時間？","options":{"A":"1到3天","B":"3到6天","C":"3到15天","D":"3天到1個月"},"answer":"D","source":"TP題庫","manualChapter":"CH06"},{"question":"關於自殺分類，下列何者為「意圖與計畫造成死亡的行為」？","options":{"A":"自殺意念","B":"自我傷害","C":"自殺企圖","D":"自殺死亡"},"answer":"C","manualChapter":"CH06","id":3424,"source":"TP題庫 (圖片匯入)"},{"question":"關於創傷及壓力相關障礙症的病因起源，下列敘述何者錯誤？","options":{"A":"創傷後壓力疾患 (PTSD) 通常源自於目擊或經歷創傷事件。","B":"急性壓力症 (ASD) 的病因與 PTSD 相似，皆為目擊或經歷創傷事件。","C":"適應障礙症 (AD) 的病因起源於一般壓力源產生。","D":"只有創傷後壓力疾患 (PTSD) 的病因是來自於重大創傷，ASD 與 AD 皆不是。"},"answer":"D","manualChapter":"CH06","source":"AI出題","id":3489},{"question":"某位患者在經歷一場重大車禍後，持續出現害怕、恐懼、無法經驗到正向情緒以及失去現實感的症狀。根據表格特徵，且無出現自我傷害行為，此患者最符合下列何種診斷的「現象與行為」？","options":{"A":"創傷後壓力疾患 (PTSD)","B":"急性壓力症 (ASD)","C":"適應障礙症 (AD)","D":"泛焦慮症 (GAD)"},"answer":"B","manualChapter":"CH06","source":"AI出題","id":3490},{"question":"創傷後壓力疾患 (PTSD) 與急性壓力症 (ASD) 在「症狀維持時間」上的主要判定區別為何？","options":{"A":"ASD 的症狀維持時間為 3 天到 1 個月，而 PTSD 為 1 個月以上。","B":"ASD 的症狀維持時間為 6 個月內，而 PTSD 為 3 天到 1 個月。","C":"ASD 的症狀維持時間為 1 個月以上，而 PTSD 為 3 天到 1 個月。","D":"兩者的症狀維持時間皆為 1 個月以上，僅在症狀嚴重度上不同。"},"answer":"A","manualChapter":"CH06","source":"AI出題","id":3491},{"question":"若病患的病因是來自於日常的「壓力源產生」，且主要表現為擔心焦慮、失眠、心情低落及人際相處困難，症狀維持時間在 6 個月內，最可能的診斷為何？","options":{"A":"急性壓力症 (ASD)","B":"創傷後壓力疾患 (PTSD)","C":"重度憂鬱症 (MDD)","D":"適應障礙症 (AD)"},"answer":"D","manualChapter":"CH06","source":"AI出題","id":3492},{"question":"下列關於「創傷後壓力疾患 (PTSD)」的現象與行為特徵，何者描述最符合內容？","options":{"A":"主要特徵為單純的人際相處困難與心情低落。","B":"出現創傷經驗再現、過度警覺、逃避或麻木等情況。","C":"無法回憶起創傷事件是其最核心的特徵。","D":"會出現失去現實感，但絕對不會出現與創傷事件相關的負向認知。"},"answer":"B","manualChapter":"CH06","source":"AI出題","id":3493},{"id":3511,"source":"TP題庫","question":"根據心理健康三級預防理論，下列哪一項活動屬於「三級預防(Tertiary Prevention)」的主要範疇？","options":{"A":"針對高危險群進行性暴力或家暴防治的追蹤教育","B":"提供職能治療、工作訓練並協助個案回歸社會生活","C":"在社區心理衛生中心進行壓力調適與大眾教育","D":"透過「張老師」或「生命線」等機構進行早期發現與早期治療"},"answer":"B","manualChapter":"CH06"},{"id":3514,"source":"TP題庫","question":"緊急救護員最常見的職業傷害事件為何？","options":{"A":"過度疲勞","B":"其他常見傷害事故有暴力","C":"有害暴露","D":"救護車事故"},"answer":"A","manualChapter":"CH06"},{"question":"下列何者為「額葉」掌管的功能？","options":{"A":"聽覺、認知、情緒、記憶","B":"視覺空間處理","C":"情緒、認知、注意力、問題解決、推理能力、行為策劃","D":"感覺與運動行為、訊息整合、空間知覺"},"answer":"C","source":"圖片匯入","manualChapter":"CH06","id":3569,"matchedChapters":["CH06"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

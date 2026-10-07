@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 16 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：73 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH16</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":11,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於藥物Atropine治療緩脈的敘述，何者為非?","options":{"A":"並非所有縣市的EMTP都可以使用Atropine","B":"治療成人有症狀的緩脈起始劑量是0.5mg","C":"使用於低體溫所造成的緩脈其劑量需比建議還高的劑量","D":"治療心臟移植病患發生的緩脈通常沒有效果"},"answer":"C","manualChapter":"CH16"},{"id":43,"source":"105 高級救護技術員甄試筆試題目.doc","question":"肺栓塞最容易引起的心電圖發現，下列何者為是？","options":{"A":"S1Q3T3","B":"Atrial flutter","C":"Sinus tachycardia","D":"Right bundle branch block"},"answer":"C","manualChapter":"CH16"},{"id":56,"source":"105 高級救護技術員甄試筆試題目.doc","question":"急救常用的Epinephrine在下列成人重症與給藥的組合，下列何者為非？","options":{"A":"無脈搏急救：Img靜脈推注，每3〜5分鐘一次","B":"氣喘重積症發作：0.3mg皮下注射，每20分鐘一次","C":"過敏性休克：0.3〜0.5mg皮下注射，每5〜15分鐘一次","D":"不稳定的緩脈併休克徵象：2〜10 meg / min連續滴注"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":112,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"當某樣自主神經系統的藥物作用點是β1 = β2＞α時，它對人會造成的影響，何者為是？","options":{"A":"血管舒張","B":"心跳減緩","C":"氣管收縮","D":"血糖上昇"},"answer":"D","manualChapter":"CH16"},{"id":178,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"藥物動力學中，「藥物與血液中蛋白質結合並進出微血管至各個器官」的過程叫作？","options":{"A":"吸收","B":"分佈","C":"代謝","D":"排泄"},"answer":"B","manualChapter":"CH16"},{"id":209,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"有關緊急救護藥理學下列的名詞解釋，何者為非？","options":{"A":"首渡效應：在藥物到達一般循環之前，先由肝門靜脈經過肝臟而發生的最初生物轉化作用","B":"增強：因為同時給予兩種藥物，而使其中一種藥物增加了另一種藥物效果的增強反應","C":"治療作用（therapeutic action）：藥物無法預期的效果","D":"治療指數（therapeutic index）：某個藥物的安全性指標"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":231,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"關於過敏的描述，以下敘述何者為非？","options":{"A":"局部性的過敏反應並不會影響到全身，治療最有效的藥物是Diphenhydramine","B":"嚴重過敏病患休克的原因是因為呼吸道阻塞，水腫，最好的治療是給予氣管擴劑","C":"如果出現聲音沙啞舌頭水腫，喘鳴等，應評估是否要早期插管","D":"嚴重過敏最有效的治療藥物是腎上腺素"},"answer":"B","manualChapter":"CH16"},{"id":277,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列敘述之部位，何者非皮下注射之正確位置？","options":{"A":"下腹部","B":"大腿前側","C":"屁股","D":"大臂外側"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":282,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列敘述何者錯誤？","options":{"A":"Flumazenil對有癫癇傾向的人是有幫助的。","B":"ACT中毒其解毒劑為N-acetylcysteine。","C":"鴉片類中毒症狀有三個顯著症狀：針狀瞳孔，呼吸抑制，意識狀態低下。","D":"Digoxin直接及間接作用在SA node及AV node上。"},"answer":"A","manualChapter":"CH16"},{"id":291,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"腎上腺素受體α，β之敘述，何者為非？","options":{"A":"α1受體：活化後產生瞳孔縮小，血壓下降，腸胃道蠕動加快等情形","B":"α2受體：活化後抑制胰島素分泌","C":"β1受體：活化後增加心跳速率及增加心臟收縮力","D":"β2受體：分布於支氣管，使平滑肌鬆弛"},"answer":"A","manualChapter":"CH16"},{"id":292,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"關於急救藥物Epinephrine敘述，何者為非？","options":{"A":"在小劑量時，會活化心臟的β受體增加心臟的收缩力及心搏速度","B":"活化β2受體，擴張骨骼肌上血管，造成舒張壓下降","C":"活化α1受體，放鬆小動脈，皮膚血管，讓收縮壓下降","D":"是強力的β2致效劑，讓支氣管平滑肌鬆弛，支氣管擴張"},"answer":"C","manualChapter":"CH16"},{"id":293,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"關於藥物給予途徑之英文縮寫，何者為非？","options":{"A":"皮下：S.C.","B":"舌下：S.L.","C":"霧氣吸入：I.H.","D":"口服：P.R."},"answer":"D","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":564,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"給藥途徑縮寫〔I.H.〕指的是？","options":{"A":"皮下注射","B":"舌下含藥","C":"霧氣吸入","D":"氣管內管給藥"},"answer":"C","manualChapter":"CH16"},{"id":602,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"以下有關於藥物機轉的敘述，何者為是？","options":{"A":"腎上腺素作用於受體和非選擇性β受體。當作用於β，受體時，會增加心跳速率及增加心臟收縮力，使心臟輸出上昇","B":"Propranolol（Inderal）是一種選擇性β2受體拮抗劑，氣喘病患不適合使用，而心跳過慢的病患則較不會影響","C":"Dobutamine低劑量（1～5μg／kg／min）可活化D1受體，擴張腎臟和腸繫膜血管，增加腎臟灌流。中劑量（5～10μg／kg／min），活化β1，受體，增強心臟收縮力","D":"正腎上腺素作用於α受體和非選擇性β受體，故該藥作用時，氣管平滑肌會收縮"},"answer":"A","manualChapter":"CH16"},{"id":608,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"給藥途徑縮寫［I.H.］指的是？","options":{"A":"皮下注射","B":"舌下含藥","C":"霧氣吸入","D":"氣管內管給藥"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":613,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"當某樣自主神經系統的藥物作用點是β1＝β2＞α時，它對人會造成的影響，正確的是？","options":{"A":"血管舒張","B":"心跳減緩","C":"氣管收縮","D":"血糖上昇"},"answer":"D","manualChapter":"CH16"},{"id":622,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"副交感神經受到刺激之後所造成的生理反應，何者為是？","options":{"A":"支氣管收縮","B":"心跳變快","C":"血壓上昇","D":"瞳孔變大"},"answer":"A","manualChapter":"CH16"},{"id":626,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一名50歲病患在慢跑時發生心臟猝死，您是EMT-P，所屬縣市預立醫囑可以給腎上腺素（epinephrine），給予點滴（normal saline），骨針以及插管。您在為這位病患打點滴，無法打上，請問epinephrine該如何給予是最有效的？","options":{"A":"Epinephrine 1：1,000，10倍的劑量經稀釋後從氣管內容給予","B":"Epinephrine 1：1,000，2～3倍的劑量經稀釋後從氣管內容給予","C":"Epinephrme 1：1,000，從肛門給予","D":"立即操作骨針，epinephrine 1：1,000，1 mg經由骨針給予"},"answer":"D","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":628,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"給藥途徑縮寫［P.O.］指的是？","options":{"A":"皮下注射","B":"舌下含藥","C":"霧氣吸入","D":"口服給藥"},"answer":"D","manualChapter":"CH16"},{"id":629,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"相同成份劑量的藥物，口服有時效果不如靜脈注射，最大的原因是？","options":{"A":"儲存效應（drug reservoirs）","B":"屏障效應（barriers to drug distribution）","C":"首渡效應（first-pass metabolism）","D":"拮抗效應（antagonism）"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":630,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"EMTP若要使用肌肉注射，最佳的位置是？","options":{"A":"肩三角肌","B":"肱三頭肌","C":"肩斜方肌","D":"肱二頭肌"},"answer":"A","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":637,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"有關急救藥物腎上腺素（epinephrine）的敘述，下列何者為是？","options":{"A":"會增加心臟收縮力以及心搏速率，但不會提高心臟的耗氧量","B":"可以收縮小動脈以及皮膚黏膜的血管，造成收縮壓上升，但無法增加冠狀動脈之血液灌流","C":"可以使支氣管平滑肌鬆弛，支氣管擴張，但無法治療嚴重過敏造成的支氣管痙攣","D":"可以增加升糖素分泌，並抑制胰島素分泌來增加血糖"},"answer":"D","manualChapter":"CH16"},{"id":641,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"關於Amiodarone，下列何者為非？","options":{"A":"可能導致血管擴張及血壓下降","B":"也會降低心跳","C":"不可以使用在Torsades de pointes心律上","D":"藥效很短，半衰期（half life）1～2個小時，所以常需連續使用"},"answer":"D","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":642,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"關於藥物給予與路徑，下列何者為非？","options":{"A":"在過敏性休克的病患身上給子Epinephrine，皮下注射SC優於肌肉注射IM","B":"幫孕婦建立IV路徑一般建議在上半身（橫膈以上）","C":"若緊急時無法建立IV路徑，除了IM肌肉注射，Naloxone也可以由氣管內管給藥","D":"大部份的急救藥物都可以由IO骨内注射給予，吸收速度相當於IV靜脈注射"},"answer":"A","manualChapter":"CH16"},{"id":643,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"以下十種給藥路徑：（1）靜脈注射、（2）骨內注射、3）肌肉注射、（4）皮下注射、（5）口服給藥、（6）舌下給藥、（7）直腸給藥、（8）霧氣吸入、（9）氣管内管、（10）局部給藥，關於它們的吸收與作用速度快慢，下列何者為非？","options":{"A":"（1）≧（2）＞（3）＞（4）","B":"（9）＞（2）＞（7）","C":"（1）＞（6）＞（5）","D":"（8）＞（9）＞（10）"},"answer":"B","manualChapter":"CH16"},{"id":648,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"下列對於腺甘酸（Adenosine）的敘述何者為是？","options":{"A":"為一外生性的核酸嘌呤，可短暫地抑制房室節（AV node）和竇房結（sinus node）的活性","B":"對毒、藥物引起之心搏過速特別有用，是控制心率的首選藥物","C":"因為可能引起病患發生臉潮紅及胸悶症狀，所以應緩慢注射，避免不適","D":"病患若為心房撲動（AF），在注射Adenosine之後，可能會在心電圖監視器上出現鋸齒狀波形"},"answer":"D","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":665,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"有關緊急救護藥理學下列的名詞解釋，何者為非？","options":{"A":"首渡效應：在藥物到一般循環之前，先由肝門靜脈經過肝臟而發生的最初生物轉化作用","B":"增強：因為同時給予兩種藥物，而使其中一種藥物增加了另一種藥物效果的增強反應","C":"治療作用（therapeutic action）：藥物無法預期的效果","D":"治療指數（therapeutic index）：某個藥物的安全性指標"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":666,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"有關藥理學相關名詞，何者為非？","options":{"A":"拮抗作用（Antagonism）：當併用兩種或兩種以上藥物時，藥物效果出現相互阻抑而使藥物效果的總和大於個別使用藥物的效果加總（1+1＞2）","B":"副作用（Side effect）：在藥物治療劑量內發生不希望出現但常常是無法避免的效果。而這些效果是不是原先給予這個藥物所想要的","C":"累積效應（Cumulative action）：重複給予某藥物時會有藥物積在血液或器官中的情形，造成藥物效果增加甚至中毒發生。這種情形常出現在給予多個劑量的藥物之後，或藥物的吸收作用比其排泄或代謝來得快的情況下","D":"禁忌症（Contraindication）：因醫學或生理因素，使得藥物的給予出現治療效果以外的傷害"},"answer":"A","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":667,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"各種藥物投途徑的種類、縮寫及速度比較，何者為非？","options":{"A":"經腸胃道藥物給予的吸收速度：舌下給藥＞口服給藥","B":"非經腸胃道藥物給予的方式包含皮下注射、肌肉注射、靜脈注射、及骨内注射等等","C":"非經腸胃道藥物給予的吸收速度：肌肉注射＞骨内注射","D":"經肺部給藥中的“霧氣吸入”英文縮寫為“I.H”"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":668,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"下列對於腎上腺素（Epinephrine）的敘述何者為非？","options":{"A":"治療劑量時可讓支氣管平滑肌鬆弛、支氣管擴張，用以解除致命性氣喘、嚴重過敏造的支氣管痙攀","B":"治療劑量時可收縮小動脈、皮膚和黏膜血管，讓收縮壓上升，增加冠狀動脈之血液灌流","C":"高劑量使用不能增加存活率或改善神經系統之預後，而可能造成急救後心肌功能不全","D":"治療脈搏情況，如心室顫動、無脈性心室頻脈、無收縮、無脈搏電氣活動時，應從靜脈途徑緩慢滴注"},"answer":"D","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":684,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"有關藥理學相關的名詞與作用，何老為非？","options":{"A":"治療指標（Therapeutic Index，TI）用來評估一個藥物的治療效用與反應","B":"藥物動力學就是研究身體在一定時間內，如何處理藥物","C":"競爭性抑制劑（Competitive antagonis）反應多為可逆反應","D":"副作用（Side effect）在藥物治療劑量内發生不希望出現但常常是無法避免的效果·而這些效果是不是原先給予這個藥物所想要的"},"answer":"A","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":685,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"Amiodarone是院前常使用的抗心律不整藥物，就您對此的了解，以下敘述何者為非？","options":{"A":"屬於第三類（Class III）的抗心律不整藥物","B":"可能引致血管擴張及血壓下降","C":"與第四類抗心律不整藥物併用時，易導致torsades de point","D":"藥效半生期短，易累積在體內"},"answer":"D","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":961,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於有機磷中毒患者的到院前辨認與處理，以下何者正確？","options":{"A":"Atropine的使用很重要，因為可以再活化乙醯膽鹼酶，讓無力的呼吸肌肉再度強化","B":"Atr。pine的使用劑量需要根據病患體重計算，不可超出上限","C":"由於有機磷會使得病患無力，因此一旦發生癲癇，不可以使用會讓病患更無力的diazepam或是lorazepam","D":"有機磷中毒的主要症狀是針狀瞳孔，流鼻水，呼吸道分泌物增多，流淚，流口水，全身出汗與腹瀉"},"answer":"D","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":966,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"有關毒藥物以及解毒藥劑的配對，下列何者為非？","options":{"A":"普拿疼中毒的解毒劑是N-acetylcysteine（Fluimucil）","B":"甲醇中毒的解毒劑是乙醇","C":"嗎啡類藥物中毒的解毒劑是naloxone","D":"氰化物中毒的解毒劑是flumazenil"},"answer":"D","manualChapter":"CH16"},{"id":1025,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"某青年因感情因素服用大量不明物質。你到達現場時發現病患大吼大叫，神智不清，瞳孔放大，心跳加速，臉色脹紅但皮膚與嘴唇囗腔乾燥。下列何者最可能是此病患服用的物質？","options":{"A":"抗組織胺","B":"安非他命","C":"有機磷","D":"海洛因"},"answer":"A","manualChapter":"CH16"},{"id":1037,"source":"第四章 非創傷急症(2012-2014).doc","question":"急救常用的epinephrine。在下列成人重症與給藥的組合，何者錯誤？","options":{"A":"無脈搏急救：1 mg I.V.，每3～5分鐘一次","B":"氣喘重積症發作：0.3 mg S.C.，每20分鐘一次","C":"過敏性休克：0.5 mg S.C.，每5～15分鐘一次","D":"不穩定的緩脈：2～10 mcg／min連續滴注"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":1045,"source":"第四章 非創傷急症(2012-2014).doc","question":"有關心電圖的敘述，下列何為為韭？","options":{"A":"右心房擴大在心電圖上的變化主要為P波變高（＞25 mm）而寬度不變，形成所謂的P pulmonale","B":"左心房擴大的變化主要為P波變寬（＞02秒），形成所謂的P mitrale","C":"右心室肥厚時，QRS的變化主要為胸前導程V5的R波變高、V1的S波變深","D":"三個以上連續出現的心室性期外收縮則稱為short-run ventricular tachycardia"},"answer":"C","manualChapter":"CH16"},{"id":1071,"source":"第四章 非創傷急症(2012-2014).doc","question":"病患有陣發性心房纖維顫動（paroxysmal atrial fibrillation）以及WPW的病史，此時發生陣發性上心室心搏過速（PSVT），病患臨床症狀穩定，使用非藥物的方式均無法改善，如要使用藥物應選擇何種藥物較為安全？","options":{"A":"Amiodarone","B":"Adenosine","C":"Digoxin（毛地黃）","D":"Beta blockers（乙型阻斷劑）"},"answer":"A","manualChapter":"CH16"},{"id":1087,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於過敏的描述，以下敘述何者為非？","options":{"A":"局部性的過敏反應並不會影響到全身，治療最有效的藥物是Diphenhydramine","B":"嚴重過敏病患休克的原因是因為呼吸道阻塞、水腫，最好的治療是給予氣管擴張劑","C":"如果出現聲音沙啞舌頭水腫、喘鳴等，應評估是否要早期插管","D":"嚴重過敏最有效的治療藥物是腎上腺素"},"answer":"B","manualChapter":"CH16"},{"id":1113,"source":"第四章 非創傷急症(2015-2018).doc","question":"以下何者心律是出現窄的QRS波？","options":{"A":"VF","B":"VT","C":"Torsadesdepoints","D":"2度II AV block"},"answer":"D","manualChapter":"CH16"},{"id":1123,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列有關嚴重高血鉀的處置與敘述，何者為非？","options":{"A":"靜脈注射Calcium可以最快減少高血鉀對心臟的影響","B":"靜脈注射Sodium bicarbonate可以將鉀離子移除到身體外面","C":"心電圖可以看到QRS變寬和高聳的T波","D":"容易發生在末期腎病變的病患身上"},"answer":"B","manualChapter":"CH16"},{"id":1140,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於「Nitroglycerin」下列敘述何者為非？","options":{"A":"可有效治療狹心病（angina pectoris）","B":"可降低鬱血性心衰竭（CHF）病人之前後負荷（preload）","C":"主要作用是增加心肌收縮，有效治療心臟衰竭","D":"可能會造成低血壓（hypotension）"},"answer":"C","manualChapter":"CH16"},{"id":1154,"source":"第四章 非創傷急症(2015-2018).doc","question":"許多藥物可能引發血壓偏低，但下列藥物何者為非？","options":{"A":"Amiodarone","B":"Naloxone","C":"Nitroglycerin","D":"Lasix（Furosemide）"},"answer":"B","manualChapter":"CH16"},{"id":1159,"source":"第四章 非創傷急症(2015-2018).doc","question":"根據高級救護技術員教科書，以下何者不是讓插管病患肌肉鬆弛的神經肌肉阻斷劑？","options":{"A":"Succinylcholine","B":"Midazolam","C":"Vecuronium","D":"Pancuronium"},"answer":"B","manualChapter":"CH16"},{"id":2013,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"下列關於各類藥物給予途徑之敘述何者正確？","options":{"A":"靜脈輸液的流速與留置導管的內徑呈平方正比，所以在休克病人身上應該要盡可能選擇大管徑的留置導管。","B":"不同藥物注射方式與皮膚呈現的角度皆不相同，例如肌肉注射應與皮膚呈90度、皮內注射為45度。","C":"骨內注射常選擇的位置為肱骨近端、脛骨近端、脛骨遠端；若為兒科病人，還可選擇肱骨遠端。","D":"即使吸入給藥使用方法正確，一口仍然只有10%能進入呼吸道，其餘的量會被吞下或被噴出來。"},"answer":"D","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":2041,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"關於藥物給予與路徑，下列何者為非？","options":{"A":"幫孕婦建立靜脈路徑（IV）一般建議在上半身（橫膈以上）。","B":"在過敏性休克的病患身上給予Epinephrine時首選路徑為皮下注射。","C":"Naloxone也可以由氣管內管給藥。","D":"大部份的急救藥物都可以由骨內注射（IO）給予，吸收速度相當於IV靜脈注射。"},"answer":"B","manualChapter":"CH16"},{"id":2043,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"下列何者心律會以「窄的QRS波型」為最常見？","options":{"A":"Ventricular tachycardia。","B":"PSVT with aberrant conduction。","C":"Multifocal atrial tachycardia。","D":"Torsade de pointes。"},"answer":"C","manualChapter":"CH16"},{"id":2102,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於常見的急救藥物使用時機及描述，下列何者最正確？","options":{"A":"Amiodarone可使用於寬QRS波頻脈的病人，給藥途徑為快速靜脈注射。","B":"腺甘酸(Adenosine)可用於窄波頻脈之區分診斷，給藥途徑為靜脈滴注。","C":"氯化鈣(Calcium chloride)可以用於毛地黃中毒所引起之高血鉀，給藥途徑為靜脈注射。","D":"Midazolam可用於因癲癇發作痙攣時抑制痙攣的病人，給藥途徑為肌肉注射。"},"answer":"D","manualChapter":"CH16"},{"id":2107,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列哪一種心律不整，是由於心臟存在額外的傳導路徑，導致電流「再迴旋異常」(Re - entrant)？","options":{"A":"多發性心房心搏過速(Multifocal Atrial Tachycardia)。","B":"陣發性上心室頻脈(Paroxysmal Supraventricular Tachycardia, PSVT)。","C":"心房顫動(Atrial Fibrillation)。","D":"心室顫動(Ventricular Fibrillation)。"},"answer":"D","manualChapter":"CH16"},{"id":2193,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"有一種果實，食用方式是咀嚼與唾液混和後吐出，咀嚼後很快會有提神的效果，服用過量會產生分泌物增加、縮瞳、緩脈、支氣管痙攣，下列以藥理學敘述吃的過程何者為非？","options":{"A":"吸收方式為口腔內吸收。","B":"植物鹼會經過肝臟首渡效應再進入循環系統。","C":"以症狀來看檳榔毒性應該是乙醯膽鹼。","D":"長期越吃越多才有提神效果是因為適應性(tolerance)。"},"answer":"B","manualChapter":"CH16"},{"id":2264,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"有一名患者吸食過多海洛英(heroin)，到院後要給予何者解毒劑？","options":{"A":"Acetylcysteine。","B":"Benzodiazepines。","C":"Flumazenil。","D":"Naloxone。"},"answer":"D","manualChapter":"CH16"},{"id":2386,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"Amiodarone是院前常使用的抗心律不整藥物，關於此藥以下敘述何者為非？","options":{"A":"屬於第三類(Class III)的抗心律不整藥物。","B":"可能引致心臟收縮力降低、血管擴張及血壓下降。","C":"嚴禁用於已知有嚴重心臟功能受損的患者的心律不整。","D":"藥效半生期長，可至40天，易累積在體內。"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":2389,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"有關藥理學相關名詞，何者正確？","options":{"A":"拮抗作用(Antagonism)：當併用兩種或兩種以上藥物時，藥物效果出現相互阻抑而使藥物效果的總和小於個別使用藥物的效果加總(1＋1 < 2)。","B":"禁忌症(Contraindication)：在藥物治療劑量內發生不希望出現但常常是無法避免的效果。","C":"藥物過敏(drug allergy)：一種藥物被另一種先前給予藥物所影響，產生增加或減少藥效作用。","D":"適應性(tolerance)：重複使用藥物因藥物濃度累積，出現治療效果增強，需要調低藥物劑量。"},"answer":"A","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":2419,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"70歲男性有末期腎病變病史，最近因家裡辦喪事一個禮拜未到診所洗腎，兒子今天發現病人呼吸急促和昏迷因而報案。初步評估發現病人只對痛有反應且病人有休克徵象，輔助檢查發現心跳40次/分鐘，血壓70/40mmHg，血氧濃度86%，關於此病人可能之用藥選擇何者最不適當？","options":{"A":"MgSO4。","B":"Sodium bicarbonate。","C":"Atropine。","D":"Calcium gluconate。"},"answer":"A","manualChapter":"CH16"},{"id":2574,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"關於管制藥品使用及管理的敘述，何者最不適當？","options":{"A":"管制藥品減損時，管理人應於一個月內報請當地衛生主管機關查核。","B":"管制藥品使用後，必須於救護紀錄表詳細記載，由醫療指導醫師簽核。","C":"常使用於鎮靜的Ketamine為第三級管制藥品。","D":"常使用於止痛的Tramadol為第四級管制藥品。"},"answer":"A","manualChapter":"CH16"},{"id":2576,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"關於藥物給予及給藥途徑，下列敘述何者錯誤？","options":{"A":"當理學檢查發現要施打IV部位有硬化、紅腫熱痛時，應考慮換部位施打。","B":"IV應避免施打在乳癌病患接受淋巴移除手術之患側肢體。","C":"糖尿病病人，IV應該避免打在下肢。","D":"當病人有休克徵象，應選用較大號數的IV針頭。"},"answer":"D","manualChapter":"CH16"},{"id":3309,"source":"AI出題","manualChapter":"CH16","question":"在執行緊急救護時，面對心律不整傷患的藥物使用，下列敘述何者錯誤？","options":{"A":"當面對規則且穩定的寬 QRS 波心搏過速（懷疑單型性室性心搏過速 VT）時，若病患無禁忌症，可考慮給予 Amiodarone 或 Procainamide 治療","B":"Amiodarone（胺碘酮）屬於第三類抗心律不整藥物，主要機轉為阻斷鉀離子通道，但在心跳停止（Cardiac Arrest）的 VF/pVT 流程中，首劑給藥劑量為 300 mg IV/IO","C":"對於不穩定（Unstable）且有嚴重症狀的陣發性室上性心搏過速（PSVT）傷患，應絕對優先建立靜脈管路並快速推注 Adenosine 6 mg 治療","D":"Magnesium sulfate（硫酸鎂）是治療尖端扭轉型室速（Torsades de Pointes）的首選藥物"},"answer":"C"},{"question":"在自主神經系統中，受體活化會引起不同的生理反應。下列關於腎上腺素受體亞型的敘述，何者正確？","options":{"A":"β2受體活化會造成支氣管平滑肌收縮，惡化氣喘","B":"α1受體活化會引起周邊小動脈收縮，進而使血壓上升","C":"α1受體主要分佈在心臟，活化後增加心跳速率","D":"α2受體主要存在於骨骼肌，負責維持肌肉張力"},"answer":"B","manualChapter":"CH16","id":3329,"source":"TP題庫 (圖片匯入)"},{"question":"下列何者不是副交感神經節前神經元的來源？","options":{"A":"滑車神經","B":"顏面神經","C":"舌咽神經","D":"迷走神經"},"answer":"A","manualChapter":"CH16","id":3421,"source":"TP題庫 (圖片匯入)"},{"question":"Midazolam DAI使用劑量為何？","options":{"A":"0.1mg/kg","B":"0.1mcg/kg","C":"0.3mg/kg","D":"0.3mcg/kg"},"answer":"C","manualChapter":"CH16","id":3435,"source":"TP題庫 (圖片匯入)"},{"question":"你到院前接觸一名 24 歲女性，因嚴重氣喘發作呼吸困難。給予多次 salbutamol 後症狀仍無明顯改善。病史顯示她平時有偏頭痛，固定服用某種藥物。下列哪種藥物最可能造成支氣管擴張效果不佳？","options":{"A":"Acetaminophen","B":"Propranolol","C":"Atropine","D":"Furosemide"},"answer":"B","manualChapter":"CH16","id":3440,"source":"TP題庫 (圖片匯入)"},{"question":"抗血栓藥物可分成三大類：拮抗血小板藥物、血栓溶解藥物和抗凝血劑，下面配對何者正確？","options":{"A":"抗凝血劑-Aspirin","B":"抗凝血劑-Abciximab","C":"抗血小板-Clopidogrel","D":"血栓溶解劑-Heparin"},"answer":"C","manualChapter":"CH16","id":3442,"source":"TP題庫 (圖片匯入)"},{"question":"關於藥物在胃腸道的吸收（Enteral route），下列敘述何者正確？","options":{"A":"硝化甘油舌下片（NTG）由口腔黏膜吸收，必須先經過肝臟的首渡效應才能發揮效果","B":"阿斯匹靈（Aspirin）是弱鹼性藥物，因此在胃部的酸性環境中吸收最佳","C":"小腸液為鹼性，小腸有十分豐富的血管網和表面積，大部份口服藥物在小腸上段吸收","D":"直腸吸收的藥物有100%不用經過肝臟的首渡效應，其吸收穩定度優於口腔內給藥"},"answer":"C","manualChapter":"CH16","source":"TP題庫 (圖片匯入) - EMT-P 第 16 章 P.389~390","id":3463},{"id":3500,"source":"AI出題","question":"一名氣喘患者使用短效型 β 2 促效劑吸入劑，其引起氣管平滑肌舒張的神經生理途徑屬於下列何者？","options":{"A":"體神經系統中的隨意運動控制部分","B":"自主神經系統中的不隨意運動部分","C":"抑制 α 1受體使微血管通透性降低","D":"副交感神經釋放乙醯膽鹼作用於毒蕈鹼受體"},"answer":"B","manualChapter":"CH16"},{"id":3521,"source":"TP題庫","question":"針對「ST段上升之急性心肌梗塞」病患，在什麼樣的時間條件下，可於執行心導管前注射血栓溶解劑？","options":{"A":"症狀開始到預期血管打通時間為 6~12 小時","B":"症狀開始到預期血管打通時間超過 24 小時","C":"症狀開始到預期血管打通時間為 3~6 小時","D":"症狀開始到預期血管打通時間為 1~3 小時"},"answer":"A","manualChapter":"CH16"},{"source":"EMT-P 第 16 章 P.401","question":"當某藥物活化了 α 受體時，最可能出現下列哪種生理反應？","options":{"A":"支氣管平滑肌舒張，增加換氣量。","B":"腸胃道蠕動增加以促進消化。","C":"心跳減慢且心肌收縮力減弱。","D":"周邊小動脈收縮，導致血壓上升。"},"answer":"D","matchedChapters":["CH16"],"manualChapter":"CH16","id":3613},{"source":"EMT-P 第 16 章 P.401","question":"一名患者因重症肌無力 (Myasthenia gravis) 接受乙醯膽鹼酯酶抑制劑治療。若藥物過量，最可能出現下列哪一種症狀？","options":{"A":"心跳加快、瞳孔放大、口乾","B":"支氣管擴張、血壓上升","C":"心跳減慢、流口水、支氣管分泌增加","D":"腸胃蠕動減少、尿瀦留"},"answer":"C","matchedChapters":["CH16"],"manualChapter":"CH16","id":3618},{"source":"EMT-P 第 16 章 P.388","question":"重複使用同一藥物後，需要增加劑量才能維持原有效果，此現象稱為何者？","options":{"A":"過敏反應","B":"適應性(Tolerance)","C":"禁忌症","D":"累積效應"},"answer":"B","matchedChapters":["CH16"],"manualChapter":"CH16","id":3620},{"source":"EMT-P 第 16 章 P.389","question":"有關藥物給予途徑之敘述，何者為經肺部給藥？","options":{"A":"S.L.","B":"PR","C":"SUPP","D":"ETT"},"answer":"D","id":3719,"manualChapter":"CH16","matchedChapters":["CH16"]},{"source":"EMT-P 第 16 章 P.397","question":"一般認為，藥物經過幾個半衰期後，可視為已從體內全部清除？","options":{"A":"10個半衰期","B":"5個半衰期","C":"3個半衰期","D":"1個半衰期"},"answer":"B","id":3722,"manualChapter":"CH16","matchedChapters":["CH16"]},{"id":45659,"question":"關於成人骨內注射(intraosseous injection)的注意事項，最不正確的描述是？","options":{"A":"脛骨近端、遠端、肱骨近端及股骨遠端均是可以選擇的注射點。","B":"腎上腺素、阿托品及碳酸氫鈉均可以從骨內注射途徑給藥。","C":"選擇骨折的部位作為注射點是絕對禁忌症，穿刺部位紅腫也應避免。","D":"給藥前，先適量的生理食鹽水確定骨內留置針是通暢的或沖洗留置針。"},"answer":"A","source":"同學出題","manualChapter":"CH16"},{"id":45680,"question":"以下哪項給藥的途徑是錯誤的?","options":{"A":"骨內注射，注射於骨髓腔內之動脈","B":"皮下注射，注射於皮下組織層","C":"靜脈注射，注射於血管內","D":"塞劑，塞肛門或陰道的藥物"},"answer":"A","source":"同學出題","manualChapter":"CH16"},{"id":45775,"question":"關於 Aspirin 在抗血栓與抗發炎機轉上的差異，下列何者正確？","options":{"A":"每日低劑量能藉由不可逆抑制 COX-1 有效抑制血小板凝集","B":"低劑量主要透過干擾 COX-2 抑制 Prostacyclin 達到抗血栓作用","C":"高劑量透過乙醯化 COX-1 抑制 Thromboxane A2 達成抗發炎","D":"單次低劑量能藉由可逆結合COX-1 短暫抑制血小板凝集約一天"},"answer":"A","source":"AI","manualChapter":"CH16"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

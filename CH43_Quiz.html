@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 43 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：55 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH43</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":87,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於生物戰劑的觀念，以下何者錯誤？","options":{"A":"相對於傳統武器與其他大規模殺傷性武器，生物戰劑容易大量製造，也容易施放","B":"生物恐怖事故不易偵測，可能造成嚴重的心理街擊","C":"忽然爆發的大量病患，其潛伏期均非常相近且密集，應該懷疑生物恐怖事故","D":"結核桿菌，天花病毒，水痘病毒，麻疹病毒，都是飛沫傳染"},"answer":"D","manualChapter":"CH43","matchedChapters":["CH43"]},{"id":266,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"天花的臨床表現，下列那項是錯誤?","options":{"A":"發燒","B":"頭痛","C":"臉上，粘膜長出同步發展的丘疹，水疱，膿皰性皮疹","D":"膿皰性皮疹部位軀幹多於四肢"},"answer":"D","explanation":"p1128 CH43 由於大量的病毒在口咽複製，出疹的第一個星期是最具傳染性的。潛伏期約7~17天(平均10~12天)，然後開始出現急性發燒、寒顫、頭痛和背痛等一些疲憊的前驅症狀，約持續2~3天。隨後爆發離心分佈的皮疹，在約8 天內以同步的方式，經過斑疹、丘疹、水皰和膿皰階段，後期階段出現臍狀凹陷。口腔的黏膜疹通常在皮疹前1或2天出現，皮疹通常在早期就會出現於手掌和腳底。","manualChapter":"CH43"},{"id":267,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列生物恐怖製劑之潛伏期，何者錯誤：","options":{"A":"吸入型炭疽病1-43（58）天","B":"天花7-17天","C":"肉毒桿菌中毒0.5-3天","D":"病毒性出血熱2-23天"},"answer":"D","manualChapter":"CH43"},{"id":395,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於生物戰劑的觀念，以下何者敘述最不正確？","options":{"A":"目對於傳統武器與其他大規模殺傷性武器，生物戰劑容易大量製造，也容易施放","B":"生物恐怖事故不易偵測，可能造成嚴重的心理衝擊","C":"同時間忽然出現許多相同臨床症候群病患，尤其出現在年輕人或原本健康狀人，應該懷疑生物恐怖事故","D":"炭疽病、肉毒桿菌、天花、蓖麻毒素都易於傳播，死亡率高，因此在美國疾病管制局的分類中，都屬於A類生物戰劑"},"answer":"D","manualChapter":"CH43"},{"id":409,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於生物恐怖主義威脅，以下敘述何者為是？","options":{"A":"由於20世紀生物科技進步可以做基因重組，所以近三十年來才有生物戰劑的研發，最有名的就是2001年的炭疽病信件事件，造成22人感染","B":"相較於其他恐怖活動使用的武器，生物戰劑最大的利基點在於可以快速且有效地散佈，短時間產生大量傷亡","C":"生物戰劑的分類中，A類的傳播速度與死亡率均高，而C類最難取得或製造","D":"等級A的個人防護裝備（PPE）用於處理未知濃度的未知化學物質，或是當處理有飛濺危害的已知液體或接觸皮膚有害的蒸汽時"},"answer":"D","matchedChapters":["CH43"],"manualChapter":"CH43"},{"id":410,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於生物戰劑的描述，何者為是？","options":{"A":"相較於高殺傷力的化學武器可以在短時間產生大量死亡人數，暴露生物戰劑之病患多半不會立即死亡，引此對於醫療與公衛處置能量的影響較小","B":"吸入型炭疽病、肉毒桿菌、原發性腺鼠疫、天花、兔熱病、病毒性出血熱、病毒性腦炎、Q熱、布魯氏菌病、鼻疽這十種生物戰劑，超過半數以上會人傳人傳染","C":"潛伏期長有利於施放生物戰劑者逃脫","D":"在相等面積區域造成同樣殺傷人數時，生物戰劑的成本比化學武器與核子武器來得高"},"answer":"C","manualChapter":"CH43"},{"id":421,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"所謂新興感染症（emerging infectious disease），如伊波拉病毒出血熱，在1992年美國醫學研究院提出的報告中是指「新近（通常指近20年內）出現於人類的疾病」，且需符合下列三項定義。請問下列定義何者為非？","options":{"A":"其發生率呈現快速增加之趨勢","B":"在地理分佈上之範圍擴張","C":"跨越多種族及人畜共通傳染","D":"增加或發展出新的抗藥性機制"},"answer":"C","manualChapter":"CH43","matchedChapters":["CH43"]},{"id":429,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關生物恐怖攻擊的描述，何者有誤？","options":{"A":"生物戰劑容易大量製造","B":"生物恐怖事件不易偵測、不易預防、難於辨認","C":"蔓延性廣、滲透性強；可造成嚴重的心理衝擊；能催垮所有現有資源","D":"生物戰劑可以有效率的散播"},"answer":"D","manualChapter":"CH43"},{"id":438,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於生物恐怖事件（Bioterrism），下列敘述何者為非？","options":{"A":"施放的恐怖分子本身可能也受到感染","B":"可依恐怖分子規劃，進行有效率的散播","C":"造成大量傷亡所需費用較低，又稱為「窮人的原子彈」","D":"炭疽病、鼠疫、天花屬於最高優先級（A類）可能被使用的生物戰劑"},"answer":"B","manualChapter":"CH43"},{"id":458,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於生物恐怖事件（Bioterrism），下列敘述何者為非？","options":{"A":"可依規劃進行有效率的散播","B":"施放的恐怖分子本身可能也受到感染","C":"造成大量傷亡所需費用較低，又稱為「窮人的原子彈」","D":"炭疽病、鼠疫、天花屬於最高優先級（A類）可能被使用的生物戰劑"},"answer":"A","manualChapter":"CH43"},{"id":468,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"您出勤時載送全身黃疸及發燒的病人，疑似患有鉤端螺旋體病（Leptospirosis）關於鉤端螺旋體病，以下何者錯誤？","options":{"A":"是熱帶和亞熱帶常見的人畜共通感染病，台灣也有案例","B":"可經由動物尿液污染的水和土壤，進而感染人類","C":"極少見人傳人，若有帶手套和口罩處理病患基本上不會被感染","D":"直接接觸動物不會被傳染"},"answer":"D","manualChapter":"CH43"},{"id":469,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"炭疽病（Anthrax）是A級生物戰劑中，咸認最可能被用的病原體。關於炭疽病，何者正確？","options":{"A":"炭疽菌是專性嗜氧的格蘭氏陰性產孢桿菌，死亡率極高","B":"除皮膚性疽外，吸入型和腸胃道炭疽皆可能發生全身性炭疽症","C":"炭疽病沒有疫苗可施打","D":"炭疽病可能經由動物接觸而感染"},"answer":"D","manualChapter":"CH43"},{"id":514,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"關於傳染性病患處置的敘述，下列何者為是？","options":{"A":"對於一個疑似中東呼吸症候群冠狀病毒感染症（MERS）感染的發燒病患，為降低醫療人員的遭受感染及病毒在社區間傳播的風險，因此必須採用以醫師為中心的「主動一動模式」，此時醫療作為上必需滿足病患醫療基本需求","B":"醫療人員因為希望傳染病患可以在醫療上及隔離上的配合，往往會對這類病的病債出過度的承諾，是Beckman等人於1994年發表的研究中四種常見的缺失之一","C":"針對發燒或呼吸道疾病詢問TOCC（旅遊、職業、接觸、群聚）病史，可以有助於到院前緊急救護人員早期警覺可能的特殊傳染性疾病病患。例如賴比瑞亞及獅子山近期出現伊波拉病毒出血熱疫情，而中東地區國家則傳出中東呼吸症候群冠狀病毒疫情","D":"生物恐怖戰劑分為A、B、C三大類，主要是依據其流行病學上的傳播途徑來區分，其中A類的生物恐怖戰劑均為空氣傳播，可以很容易的藉由人與人傳播"},"answer":"C","manualChapter":"CH43","explanation":"Beckman發現在醫病關係的建立與溝通上，有四種常見的缺失：\n1. 覺得被遺棄。\n2. 覺得認知或觀點不被尊重 。\n3. 訊息傳達不良 。\n4. 缺乏同理心"},{"id":1152,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列傳染性疾病，何者非為蟲媒傳染病？","options":{"A":"流行性斑疹傷寒","B":"萊姆病","C":"Q熱","D":"黃熱病"},"answer":"C","manualChapter":"CH43"},{"id":2177,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列新興感染症的出現及增加原因的相關敘述何者最不適當？","options":{"A":"日本腦炎的感染症增加是因為生態改變及農業發展導致。","B":"愛滋病因國際間旅遊與貿易頻繁而助長蔓延。","C":"肺結核病最容易在人口高度密集的地方散播，這是人口學之改變的影響。","D":"鼠疫從中亞草原被帶進歐洲，正是藉由戰爭及貿易的途徑。"},"answer":"B","matchedChapters":["CH43"],"manualChapter":"CH43"},{"id":2178,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列有關生物恐怖攻擊事件線索，何者最不適當？","options":{"A":"染病的病人疾病潛伏期相近且密集。","B":"某一疾病或症狀的病人數逐漸增加。","C":"近期忽然出現許多同症狀的年輕病人。","D":"出現相同症狀的病人集中於限定區域。"},"answer":"B","manualChapter":"CH43"},{"id":2271,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"在台灣，每年皆有腸病毒重症的發生，下列有關腸病毒的敘述，何者為是？","options":{"A":"根據基因分A、B、C三型，其中腸病毒71型被歸類於人類腸病毒A型。","B":"人類是唯一腸病毒的傳染來源。","C":"主要藉由腸胃道傳染及接觸傳染，不太會藉由呼吸道傳播。","D":"嬰兒急性心肌炎及成人心包膜炎由A族克沙奇病毒引起。"},"answer":"B","manualChapter":"CH43"},{"id":2288,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"有關新冠病毒的傳播描述，以下何者為非？","options":{"A":"新冠病毒傳播主要為飛沫傳染。","B":"濕洗手對新冠病毒的傳播不具阻斷與防護作用。","C":"新冠病毒有可能經結膜感染，所以應戴護目鏡防護。","D":"對COVID-19病人抽痰，會產生氣溶膠，所以應做好空氣傳染防護。"},"answer":"B","manualChapter":"CH43"},{"id":2360,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"下列有關COVID - 19（Coronavirus Disease - 2019）新冠病毒的描述何者最為適當？","options":{"A":"症狀以腸胃道為主，症狀包括食慾不振、噁心嘔吐、腹瀉等症狀。","B":"可能的傳播途途徑為糞口傳染，故感染者的排泄物需謹慎處理。","C":"為預防感染，應避免前往人潮擁擠、空氣不流通的地方、維持手部衛生及佩戴口罩。","D":"載送疑似病患時，個人防護裝備的等級越高越好，不需要考慮其他因素。"},"answer":"C","matchedChapters":["CH43"],"manualChapter":"CH43"},{"id":2367,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"感染發生的過程稱為『感染鏈』(chain of infection)，其中包含六個條件，下列敘述何者為非？","options":{"A":"感染源(infectious agent)為其中條件之一。","B":"傳染途徑(modes of transmission)為感染鏈的六種條件中最難防範與打斷者。","C":"傳染窩(reservoir)指感染源賴以生存和繁殖，並可逸出使得易感宿主遭受感染的處所。","D":"易感宿主(susceptible hosts)指能被感染源感染的人或動物。"},"answer":"B","manualChapter":"CH43","matchedChapters":["CH43"],"explanation":"感染源進入人體並感染人體的過程，為感染鏈的六種條件中最容易打斷者"},{"id":2368,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"有關生物戰劑的敘述，何者為是？","options":{"A":"生物戰劑可能造成大量傷亡，但也有其限制，如很難進行有效率的傳播。","B":"依造成疾病的嚴重程度或死亡率分成A、B、C、D四類。","C":"炭疽病(Anthrax)，黃熱病(Yellow fever)，及天花(Smallpox)皆屬於A類生物戰劑。","D":"生物戰劑所需費用製程複雜，相較其他種類武器要昂貴許多。"},"answer":"A","manualChapter":"CH43"},{"id":2449,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"下列皆是腸病毒71型感染併發重症的常見病徵，但何者為非？","options":{"A":"肌躍型抽搐(myoclonic jerks)。","B":"低血糖(hypoglycemia)。","C":"肢體顫抖(tremor)。","D":"心搏過速(tachycardia)。"},"answer":"B","manualChapter":"CH43"},{"id":2548,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"88風災後，屏東縣萬丹鄉多處水患，爆發台灣有紀錄以來最大規模鉤端螺旋體病大流行。關於感染鉤端螺旋體症狀之描述，下列何者正確？","options":{"A":"屬於人畜共通感染病，主要宿主有鼠、犬、豬、牛、羊等動物，也常見人與人間直接傳染。","B":"無黃疸性鉤端螺旋病，會出現發燒、頭痛、肌肉痛、腹痛、腹瀉、結膜充血，死亡率相當高。","C":"黃疸性鉤端螺旋病，以高燒、黃疸、急性腎症衰竭、血液凝固異常、及多重器官衰竭表現。","D":"鉤端螺旋體可經由糞便排除達一個月或更長，因此病患的糞便須小心處理。"},"answer":"C","manualChapter":"CH43"},{"id":2630,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"季節性流感每年都需要更新疫苗，主要是因為病毒發生了抗原漂變（Antigenic Drift）。關於抗原漂變與抗原轉變（Antigenic Shift）之間的病理差異，下列敘述何者最適當？","options":{"A":"漂變是病毒基因組發生大段落互換，轉變是基因的點突變。","B":"漂變是造成季節性流行的機制，轉變是造成世界性大流行的機制。","C":"漂變影響的是病毒的傳染力，轉變影響的是病毒的適應力。","D":"漂變是人類流感病毒株與動物流感病毒株的重新組合。"},"answer":"B","manualChapter":"CH43","matchedChapters":["CH43"]},{"id":2631,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"關於鉤端螺旋體病感染、下列描述何者最不適當？","options":{"A":"我國為第四類法定傳染病，應於24小時內通報。","B":"黃疸性比無黃疸性鉤端螺旋病死亡率高。","C":"病人可能出現結膜充血但無膿狀分泌物。","D":"病人必須在單人病室進行隔離。"},"answer":"D","manualChapter":"CH43"},{"question":"在台灣，下列哪一種新興感染症常發生於南台灣地區，且特別容易在水災過後出現？","options":{"A":"SARS","B":"類鼻疽","C":"退伍軍人症","D":"腸病毒71型"},"answer":"B","manualChapter":"CH43","id":3409,"source":"TP題庫 (圖片匯入)"},{"question":"流感病毒的「抗原轉變」(Antigenic shift) 與「抗原漂變」(Antigenic drift)之間的主要區別為何？","options":{"A":"抗原轉變僅發生在 B 型流感病毒上","B":"抗原漂變會導致完全喪失流行的季節性","C":"抗原轉變涉及基因段互換，導致抗原大改變","D":"抗原轉變是年度季節性流感的主因"},"answer":"C","manualChapter":"CH43","source":"TP題庫 (圖片匯入) - EMT-P 第 43 章 P.1119","id":3475},{"id":3527,"source":"TP題庫","question":"流感病毒發生「抗原轉變」而引發全世界大流行的主要機制為何？","options":{"A":"單一病毒株內基因每年累積的點突變","B":"病毒從人類傳染給禽鳥的過程發生突變","C":"病毒與抗體結合後產生的變異","D":"不同來源病毒株在同一宿主體內進行基因段互換"},"answer":"D","manualChapter":"CH43"},{"id":45632,"question":"關於腸病毒感染，下列描述何者錯誤？","options":{"A":"腸病毒71型被歸類於人類腸病毒A型","B":"人類腸病毒僅限人與人之間傳播","C":"腸病毒臨床上可以引起多種疾病，但其中很多是無症狀(約50 ~ 80％)","D":"特殊的臨床表現如嬰兒急性心肌炎(acute myocarditis)主要由腸病毒71型引起"},"answer":"D","source":"同學出題","manualChapter":"CH43"},{"id":45645,"question":"關於新型流感，下列描述何者正確？","options":{"A":"流感病毒可藉由突變及基因重組二種方式來產生新型病毒，所造成的抗原的小改變稱作病原轉變(antigenic shift)","B":"流感病毒分為A、B、C三型，其中C型最會造成大流行","C":"流感病毒的傳染方式主要在密閉空間中經由空氣傳染","D":"A 型流感病毒的RNA由8個節段組成，而主要的變異大都發生在第4、第6節段"},"answer":"D","source":"同學出題","manualChapter":"CH43"},{"id":45652,"question":"關於流感病毒的變異，下列敘述何者錯誤？","options":{"A":"新型流感可被預測並施打疫苗，所以整體死亡率較低","B":"不同來源的病毒株同時感染同一宿主時，基因重新排列組合造成的大改變稱作病原轉變","C":"流感病毒可藉由突變及基因重組兩種方式來產生新型病毒","D":"病毒基因每年累積的點突變，所造成的抗原的小改變稱作抗原漂變"},"answer":"A","source":"同學出題","manualChapter":"CH43"},{"id":45777,"source":"大白","question":"當不同來源的病毒株同時感染同一宿主時，病毒於複製過程就可能產生基因段互換及重新排列組合(reassortment)，此時造成抗原的大改變稱作?","options":{"A":"病原轉變","B":"抗原漂變","C":"","D":""},"answer":"A","manualChapter":"CH43","matchedChapters":["CH43"]},{"id":45778,"source":"大白","question":"何者乃病毒為了適應宿主產生的抗體而發生的改變，是每年季節性流感造成流行的原因。","options":{"A":"病原轉變","B":"抗原漂變","C":"","D":""},"answer":"B","manualChapter":"CH43","matchedChapters":["CH43"]},{"id":45779,"source":"大白","question":"病毒基因每年累積的點突變，所造成的抗原的小改變稱作為何?","options":{"A":"病原轉變","B":"抗原漂變","C":"","D":""},"answer":"B","manualChapter":"CH43","matchedChapters":["CH43"]},{"id":45780,"source":"大白","question":"關於腸病毒感染的敘述下列何者錯誤?","options":{"A":"腸病毒71型感染較易侵犯中樞神經系統，併發重症主要有腦幹腦炎、心臟衰竭、肺水腫與肺出血等表現","B":"潛伏期可長達3個月","C":"病人亦可經由接觸病人皮膚水泡的液體而受到感染","D":"病人可持續經由腸道釋出病毒，時間長達8~12週之久"},"answer":"B","manualChapter":"CH43","matchedChapters":["CH43"]},{"id":45788,"question":"清潔、消毒用漂白水(次氯酸鈉)皆應新鮮泡製，並於泡製後多久內使用完畢?","options":{"A":"1小時","B":"24小時","C":"3天","D":"7天"},"answer":"B","source":"大白p1122","manualChapter":"CH43"},{"id":45790,"question":"根據美國醫學研究院 (IOM) 的定義，下列哪一項「不符合」新興感染症 (Emerging Infectious Diseases) 的特徵？","options":{"A":"在過去 20 年內才出現在人類族群的疾病","B":"疾病的發生率在人群中呈現快速增加的趨勢","C":"疾病的宿主專一性極高，只侷限在單一特定地區，地理分布範圍不斷縮小","D":"微生物發展出新的抗藥性機制（如多重抗藥性結核菌）"},"answer":"C","explanation":"新興感染症的特徵包含地理分布「擴張」而非縮小。在全球化與交通發達的影響下，傳染病往往能在極短時間內跨國界傳播。","source":"AI","manualChapter":"CH43"},{"id":45791,"question":"阻斷傳染病傳播最有效且最容易介入的環節是「感染鏈 (Chain of Infection)」中的哪一個部分？","options":{"A":"易感宿主 (Susceptible host)","B":"傳染窩 (Reservoir)","C":"傳染途徑 (Modes of transmission)","D":"感染源釋出的出口 (Portals of exit)"},"answer":"C","explanation":"感染鏈包含六個要素，只要阻斷其中一項就能防止感染發生。其中「傳染途徑 (Modes of transmission)」是最容易透過公共衛生手段（如戴口罩防飛沫、洗手防接觸、隔離等）來打斷的環節。","source":"AI","manualChapter":"CH43"},{"id":45792,"question":"一名 3 歲幼童因突發性持續嘔吐與發燒求診。救護人員評估時發現幼童手掌、腳掌及口腔有散在性的小水泡。家屬表示幼童在睡覺時會出現「無故驚嚇、全身肌肉突然抖動」的現象。依據這些臨床表徵，救護員應高度懷疑此幼童面臨下列何種致命併發症的風險？","options":{"A":"天花病毒引發的敗血性休克","B":"腸病毒 71 型引發的腦幹腦炎與肺水腫","C":"鉤端螺旋體引發的急性腎衰竭","D":"流行性腦脊髓膜炎引發的瀰漫性血管內凝血 (DIC)"},"answer":"B","explanation":"手腳與口腔的水泡為「手足口病」特徵，主要由腸病毒 71 型或 A 族克沙奇病毒引起。若病童出現「嗜睡、持續嘔吐、肌躍型抽搐、無故心跳呼吸加快」四大前兆，代表病毒已侵犯中樞神經，極易引發致命的腦幹腦炎與肺水腫。","source":"AI","manualChapter":"CH43"},{"id":45793,"question":"在台灣南部，每逢颱風或嚴重水災過後，若民眾接觸受汙染的泥水與土壤，容易爆發一種被稱為「偉大摹仿者」的傳染病。此病可表現為皮膚潰瘍，嚴重時會引發猛爆性敗血症與肺炎。請問此新興傳染病為何？","options":{"A":"登革熱 (Dengue fever)","B":"類鼻疽 (Melioidosis)","C":"萊姆病 (Lyme disease)","D":"兔熱病 (Tularemia)"},"answer":"B","explanation":"類鼻疽 (Melioidosis) 是台灣南部風災水患後常見的土壤/水源傳染病，因其臨床症狀千變萬化（從皮膚潰瘍到敗血症），故有「偉大摹仿者 (The great imitator)」之稱。","source":"AI","manualChapter":"CH43"},{"id":45794,"question":"流感病毒之所以能屢次造成「世界性大流行 (Pandemic)」，主要是因為不同來源（如禽類、豬、人類）的病毒株在同一宿主體內發生了基因段互換與重新排列組合。這種導致抗原發生「大改變」的機制稱之為？","options":{"A":"抗原漂變 (Antigenic drift)","B":"抗原轉變 (Antigenic shift)","C":"基因重組 (Genetic cloning)","D":"潛伏期活化 (Reactivation)"},"answer":"B","explanation":"抗原轉變 (Antigenic shift)：基因段重新排列組合產生全新亞型，人類對其無抗體，導致「世界性大流行」。抗原漂變 (Antigenic drift)：基因點突變，抗原發生微小改變，導致每年的「季節性流行」。","source":"AI","manualChapter":"CH43"},{"id":45795,"question":"關於「鉤端螺旋體病 (Leptospirosis)」，下列敘述何者錯誤？","options":{"A":"主要傳染途徑是經由接觸受感染動物（如老鼠）尿液汙染的水或土壤","B":"臨床上一項非常具有特徵性的指標 (pathognomonic sign) 為「結膜充血」","C":"嚴重者會出現黃疸、急性腎衰竭及出血傾向，稱為威爾氏症候群 (Weil's syndrome)","D":"它是一種只會透過病媒蚊叮咬傳播的病毒性疾病"},"answer":"D","explanation":"鉤端螺旋體病是「人畜共通傳染病」，主要透過皮膚、黏膜傷口接觸到受感染動物（老鼠、狗等）「尿液汙染的水或泥土」而感染，並非透過病媒蚊叮咬傳播。","source":"AI","manualChapter":"CH43"},{"id":45796,"question":"在生物恐怖主義中，美國 CDC 將潛在的生物武器分為 A、B、C 三類。下列何者「不屬於」威脅最大、最優先防範的「A 類生物戰劑」？","options":{"A":"炭疽病 (Anthrax)","B":"鼠疫 (Plague)","C":"肉毒桿菌毒素 (Botulism)","D":"漢他病毒 (Hantavirus)"},"answer":"D","explanation":"美國 CDC 的 A 類生物戰劑包含：炭疽病、天花、鼠疫、肉毒桿菌毒素、兔熱病、病毒性出血熱。漢他病毒 (Hantavirus) 被歸類為 C 類戰劑。","source":"AI","manualChapter":"CH43"},{"id":45797,"question":"救護人員接獲通報前往處理一起疑似生化恐怖攻擊事件。多名病患同時出現「視力模糊、眼瞼下垂、吞嚥困難及口齒不清」，且症狀逐漸向下蔓延至四肢，導致無力與呼吸困難。所有病患皆「無發燒」且「意識完全清醒」。請問最可能是受到下列何種生物戰劑攻擊？","options":{"A":"炭疽桿菌 (Bacillus anthracis)","B":"天花病毒 (Smallpox virus)","C":"肉毒桿菌毒素 (Botulinum toxin)","D":"伊波拉病毒 (Ebola virus)"},"answer":"C","explanation":"肉毒桿菌毒素 (Botulinum toxin) 是強烈的神經毒素，會阻斷乙醯膽鹼釋放。典型特徵為「無發燒、意識清醒」，且呈現「由上而下（下行性）」的對稱性弛緩性麻痺，最先影響腦神經（眼瞼下垂、吞嚥/構音困難），最後死於呼吸衰竭。","source":"AI","manualChapter":"CH43"},{"id":45798,"question":"若恐怖份子將「炭疽桿菌芽孢」製成氣溶膠武器散佈在空氣中。病患吸入後，初期會出現類似感冒的症狀，隨後在 2~3 天內迅速惡化為嚴重的呼吸衰竭與休克。在急診拍攝胸部 X 光時，最可能發現下列哪一種極具特徵性的影像學異常？","options":{"A":"肺尖出現明顯空洞 (Apical cavitation)","B":"寬縱膈腔 (Widened mediastinum)","C":"雙側瀰漫性細小結節 (粟粒狀陰影)","D":"氣胸伴隨張力性氣腫"},"answer":"B","explanation":"吸入型炭疽病 (Inhalational anthrax) 發病極快且致命。炭疽桿菌芽孢在肺部與淋巴結大量繁殖並釋放毒素，導致嚴重的縱膈腔炎與出血。因此，胸部 X 光上呈現「寬縱膈腔 (Widened mediastinum)」是其極具代表性的早期指標。","source":"AI","manualChapter":"CH43"},{"id":45799,"question":"在歷史上已被宣布絕跡，但仍被視為極具威脅的 A 類生物戰劑「天花 (Smallpox)」，其出疹的特徵與常見的水痘 (Chickenpox) 有顯著不同。下列何者為「天花」的典型皮疹特徵？","options":{"A":"皮疹呈現「向心性分佈」，也就是軀幹的疹子比四肢多","B":"在同一身體部位，可以同時看到斑疹、水泡、膿皰與結痂等「不同階段」的皮疹混雜在一起","C":"所有皮疹的發展階段都是「同步」的，亦即同一區域的皮疹會同時變成水泡或同時化膿","D":"皮疹通常伴隨極度強烈的搔癢感，且絕不會長在手掌與腳底"},"answer":"C","explanation":"「天花」皮疹的兩大特徵為：(1) 離心性分佈（臉部、手腳掌極多）。(2) 所有皮疹的演化階段「同步」（同一區域的皮疹會一起變成水泡、一起結痂）。相對地，水痘則是「向心性分佈」，且同一區域可見「新舊雜陳、各個階段都有」的皮疹。","source":"AI","manualChapter":"CH43"},{"id":45800,"question":"關於防護裝備的等級分類，若救護技術員面對的是「未知種類、未知濃度」，且可能同時對呼吸道與皮膚造成極高危害的致命化學/生物物質外洩現場（熱區），必須穿著下列哪一個等級的防護裝備？","options":{"A":"等級 A (Level A)","B":"等級 B (Level B)","C":"等級 C (Level C)","D":"等級 D (Level D)"},"answer":"A","explanation":"等級 A (Level A) 提供最高等級的呼吸道、眼睛、黏膜與「皮膚」防護。使用全封閉氣密式防護衣與內置 SCBA。專門用於未知物質或已知會對皮膚與呼吸道造成極度致命危害的熱區。","source":"AI","manualChapter":"CH43"},{"id":45801,"question":"根據美國 CDC 針對傳播途徑所訂定的隔離防護措施，下列哪一組傳染病必須嚴格執行「空氣防護措施 (Airborne precautions)」，即病患需入住負壓隔離病房，且醫護人員必須配戴 N95 以上等級之口罩？","options":{"A":"流行性感冒、腸病毒、登革熱","B":"腦膜炎雙球菌、百日咳、退伍軍人症","C":"水痘、麻疹、開放性肺結核","D":"萊姆病、瘧疾、A型肝炎"},"answer":"C","explanation":"「空氣防護措施 (Airborne precautions)」適用於飛沫核 ≤5μm 的病原體。經典代表為：水痘、麻疹、開放性肺結核、SARS、天花。這些病原體會懸浮於空氣中，需 N95 口罩與負壓病房。","source":"AI","manualChapter":"CH43"},{"id":45803,"question":"所謂的「中階滅菌 (Intermediate-level disinfection)」，其消毒能力與適用範圍為何？","options":{"A":"僅能殺死部分病毒與一般細菌，對結核分枝桿菌無效","B":"可以殺死包含結核桿菌在內的大部分病原體，但「無法」殺死細菌的內孢子 (Spores)","C":"可以完全殺滅所有微生物，包含高抵抗力的細菌內孢子","D":"屬於最高規格的滅菌法，通常用於會侵入病患體內無菌區域的手術器械"},"answer":"B","explanation":"「中階滅菌」能殺死包含結核桿菌 (Mycobacterium tuberculosis) 在內的大部分細菌、病毒與黴菌，但無法殺滅最高抵抗力的「細菌內孢子 (Spores)」。完全殺滅內孢子必須靠「完全消毒/滅菌 (Sterilization)」。","source":"AI","manualChapter":"CH43"},{"id":45804,"question":"「肺鼠疫 (Pneumonic plague)」若被作為生物武器發動攻擊，其威脅性極高。關於肺鼠疫的敘述，下列何者錯誤？","options":{"A":"潛伏期極短，通常為 16 天","B":"病患會出現嚴重的咳嗽，並咳出水樣、帶血色的泡沫痰或大量咯血","C":"原發性肺鼠疫無法透過人與人之間的「飛沫」傳染，必須被受感染的跳蚤叮咬才會致病","D":"若未及時給予適當的抗生素治療，死亡率可高達 90100%"},"answer":"C","explanation":"「腺鼠疫」通常由跳蚤叮咬傳播；但「肺鼠疫」可以直接透過病患咳嗽的飛沫，在「人與人之間」快速傳播，這也是它被視為極危險生物武器的原因。","source":"AI","manualChapter":"CH43"},{"id":45805,"question":"N95 口罩是應對空氣傳染病的重要防護裝具。關於 N95 口罩的規格意義，下列敘述何者正確？","options":{"A":"\"N\" 代表該口罩針對「油性懸浮微粒 (Oil-based particulates)」具有極佳的防護力","B":"\"95\" 代表該口罩能過濾掉空氣中至少 95% 的揮發性有機化學毒氣","C":"若執行高風險的呼吸道處置（如插管），即使戴了 N95 口罩，仍建議病患端加裝 HEPA 濾網以減少氣溶膠噴濺","D":"只要有配戴 N95 口罩，無須進行密合度測試 (Fit test) 即可保證達到 95% 的防護效果"},"answer":"C","explanation":"N 代表 \"Not resistant to oil\"（不防油性微粒）。它主要過濾非油性懸浮微粒（大於 0.3 微米，過濾效率 ≥95%），無法過濾化學毒氣。配戴 N95 必須經過密合度測試 (Fit test) 才能確保無漏氣。為減少氣溶膠噴濺，高風險呼吸道處置建議搭配 HEPA 濾網。","source":"AI","manualChapter":"CH43"},{"id":45806,"question":"嚴重急性呼吸道症候群 (SARS)、中東呼吸症候群 (MERS) 與嚴重特殊傳染性肺炎 (COVID-19) 皆屬於冠狀病毒感染。關於這三種疾病的共同點與相異點，下列敘述何者錯誤？","options":{"A":"這三種冠狀病毒的起源或中間宿主，研究皆指出與蝙蝠或其他野生動物有高度關聯","B":"它們皆會引發下呼吸道感染，嚴重時導致 ARDS (急性呼吸窘迫症候群)","C":"COVID-19 的致死率雖然低於 SARS 與 MERS，但因存在大量「無症狀感染者」，導致其傳播範圍最廣","D":"MERS 的主要動物宿主是果子狸，因此赴中東旅遊應避免接觸果子狸"},"answer":"D","explanation":"SARS 的可能中間宿主是果子狸 (Civet cats)；而 MERS 的主要動物宿主是中東地區的「單峰駱駝」。","source":"AI","manualChapter":"CH43"},{"id":45807,"question":"某些高危險性的傳染病病患在治療與運送時，必須穿戴特定等級的防護裝備。若救護員面對的是「已知濃度不高，且主要危害為呼吸道，對皮膚吸收危害極低」的生化事故（如在遠離熱區的溫區或冷區工作），通常最低應穿著何種等級的防護裝備？","options":{"A":"等級 A","B":"等級 B","C":"等級 C","D":"等級 D (一般制服)"},"answer":"C","explanation":"等級 C 防護服（C 級）提供與 B 級相近的皮膚防護（防潑濺），但使用 PAPR 或濾毒罐（而非 SCBA）作為呼吸防護。適用於「危害物質與濃度已知，不會透過皮膚大量吸收，且空氣中氧氣濃度足夠」的環境（如溫區除汙站）。","source":"AI","manualChapter":"CH43"},{"id":45808,"question":"在鑑別各類生物戰劑的臨床表徵時，如果病患出現「發燒、畏寒、局部出現會癢的丘疹，隨後發展成周圍嚴重水腫、中央帶有『黑色壞死焦痂 (Eschar)』的無痛性潰瘍」。請問這是哪一種生物戰劑感染的典型表現？","options":{"A":"天花病毒 (Smallpox)","B":"皮膚型炭疽病 (Cutaneous anthrax)","C":"兔熱病 (Tularemia)","D":"腺鼠疫 (Bubonic plague)"},"answer":"B","explanation":"接觸炭疽桿菌芽孢後，皮膚會出現水泡，隨後破裂形成中央凹陷、呈現黑色的「無痛性焦痂 (Eschar)」，這是「皮膚型炭疽病 (Cutaneous anthrax)」的經典特徵。","source":"AI","manualChapter":"CH43"},{"id":45809,"question":"當急救現場面臨疑似生物恐怖攻擊時，最難以在第一時間確認並啟動應變計畫的原因為何？","options":{"A":"生物戰劑通常會產生劇烈的爆炸聲與閃光，導致現場混亂無法評估","B":"生物武器的攻擊通常具有「長短不一的潛伏期」，病患往往在離開暴露現場數天後才在各地醫院陸續發病","C":"生物武器的散佈裝置龐大且極易被肉眼察覺，恐怖分子難以隱藏","D":"所有的生物戰劑皆會散發出濃烈的大蒜或芥末氣味，容易與化學毒氣混淆"},"answer":"B","explanation":"生物恐怖攻擊最大的威脅與偵測阻礙在於其「隱蔽性」與「潛伏期」。病原體通常無色無味，釋放時毫無動靜。受害者吸入後不會立刻發病，而是四散到各地，數天後才陸續湧入醫院，導致難以第一時間界定攻擊現場與暴露範圍。","source":"AI","manualChapter":"CH43"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

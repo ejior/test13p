@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 42 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：48 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH42</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":161,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"有位兩歲半大，意識清醒女童，發燒39℃，燥動不安，皮膚有出血性紫斑，四肢冰冷並有酸血症的現象，心跳速率為148下/分，呼吸速率為38下/分，血壓為80 / 56mmHg，酸鹼度為7.25，這位女童最有可能之診斷為：","options":{"A":"紅班性狼瘡","B":"腦膜炎雙球菌敗血症","C":"過敏性紫斑症","D":"藥物中毒"},"answer":"B","manualChapter":"CH42"},{"id":1089,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於疥瘡，以下敘述何者為非？","options":{"A":"若病患有在使用類固醇，病症會較不典型，不易診斷","B":"治療疥瘡常用的疥瘡乳劑不適用於孕婦","C":"疥瘡患者接觸過的床單、被褥、枕頭套應以塑膠袋密封兩週使成蟲及蟲卵死亡","D":"疥蟲孵化只需3天，因此若懷疑接觸疥瘡患者，一週以上沒有症狀，就不用擔心感染"},"answer":"D","manualChapter":"CH42"},{"id":2055,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"以下傳染病之傳播途徑配對，何者錯誤？","options":{"A":"疥瘡—接觸傳染。","B":"麻疹—飛沫傳染。","C":"肺結核—空氣傳染。","D":"後天免疫缺乏症候群—體液傳染。"},"answer":"B","manualChapter":"CH42"},{"id":2063,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"下列何者並非我國目前（2020年10月為準）之第一類法定傳染病？","options":{"A":"新冠肺炎（COVID-19；嚴重特殊傳染性肺炎）。","B":"狂犬病。","C":"鼠疫。","D":"嚴重急性呼吸道症候群。"},"answer":"A","manualChapter":"CH42"},{"id":2099,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於救護人員出勤傷病患救護的保護措施，以下何者最不正確？","options":{"A":"面對可以接觸傳播的疾病(如疥瘡)，要配戴手套。","B":"面對空氣傳播疾病(如麻疹)，要配戴一般外科口罩。","C":"若可能有體液或血液噴濺，應戴上護目鏡。","D":"面對飛沫傳播疾病(如流行性感冒)，要配戴一般外科口罩。"},"answer":"B","manualChapter":"CH42"},{"id":2249,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"病原體進入體內後，帶有記憶能力並放出抗體來進行中和作用以避免進一步傷害的是？(複選：選「白血球」也給分)","options":{"A":"白血球。","B":"巨嗜細胞。","C":"T型淋巴球。","D":"B型淋巴球。"},"answer":"D","manualChapter":"CH42"},{"id":2405,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"以下何種疾病為空氣傳染？","options":{"A":"水痘。","B":"腸病毒。","C":"流行性感冒。","D":"鏈球菌肺炎。"},"answer":"A","manualChapter":"CH42"},{"id":2417,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於腦膜炎雙球菌感染之敘述，何者為非？","options":{"A":"為葛蘭氏陰性球菌，常存在鼻部和咽喉的粘膜中。","B":"好發於老年人，年輕人及兒童較少見。","C":"屬於飛沫傳染，在未適當防護下接觸病人飛沫者需預防性抗生素投藥。","D":"約10%的人會成為不具感染症狀的帶原者，但仍具有傳染力。"},"answer":"B","matchedChapters":["CH05"],"manualChapter":"CH42"},{"id":2471,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"新興傳染病感染鏈中，最容易被消滅或打斷以阻絕疾病傳染的部份是？","options":{"A":"傳染途徑。","B":"易感宿主。","C":"傳染病源。","D":"傳染窩。"},"answer":"A","manualChapter":"CH42"},{"id":2497,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"您載送一名長期臥床病人到院後，被醫院告知病人可能有疥瘡。下列說明，何者為是？","options":{"A":"疥瘡是由寄生在真皮層中的疥蟲所引發的疾病。","B":"病人發癢搔抓的部位，通常由臉和軀幹開始。","C":"救護車上病人接觸過的物品，可以日曬處理或是用塑膠布密封靜置兩週。","D":"您若因接觸到疥蟲被感染的，一般來說一週內就會出現搔癢症狀。"},"answer":"C","manualChapter":"CH42"},{"id":2508,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"救護技術員載送已知診斷的下列病人時，應該要配戴N95口罩，但何者除外？","options":{"A":"水痘。","B":"麻疹。","C":"流行性感冒。","D":"開放性肺結核。"},"answer":"C","manualChapter":"CH42"},{"id":2629,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"疑似疥瘡的救護案件，在個人防護與後續除污方面，最為完整且正確的處理流程為何？","options":{"A":"佩戴N95口罩與隔離衣，避免飛沫傳染；處置結束後，使用酒精性乾洗手消毒雙手，並將壓脈帶以低階滅菌法處理。","B":"佩戴外科口罩、長袖隔離衣與手套，避免皮膚直接接觸；處置結束後，立即使用清水與肥皂徹底洗手，並將壓脈帶以中階滅菌法處理。","C":"佩戴外科口罩與手套，避免體液接觸；處置結束後，將手套丟棄並使用酒精消毒雙手，將壓脈帶以清水擦拭。","D":"僅佩戴手套，減少皮膚接觸；處置結束後，立即用清水與肥皂洗手，並將所有與病人接觸的裝備以高階滅菌法處理。"},"answer":"B","matchedChapters":["CH05"],"manualChapter":"CH42"},{"id":3325,"question":"愛滋病患者在 CD4 淋巴球總數下降到約多少範圍時，會開始出現正常人少見的伺機性感染（如肺囊蟲肺炎）？","options":{"A":"800~1200 顆/μL","B":"10~50 顆/μL","C":">500 顆/μL","D":"200~350 顆/μL"},"answer":"D","source":"TP題庫","manualChapter":"CH42"},{"question":"關於傳染病敘述，以下何者正確？","options":{"A":"腸病毒為RNA病毒，為單一病毒的簡稱","B":"黑死病的自然傳染途徑主要為老鼠與人之間的直接感染","C":"結核病分為開放性與非開放性兩種，非開放性的結核病不治療也不會傳染給其他人。","D":"生物戰劑的意思為：以病原及毒素為主，可做為攻擊人類及其農產或畜產的武器。"},"answer":"D","manualChapter":"CH42","id":3401,"source":"TP題庫 (圖片匯入)"},{"question":"常見傳染途徑其相關疾病下列何者錯誤？","options":{"A":"接觸傳染: 急性結膜炎、帶狀泡疹、抗藥性黃金葡萄球菌感染、疥瘡","B":"空氣傳染: 水痘、麻疹、開放性肺結核、嚴重特殊傳染性肺炎","C":"食物或水源傳染: 桿菌性痢疾、霍亂、A型肝炎","D":"血液或體液傳染: 登革熱、B型肝炎、愛滋病"},"answer":"D","manualChapter":"CH42","source":"TP題庫 (圖片匯入) - EMT-P 第 42 章 P.1092","id":3476},{"question":"有關口罩分類的規範，下列敘述何者正確？","options":{"A":"歐盟規格的 FFP2 等級口罩約等同於美國的 N95 口罩。","B":"醫療用拋棄式口罩的使用時間通常不建議超過 24 小時。","C":"N95 口罩代表其具備高度抗油污性。","D":"1/4 罩式面罩必須能涵蓋到口、鼻及下頷顎。"},"answer":"A","source":"圖片匯入","manualChapter":"CH42","id":3576,"matchedChapters":["CH42"]},{"question":"愛滋病(AIDS) 主要攻擊人體免疫系統中的哪一種細胞，導致病人容易出現伺機性感染？","options":{"A":"B 淋巴球","B":"CD4 淋巴球","C":"白血球","D":"血小板"},"answer":"B","source":"圖片匯入","manualChapter":"CH42","id":3582,"matchedChapters":["CH42"]},{"question":"關於「體內物質隔離措施 (BSI)」的原則，下列敘述何者正確？","options":{"A":"只針對愛滋病病人","B":"將所有病人的體液、分泌物均列為感染源","C":"只有在看到血液時才穿戴防護裝備","D":"接觸病人的汗液不需要任何防護"},"answer":"B","source":"圖片匯入","manualChapter":"CH42","id":3584,"matchedChapters":["CH42"]},{"question":"一名患者因高燒、肌肉痠痛、出血傾向就醫，經檢驗確認感染 伊波拉病毒感染症 (Ebola virus disease) ，依我國法定傳染病分類及通報規定，下列何者正確？","options":{"A":"屬第五類法定傳染病，應於24小時內通報","B":"屬第五類法定傳染病，應於7日內通報","C":"屬第一類法定傳染病，應立即通報並採取嚴格隔離","D":"不需通報，僅症狀治療即可"},"answer":"A","manualChapter":"CH42","source":"TPP","id":3760,"matchedChapters":["CH42"]},{"id":3845,"source":"AI出題","question":"關於敗血症 (Sepsis) 與敗血性休克的最新國際定義 (Sepsis-3)，下列敘述何者最為正確？","options":{"A":"敗血症被定義為單純由微生物感染所引起的全身性發炎反應症候群 (SIRS)","B":"敗血性休克的診斷標準之一為：在給予足夠液體復甦後，仍需使用血管收縮劑以維持平均動脈壓 (MAP) ≥ 65 mmHg，且血清乳酸值 > 2 mmol/L","C":"qSOFA 評估項目包含：心跳速率、收縮壓、呼吸速率","D":"敗血性休克的血清乳酸鹽濃度標準必須低於 2 mmol/L"},"answer":"B","manualChapter":"CH42"},{"id":3846,"source":"AI出題","question":"救護技術員在院前評估疑似感染的病人時，常使用 qSOFA 進行快速篩檢。若一名病人的呼吸速率為 24 次/分，收縮壓為 90 mmHg，格拉斯哥昏迷指數 (GCS) 為 13 分。此病人的 qSOFA 分數為何？","options":{"A":"1 分","B":"2 分","C":"3 分","D":"4 分"},"answer":"C","manualChapter":"CH42"},{"id":3847,"source":"AI出題","question":"在傳染性疾病的傳播途徑中，下列哪一種疾病與其主要傳播途徑的配對是「錯誤」的？","options":{"A":"流行性腦脊髓膜炎：飛沫傳染","B":"疥瘡：接觸傳染","C":"開放性肺結核：飛沫傳染","D":"霍亂：食物或水源傳染"},"answer":"C","manualChapter":"CH42"},{"id":3848,"source":"AI出題","question":"關於救護設備與環境的消毒滅菌，下列敘述何者最為正確？","options":{"A":"低階滅菌 (Low-level disinfection) 可以有效殺死結核桿菌，適用於一般環境消毒","B":"中階滅菌 (Intermediate-level disinfection) 能夠殺死所有細菌的內孢子 (Spores)","C":"被血液或體液汙染的救護車環境表面，建議至少使用「中階滅菌法」進行消毒","D":"喉頭鏡葉片接觸病人黏膜，僅需使用一般清潔劑進行低階消毒即可"},"answer":"C","manualChapter":"CH42"},{"id":3849,"source":"AI出題","question":"依據台灣現行法定傳染病分類，下列哪一組疾病「皆」屬於第二類法定傳染病，且須於24小時內通報？","options":{"A":"嚴重急性呼吸道症候群 (SARS)、天花","B":"登革熱、流行性腦脊髓膜炎","C":"結核病、日本腦炎","D":"嚴重特殊傳染性肺炎 (COVID-19)、流感併發重症"},"answer":"B","manualChapter":"CH42"},{"id":3850,"source":"AI出題","question":"肺結核的傳播途徑被稱為「飛沫核傳染 / 空氣傳染」。關於此傳播特性的描述，下列何者正確？","options":{"A":"飛沫核的直徑通常大於 5 微米，因此無法在空氣中長時間懸浮","B":"只要吸入含有結核菌的飛沫核，就一定會發病成為開放性結核病","C":"由於飛沫核極微小，即使救護員離開感染來源甚遠，只要呼吸同一空間的空氣即可能被感染","D":"給予疑似肺結核病人配戴 N95 口罩，是防止其將病菌散播至空氣中的最佳且唯一方法"},"answer":"C","manualChapter":"CH42"},{"id":3851,"source":"AI出題","question":"愛滋病毒 (HIV) 主要攻擊人體的免疫系統。當血液中某一種細胞的數量下降至何種程度時，病人會開始出現正常人不易得到的「伺機性感染」(如肺囊蟲肺炎、禽型分枝桿菌感染)？","options":{"A":"CD8 淋巴細胞下降至 500 顆/μL 以下","B":"CD4 淋巴細胞下降至 200~350 顆/μL 左右或更低","C":"巨噬細胞總數低於 1000 顆/μL","D":"B 型淋巴球數量急遽減少"},"answer":"B","manualChapter":"CH42"},{"id":3852,"source":"AI出題","question":"救護技術員在執行勤務時，若不慎被疑似含有愛滋病毒的針頭扎傷，下列處置流程何者「錯誤」？","options":{"A":"立即用力擠壓傷口，使血液盡量流出","B":"在流動的清水下清洗傷口至少 5 分鐘","C":"因為愛滋病毒有空窗期，抽血檢驗若呈陰性即可完全排除感染，不需服用預防性藥物","D":"應盡快尋求醫療協助，最好在 72 小時內接受預防性投藥以降低感染率"},"answer":"C","manualChapter":"CH42"},{"id":3853,"source":"AI出題","question":"關於「腦膜炎雙球菌」的敘述，下列何者最「不正確」？","options":{"A":"該病菌屬於革蘭氏陰性球菌，通常存在於部分正常人的鼻部和咽喉黏膜中","B":"病程通常進展緩慢，有足夠的黃金時間進行早期抗生素治療","C":"可能會迅速惡化造成休克、瀰漫性血管內凝血 (DIC) 及多重器官衰竭","D":"若救護員在無適當防護下對該病人進行氣管插管或抽痰，事後應接受預防性抗生素投藥"},"answer":"B","manualChapter":"CH42"},{"id":3854,"source":"AI出題","question":"關於「疥瘡 (Scabies)」的感染與處置，下列敘述何者正確？","options":{"A":"疥蟲離開人體後，在一般環境下可存活長達數週之久","B":"第一次感染疥瘡的病人，通常在接觸後 1~2 天內就會出現嚴重的搔癢症狀","C":"疥瘡不會引發體內有效的免疫保護，即使治癒後再次接觸仍會感染","D":"被疥蟲汙染的床單衣物，只要用冷水加入漂白水浸泡 5 分鐘即可徹底殺滅蟲卵"},"answer":"C","manualChapter":"CH42"},{"id":3855,"source":"AI出題","question":"關於「邦克列酸 (Bongkrekic acid)」所引起的食物中毒事件，下列敘述何者錯誤？","options":{"A":"主要是由唐菖蒲伯克氏菌 (Burkholderia gladioli) 分泌產生","B":"會導致嚴重的多重器官衰竭，病人病情快速惡化","C":"通常屬於群聚感染事件，短時間內會有多人出現類似症狀","D":"到院前即可透過施打專一性解毒劑血清來快速中和毒性"},"answer":"D","manualChapter":"CH42"},{"id":3856,"source":"AI出題","question":"關於 N95 口罩的規格與防護意義，下列敘述何者正確？","options":{"A":"\"N\" 代表該口罩具有極佳的抗油汙能力 (Oil-proof)","B":"\"95\" 代表可以過濾至少 95% 以上直徑大於 5 微米的飛沫","C":"依據美國 NIOSH 規範，N95 面罩屬於無抗油污性，且能過濾 95% 以上的微粒","D":"若遇到化學毒氣外洩事件，配戴 N95 口罩亦能提供完整的毒氣過濾防護"},"answer":"C","manualChapter":"CH42"},{"id":3857,"source":"AI出題","question":"在人體的免疫防禦系統中，哪一種細胞具有「記憶能力」，能在下次遇到相同病原體時快速製造專一性「抗體」進行中和作用？","options":{"A":"巨噬細胞","B":"B 型淋巴球 (B細胞)","C":"嗜中性白血球","D":"紅血球"},"answer":"B","manualChapter":"CH42"},{"id":3858,"source":"AI出題","question":"救護車在運送患有「開放性肺結核」的病人時，為降低傳染風險，下列措施何者最為適當？","options":{"A":"讓病人配戴 N95 口罩，救護員配戴一般外科口罩","B":"車廂內開啟「室內循環」空調，以免病菌飄散至車外","C":"救護員配戴 N95 口罩，並讓病人在不影響呼吸下配戴一般外科/拋棄式手術口罩","D":"運送途中應將車窗全部緊閉，以維持車內正壓狀態"},"answer":"C","manualChapter":"CH42"},{"id":3859,"source":"AI出題","question":"依據《傳染病防治法》及相關規定，針對疑似傳染病病人的處理，下列敘述何者最為正確？","options":{"A":"救護技術員有權力強制要求所有病人出示愛滋病檢驗報告","B":"病人或其家屬在就醫時，有據實陳述接觸史與旅遊史 (TOCC) 的義務","C":"愛滋病患者在任何緊急危及生命的狀況下，都必須先主動宣告感染身分，否則救護員可拒絕施救","D":"為了保護隱私，救護紀錄表上絕對不可紀錄任何傳染病相關資訊"},"answer":"B","manualChapter":"CH42"},{"id":3860,"source":"AI出題","question":"人類免疫缺乏病毒 (HIV) 感染人體後，有相當長的一段「無症狀潛伏期」。關於此潛伏期的描述，下列何者正確？","options":{"A":"在潛伏期內，病毒在體內處於完全休眠狀態，不會進行繁殖","B":"在此期間，病人的 CD4 淋巴球數量會維持在正常高水準","C":"雖然外觀無明顯症狀，但病毒仍在持續大量繁殖並逐漸破壞免疫系統","D":"處於潛伏期的病人，其血液或體液完全不具備傳染力"},"answer":"C","manualChapter":"CH42"},{"id":3861,"source":"AI出題","question":"關於免疫防禦系統中的「正常菌落 (Normal flora)」，下列敘述何者錯誤？","options":{"A":"大量分布在健康人體的皮膚、腸胃道及呼吸道黏膜上","B":"它們主要的功能是破壞人體的外部屏障，協助病原菌入侵","C":"正常菌落可以協助干擾致病菌的附著與侵入","D":"當腸胃道的正常菌落（如大腸桿菌）移位至泌尿道時，可能會引發泌尿道感染"},"answer":"B","manualChapter":"CH42"},{"id":3862,"source":"AI出題","question":"在評估疑似感染敗血症的病人時，下列哪一項生理指標的改變「不」屬於 qSOFA 的評估範圍？","options":{"A":"呼吸速率 ≥ 22 次/分","B":"收縮壓 ≤ 100 mmHg","C":"體溫 ≥ 38.5 °C 或 ≤ 36 °C","D":"發生新的意識狀態改變 (GCS < 15)"},"answer":"C","manualChapter":"CH42"},{"id":3863,"source":"AI出題","question":"在面對高危險傳染病（如 COVID-19 等空氣/飛沫傳播疾病）時，救護員在脫卸個人防護裝備 (PPE) 時，哪一項原則是最重要的？","options":{"A":"脫卸速度越快越好，以縮短暴露在汙染環境的時間","B":"為了省去麻煩，應戴著汙染的手套直接脫除口罩與護目鏡","C":"必須嚴格遵守脫卸順序，避免被防護裝備外層汙染自身黏膜，且脫卸後須徹底洗手","D":"N95 口罩可以直接用手抓取口罩外部正中心取下丟棄"},"answer":"C","manualChapter":"CH42"},{"id":3864,"source":"AI出題","question":"一名 30 歲男性病患，主訴連續多日高燒、肌肉痠痛、後眼窩痛，且身上出現紅疹。詢問病史發現其一週前曾前往東南亞旅遊。依據其症狀與旅遊史，他最可能感染下列何種「第二類」法定傳染病？","options":{"A":"肺結核","B":"登革熱","C":"狂犬病","D":"新型 A 型流感"},"answer":"B","manualChapter":"CH42"},{"question":"根據 2016 年第三次國際共識會議（Sepsis-3），敗血症（Sepsis）的臨床正式定義為何？","options":{"A":"感染源進入血液循環並大量繁殖的狀態","B":"發生嚴重低血壓且對輸液治療無反應的感染狀態","C":"宿主對感染的反應失調，導致器官功能失常","D":"由感染引起的全身性炎症反應綜合症（SIRS）"},"answer":"C","source":"AI出題","manualChapter":"CH42","id":45458},{"question":"關於傳染病傳播鏈（Chain of Infection）的敘述，下列何者正確？","options":{"A":"釋出門戶與進入門戶必須為相同的解剖部位","B":"只要切斷傳染途徑，即使宿主具備高易感性也不會發生感染","C":"正常菌落（Normal flora）在任何情況下都不會成為致病原","D":"病原體的毒力與數量直接影響傳染鏈是否能成功建立"},"answer":"D","source":"AI出題","manualChapter":"CH42","id":45459},{"question":"肺結核的「飛沫核（Droplet nuclei）」傳染特性，與一般飛沫傳染最大的不同點在於？","options":{"A":"僅能透過與病人近距離（1公尺內）接觸才會感染","B":"病原體在飛沫中含水量高，對環境抵抗力弱","C":"顆粒直徑大於 10μm，因此沉降速度快","D":"顆粒直徑小於 5μm，能長時間懸浮並隨氣流遠距離移動"},"answer":"D","source":"AI出題","manualChapter":"CH42","id":45460},{"question":"關於後天免疫缺乏症候群（AIDS）的「空窗期」，下列敘述何者正確？","options":{"A":"只要空窗期內檢測結果為陰性，即可完全排除感染可能","B":"傳統血清抗體檢驗的空窗期約為 6 至 12 週","C":"空窗期是指病毒在體內大量繁殖但尚無傳染力的時期","D":"目前最先進的 PCR 檢驗仍需 3 個月才能偵測出病毒"},"answer":"B","source":"AI出題","manualChapter":"CH42","id":45461},{"question":"對於「開放性肺結核」的定義，臨床上最常用的判斷標準為何？","options":{"A":"胸部 X 光檢查發現肺尖部有纖維化病灶","B":"病人與結核病案有過親密接觸史","C":"病人出現咳嗽、體重減輕及盜汗等典型症狀","D":"痰液檢體經抗酸性染色（Acid-fast stain）呈現陽性"},"answer":"D","source":"AI出題","manualChapter":"CH42","id":45462},{"question":"關於人體的「內部防禦系統」，下列哪一種細胞具備產生「一對一專一性抗體」的功能？","options":{"A":"白血球（中性球）","B":"巨噬細胞","C":"B 型淋巴球","D":"T 型淋巴球"},"answer":"C","source":"AI出題","manualChapter":"CH42","id":45463},{"id":45466,"question":"根據我國疾病管制署的建議，救護技術員因工作發生疑似愛滋病毒暴露時，下列緊急處置，何者正確？(選「必須於暴露後3個月、6個月、1年追蹤三次抗體檢驗。」也給分)","options":{"A":"若有扎傷處應立即以大量優碘消毒傷口。","B":"若暴露處為黏膜(如眼睛)則大量沖水即可。","C":"必須於72小時內向工作單位進行事件通報。","D":"必須於暴露後3個月、6個月、1年追蹤三次抗體檢驗。"},"answer":"B","source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","manualChapter":"CH42"},{"id":45690,"question":"病原體進入體內後，帶有記憶能力並放出抗體來進行中和作用以避免進一步傷害的是？","options":{"A":"NK細胞(Natural Killer)。","B":"巨嗜細胞。","C":"T細胞。","D":"B細胞。"},"answer":"D","source":"同學出題","manualChapter":"CH42"},{"id":45700,"question":"在評估敗血症風險時，關於 qSOFA(quickSOFA) 評分系統的項目，下列何者不包含在內？","options":{"A":"血壓100mmHg以下","B":"呼吸22次/分以上","C":"體溫超過38.5°C","D":"GCS分數不足15分或新發生的意識變化"},"answer":"C","source":"同學出題","manualChapter":"CH42"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

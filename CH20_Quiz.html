@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 20 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：78 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH20</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":19,"source":"105 高級救護技術員甄試筆試題目.doc","question":"有關心臟聽診與辦膜音位置的配對，正確的是？","options":{"A":"A：肺動脈區，B：主動脈區","B":"C：三尖辦區，D：肺動脈區","C":"B：三尖辦區，C：二尖辦區","D":"A：主動脈區，D：二尖辦區"},"answer":"D","manualChapter":"CH20"},{"id":21,"source":"105 高級救護技術員甄試筆試題目.doc","question":"與盲腸炎有關的理學檢查，不包括下列哪一項？","options":{"A":"肛門直腸指診（Digital rectal examination）","B":"洛夫辛徵象（Rovsing：ssign）","C":"腰大肌徵象（Psoas sign）","D":"透納氏徵象（Turner's sign）"},"answer":"D","manualChapter":"CH20"},{"id":153,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"關於EMTP使用聽診器進行聽診的說明，正確的是？","options":{"A":"聽診的原理，是利用空氣或液體的流動所發出的聲響判斷身體部位哪裏有異常","B":"雙面聽診器的膜面，是為了收集較低頻率的聲音，所以使用膜面聽診時應輕放在皮膚表面即可","C":"若是EMTP聽診時發現病患有哮喘音（wheezes），就代表病患的呼吸窘迫一定是氣喘或肺氣腫所引起","D":"聽診在到院前環境中很難執行，故聽診檢查並非EMTP訓練及理學檢查的重點"},"answer":"A","manualChapter":"CH20"},{"id":159,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"你在EMTP醫院實習時，看見醫師幫某位腹痛的年輕人，進行如右圖的理學檢查。請問關於該檢查之敘述，何者正確？","options":{"A":"該檢查名為「閉孔肌徵候」","B":"陽性反應為引起同側劇烈腰痛","C":"陽性反應代表可能有後腹腔發炎或後腹腔膿瘍","D":"陰性反應即可排除盲腸炎之可能性"},"answer":"C","manualChapter":"CH20","matchedChapters":["NeedImage"],"image":"題庫圖片/159.png","explanation":"此為腰大肌徵候(psoas Sign)測試方式，其臨床意義為腰大肌本身病變，或其附近之後腹腔器官發炎產生次發性刺激；代表性疾病包含闌尾炎、腰大肌膿瘍、後腹腔膿瘍"},{"id":218,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"有關昏迷指數（Glasgow Coma Scale，GCS），下列何者為非？","options":{"A":"昏迷指數針對病患的睜眼，運動以及說話三個方面來評估計分，加總後病患意識介於3分到15分，最低為3分，代表病患完全喪失意識，而最好的意識狀態為15分","B":"運動反應，對疼痛刺激肢體會回缩躲避為5分","C":"運動反應，對疼痛刺激產生肢體伸直反應為2分","D":"說話反應，發出不連貫而無意義的字句為3分"},"answer":"B","manualChapter":"CH20"},{"id":251,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列哪個不是中心體溫？","options":{"A":"肛溫","B":"耳溫","C":"腋溫","D":"舌溫"},"answer":"C","manualChapter":"CH20","matchedChapters":["CH20"]},{"id":276,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"理學檢查時所發現的徵象，何者為是？","options":{"A":"肚臍下方接近恥骨聯合處觸摸到的異物，可能為副主動脈瘤","B":"後腰部敲痛可能為腎結石","C":"罩丸劇痛，外觀無異常，可能為副睾","D":"女童有腹脹，腹痛及嘔吐等症狀，可能為嵌頓性疝氣"},"answer":"D","manualChapter":"CH20"},{"id":472,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"關於聽診器的使用，以下敘述何者為非？","options":{"A":"聽診器除了用來評估臟器發出的聲音，同時也可以用來協助生命徵象的測量","B":"不管使用哪一種聽診器，隔著衣服聽診是相對錯誤的使用聽診器方式","C":"雙面聽診器聽筒表面可以分為鼓面以及膜面，鼓面適合收集高頻率與膜面適合收集低頻率的音波","D":"電子式聽診器放大聲音的效果有助於救護技術員克服現場環境噪音的干擾"},"answer":"C","manualChapter":"CH20"},{"id":476,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"68歲阿公下腹脹，且上廁所時小便很難解出來，下列理學檢查會讓你合理推斷儘快幫他安排導尿對他將是最佳的處置？","options":{"A":"觸診：莫菲氏病徵（Murphy's sign）＋叩診：移動性濁音（shifting dullness）","B":"聽診：下腹部動脈嘈音（bruit）＋敲診：腰側敲擊痛（flank knocking pain）","C":"觸診：下腹部腫塊（palpable mass）＋叩診：恥骨上濁音（dullness percussion）","D":"觸診：反彈痛（rebound tenderness）＋叩診：恥骨上鼓音（tympanic percussion）"},"answer":"C","manualChapter":"CH20"},{"id":477,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"當您為一位75歲阿公聽診時聽到頸動脈嘈聲（bruits），請問以下何者為最可能的診斷？","options":{"A":"頸動脈狹窄","B":"頸靜脈栓塞","C":"心包膜填塞","D":"急性心肌梗塞"},"answer":"A","manualChapter":"CH20"},{"id":483,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列對於胸部檢查的描述何者為誤？","options":{"A":"在視診時發現病人胸部有蛛狀痣，在臨床上代表著病患可能有肝硬化的疾病","B":"在觸診時發現病人胸部有皮下氣腫，在臨床上代表著病患可能有氣胸的現象","C":"聽診時發現病人有喘鳴音（stridor）時，在臨床上代表的病人可能有下呼吸道疾病，例如氣喘的現象","D":"聽診時發現病人有哮鳴音（wheezes）時，在臨床上代表著病人可能有慢性阻塞性肺病"},"answer":"C","manualChapter":"CH20","matchedChapters":["CH20"]},{"id":484,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列對於腸音的敘述何者為誤？","options":{"A":"每分鐘從5下到30下，均屬正常","B":"麻痺型腸阻塞可能出現低活動性腸音（hypoactive bowel sounds）","C":"敗血症病患末期可能出現高活動性腸音（hyperactive bowel sounds）","D":"大腸腫瘤所造成的腸阻塞在初期可能出現高活動性腸音（hyperactive bowel sounds）"},"answer":"C","manualChapter":"CH20","matchedChapters":["CH20"]},{"id":488,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列對於心臟的理學檢查何者為韭？","options":{"A":"當觸診時發現患者心臟最大搏動點消失時，有可能的臨床意義為大量心包膜積水","B":"當聽診時發現患者心音出現開放彈響時，有可能的臨床意義為僧帽瓣硬化","C":"當聽診時發現患者心音出現收縮期時的心雜音，有可能的臨床意義為二尖瓣閉鎖不全","D":"當聽診時發現患者心音出現舒張期時的心雜音，有可能的臨床意義為主動脈瓣狹窄"},"answer":"D","manualChapter":"CH20"},{"id":494,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列關於疼痛性質的描述，何者為非？","options":{"A":"漸進性持續性頭部劇痛，是蜘蛛網膜下腔出血的典型表現症狀","B":"急性下壁心肌梗塞的病患，可能以上腹疼痛不適作為主訴症狀","C":"病患描述突發性撕裂般胸口或腹部劇痛時，必須考慮主動脈剝離的可能性","D":"突發性的疼痛導致病患從睡夢中醒來，通常暗示病患可能出現比較嚴重的病變"},"answer":"A","manualChapter":"CH20"},{"id":495,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列關於不同器官病變的疼痛部位及轉移位置的敘述何者不正確？","options":{"A":"下顎、頸部、及左手臂內側是心肌缺氧性胸痛常見的轉移位置","B":"肝膿瘍病患可以因為發炎刺激橫隔膜，而出現左肩的轉移性疼痛","C":"急性胰臟炎除左上腹疼痛外，亦可以出現相對背痛位置的轉移痛","D":"輸尿管結石疼痛可以轉移造成同側鼠蹊部或睪丸的疼痛感"},"answer":"B","manualChapter":"CH20"},{"id":497,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列何種病史或理學檢查發現，與嚴重肺栓塞沒有相關？","options":{"A":"反覆單側下肢腫脹","B":"脈搏壓（pulse pressure）降低","C":"中樞性發紺且對氧氣治療反應不佳","D":"頸靜脈怒張，且兩側呼吸音對稱且呈現細囉音（fine crackles）"},"answer":"D","manualChapter":"CH20"},{"id":499,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列關於理學檢查發現的判斷，何者為是？","options":{"A":"病患眼眶周圍瘀青（浣熊眼徵候）、耳後瘀青（貝特氏徵候）以及腦脊髓液耳漏常常一起出現於顱底骨折的病患","B":"顱內出血病患出現心搏加速且血壓上升時，稱為庫欣氏反射（Cushing reflex），代表此時患者因為顱內壓上升，可能出現腦疝脫（brain herniation）的現象","C":"腹部反彈痛（rebound tenderness）徵候代表病患腹膜受到刺激而出現炎症反應，此時細菌感染造成的腹膜炎是唯一需要考慮的鑑別診斷","D":"肚臍周邊瘀青（Cullen's sign）代表患者腹腔內的大量出血，而腰側瘀青（Gray-Turner’s sign）則是代表後腹腔出血，兩者均可以是急性胰臟炎以及主動脈瘤破裂病患的臨床表現"},"answer":"D","manualChapter":"CH20"},{"id":500,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列關於聽診的敘述，何者為是？","options":{"A":"聽診器的使用，鼓面適合聽低頻的心音或呼吸音，使用時需要用力貼緊患者胸壁皮膚，才可以有最佳的收音效果","B":"張力性氣胸、胸部創傷合併大量血胸、腫瘤病患合併大量肋膜積液病患，胸部聽診時均可能出現單側呼吸音降低，在理學檢查上並沒有辦法進一步加以區分","C":"一位過去有氣喘病史的病患，主訴呼吸困難，若理學檢查時兩側肺部聽診沒有聽到明顯的哮喘音（wheezes），即可完全排除氣喘發作的可能性，而另行尋找其他可能的疾病診斷","D":"急性心包膜炎病患，會因為心包膜腔發炎積水（pericardial effusion）的出現，而使得心包膜摩擦音消失，因此心臟聽診沒有發現心包膜摩擦音，並無法排除急性心包膜炎的可能性"},"answer":"D","manualChapter":"CH20"},{"id":502,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列何種理學檢查發現，與後腹腔的疾病或損傷沒有關係？","options":{"A":"腰側瘀青","B":"蛇女頭徵候（caput medusae）","C":"腰大肌徵候（psoas sign）","D":"肋脊角敲擊痛（costovertebral angle knocking pain）"},"answer":"B","manualChapter":"CH20"},{"id":510,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列關於轉移性疼痛的考量，何者為非？","options":{"A":"右肩的轉移性疼痛，需要考慮肝膿瘍、肝腫瘤、及右側橫隔膜下膿瘍等疾病","B":"胃食道逆流可以往上轉移到脖子及下巴","C":"主動脈剝離的疼痛可以傳到背後，甚至由胸口轉移到腹部","D":"輸尿管結石疼痛可以轉移造成同側鼠蹊部或睪丸的疼痛感"},"answer":"B","manualChapter":"CH20"},{"id":511,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"關於周邊脈搏及血壓的評估及測量，下列敘述何者為非？","options":{"A":"左右手脈搏強度不對稱，必須考慮主動脈剝離、游離性血栓導致血管阻塞、周邊血管動脈硬化或是血管炎之可能","B":"使用同一血壓計測量四肢血壓，若雙側下肢血壓測量結果均比上肢低，需考慮腹部主動脈瘤破裂、主動脈剝離、及腹部主動脈血栓阻塞之可能","C":"脈搏壓（pulse pressure）變窄減小，常見於鬱血性心衰竭、嚴重主動脈瓣膜狹窄、早期敗血症、心包膜填塞、及嚴重肺栓塞等疾病病患身上","D":"脈搏壓增加變寬，可見於嚴重主動脈瓣膜閉鎖不全之病患"},"answer":"C","manualChapter":"CH20","matchedChapters":["CH20"]},{"id":512,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"關於理學檢查的評估，下列敘述何者為是？","options":{"A":"大量心包膜積液導致心包膜填塞之病患，理學會出現頸靜脈怒張、肺部呼吸音亁淨對稱、心臟最大搏動點（point of maximal impulse）外移、心音呈現遙遠模糊（distant heart sound）、且脈搏壓下降窄小","B":"後腹腔出血之病患，可於肚臍周邊呈現瘀青，稱為Cullen’s sign","C":"病患出現收縮期心雜音，需要鑑別主動脈瓣狹窄、僧帽瓣逆流、三尖瓣狹窄、以及肺動脈瓣逆流等心臟瓣膜疾病","D":"病患於右上肺野處持續出現鼾音（rhonchi）且不隨身體位置或咳痰而改變，代表有固定性氣管內狹窄如腫瘤之可能性"},"answer":"D","manualChapter":"CH20"},{"id":518,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列疾病病患可能在理學檢查時出現肋脊角敲擊痛，其中何者為非？","options":{"A":"肝膿瘍","B":"急性膽囊炎","C":"主動脈瘤破裂","D":"急性腎盂性腎炎"},"answer":"B","manualChapter":"CH20"},{"id":519,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"關於周邊脈搏及血壓的評估及測量，下列敘述何者正確？","options":{"A":"評估病患脈搏的強弱，反應的是病患血壓的高低","B":"脈搏壓（pulse pressure）增加變寬，可見於孕婦、嚴重貧血、甲狀腺機能亢進、及嚴重主動脈瓣膜閉鎖不全之病患","C":"脈搏壓變窄減小，常見於鬱血性心衰竭、嚴重主動脈瓣膜狹窄、早期敗血症、心包膜填塞、及嚴重肺栓塞等疾病病患身上","D":"使用同一血壓計測量四肢血壓，若雙側上肢血壓測量結果均比雙側下肢為低，則需考慮主動脈剝離或心包膜填塞之可能性"},"answer":"B","manualChapter":"CH20","matchedChapters":["CH20"]},{"id":520,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"關於理學檢查的評估，下列敘述何者為非？","options":{"A":"腹腔內大量出血之病患，可於肚臍周邊呈現瘀青，稱為Cullen’s sign","B":"胸部呼吸音聽診時於病患右上肺野處出現鼾音（rhonchi），但隨身體位置或拍痰動作後消失，代表有氣管內痰液梗塞或出現非固定性氣管內異物","C":"病患出現收縮期心雜音，需要鑑別主動脈瓣狹窄、僧帽瓣逆流、肺動脈瓣狹窄、以及三尖瓣逆流等心臟瓣膜疾病","D":"大量心包膜積液導致心包膜填塞之病患，理學會出現頸靜脈怒張、肺部呼吸音乾淨對稱、心臟最大搏動點（point of maximal impulse）外移、心音呈現遙遠模糊（distant heart sound）、且脈搏壓下降窄小"},"answer":"D","manualChapter":"CH20"},{"id":521,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列關於聽診的敘述，何者為是？","options":{"A":"張力性氣胸、胸部創傷合併大量血胸、腫瘤病患合併大量肋膜積液病患，胸部聽診時均可能出現單側呼吸音降低，在理學檢查上並沒有辦法進一步加以區分","B":"心臟聽診可以藉由調整病患的姿勢來加強特定心音的聽診，如病患左側躺可以加強主動脈瓣的聽診，而讓病患坐姿身體前傾則可以加強僧帽瓣的聽診","C":"急性心包膜炎病患，會因為心包膜表面發炎出現積液導致心包膜摩擦音的消失，因此即使心臟聽診沒有出現心包膜摩擦音，仍然不可以完全排除急性心包膜炎的可能性，此時要注意的反而是有無出現心包膜填塞的可能性","D":"一位過去有氣喘病史的病患，主訴呼吸困難，若理學檢查時兩側肺部聽診沒有聽到明顯的哮喘音（wheezes），即可完全排除氣喘發作的可能性，而另行尋找其他可能的疾病診斷"},"answer":"C","manualChapter":"CH20"},{"id":522,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"年輕病患若出現下列理學檢查發現時，代表患者出現免疫功能低下，而需考慮有後天免疫不全症候群（AIDS）之可能性，何者為非？","options":{"A":"囗腔內卡波西氏瘤（Kaposi'ssarcoma）","B":"口腔或食道念珠菌感染（oralcandidiasis）","C":"舌頭側邊出現毛樣白斑症（hairyleukoplakia）","D":"全身四肢多處靜脈注射針孔疑似毒癮患者"},"answer":"D","manualChapter":"CH20"},{"id":527,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"與盲腸炎有關的理學檢查，不包括下列哪一項？","options":{"A":"莫菲氏徵象（Murphy's sign）","B":"洛夫辛徵象（Rovsing's sign）","C":"腰大肌徵象（psoas sign）","D":"閉孔肌徵象（obturator sign）"},"answer":"A","manualChapter":"CH20"},{"id":538,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"關於EMTP使用聽診器進行聽診的說明，何者為是？","options":{"A":"聽診的原理，是利用空氣或液體的流動所發出的聲響判斷身體部位哪裏有異常","B":"雙面聽診器的膜面，是為了收集較低頻率的聲音，所以使用膜面聽診時應輕放在皮膚表面即可","C":"若是EMTP聽診時發現病患有哮喘音（wheezes），就代表病患的呼吸窘迫一定是氣喘或肺氣腫所引起","D":"聽診在到院前環境中很難執行，故聽診檢查並非EMTP訓練及理學檢查的重點"},"answer":"A","manualChapter":"CH20"},{"id":546,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"指端血氧飽和度監視器會受到許多因素的影響，下列何者為非？","options":{"A":"膚色差異、黃疸","B":"指甲油塗抹、異常血紅素過多","C":"可偵測反應血液中的變性血紅素、一氧化碳血紅素","D":"休克、周邊動脈阻塞性疾病"},"answer":"C","manualChapter":"CH20","matchedChapters":["CH20"]},{"id":548,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關昏迷指數（Glasgowcomascale，GCS），下列何者為非？","options":{"A":"昏迷指數針對病患的睜眼、運動以及說話三個方面來評估計分，加總後病患意識介於3分到15分，最低為3分，代表病患完全喪失意識，而最好的意識狀態為15分","B":"運動反應，對疼痛刺激肢體會回縮躲避為5分","C":"運動反應，對疼痛刺激產生肢體伸直反應為2分","D":"說話反應，發出不連貫而無意義的字句為3分"},"answer":"B","manualChapter":"CH20"},{"id":555,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"關於理學檢查的基本描述，下列敘述何者為非？","options":{"A":"理學檢查基本的四大技術，分別是視診、觸診、扣診以及聽診","B":"生命徵象的檢測，也包括在理學檢查的項目當中","C":"神經學檢查因為太過複雜，一般救護現場都不施行","D":"重點性的理學檢查，通常都是配合病史詢問"},"answer":"C","manualChapter":"CH20"},{"id":559,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"以下配對，何者為非？","options":{"A":"主動脈剝離－突發性撕裂或刀割般的尖銳疼痛，偶爾合併前胸到後背的轉移痛","B":"急性心肌梗塞－急性左前胸壓迫或悶痛感，常合併下巴或左上肢的轉移痛","C":"自發性氣胸－急性單側胸痛，深呼吸時可減緩疼痛感","D":"輸尿管結石－急性單側腰痛，常合併後腰到鼠蹊部的轉移痛"},"answer":"C","manualChapter":"CH20"},{"id":560,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"72歲男性突然左側肢體無力，理學檢查發現病患會自發性睜眼，左側上下肢肌肉力量僅2分，且明顯失語症無法發出任何字句，但病患可用右手握筆跟你筆談。請問該病患的GCS昏迷指數為何？","options":{"A":"E4M2V1","B":"E4M6VA","C":"E4M6V1","D":"E4M2VA"},"answer":"B","manualChapter":"CH20"},{"id":566,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"除夕前一天，救護台通報有名女生打電話求救，表示頭很暈，全身全力。EMT到現場破門而入時，發現有三名女大學生倒在臥室，身邊沒有藥品。理學檢查病患身上無明顯外傷，但都呈現意識不清，心跳偏快。以下何者為是？","options":{"A":"若使用指端血氧飽和度監視器，應打開室內電燈，否則光線太暗，其數值會受到影響","B":"若使用指端血氧飽和度監視器，不需要避開量測血壓的肢體","C":"雖然指端血氧飽和度監視器呈現98%，該病患仍應提供高濃度氧氣治療","D":"女大學生指甲上的指甲油不會影響指端血氧飽和度監視器的數值"},"answer":"C","manualChapter":"CH20"},{"id":569,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關理學檢查，請問以下何者為是？","options":{"A":"胸部理學檢查的順序是視、觸、叩、聽","B":"心臟理學檢查的順序是視、聽、叩、觸","C":"腹部理學檢查的順序是視、叩、觸、聽","D":"病患的所有理學檢查步驟都必須在救護現場完成以正確診斷病情"},"answer":"A","manualChapter":"CH20"},{"id":575,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"下列病患在未給氧時的血氧濃度都是100%，但以下的理學檢查發現，何者最需考慮盡速給予氣管內管插管？","options":{"A":"火場救出顏面燒傷傷患，頸部明顯喘鳴音（stridor），眉毛鼻毛燒焦捲曲","B":"過去病史心臟衰竭患者，兩側明顯濕囉音（crackles），使用輔助呼吸肌","C":"患者出現庫斯毛耳氏（Kussmaul respiration），呼吸每分鐘次數32下","D":"意識不清患者，瞳孔不等大，呼吸每分鐘次數12下，血壓200/120mmHg"},"answer":"A","manualChapter":"CH20"},{"id":584,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"50歲女士唱歌時突發劇烈頭痛，整顆頭都痛到要爆炸開來一般。救護車現場吐了兩次，且血壓明顯升高（180／120 mmHg）。現場理學檢查脖子時發現頸部僵硬。請問最可能的診斷是？","options":{"A":"硬腦膜上出血","B":"硬腦膜下出血","C":"蜘蛛膜下腔出血","D":"小腦出血"},"answer":"C","manualChapter":"CH20"},{"id":712,"source":"第五章 創傷急症(2012-2014).doc","question":"30歲男性騎摩托車發生車禍，沒有戴安全帽。請問以下何者的理學檢查發現與可能顱骨骨折的部位不相符？","options":{"A":"浣熊眼（Raccoon's eyes）懷疑有中顱底之骨折","B":"耳漏（otorrhea）懷疑有中顱底之骨折","C":"鼻漏（rhinorrhea）懷疑有前顱底之骨折","D":"巴氏徵候（Battle's sign）懷疑有岩樣骨骨折、後顱底骨折"},"answer":"A","manualChapter":"CH20"},{"id":811,"source":"第五章 創傷急症(2015-2018).doc","question":"一名32歲男性病患，因車禍受傷送醫。理學檢查顯示病患的血壓為70/40 mmHg，心跳速率為110/min，昏迷指數為13，呼吸速率為30/min，呼吸道內沒有異物，頸靜脈鼓脹，氣管移到右側，左側呼吸聲降低，腹部稍微鼓脹且有壓痛。此時該做什麼處置？","options":{"A":"插入氣管插管","B":"在左胸側第二肋間，靠近鎖骨中線處迅速插入大號針頭","C":"照胸部X部光","D":"緊急輸血及輸液"},"answer":"B","manualChapter":"CH20"},{"id":822,"source":"第五章 創傷急症(2015-2018).doc","question":"頭部外傷導致意識模糊之病患，下列理學檢查何者和顱底骨折最無相關？","options":{"A":"眼眶周圍瘀青","B":"耳後瘀青","C":"疑似腦脊髓液鼻漏","D":"鼻骨斷裂"},"answer":"D","manualChapter":"CH20"},{"id":846,"source":"第五章 創傷急症(2015-2018).doc","question":"50歲男性，騎摩托車與汽車相撞，其心跳每分鐘120次，血壓80/50 mmHg，呼吸速率每分鐘24次；血氧90%，意識E2M5V4。理學檢查：頸靜脈怒張，氣管無偏移，呼吸音正常，腹部無明顯壓痛。傷患吸氣時，脈搏明顯變得更微弱。以下描述何者為非？","options":{"A":"可靜脈給予1,000cc生理食鹽水灌注","B":"使用超音波對於診斷可能有幫忙","C":"需送到創傷中心","D":"應立即給予胸管治療"},"answer":"D","manualChapter":"CH20"},{"id":1054,"source":"第四章 非創傷急症(2012-2014).doc","question":"想要在短時間內找出PEA／Asystole病人可能原因，快速的理學檢查是不可缺的一環，下列何者不包含在內？","options":{"A":"查看病人頸靜脈是否怒張","B":"測量病人的深肌腱反射","C":"聽診病人兩側呼吸音","D":"以超音波檢視病患的心臟、肺部及腹部"},"answer":"B","manualChapter":"CH20"},{"id":2054,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"關於腹部急症的身體診察，下列徵候都表示病人可能有闌尾炎的跡象，除了何者之外？","options":{"A":"洛夫辛徵象（Rovsing’s sign）。","B":"腰大肌徵候（Psoas sign）。","C":"莫菲氏病徵（Murphy’s sign）。","D":"閉孔肌徵候（Obturator sign）。"},"answer":"C","manualChapter":"CH20","matchedChapters":["CH20"]},{"id":2113,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"78歲男性因主訴腹痛求救。您到達現場後進行身體檢查，視診時發現患者肚臍周圍出現瘀青(Cullen's sign)，也發現患者腹部出現大範圍反射性腹部肌肉持續僵直收縮(即是所謂的muscle guarding)。以下評估結果何者最適當？","options":{"A":"肚臍周圍出現瘀青須考慮腹部中空器官破裂，如胃穿孔、十二指腸穿孔。","B":"muscle guarding代表腹膜受到化學性刺激(如胃酸)或出現炎症反應(腹膜炎)而產生。","C":"腹部叩診對此病人有害，應避免操作。","D":"若病人身體檢查同時出現移動性濁音(shifting dullness)應考慮是腹水感染引發腹膜炎所導致。"},"answer":"B","manualChapter":"CH20"},{"id":2339,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"以下何種理學檢查無法協助判斷病人是否適合給予大量輸液？","options":{"A":"頸靜脈是否怒張。","B":"病人是否呈現端坐呼吸。","C":"聽診兩側肺部是否呈現濕囉音。","D":"呼吸是否呈現Kussmaul式呼吸。"},"answer":"D","manualChapter":"CH20"},{"id":2395,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"48歲男性因腳腫、呼吸喘求救，你到現場發現他呼吸淺快、心跳120下/分鐘、下列何者視觸診線索可以支持他最可能為肺栓塞？","options":{"A":"單側肢體紅腫合併水泡產生、疼痛劇烈。","B":"單側肢體腫脹、肢體溫熱。","C":"雙下肢脈搏消失或減弱。","D":"雙下肢出現網狀青斑。"},"answer":"B","manualChapter":"CH20"},{"id":2409,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"40歲女性被家人發現倒臥家中，GCS=E1V1M4，無外傷，理學檢查無其他異常發現。血壓110/70 mmHg、心跳100次/分鐘、呼吸10次/分鐘、體溫正常。未使用氧氣治療下，動脈氣體分析：pH=7.20、PaCO 2 =80mmHg、PaO 2 =40mmHg，HCO 3 =25mmHg、SaO 2 =75%。最可能的病因為？","options":{"A":"安眠藥過量使用。","B":"氣喘急性發作。","C":"肺炎併呼吸衰竭。","D":"心因性肺水腫。"},"answer":"A","manualChapter":"CH20"},{"id":2486,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"下列身體理學檢查結果與臆斷配對錯誤的是？","options":{"A":"結膜蒼白：貧血。","B":"鞏膜黃疸：急性肝炎。","C":"耳道出血：鼓膜破裂、顱底骨折。","D":"瞳孔不等大：嗎啡中毒。"},"answer":"D","manualChapter":"CH20"},{"id":2488,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"特殊的腹部診察方式，何者為非？","options":{"A":"移動式濁音在患者平躺及側臥時，叩診時濁音與實音的交界位置會改變。","B":"深觸診左下腹時會使傷病患右下腹疼痛，是為洛夫辛徵象( Rovsing's sign)。","C":"闌尾炎可能會有閉孔肌徵候(Obturator Sign)的出現。","D":"肋脊角的敲擊痛，代表後腹腔可能有出血或發炎。"},"answer":"A","manualChapter":"CH20","matchedChapters":["CH20"]},{"id":2580,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"一位病人以發燒合併右肩酸痛作為主訴，在身體診察中未發現肩部有明顯局部異常。依據體表轉移痛（referred pain）的概念，在鑑別診斷中，應優先考慮下列哪個內臟器官的病變可能性？","options":{"A":"心臟。","B":"胰臟。","C":"肝膽。","D":"腎臟。"},"answer":"C","manualChapter":"CH20"},{"id":2581,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"腹部視察與特殊觸診徵象（abdominal physical signs）可協助判斷病因部位與急重症類型，操作右上腹按壓時，患者因疼痛而無法深吸氣的特殊腹部徵象，何者最適當？","options":{"A":"洛辛氏徵象（Rovsing’s sign）。","B":"莫菲氏徵象（Murphy’s sign）。","C":"腰大肌徵象（Psoas sign）。","D":"麥氏點壓痛（McBurney’s point）。"},"answer":"B","manualChapter":"CH20","matchedChapters":["CH20"]},{"id":2597,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"30歲男性騎乘機車自摔，主訴左上腹疼痛，理學檢查發現左側第十肋骨處壓痛變形，且疼痛轉移至左肩。此傷患最可能傷及下列哪個器官？","options":{"A":"肝臟。","B":"脾臟。","C":"腎臟。","D":"胰臟。"},"answer":"B","manualChapter":"CH20"},{"question":"在進行「觸診 (Palpation)」時，下列操作原則何者正確？","options":{"A":"為了搶時間，對意識清楚的病人可直接實施觸診不需告知。","B":"應直接以深觸診開始，以確保能摸到深層器官。","C":"一般使用指腹或手掌接觸病人，蒐集皮膚特性或器官外廓。","D":"觸診是完全非侵入性的檢查方式。"},"answer":"C","manualChapter":"CH20","id":3333,"source":"TP題庫 (圖片匯入)"},{"question":"關於胸部聽診中的「正常肺音」，下列敘述何者正確？","options":{"A":"若在周邊肺葉聽到支氣管音，屬於正常生理發現","B":"支氣管音分布於周邊肺野，音調低而輕柔","C":"支氣管肺泡音僅出現於背部肩胛骨之間","D":"肺泡音的吸氣期明顯長於呼氣期"},"answer":"D","manualChapter":"CH20","id":3436,"source":"TP題庫 (圖片匯入)"},{"question":"脈搏壓變窄常見於下列哪種臨床狀況","options":{"A":"甲狀腺機能亢進","B":"早期敗血症","C":"心包膜填塞","D":"主動脈瓣閉鎖不全"},"answer":"C","manualChapter":"CH20","id":3438,"source":"TP題庫 (圖片匯入)","matchedChapters":["CH20"]},{"question":"身體診察中，基本心音之成因原理，下列何者為非？","options":{"A":"第一心音：僧帽瓣關閉","B":"第二心音：主動脈瓣關閉","C":"第三心音：心室血流填充","D":"第四心音：心房舒張"},"answer":"D","manualChapter":"CH20","source":"TP題庫 (圖片匯入) - EMT-P 第 20 章 P.542","id":3466},{"id":3495,"source":"醫/護考古題","question":"若未適當處置，下列何者為盧德威氏口峽炎（Ludwig's angina）最常見的併發症？","options":{"A":"海綿竇栓塞","B":"肺栓塞","C":"呼吸道阻塞","D":"廣泛性血管栓塞"},"answer":"C","manualChapter":"CH20"},{"id":3499,"source":"AI出題","question":"關於庫欣氏反射（Cushing reflex）的機轉描述，下列何者最符合生理現況？","options":{"A":"副交感神經直接興奮血管平滑肌導致收縮壓上升","B":"大腦皮質主動發出運動訊號導致心跳代償性減慢","C":"呼吸變快且變深是為了排除二氧化碳降低顱內壓","D":"延腦血管舒縮中心受壓迫引發交感神經高度興奮"},"answer":"D","manualChapter":"CH20"},{"id":3518,"source":"TP題庫","question":"腹部急性闌尾炎可使用何種特殊身體診察進行？","options":{"A":"洛夫辛徵象（Rovsing's sign）","B":"莫菲氏病徵（Murphy's sign）","C":"腰大肌徵候（psoas Sign）","D":"閉孔肌徵候（obturator Sign）"},"answer":"B","manualChapter":"CH20","explanation":"CH20 p556"},{"source":"EMT-P 第 20 章 P.513","question":"使用聽診器時，下列何者正確？","options":{"A":"可隔著厚衣服聽診，以保護病人隱私。","B":"鼓面應用力壓住皮膚。","C":"膜面需緊貼皮膚，以收集高頻音。","D":"現場環境吵雜時應放棄聽診。"},"answer":"C","matchedChapters":["CH20"],"manualChapter":"CH20","id":3615},{"source":"EMT-P 第 20 章 P.527","question":"一名顏面嚴重外傷的機車騎士，EMT在視診時發現他有一側的眼球明顯突出，而且仔細觀察，這個突出的眼球竟然會「跟著心跳的頻率搏動」，並合併結膜充血。這最可能是下列哪一種急症？","options":{"A":"葛瑞夫茲氏病 (Graves' disease)","B":"頸動脈海綿竇廔管 (Carotid-cavernous fistula)","C":"眼窩蜂窩性組織炎 (Orbital cellulitis)","D":"急性細菌性眼內炎 (Endophthalmitis)"},"answer":"B","id":3718,"manualChapter":"CH20","matchedChapters":["CH20"]},{"source":"EMT-P 第 20 章 P.539","question":"胸部身體診察，以下徵候所表現出的臨床意義之配對何者錯誤？","options":{"A":"扣診發現共鳴過度其臨床意義可能為COPD","B":"視診發現蛛狀痣其臨床意義可能為肝硬化","C":"聽診兩側肺部粗囉音其臨床意義可能為肺纖維化","D":"觸診發現皮下氣腫其臨床意義可能為嚴重氣喘"},"answer":"C","id":3720,"manualChapter":"CH20","matchedChapters":["CH20"]},{"id":3749,"source":"TP題庫","question":"下列針對理學檢查扣診回音特性的配對，何者正確?","options":{"A":"肋膜腔積液：濁音","B":"大葉性肺炎：濁音","C":"大量氣胸：共鳴過度","D":"慢性支氣管炎：鼓音"},"answer":"B","manualChapter":"CH20","matchedChapters":["CH20"]},{"source":"TP題庫","question":"下列哪項病徵的脈搏壓不會變寬?","options":{"A":"早期敗血症","B":"心臟衰竭","C":"貧血","D":"甲狀腺機能亢進"},"answer":"B","manualChapter":"CH20","matchedChapters":["CH20"],"id":3750},{"source":"TP題庫","question":"下列哪項病徵的脈搏壓不會變窄?","options":{"A":"心包膜填塞","B":"心臟衰竭","C":"肺栓塞","D":"貧血"},"answer":"D","manualChapter":"CH20","matchedChapters":["CH20"],"id":3751,"explanation":"A心臟衰竭：心肌收縮力大幅衰退，每搏輸出量（SV）極低導致收縮壓（SBP）偏低；同時交感神經與 RAAS 系統代償性使周邊血管強烈收縮，舒張壓（DBP）相對維持，造成脈搏壓變窄。\n\n心包膜填塞：心包腔內高壓限制心室舒張充盈（Preload 嚴重受限），每搏輸出量急劇崩跌，為典型狹窄脈壓表現（貝克氏三聯徵常伴隨低收縮壓與脈搏壓變窄）。\n\n肺栓塞：肺動脈主幹或大分支急性阻塞引發急性右心後負荷飆升，右心衰竭導致左心回血量（Preload）銳減，每搏輸出量驟降，伴隨周邊代償性血管收縮，呈現脈搏壓變窄。"},{"source":"TP題庫","question":"量測體溫時所量測的數值高低，下列何者正確?","options":{"A":"肛溫>舌下溫度>腋溫","B":"舌下溫度>腋溫>肛溫","C":"肛溫>腋溫>舌下溫度","D":"腋溫>肛溫>舌下溫度"},"answer":"A","manualChapter":"CH20","matchedChapters":["CH20"],"id":3752},{"source":"TP題庫","question":"下肢脈搏消失但上肢脈搏仍然清楚的病人，不會考慮下列哪種病因?","options":{"A":"急性腹部主動脈血栓性阻塞","B":"主動脈剝離","C":"敗血症","D":"腹部主動脈瘤破裂"},"answer":"C","manualChapter":"CH20","matchedChapters":["CH20"],"id":3754},{"question":"請病人說「啊」，然後觀察懸雍垂有無偏向及軟顎上升是否對稱。以上描述是測試哪一對腦神經?","options":{"A":"第九對，舌咽神經","B":"第十對，迷走神經","C":"第十一對，副神經","D":"第十二對，舌下神經"},"answer":"B","manualChapter":"CH20","source":"TP題庫","id":3775,"matchedChapters":["CH20"]},{"question":"要求病人轉頭與聳肩，分別觀察病人的胸鎖乳突肌及斜方肌功能是測試哪一對腦神經?","options":{"A":"第九對，舌咽神經","B":"第十對，迷走神經","C":"第十一對，副神經","D":"第十二對，舌下神經"},"answer":"C","manualChapter":"CH20","source":"TP題庫","id":3776,"matchedChapters":["CH20"]},{"id":45554,"question":"心臟位於胸腔之中，受到胸廓骨骼的嚴密保護，位置大約位在胸骨及第___肋骨後之縱隔腔","options":{"A":"1-3","B":"3-6","C":"4-8","D":"9-12"},"answer":"B","source":"大白p539","manualChapter":"CH20"},{"id":45582,"question":"麻痺性腸阻塞定義上為超過幾分鐘以上沒有聽到腸蠕動音?","options":{"A":"1","B":"2","C":"3","D":"4"},"answer":"B","source":"大白p550","manualChapter":"CH20"},{"id":45637,"question":"不同疾病的症狀性質也不同，下列關於疾病的典型症狀的描述，何者錯誤?","options":{"A":"胸骨後灼熱感：心包膜炎","B":"頭部突發性爆炸性劇痛：蜘蛛網膜下出血","C":"胸部突發性撕裂般疼痛感：主動脈剝離","D":"腹部突發性撕裂般疼痛感：腹部主動脈剝離"},"answer":"A","source":"同學出題","manualChapter":"CH20"},{"id":45702,"question":"以下呼吸模式與對應的可能的臨床疾病組合，何者正確？","options":{"A":"庫斯毛耳氏呼吸 (Kussmaul respiration) – COPD。","B":"陳施氏呼吸 (Cheyne-Stokes respiration) – 大腦損傷。","C":"逆理式呼吸 (paradoxical respiration) – 延腦損傷。","D":"畢歐氏呼吸 (Biot’s respiration) – 橋腦損傷。"},"answer":"B","source":"同學出題","manualChapter":"CH20"},{"id":45739,"question":"關於心音聽診，下列何者不是居於S1 到S2 之間心收縮期的心雜音?","options":{"A":"三尖瓣閉鎖不全","B":"肺動脈瓣狹窄","C":"心室中膈缺損","D":"主動脈瓣閉鎖不全"},"answer":"D","source":"民國105專科護理通論考古題","manualChapter":"CH20","explanation":"主動脈瓣閉鎖不全為舒張期雜音,不在收縮期。心雜音時相判讀：收縮期(S1–S2 間)雜音見於三尖瓣/二尖瓣逆流、主動脈瓣/肺動脈瓣狹窄、VSD；舒張期雜音見於主動脈瓣/肺動脈瓣閉鎖不全、二尖瓣/三尖瓣狹窄。主動脈瓣閉鎖不全(AR)為舒張早期遞減型雜音，不在收縮期。　故主動脈瓣閉鎖不全為舒張早期的遞減型雜音，不屬於S1 至S2 之間的收縮期雜音。"},{"id":45747,"question":"腸音的聽診位置?","options":{"A":"只需要聽一個位置即可","B":"腹部四象限","C":"患者最痛的位子","D":"患者最痛的位子的斜對角度位子"},"answer":"A","source":"大白p549","manualChapter":"CH20"},{"id":45751,"question":"若一個有糖尿病病史的老年病人，耳廓及附近的軟組織出現明顯紅腫熱痛發炎反應時，應該注意可能何種病狀?","options":{"A":"惡性外耳炎","B":"中耳炎","C":"顱底骨折","D":"聽神經瘤"},"answer":"A","source":"大白p529","manualChapter":"CH20"},{"id":45753,"question":"正常腸音頻率範圍則約在每分鐘幾下之間屬正常?","options":{"A":"1-3","B":"20-50","C":"5-30","D":"50-100"},"answer":"C","source":"大白p550","manualChapter":"CH20"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

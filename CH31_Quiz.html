@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 31 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：36 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH31</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":30,"source":"105 高級救護技術員甄試筆試題目.doc","question":"火場搶救出中年男性約50公斤，傷勢：「前胸及腹部為二度及三度燒傷，雙腿全部為三度燒傷，雙手臂為一度燙傷」。依巴克蘭公式（Parkland formula），在燒傷後的第一個8小時中應給林格氏液的量大約為？","options":{"A":"4000 cc","B":"5500 cc","C":"8500 cc","D":"15000 cc"},"answer":"B","manualChapter":"CH31"},{"id":139,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"一位25歲約60公斤的男性自火災現場被救出，意識模糊，聲音沙啞，全身多處灼傷，前額頭髮，眉毛及鼻毛均已燒焦，血壓100/65 mmHg，心跳120 / min，血氧濃度85％，身體燒燙傷面積為1度10％，2度30％，3度20％，請問下列處置何者為非？","options":{"A":"给予一般型氧氣面單，維持血氧濃度在94％以上即可","B":"問清楚火災現場環境，因為燒傷除了吸入性傷害及一氧化碳中毒外，仍要小心其他化學物質的傷害","C":"檢查身體是否有合併其他傷害","D":"按照Parkland formula，前8小時的輸液量要給予6000ml的乳酸林格氏液Lactated Ringer"},"answer":"A","matchedChapters":["CH31"],"manualChapter":"CH31"},{"id":686,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"35歲男性從火場被救出，體重目測約75公斤，燒燙傷面積一度約為10％，二度約為18％，三度約佔9％，依據Parkland Formula的方式計算，使用兩套標準輪液套管滴住，請推算前八小時每一套標準輸液套管每分鐘須調整為幾滴最為合適？","options":{"A":"85","B":"75","C":"60","D":"50"},"answer":"A","manualChapter":"CH31","matchedChapters":["CH31"]},{"id":689,"source":"第五章 創傷急症(2012-2014).doc","question":"一位60公斤男性傷者，體表有10％一度灼傷，20％二度灼傷，與10％三度灼傷，則根據Parkland Formula，其前八小時應給予的靜脈輸液總量為？","options":{"A":"3,600 ml","B":"4,800 ml","C":"7,200 ml","D":"9,600 ml"},"answer":"A","matchedChapters":["CH31"],"manualChapter":"CH31"},{"id":692,"source":"第五章 創傷急症(2012-2014).doc","question":"根據皮膚灼傷範圍評估法「九的法則」（rule of nines），一位30歲成年男性，其受灼傷範圍包括整個右上肢、整個右下肢，與整個前胸部，而頭頸部、腹部、背部、外陰部與其他肢體並無灼傷，則其灼傷之體表面積為：","options":{"A":"27％","B":"31.5％","C":"36％","D":"45％"},"answer":"C","manualChapter":"CH31"},{"id":702,"source":"第五章 創傷急症(2012-2014).doc","question":"燒燙傷時若患處出現水泡，表示其為幾度灼傷？","options":{"A":"一度灼傷","B":"二度灼傷","C":"三度灼傷","D":"四度灼傷"},"answer":"B","matchedChapters":["CH31"],"manualChapter":"CH31"},{"id":710,"source":"第五章 創傷急症(2012-2014).doc","question":"一位從火場被救出的中年男性傷患，外觀呈現臉部一度燒傷，鼻毛燒焦，目前意識楚，血壓為130／80 mmHg，脈搏110，呼吸35，呼吸有哮吼聲（stridor），要建立其呼吸道時，下列何者為最佳？","options":{"A":"可在地方醫療指導的預立醫授權下，考慮給予氣管插管","B":"鼻管給氧4L／min","C":"簡單面罩給氧（simple mask）10L／min","D":"有儲留袋之面罩給氧10L／min"},"answer":"A","manualChapter":"CH31"},{"id":741,"source":"第五章 創傷急症(2012-2014).doc","question":"在一工廠火災的事故中，一位30歲男性傷患體重80kg，全身體表面積中20％為一度灼傷、50％為二度灼傷、10％為三度灼傷，現傷患已被救出且距受傷約已30分鐘，距後送醫院約30分鐘之車程。若你已為傷患建立大管徑的靜脈管路，且傷患無其他出血則依照Parkland formula，你在到院前大約該給多少的靜脈輸液？","options":{"A":"600毫升／小時","B":"800毫升／小時","C":"1,200毫升／小時","D":"1,600毫升／小時"},"answer":"C","manualChapter":"CH31"},{"id":756,"source":"第五章 創傷急症(2012-2014).doc","question":"一位25歲約60公斤的男性自火災現場被救出，意識模糊，聲音沙啞，全身多處灼傷，前額頭髮、眉毛及鼻毛均已燒焦，血壓100／65 mmHg，心跳120／min，血氧濃度85％，身體燒燙傷面積為1度10％，2度30％，3度20％，請問下列處置，何者不適當？","options":{"A":"給予一般型氧氣面罩，維持血氧濃度在94％以上即可","B":"問清楚火災現場環境，因為燒傷除了吸入性傷害及一氧化碳中毒外，仍要小心其他化學物質的傷害","C":"檢查身體是否有合併其他傷害","D":"按照Parkland formula，前8小時的輸液量要給予6,000ml的乳酸林格氏液（lactated Ringer's）"},"answer":"A","manualChapter":"CH31","matchedChapters":["CH31"]},{"id":760,"source":"第五章 創傷急症(2012-2014).doc","question":"一位從火場被救出的病患，外觀呈現臉部一度燒傷，鼻毛燒焦，目前意識清楚，血壓130／80，脈搏110，呼吸30，胸部有喘鳴聲，要建立其呼吸道時，下列何者為是？","options":{"A":"氣管內插管並給予高濃度氧氣","B":"有儲留袋之面罩給氧10～12 L／min","C":"傷患應有呼吸道灼傷，應使用LMA（喉罩呼吸道）以建立呼吸道","D":"若傷患應有有呼吸道灼傷，可使用口咽、鼻咽以建立呼吸道"},"answer":"A","matchedChapters":["CH31"],"manualChapter":"CH31"},{"id":771,"source":"第五章 創傷急症(2012-2014).doc","question":"一名57歲男性，從火場救出，意識清楚但躁動，臉上和前胸有大片灼傷，頭髮眉毛均燒焦，關於此病人敘述，下列何者為非？","options":{"A":"若咳出黑色痰液，出現stridor，需要先建立呼吸道","B":"需先終止繼續灼傷，包括沖水降溫","C":"快速評估灼傷面積，以Parkland formula計算輸液量，前八個小時要全部給予","D":"若上肢出現開放性骨折，也需要沖洗傷囗，以護木固定患肢"},"answer":"C","matchedChapters":["CH31"],"manualChapter":"CH31"},{"id":774,"source":"第五章 創傷急症(2012-2014).doc","question":"勤務中心通知有一瓦斯行氣爆，當你抵達現場，救災人員將一名50歲男性（體重75 Kg）抬出，他意識混亂，但臉上有灼傷，鼻毛眉毛燒焦，呼吸急促，全身共有20％二度到三度灼傷，下列敘述何者為非？","options":{"A":"若是意識混亂，除了懷疑有頭部外傷外，也要注意是否因低血氧或休克造成","B":"若是血氧低下，除了呼吸道可能阻塞外，也有可能出現氣胸情形，或是因外傷造成氣血胸","C":"若是血壓太低，可能是身上灼傷造成體液流失，應該給予生理食鹽水點滴，流速約375 cc／hr","D":"意識混亂也可能是一氧化碳中毒造成，所以應給予高濃度氧氣"},"answer":"C","manualChapter":"CH31","matchedChapters":["CH31"]},{"id":780,"source":"第五章 創傷急症(2012-2014).doc","question":"下列關於一氧化碳的敘述，下列「何者為非」？","options":{"A":"一氧化碳是一種無色、無味的氣體，多發生在有機物質的不完全燃燒。它和血液中的血紅素的親和力是氧氣的250倍","B":"一氧化碳中毒病患皮膚大多會呈現櫻桃紅顏色","C":"一氧化碳血紅素的半衰期，在一大氣壓100％氧氣，半衰期為40～60分鐘","D":"一氧化碳血紅素的半衰期，在一般室內氣體，半衰期為4～5小時"},"answer":"B","manualChapter":"CH31","matchedChapters":["CH31"]},{"id":784,"source":"第五章 創傷急症(2012-2014).doc","question":"皮膚遭灼傷的局部反應有三區變化：甲、充血區；乙、靜滯區；丙：凝固區。請問以灼傷點為圓心，由內向外依序是：","options":{"A":"乙→丙→甲","B":"丙→乙→甲","C":"甲→乙→丙","D":"乙→甲→丙"},"answer":"B","matchedChapters":["CH31"],"manualChapter":"CH31"},{"id":785,"source":"第五章 創傷急症(2012-2014).doc","question":"火場搶救出中年男性約60公斤，傷勢：「前胸及腹部為二度及三度燒傷，雙腿全部為三度燒傷，雙手臂為一度燙傷」。依巴克蘭公式（Parkland formula），在燒傷後的第一個8小時中應給林格氏液的量大約為？","options":{"A":"6,500cc","B":"8,500cc","C":"2,000cc","D":"15,000cc"},"answer":"A","manualChapter":"CH31"},{"id":805,"source":"第五章 創傷急症(2015-2018).doc","question":"自火場救出的傷患二隻手臂均有二度及三度灼傷，並主訴頭痛噁心，以下之敘述？","options":{"A":"初評時，傷患能對話，研判呼吸道正常，以排除吸入性灼傷的可能","B":"常規為傷患量測血壓及血氧值，以決定是否進行氧氣治療","C":"病史詢問除應依循一般通則外，現場資訊也很重要。例如：現場可能的燃燒物為何？是否有涉及化學物品的燃燒或接觸等","D":"傷患屬於嚴重灼傷，應通報為重大創傷個案並送往創傷中心治療"},"answer":"C","manualChapter":"CH31"},{"id":818,"source":"第五章 創傷急症(2015-2018).doc","question":"燒傷傷患可依據Parkland Formula給予輸液補充，若一位傷患體重60公斤，全身體表面積中10%為一度灼傷，10%為二度灼傷，10%為三度灼傷，則下列評估與處置何者為非？","options":{"A":"前24小時的估算輸液量為7.200mL","B":"灼傷發生後的前8小時輸液流速為150 mL/hr","C":"之後16小時的輸液流速為前8小時的一半","D":"可以視傷患臨床表現調整流速，如出現血壓低，微血管再充填時間延長，小便量減少，可再給予更多輸液補充"},"answer":"A","manualChapter":"CH31"},{"id":824,"source":"第五章 創傷急症(2015-2018).doc","question":"一位45歲經火場搶救之女性傷患，現場評估發現，身上多處燒燙傷，前胸約有9%二度燒燙傷，後背約有9%三度傷燙傷，雙上肢共約有9%一度燒燙傷，患者約60公斤，請問該傷患在前8小時建議應給予多少輸液？","options":{"A":"2.160 C.C","B":"4.320 C.C","C":"6.480 C.C","D":"3.240 C.C"},"answer":"A","manualChapter":"CH31","matchedChapters":["CH31"]},{"id":2135,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"一位30歲約60公斤的男性自火災現場救出，評估時傷患意識模糊，眉毛有燒焦，口鼻部有明顯碳粒，身上多處燒燙傷，體表面積(BSA)分別為1度10%，2度16%，3度14%，其生命徵象心跳：110下/分鐘，呼吸：30下/分鐘，血壓：100/80mmHg，SpO 2：83%，請問下列處置何者最不適當？","options":{"A":"傷患救出時除燒燙傷外仍應考慮頭頸部傷害，若無法排除應戴上頸圈。","B":"為預防吸入性灼傷造成喉頭水腫，應盡早建立進階呼吸道處置。","C":"根據修正後布魯克公式(modified Brooke formula)，傷患在灼傷後的前8小時要給予1,500-2,000 ml的乳酸林格氏液。","D":"移除傷患身上的衣物及飾品，並在燒燙傷傷口以冰敷降溫。"},"answer":"D","manualChapter":"CH31"},{"id":2225,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"關於燒燙傷與電灼傷，下列描述何者最不適當？","options":{"A":"當傷患有顏面灼傷、鼻毛燒焦、呼吸有喘鳴聲(stridor)、聲音沙啞時，要高度懷疑有呼吸道灼傷。應考慮儘早放置氣管內管。","B":"嚴重燒燙傷傷患之輸液補充，可採修正後布魯克公式(modified Brooke formula)：初始24小時靜脈輸液量= 2ml/公斤體重×傷患體重×灼傷面積(無計入一度燒傷面積)。","C":"若閃電傷害現場同時造成多位傷患，應優先急救呼吸中止者(不論有無脈搏)。","D":"若暴露在粉末之化學物質情況下，應儘快用清水或生理食鹽水沖洗，以免粉末持續對皮膚產生化學性灼傷。"},"answer":"D","matchedChapters":["CH31"],"manualChapter":"CH31"},{"id":2226,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"搜救人員將傷患從火場中抬出，患者表示胸口很痛，呼吸不順，右手前臂灼傷，下列處置何者最為適當？ (多選)","options":{"A":"血氧量測96%，應先觀察患者狀況，再決定是否給予氧氣治療。","B":"傷患右前臂有一個手鍊，表示很有紀念價值，拒絕將其拿下來，協助將手鍊降溫。","C":"除了詢問基本病史外，應詢問搜救人員傷患所在位置，燃燒物質等。","D":"傷患從火場抬出，意識清楚可以講話，並持續表示胸口很痛，呼吸道正常，吸入性灼傷機會小。"},"answer":"C,B","manualChapter":"CH31"},{"id":2316,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"自小客車自撞安全島引發引擎起火，當您將傷患脫困後發現其痰液中有炭粒，眉毛、鼻毛有燒焦情形，軀幹有大面積的二度燒傷。以下評估何者為是？","options":{"A":"聲門以上吸入性灼傷為吸入過熱的氣體時所造成，有喘鳴聲(stridor)時，應放置LMA。","B":"聲門以下吸入性灼傷多是傷患吸入火場微細煙塵或有毒物質所導致，症狀通常又快又急。","C":"若病人血中一氧化碳濃度高達10％~20％時，通常就會出現昏迷的症狀。","D":"為防止休克及休克處理，應盡速給予靜脈注射及輸液。"},"answer":"D","matchedChapters":["CH31"],"manualChapter":"CH31"},{"id":2318,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"在KTV火警救護案件中，你迅速評估一位病人：全身滿佈煙灰，僅有臉部與頸前頸後處有燒傷，呼吸深快並伴有咳出碳粒痰。目前呼吸次數30下/min，血氧95%，HR：106/min，BP：140/80mmHg，下列評估何者為是？","options":{"A":"吸入性灼傷判斷很重要，特別是一氧化碳中毒時要利用血氧機(oximeter)加以確認。","B":"有吸入性灼傷或呼吸道腫脹時，可在地方醫療指導授權下考慮給予氣管插管。","C":"若無發現其它燒傷處，依灼傷嚴重度區分此病人為中度灼傷。","D":"若有環狀灼傷會出現止血帶效應，但在此病人應該不會發生。"},"answer":"B","manualChapter":"CH31","matchedChapters":["CH31"]},{"id":2387,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"60歲男性從火場被救出，體重目測75公斤，燒燙傷面積一度約為10%，二度約為18%，三度約佔9%。依據最新版PHTLS，使用兩套標準輸液套管滴注，請推算前八小時每一套標準輸液套管每分鐘須調整為幾滴最為合適？","options":{"A":"84。","B":"42。","C":"21。","D":"63。"},"answer":"B","manualChapter":"CH31"},{"id":2436,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"一名男性於火場救出，其傷勢描述及範圍如下圖所示，分別為右臂背側皮膚如曬傷，胸腹部正面出現皮膚紅腫及水泡，右下肢及生殖器皮膚出現死白焦黑及水泡，請問含2度以上燒燙傷面積計算為多少%？","options":{"A":"22.5%。","B":"28%。","C":"32.5%。","D":"37%。"},"answer":"B","manualChapter":"CH31","matchedChapters":["需要圖片"],"image":"題庫圖片/2436.png"},{"id":2438,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"40歲男性工作時被火灼傷，全身多處大面積燒傷，意識清楚表示疼痛，下列處置何者最適當？","options":{"A":"傷患顏面燒傷，眉毛鼻毛燒焦捲曲，若尚可講話不用考慮插管。","B":"計算靜脈輸液治療時，燒燙傷面積不需加入一度燒傷面積。","C":"三度燒傷區域，可以為乾硬不具彈性的皮膚稱為焦痂(eschar)，會有嚴重疼痛表現。","D":"輸液補充量計算改用修正後布魯克公式(modified Brooke formula)，為了增加體液的補充量，避免體液流失造成休克惡化。"},"answer":"B","matchedChapters":["CH31"],"manualChapter":"CH31"},{"id":2517,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"你接獲派遣令到火災現場進行救護，救出的男子，年約五十歲，左上臂以及背部約一半的範圍出現了二度以上的燒傷，但肢體仍可活動，意識清楚，講話聲音略帶沙啞，著急著想要回到房屋內搶救他心愛的狗，現場血壓120/60mmHg、心跳120下/每分鐘、呼吸速度約24下每分鐘，血氧92%，下列敘述何者最正確？","options":{"A":"患者血氧92%、呼吸偏快；建議給予鼻導管供給氧氣至血氧94%以上。","B":"根據九的法則(Rule of Nines)患者燒灼傷範圍超過20%，應送至燒傷中心處置。","C":"患者心跳偏快，應在患者雙上臂各建立一條靜脈輸液管路，進行輸液。","D":"如果患者臉上有碳粒、鼻毛有燒焦情形，可預防性先置入氣管內管。"},"answer":"D","matchedChapters":["CH31"],"manualChapter":"CH31"},{"id":2601,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"35歲男性廚師，前臂不慎被滾燙的熱油潑灑，產生數個巨大水泡，皮膚呈現紅色且傷患主訴劇烈疼痛。此類灼傷的深度分級為何者最適當？","options":{"A":"表淺性灼傷(一度)。","B":"淺層灼傷(二度)。","C":"全層灼傷(三度)。","D":"四度灼傷。"},"answer":"B","matchedChapters":["CH31"],"manualChapter":"CH31"},{"question":"下列何者正確?","options":{"A":"最主要灼傷型態是燒灼傷，研究顯示身體接觸攝氏44度以上的物品不會造成傷害","B":"接觸物品溫度攝氏44~51度間，每上升1度，造成身體表皮壞死速度減緩","C":"傑克森灼傷理論 (Jackson's Burn Model) 將燒燙傷區分為三層病理區域，用以說明傷口會隨時間惡化","D":"化學灼傷一定會產生熱能"},"answer":"C","manualChapter":"CH31","id":3335,"source":"TP題庫 (圖片匯入)"},{"question":"依據ATLS建議，以下何者不用送往灼傷中心照護？","options":{"A":"十歲男童會陰部淺層灼傷。","B":"60歲老先生手掌三度灼傷。","C":"被雷擊中的20歲男性登山客。","D":"剛泡完熱泉，體表面積8%二度灼傷的男子。"},"answer":"D","manualChapter":"CH31","id":3337,"source":"TP題庫 (圖片匯入)"},{"question":"火場救出的成年患者，全胸部、左下肢以及會陰部有3度燒燙傷，請問燒燙傷面積為何?","options":{"A":"19%","B":"28%","C":"27%","D":"37%"},"answer":"B","manualChapter":"CH31","source":"TP題庫 (圖片匯入) - EMT-P 第 31 章 P.818","id":3468},{"id":3498,"source":"醫/護考古題","question":"病人從密閉火場被救出，臉部燒傷，口鼻處有燻黑炭渣，鼻毛燒焦，聲音沙啞，有喘鳴聲（wheezing），其他皮膚無明顯燒傷，下列那項處置最不適當？","options":{"A":"置放氣管內管以保護呼吸道","B":"給與 100% 潮濕氧氣","C":"給與大量輸液","D":"檢驗血中一氧化碳濃度"},"answer":"C","manualChapter":"CH31"},{"question":"一名 11 歲男童體重約 37 公斤，雙下肢發生二度灼傷。依據「十的法則 (Rule of TENS) 」，其初始輸注速率應如何決定？","options":{"A":"以 20×3=60 mL/hr 作為第一小時給予量","B":"應改用帕克蘭公式或修正後布魯克公式計算","C":"輸注速率為灼傷面積 14%×10=140 mL/hr","D":"以 20×10=200 mL/hr 進行初始輸注"},"answer":"B","source":"圖片匯入","manualChapter":"CH31","id":3588,"matchedChapters":["CH31"]},{"id":45486,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"35歲女性，體重約50公斤火場救出後經初步評估為整隻右手臂及整隻右腿的深度灼傷（皆為二度或三度灼傷），根據修正後布魯克公式(modified Brooke formula)前八小時應給予多少輸液量？","options":{"A":"1,350ml。","B":"1,800ml。","C":"2,700ml。","D":"3,600ml。"},"answer":"A","manualChapter":"CH31","matchedChapters":["背誦題"]},{"id":45664,"question":"搜救人員將傷患從火場中抬出，患者表示胸口很痛，呼吸不順，右手前臂灼傷，下列處置何者最為適當？","options":{"A":"血氧量測96%，應先觀察患者狀況，再決定是否給予氧氣治療。","B":"傷患左手無名指有一個戒指，表示很有紀念價值，拒絕將其拿下來，給予其手部冰水降溫。","C":"除了詢問基本病史外，應詢問搜救人員傷患所在位置，燃燒物質等。","D":"傷患從火場抬出，意識清楚可以講話，並持續表示胸口很痛，呼吸道正常，吸入性灼傷機會小。"},"answer":"C","source":"同學出題","manualChapter":"CH31"},{"id":45755,"question":"針對將火場救出的病人，下列敘述何者最不適當?","options":{"A":"在排除病人有脊椎的傷害下，應保持患者頭部抬高至少30度","B":"若胸腹部大面積灼傷，仍是應在傷口處黏貼生理監視器電極貼片以監視患者狀態","C":"經由潮濕瓶給予100％的氧氣","D":"若四肢軀幹皆灼傷，仍是需要量測血壓，於壓脈帶下置放無菌紗布直接量測即可"},"answer":"B","source":"大白P820","manualChapter":"CH31"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

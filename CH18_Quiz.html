@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 18 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：27 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH18</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":16,"source":"105 高級救護技術員甄試筆試題目.doc","question":"結構式溝通的SOAP模式，不包括？","options":{"A":"Subjective data主訴資訊","B":"Objective data客觀評估","C":"Assessment data綜合判断","D":"Protection data隱私保護"},"answer":"D","manualChapter":"CH18"},{"id":115,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"關於EMTP使用醫學上常用的結结構式溝通S-O-A-P模式，不包括下列哪一項？","options":{"A":"S：surrounding data環境安全與對病患及施救者之影響","B":"0：objective data病患身體評估的結果","C":"A：assessment data綜合上述結果形成的臨床判斷","D":"P：plan of management根據臨床判斷所形成的治療計畫"},"answer":"A","manualChapter":"CH18","matchedChapters":["CH18"]},{"id":491,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列關於醫病互動溝通的敘述何者為是？","options":{"A":"對於一個疑似開放性肺結核的病患，由於病菌傳播的風險甚高，為保護醫療人員的安全降低感染風險，因此必須採用「主動－被動模式」單向影響病患，病患完全沒有參與互動的空間","B":"醫療專業上的傲慢，是Beckman於1994年研究醫病關係建立溝通的四種缺失中最為常見的一種","C":"救護現場的溝通過程中，病患或其家屬常因文化語言背景的不同，或是因為選擇性的解讀，或是因為對醫療專業術語的不熟悉，而誤解救護人員原本所想要傳達的訊息","D":"現場病患及家屬常常因為緊張驚慌而無法配合緊急醫療人員的處置，這時高級救護技術員應該表現專業性與自信心，並利用「放心好了，應該不會有什麼問題的」這樣的語句，以給予病患及家屬適度的安撫"},"answer":"C","manualChapter":"CH18"},{"id":507,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"關於醫病關係與溝通的敘述，下列何者為是？","options":{"A":"因為不適當的承諾導致病患或家屬對治療結果有過高的期待，是Beckman於1994年研究醫病關係建立與溝通中四種常見缺失中，最為常見的一種","B":"對於一個疑似H7N9禽流感感染的發燒病患，為保護醫療人員的安全降低感染風險，因此必須採用以醫師為中心的「主動一被動模式」單向影響病患，病患完全沒有參與互動的空間","C":"現場病患及家屬常常因為緊張驚慌而無法配合緊急醫療人員的處置，這時高級救護技術員應該表現專業性與自信心，使用「放心好了，不會有什麼問題的」這樣的語句，以給予病患及家屬適度的安撫","D":"高級救護技術員必須對病患的情緒反應採取開放的態度，並用正向或接納的語言表達同理心"},"answer":"D","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":534,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"EMTP使用醫學上常用的結構式溝通S-O-A-P模式，不包括下列哪一項？","options":{"A":"S：surrounding data環境安全與對病患及施救者之影響","B":"O：objective data病患身體評估的結果","C":"A：assessment data綜合上述結果形成的臨床判斷","D":"P：plan of management根據臨床判斷所形成的治療計畫"},"answer":"A","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":550,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關醫病與救護溝通可能會遇到的困境導致溝通無效或失敗，下列何者為非？","options":{"A":"接受者的背景或特質（Attributes of the receiver）：例如與外傭詢問是否應停止病患之現場急救復甦（TOR）","B":"選擇性的解讀（Selective perception）：例如某些宗教的病患對於肢體接觸感到被冒犯","C":"語義不清（Semantic problems）：例如救護技術員通知醫院關於病患意識不清的狀況","D":"時間壓力（Time pressure）：例如對於OHCA病患救護處置AED的使用訊息傳遞不足"},"answer":"B","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":551,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關醫療救護與病患互動的模式，下列敘述何者為是？","options":{"A":"高級救護技術員EMTP對於OHCA病患進行AED去顫是指導－合作模式","B":"高級救護技術員EMTP對於GCS 6分，呈呼吸衰竭徵狀，SpO2：78%的病患進行氣管內管插管是主動－被動模式","C":"高級救護技術員EMTP對於精神急症病患進行強制就醫是共同參與模式","D":"高級救護技術員EMTP對於GCS 15分，E4V5M6主訴頭暈肢體無力病患進行血糖機one touch血糖檢測是主動－被動模式"},"answer":"B","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":561,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關於救護出勤時，醫病溝通過程的描述，下列何者為非？","options":{"A":"若懷疑病患有急性傳染病時，救護人員要求病患合作，此模式為指導－合作模式","B":"在一開始接觸病人時，應迅速建立和諧的氣氛，並採取開放式的問題搜集資訊","C":"在醫病關係的建立與溝通上，訊息傳達不良及缺乏同理心是常見的缺失","D":"適度讓病患或家屬參與醫療決策是完全沒有幫助的"},"answer":"D","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":562,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"高級救護技術員在緊急狀況下，為確保訊息傳遞的完整性與品質，其中一個常被使用的模式是SOAP模式，關於SOAP模式，以下敘述何者為非？","options":{"A":"S：病患的主觀症狀與資訊，其中包括家屬或目擊者提供的資訊","B":"0：客觀的評估觀察結果","C":"A：病患自覺的疾病","D":"P：已經進行中的治療及其他進一步治療計劃"},"answer":"C","manualChapter":"CH18"},{"id":565,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"EMTP使用醫學上常用的結構式溝通S-O-A-P模式，不包括下列哪一項？","options":{"A":"S：surrounding data環境安全與對病患及施救者之影響","B":"0：objective data病患身體評估的結果","C":"A：assessment data綜合上述結果形成的臨床判斷","D":"P：plan of management根據臨床判斷所形成的治療計畫"},"answer":"A","manualChapter":"CH18"},{"id":573,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"醫病之間互動與溝通的技巧是非常重要的。高級救護技術員在救護的過程中，關於展現同心的技巧，下列何者為非？","options":{"A":"注意病患或家屬肢體或語調所展現的情緒反應，並對些情緒反應採取開放的態度看待","B":"用適度的肢體語言表達同理心，例如：臉部的表情、適度的接觸，如輕拍肩膀等等","C":"根據病患或家屬的情緒回饋適度調整自己的應對，必要時以適時的沈默面對也無妨","D":"病患或家屬表現緊張情緒時，利用「放心好了，不會有什麼問題」類似語句加以安撫"},"answer":"D","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":2065,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"下列關於SOAP病況紀錄方式的描述，何者最不適當？","options":{"A":"Summary：包括目前傷病情的總結客觀描述，如受傷機轉、預估出血量，已給予的處置。","B":"Objective：主要是病人/傷患的生命徵象、身體診察。","C":"Assessment：指的是根據上面兩項收集到的資訊，所做出對於病情的評估與診斷。","D":"Plan：針對上面的診斷，預計給予傷病患的治療計畫。"},"answer":"A","manualChapter":"CH18"},{"id":2109,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"45歲男性，近日診斷為A型流感，今日因呼吸喘報案，您到達現場後使用結構式溝通模式(SOAP)收集資訊，下列哪一項為O的描述？","options":{"A":"病人表示看電視時覺得愈來愈喘，有吸不到氣的感覺。","B":"病人血氧濃度85%，呼吸急促，每分鐘約30下。","C":"過去病史有糖尿病及高血壓。","D":"病人可能是A型流感併發重症。"},"answer":"B","manualChapter":"CH18"},{"id":2200,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"55歲男性病人突然意識改變與全身抽搐。您到達現場時，病人仍意識不清無法溝通並嘴角抽動，請問此時最適合的醫病互動模式為何？","options":{"A":"「主動—被動」模式。","B":"「指導—合作」模式。","C":"「共同參與」模式。","D":"「遵從法規」模式。"},"answer":"A","manualChapter":"CH18"},{"id":2201,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"55歲男性病人主訴早上起床後發現自己右側肢體無力。您到達後與病人採用「SOAP」溝通模式，下列描述哪一項屬於「O」的敘述？","options":{"A":"早上起床病人表示發現自己右側無力。","B":"請病人雙手平舉，發現病人右手明顯下垂。","C":"最後一次正常時間為昨晚10點睡覺前。","D":"過去病史有高血壓。"},"answer":"B","manualChapter":"CH18"},{"id":2303,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"「SOAP」是高級救護技術員常用的結構式溝通模式。下列哪一項是屬於「SOAP」中的Objective data (O:客觀評估)的部份？","options":{"A":"病患平時使用的藥物。","B":"每次胸痛發作的時間。","C":"家屬提供的最後一次正常時間。","D":"意識狀態。"},"answer":"D","manualChapter":"CH18"},{"id":2396,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"派遣令任務是要您至檢疫所護送COVID - 19快篩陽性的病患至專責醫院，請問此時最適合的醫病互動模式為何？","options":{"A":"「主動—被動」模式。","B":"「指導—合作」模式。","C":"「共同參與」模式。","D":"「遵從法規」模式。"},"answer":"B","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":2487,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"關於醫病互動模式的比較，何者為是？","options":{"A":"指導–合作模式是一種以醫病互為中心的互動。","B":"共同參與模式是一種以病患和家屬為中心的互動。","C":"病患在送醫途中心跳停止，應先使用共同參與模式。","D":"主動–被動模式是醫療人員對病患的單向影響，並非互動。"},"answer":"D","manualChapter":"CH18"},{"id":2577,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"根據Szasz與Hollender提出的三種醫病互動模式，下列何者最適合應用於慢性疾病（譬如：高血壓、糖尿病）的照護情境？","options":{"A":"主動—被動模式（Active–Passive Model）。","B":"指導—合作模式（Guidance–Cooperation Model）。","C":"共同參與模式（Mutual Participation Model）。","D":"父母—嬰兒模式（Parent–Infant Model）。"},"answer":"C","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":2578,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"OHCA急救現場家屬情緒激動，哭喊要求馬上送醫並大聲指責救護員動作太慢。若要應用HARD溝通策略，以穩定家屬情緒並爭取後續急救時間，以下哪一項回應最適當地體現HARD溝通策略中的「A：承認（Acknowledge）」步驟？","options":{"A":"「我們在幫他急救，請配合讓我們儘快送醫，現場不適合討論」。","B":"「我知道你現在非常難過，如果我是你，我也會覺得很焦急」。","C":"「我了解急救的重要性與急迫性，我們是依照標準作業程序處理，做好病人的評估和處置是我的專業」。","D":"「你這樣只會妨礙我們工作，請讓開讓我們好好做事」。"},"answer":"B","matchedChapters":["CH18"],"manualChapter":"CH18"},{"question":"關於醫者在告知病患或家屬壞消息時，所使用的SPIKES原則，下列敘述何者錯誤？","options":{"A":"S:Setting up（營造），營造一個適當的環境有助於壞消息的告知。","B":"P: Precise（精確），如實告知患者或家屬精確的診斷，增加對於病情的了解與接受度。","C":"E:Emotions（情感），同理病患或家屬的心情，其中包括觀察、嘗試訴說情緒、確定情緒原因以及給予對方時間並作出適當回應。","D":"S: Strategy and Summary（策略與總結），病人或家屬認知到壞消息之後，接下來應該嘗試給予一個可以執行的計畫，把病人或家屬拉回現實上應該要面對的問題，讓病人或家屬聚焦到現況。"},"answer":"B","source":"同學出題","manualChapter":"CH18","id":3842},{"id":45613,"question":"關於醫者在告知病患或家屬壞消息時，所使用的SPIKES原則，下列敘述何者錯誤？","options":{"A":"S:Setting up（營造），營造一個適當的環境有助於壞消息的告知。","B":"P: Precise（精確），如實告知患者或家屬精確的診斷，增加對於病情的了解與接受度。","C":"E:Emotions（情感），同理病患或家屬的心情，其中包括觀察、嘗試訴說情緒、確定情緒原因以及給予對方時間並作出適當回應。","D":"S: Strategy and Summary（策略與總結），病人或家屬認知到壞消息之後，接下來應該嘗試給予一個可以執行的計畫，把病人或家屬拉回現實上應該要面對的問題，讓病人或家屬聚焦到現況。"},"answer":"B","source":"同學出題","manualChapter":"CH18"},{"id":45619,"question":"有關醫病溝通四步驟中，確認病人認知之技巧，不包含下列何者?","options":{"A":"確認病人之觀點與背景","B":"確認病人之需求與目標","C":"探求病情對生活之衝擊","D":"確認病人的動機與訴求"},"answer":"D","source":"同學出題","manualChapter":"CH18"},{"id":45631,"question":"醫病互動有許多模式，應該根據病人的病情選擇最適當的互動模式，下列關於互動模式的敘述何者為非?","options":{"A":"主動—被動模式：適用於病人嚴重受傷、昏迷、失血或精神錯亂的緊急狀況，此時以醫師為中心，病人無力參與互動","B":"指導—合作模式：適用於麻疹、急性傳染病等急性病症，此時病患提供必要資訊，醫師主導治療計畫而病患遵守","C":"提供—選擇模式：適用於手術、特殊藥物治療之情況，由醫師提供不同治療計畫及優缺點，病人可依需求選擇適當處置","D":"共同參與模式：適用於高血壓、糖尿病等慢性疾病，醫病具有平等的地位，病人主動參與並監控自己的治療"},"answer":"C","source":"同學出題","manualChapter":"CH18"},{"id":45636,"question":"一名 32 歲男性騎機車與汽車發生碰撞，造成右大腿明顯變形及大量出血。到院前救護人員已使用止血帶止血，患者目前 GCS 13 分、血壓 88/54 mmHg、脈搏 124 次/分、SpO2 92%。救護人員準備以 IMIST 模式向急診醫療團隊交班，下列何者最符合 IMIST 的內容分類？","options":{"A":"I（Identification）：32 歲男性，車禍後右大腿大量出血，GCS 13 分。","B":"M（Mechanism of injury）：騎機車與汽車碰撞，患者右大腿明顯變形並疑似股骨骨折。","C":"I（Type of Injury）：右大腿明顯變形並大量出血，疑似股骨骨折，從最嚴重傷勢開始描述。","D":"T（Treatment Given）：血壓 88/54 mmHg、脈搏 124 次/分、SpO2 92%，已使用止血帶。"},"answer":"C","source":"同學出題","manualChapter":"CH18"},{"id":45686,"question":"車禍外傷救護過程中與醫院醫療人員交班時，向院端表示患者頭部有血腫、右肩撕裂傷、大腿變形疑似骨折及多處擦傷，請問該資訊最符合IMIST交班模式之何項?","options":{"A":"M 傷害機轉(Mechanism of injury)","B":"I 受傷型態 (Type of Injury)","C":"S 顯著症狀(Signs)","D":"T 進行的治療(Treatment Given)"},"answer":"B","source":"同學出題","manualChapter":"CH18"},{"id":45688,"question":"IMIST 是來源於軍方對外傷病人交接的一種方式，關於此交班模組包含的資訊，下列敘述何者錯誤?","options":{"A":"M 傷害機轉(Mechanism of injury)：傷害機制及簡要病人醫療主訴。","B":"S 生命徵像或顯著症狀(Signs)：生命徵象回報或明顯的生理症狀。","C":"T 進行的治療(Treatment Given)：已進行的治療處置，如：使用止血帶。","D":"I重要事項(Importance)：關於此病人需要交接補充的重要事項。"},"answer":"D","source":"同學出題","manualChapter":"CH18"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

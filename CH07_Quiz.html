@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 7 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：56 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH07</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":2,"source":"105 高級救護技術員甄試筆試題目.doc","question":"所謂優先派遣的定義，最主要的根據是？","options":{"A":"傷病患主訴的關鍵問題","B":"傷病患所在位置","C":"最近有空救護車之救護分隊位置","D":"報案者描述緊急事件之性質"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":24,"source":"105 高級救護技術員甄試筆試題目.doc","question":"醫學上對於到院前死亡（OHCA）的現場終止急救條件，不包括？","options":{"A":"沒有目擊者","B":"沒有旁觀者心肺復甦術（CPR）","C":"現場急救過程中沒有出現可電擊心律","D":"EMS反應時間超過十五分鐘"},"answer":"D","manualChapter":"CH07","matchedChapters":["CH07"]},{"id":105,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"所謂「優先派遣」是依據什麼，在短時間內分辨報案電話之輕重緩急？","options":{"A":"報案者口氣緊急與否","B":"主訴的嚴重性","C":"關鍵問題的詢問","D":"病患的主訴與生命徵象"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":166,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"關於事故指揮系統的核心價值，下列敘述何者為是？","options":{"A":"共通詞彙（Common Terminology）：盡量使用當地方言溝通以避免誤解","B":"統一指揮（Unity of Command）：不同性質的機構進行合作，命令由統一的指揮中心發出","C":"管理範疇（Span of Command）：意思是指同一時間同時進行的任務，最好不要超過5個","D":"指揮（Command）：事故一開始就必須建立明確的指揮功能，指揮權可以經由書面或口頭轉移給更適任者"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":197,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"在事故應變中，有幾個應變地點相當重要，必須及早建立。以下關於事故指揮所（Incident Command Post，ICP）的觀念，何者為非？","options":{"A":"事故指揮所最好可以位於事故現場附近，但又必須確保在危險區域之外","B":"隨著事故進展，事故指揮所可能必須變動位置","C":"尚未指派任務的工作人員或物資，必須先在事故指揮所裡集結，等後派遣","D":"無論事故的型態或規模，每個事故都必須建立某種形式的事故指揮所"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":303,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"除了救護技術員目擊心肺功能停止病患，消防局能讓心肺功能停止病患4到6分鐘內接受心復甦術的有效措施為","options":{"A":"救護車閃光鳴笛前往救護地點","B":"廣設消防分隊據點","C":"實施派遣員電話指引心肺復甦術","D":"派遣責任醫院出勤，執行心肺復甦術"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":309,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"派遣員經由下列何者，來區分病患疾病之輕重緩急？","options":{"A":"報案者的囗氣急迫性","B":"年齡性別","C":"關鍵問題","D":"主訴"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":319,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"下列有關我國緊急醫療救護發展的里程碑，何者不正確？","options":{"A":"緊急醫療救護法與民國84年通過，明定緊急醫療救護為各地消防機關的權責","B":"以醫院為主的雙軌制高級救護（Hospital-basedTwo-Tiered BLS-ALS），於民國87年首次試","C":"國內首批高級救護技術員（EMT-P）於民國91年結業","D":"緊急醫療救護法於民國89年修訂，規範直轄市，縣（市）消防主管機關為辦理下列事項，應指定醫療指導醫師，建立醫療指導制度"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":320,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"下列有關救護車交通事故的敘述，何者為非？","options":{"A":"救護車的交通事故，是救護技術員職業相關嚴重傷害最重要的原因之一","B":"救護車的交通事故，多半發生在從救護現場，載送病患前往醫院的時候","C":"準確的救護派遣分級，減少不必要的闖紅燈行為，可以降低救護車交通事故的機會","D":"救護車的駕駛，與其他乘員，都應該正確繫上安全帶，以減少事故造成的傷害"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":334,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"「派遣中心所接獲電話中，傷病患主訴之分佈及數量」屬於哪一評估構面指標？","options":{"A":"結構面","B":"過程面","C":"結果面","D":"分佈面"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":345,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"派遣中心接到電話至救護人員到達現場的時間間距是屬於品質測量三大構面中的哪一面？","options":{"A":"結構面","B":"過程面","C":"結果面","D":"起始面"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":354,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"有關緊急醫療救護系統下列何者為非？","options":{"A":"緊急醫療救護（Emergency Medical Service-EMS），指針對急重症的傷病患，在緊急傷病的現場、就醫的途中、乃至到達醫院急診部門所提供的醫療救護服務·在社區提供這些服務，結合各個要素，所成立的一套體系，則稱之為緊急醫療救護系統（Emergency Medical Services Systems-EMSS）","B":"救護技術員（Emergency Medical Technicians），簡稱為EMT，為受過不同等級訓練與授權的救護技術人員。作為緊急醫療救護的第一反應人員，或成為醫師在到院前救護的延伸（physician extenders），是緊急醫療救護體系的重要骨幹","C":"緊急醫療救護指揮中心（Emergency Medical Dispatch Center），可以透過有線與無線通訊，網際網路，地理資訊，來結合民眾的緊急救護需求，以及到院前救護和醫療資源。達到適當的傷病患，以適當的方式，在適當的時間，送達適當醫療機構的目的","D":"優先派遣（Priority Dispatch）是根據各地消防局訂定之關鍵問題（key questions）的詢問，在最短時間內派遣救護團隊前往現場進行救護"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":355,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"有關預防救護車意外，下列何者為非？","options":{"A":"盡情運用閃光與鳴笛","B":"適當的救優先派遣·救護案件，並非全是危急個案·非危急個案，則一般反應即可","C":"安全通過路口","D":"注意現場停車安全，必要時做安全警戒"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":356,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"下列何者非『過程面』之緊急救護體系品管指標？","options":{"A":"疑似因心疾病引起胸痛病患，有多少比例接受心電圖檢查","B":"出勤模式是否依據「緊急醫療救護派遣規則系統」","C":"實行氣管插管之傷病患中，誤插入食道但未被發現之比例為何","D":"每一千次出勤之交通事故比例"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":367,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"緊急救護之優先派遣，是以何者為主要判定優先與否之依據？","options":{"A":"病患年齡","B":"關鍵問題","C":"求救者之緊張程度","D":"求救者認定之嚴重度"},"answer":"B","manualChapter":"CH07"},{"id":368,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"民眾接觸緊急醫療救護系統的第一道窗口為何？","options":{"A":"第一反應人員","B":"緊急救護派遣員","C":"到現場之救護技術員","D":"旁觀者"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":369,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"何者不是緊急救護醫療指導醫師的工作範疇？","options":{"A":"緊急醫療救護體系的整體規劃","B":"教育訓練","C":"督導考核緊急救護派遣員","D":"救災救指揮中心值勤"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":370,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"緊急救護之「反應時間間距（Response Time Interval）」應為？","options":{"A":"以救災救護指揮中心接到電話至救護人員到現場之時間間距計算","B":"以通知出勤至救護人員到達傷病患身旁之時間間距計算","C":"以救災救護指揮中心接到電話至救護人員到達傷病患身旁之時間間距計算","D":"以出勤至救護人員到達傷病患身旁之時間間距計算"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":389,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於事故指揮系統的核心價値，以下敘述何者為是？","options":{"A":"共通詞彙（common terminology）：盡量使用當地方言溝通以避免誤解","B":"統一指揮（unity of command）：不同性質的機構進行合作，命令由統一的指揮中心發出","C":"管理範疇（span of command）：意思是指同一時間同時進行的任務，最好不要超過5個","D":"指揮（command）：事故ー開始就必須建立明確的指揮功能，指揮權可以經由書面或口頭轉移給更適任者"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":400,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"在事故應變中，有幾個應變地點相當重要，必須及早建立。以下關於事故指揮所（incident command post，ICP）的觀念，何者最不正確？","options":{"A":"事故指揮所最好可以位於事故現場附近，但又必須確保在危險區域之外","B":"隨著事故進展，事故指揮所可能必須變動位置","C":"尚未指派任務的工作人員或物資，必須先在事故指揮所裡集結，等候派遣","D":"無論事故的型態或規模，每個事故都必須建立某種形式的事故指揮所"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":470,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"颱風對緊急醫療救護的影響，何者為非？","options":{"A":"颱風時的緊急救護調度派遣會有風險，較不緊急的醫療情況可考慮風雨減緩後進行","B":"颱風時若交通中斷，風災後可考慮用直昇機進行救護","C":"颱風時，病患以外傷居多，颱風後，則可能出現胃腸道傳染病，甚至壓力造成的心理疾病","D":"颱風過後，傳染病都會增加，但與當地原有的傳染病型態沒有相關"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":471,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"空中救護救護直昇機，管理辦法的規定，以下敘述何者錯誤？","options":{"A":"空中救護的範圍包括緊急救護、轉診和移植器官的緊急運送","B":"空中緊急救護，由當地欲轉診的醫院填具空中緊急救護申請表，直接傳真向內政部消防署救災救護指揮中心申請","C":"申請空中轉診的醫院，應與接受轉診的醫院先行聯絡協調，預作接受轉診的準備","D":"救護直昇機執行空中緊急救護或空中轉診時，除駕駛員外，應有空中救護人員隨機執行救護"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":478,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"當救護員面對憤怒或具敵意病患時下列何種態度較為合適？","options":{"A":"查問衛生局是否為精神病患，並準備約束病患","B":"請指揮中心通知員警及衛生局人員來溝通","C":"先設定好可以接受的病患行為，在這個範圍之內，維持平靜且自信的態度來安撫病患","D":"如病患不願配合請病患簽名後離開"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":576,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"你接派遣出勤酒醉路的患者。到達現場時病患渾身酒味，意識對聲音有反應，呼吸型態快且每都進行深度換氣、下列敘述何者為是？","options":{"A":"此種呼吸為陳施氏呼吸（Cheyne-Stokes respiration）","B":"此種呼吸型態為畢歐氏呼吸（Biot's respiration）","C":"應考慮病患可能為甲醇中毒引起的代謝性鹼中毒","D":"需對病患驗血糖，因有可能是糖尿病酮酸中毒引起"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":842,"source":"第五章 創傷急症(2015-2018).doc","question":"您是被派遣去火災現場支援救護的高級救護技術員，據無線電通報，其他同仁已從火場救出兩名中年女性OHCA傷患。請問以下敘述，何者為非？","options":{"A":"要準備一氧化碳偵測器","B":"要準備比平常大半號的氣管內管（如8.0及8.5號）","C":"要準備AED及急救藥物包","D":"要準備比平常多的生理食鹽水及紗布"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":890,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"兒童的生存之鏈與成人的不同之處，在於特別強調哪一環？","options":{"A":"事故預防","B":"儘早CPR","C":"有效的高級救護（ALS）","D":"整合性復甦後照顧"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":895,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"依據我國緊急醫療救護法第二十五條的規定，有關醫療指導醫師的工作內容，下列何者為非？","options":{"A":"對救災救護指揮中心的人員進行教育訓練","B":"到救災救護指揮中心分析報案與派遣資料","C":"到救災救護指揮中心審查救護技術員填寫的救護紀錄表","D":"到救災救護指揮中心執勤，擔任線上醫療指導"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":924,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"在事故應變中，有幾個應變地點相當重要，必須及早建立。以下關於事故指揮所（incident command post，ICP）的觀念，何者最不正確？","options":{"A":"事故指揮所最好可以位於事故現場附近，但又必須確保在危險區域之外","B":"隨著事故進展，事故指揮所可能必須變動位置","C":"尚未指派任務的工作人員或物資，必須先在事故指揮所裡集結，等後派遣","D":"無論事故的型態或規模，每個事故都必須建立某種形式的事故指揮所"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":968,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"以下關於熱疾病的敘述，何者為是？","options":{"A":"熱痙攣（heat cramp）主要是因為鈉與水的流失，導致全身肌肉一起痙攣","B":"熱衰竭（heate exhaustion）會有頭暈.噁心.頭痛.及輕到中度體溫上升，但不會意識改變","C":"傳統型中暑（Classic heat stroke）常發生於持續性高溫度及高濕度的環境，而且好發在健康的運動員","D":"中暑如果不治療將導致死亡。治療成功的要素包括啟動基本救命術（BLS）及高級救命術（ALS）.快速認出熱急症.及快速幫病患降溫等"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":1039,"source":"第四章 非創傷急症(2012-2014).doc","question":"你接獲指揮中心通報，到某安養中心救護病人，求救原因為意識不清，到現場後發現病人平躺床上，且護理人員已將心電圖監測器接上，如下圖：請問下列敘述何者最正確？","options":{"A":"此心電圖一定是PSVT","B":"此病人需立刻同步整流電擊","C":"此病人需立刻非同步去顫電擊","D":"此病人需先確認頸動脈再決定下一步行動"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":1099,"source":"第四章 非創傷急症(2015-2018).doc","question":"44歲男性病患在與朋友飲酒後吐大量鮮血，指揮中心派遣高救隊到現場，現場病患臉色蒼白冒冷汗，意識對痛有反應，脈搏每分鐘120下，血壓80/50mmHg，呼吸每分鐘30次，過去病史以及過敏史不詳，下列敘述何者為是？1.病患疑似為上消化道出血合併休克，Mallory-Weiss症候群不可能為病因2.病患一定有解黑便的症狀3.在時間以及裝備許可的情況下，病患應接受生理食鹽水的輸液治療4.長期酗酒的病患有可能是因為食道靜脈曲張出血造成大量吐血","options":{"A":"1，2，3，4","B":"2，3","C":"3，4","D":"1，4"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2006,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"2013年全球復甦聯盟（Global Resuscitation Alliance）提出改善突發性心臟停止存活的十個步驟，以下何者為非？","options":{"A":"實施派遣員協助心肺復甦。","B":"建立醫療指導醫師制度。","C":"應用行動科技召喚志願者急救系統。","D":"針對第一反應員的AED部署計畫。"},"answer":"B","matchedChapters":["CH07","CH06"],"manualChapter":"CH07"},{"id":2096,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"發現有路倒民眾趕緊撥打119報案，下列何者為最正確？","options":{"A":"根據優先派遣(priority dispatch)的觀念，優先派遣高級救護隊(ALS team)前往緊急傷病現場。","B":"救護技術員在現場治療的原則是「儘速送醫」Go and Play，爭取黃金時間。","C":"事件發生在離島，勤務中心派遣空中救護運輸作為緊急傷病初級運送。","D":"標準作業流程屬前瞻性的醫療指導，缺點是與救護過程不直接相關。"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2169,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列有關於大量傷病患事故指揮系統(Incident Command System，ICS)，以下敘述何者最不適當？","options":{"A":"事故指揮官通常由最早抵達的人員中，位階最高或經驗最豐富的人來擔任，執行部門通常是事故現場最先成立的部門。","B":"如果事故規模不大，指揮官可以視狀況兼任其他工作人員的任務，例如安全官、聯絡官等。","C":"在系統內的每個人都只有一個直屬長官，只接受這位長官派遣的任務，也回報訊息給這位長官。","D":"事故指揮官發派的任務，安全官評估認為有危險，須先與指揮官溝通討論後，才可以制止危險的救援行動。"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2192,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"關於派遣員協助心肺復甦術(Dispatcher Assisted CPR，以下稱DA - CPR)敘述，何者正確？","options":{"A":"研究顯示，在緊急救護人員接觸病人之前，旁觀者先執行CPR，OHCA病人的存活機率並無明顯提升。","B":"在辨識階段，派遣員必須詢問兩個關鍵問題「意識是否清醒？」以及「呼吸是否正常？」。","C":"派遣員執行DA-CPR時需要另一端的報案者積極配合，並且學過CPR，才能為突發性心跳停止的病人爭取更佳的救活機率。","D":"詢問句型「有無呼吸」與「有無正常呼吸」，對於同一病人這兩個問題的OHCA辨識率相似。"},"answer":"B","manualChapter":"CH07"},{"id":2205,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"當您出勤派遣救護時，收集及彙整有關現場環境、主訴、病史及實施初評等病人資訊，為執行關鍵思考之哪一步驟？","options":{"A":"資料判讀。","B":"概念形成。","C":"應用原則。","D":"反應評估。"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2258,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"有關兒童族群的院外心跳停止(OHCA)處置與敘述，下列何者為非？","options":{"A":"嬰兒OHCA幾乎皆為呼吸問題導致，故不使用AED或電擊器，以提升急救效率。","B":"兒童急救時，胸外按壓的建議深度為胸廓前後徑的三分之一，大約為5公分。","C":"兒童OHCA靜脈管路難以建立時，替代給藥途徑為骨內注射或從氣管內管給予。","D":"因呼吸問題為常見原因，故尚未建立進階呼吸道時，雙人操作的按壓通氣比為15:2"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2269,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"有關大型活動醫療設站考量，可分為「人、事、時、地、物」5個部份，以下考量何者為是？","options":{"A":"現場如需要高級救命術人力，一般要求高級救命術(ALS)小組或備有自動電擊器小組應在5分鐘內到達活動的任何一個位置。","B":"醫療站的地點選擇以開放場所為佳，位置最好10分鐘路程內可到達所有活動區域，醫療站對內及對外的動線要保持順暢及安全。","C":"大型活動在人群移動時容易產生傷病人，因此緊急醫療救護的規劃，至少應從活動開始前至活動結束1小時。","D":"預估參加人數須先有初步粗略的估算，參加人員包含所有工作人員及觀眾，現場遊客人數無法預估，不列入考量。"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2289,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"107年消防署的「派遣員指導旁觀者心肺復甦術」的品管指標，以下何者為非？","options":{"A":"可接觸之報案電話的OHCA辨識比率：設定指標為95％。","B":"辨識出OHCA之報案者接受DA-CPR的壓胸比率：設定指標為60％。","C":"電話報案後至辨識出OHCA時間的中位數：<120秒。","D":"從報案電話到開始做CPR的時間中位數：<180秒。"},"answer":"A","manualChapter":"CH07"},{"id":2290,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"派遣員初始流程的四大戒律(the Four commandments)，何者為非？","options":{"A":"他(傷病患者)現場有個人需要幫忙","B":"他(傷病患者)大概幾歲？","C":"他(傷病患者)的意識是清醒的嗎？","D":"他(傷病患者)的呼吸是正常的嗎？"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2291,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"全球復甦聯盟(GRA)「增加OHCA存活的十個步驟」中，名列第一步驟最重要的基石為？","options":{"A":"落實快速派遣。","B":"高品質心肺復甦。","C":"建立OHCA登錄系統。","D":"完整的AED部署計畫。"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2354,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"指揮中心通報一名40歲孕婦生產後大量出血，EMT的現場處置何者最正確？","options":{"A":"將手深入產道中，進行加壓止血。","B":"按摩子宮底促進陰道收縮，減少出血。","C":"避免會陰部檢查，並給予大量靜脈輸液維持灌流。","D":"讓胎兒吸吮母親乳頭，促使乳腺分泌子宮收縮素，幫助止血。"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2369,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"某中學宿舍約20%的學生今天發病，他們有發燒，倦怠和淋巴結腫大等症狀。校護告訴119派遣員說三天前有一學生在宿舍自助餐廳噴撒不明液體。你第一時間被派遣到現場，有關下列防護衣穿著，何者最為恰當？","options":{"A":"在宿舍自助餐廳的清掃阿姨應著等級D防護衣。","B":"救護技術員當處理未知濃度的未知化學物質，應著等級D防護衣。","C":"校護因第一線接觸學生，建議著等級C以上防護衣。","D":"後送至醫院端，醫院相關人員應著等級A防護衣。"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2380,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"依據「國際緊急派遣協會」定義，公共場所目擊OHCA的派遣等級是？","options":{"A":"E (ECHO)。","B":"A (ALPHA)。","C":"C (CHARLIE)。","D":"O (OMEGA)。"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2469,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"有關現場救護的權責，下列敘述何者最適當？","options":{"A":"大量傷患現場醫療小組人數可能嚴重不足，而中重傷者常一下子湧入治療區，故只要傷患脫困後即應該馬上轉送醫院，毋須現場執行醫療處置。","B":"現場檢傷時先召喚可行走傷患集中於傷患集結區，確保人員安全；無法行走傷患則由檢傷人員評估並搬運至傷患集結區。","C":"明顯死亡的傷患，應該先做好現場蒐證後，再送達遺體區。在危害物質事故時，宜盡速移動遺體以免染污。","D":"醫療小組的醫療派遣員須和後送小組的後送管制員確認溝通傷病患人數及嚴重度，後送順序、方式、時間、車輛、接收醫院等事宜。"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2474,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"下列何者是屬於緊急醫療救護「過程面」的指標？","options":{"A":"救護人員對單位的滿意度與離職比例。","B":"派遣中心報案電話中主訴創傷與非創傷的比例。","C":"缺血性胸痛病患接受到院前心電圖檢查的比例。","D":"社區心肺停止的病患在到院前即恢復自發性循環的比例。"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2475,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"中央衛生主管機關公告之公共場所，購置自動體外心臟電擊去顫器後，應送衛生主管機關備查後，轉登錄於哪一個單位？","options":{"A":"縣(市)政府衛生局。","B":"鄰近之急救責任醫院。","C":"衛生福利部網站。","D":"縣(市)消防機關之救災救護指揮中心。"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2511,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"根據ACLS 2015建議，提高社區猝死病人(OHCA)存活率的方法，不包括？","options":{"A":"請高風險病人家中購置自動體外去顫器(AED)以備不時之需。","B":"請119派遣中心在電話線上指導報案者作只壓胸的CPR。","C":"請119派遣中心善用社群軟體召喚週遭民眾協助CPR與取得AED。","D":"將OHCA病人儘量送到專責的猝死救治中心(cardiac arrest center)。"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":2564,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"醫療優先派遣是目前有醫學實證的解決方案之一，它是一個提供派遣員使用的標準化流程，下列何者並非其流程的一部分？","options":{"A":"溝通（Communication）。","B":"派遣（Dispatch）。","C":"指導（Instruction）。","D":"詢問（Interrogation）。"},"answer":"A","manualChapter":"CH07"},{"id":2565,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"消防署在2015年辦理了派遣員協助指導心肺復甦術訓練課程，並於2018年建立品管評量指標如下，何者最不適當？","options":{"A":"所有報案電話的OHCA辨識比率：設定指標為50%。","B":"可接觸之報案電話的OHCA辨識比率：設定指標為80％。","C":"辨識出OHCA之報案者接受DA-CPR的壓胸比率：設定指標為60％。","D":"電話報案後至辨識出OHCA時間的中位數：＜120秒。"},"answer":"A","manualChapter":"CH07"},{"id":2649,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"深夜發生規模7.3地震，多棟建物倒塌，地區停電且道路受阻。部分傷患受困於瓦礫中，另有居民集中於臨時安全區。災難醫療救護隊到達後，關於初期緊急醫療運作，下列何者最適當？ (多選)","options":{"A":"立即投入倒塌現場搜救，爭取受困傷患的黃金救援時間。","B":"優先架設臨時醫療區域，進行檢傷分類與公共衛生監測。","C":"立即通報區域指揮中心，等待後續專責搜救隊接手進駐。","D":"儘速協調收容所安置，防止疫情與群聚感染進一步擴散。"},"answer":"B,C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"question":"在情緒內容及配合度量表 (ECCS)中，一名「正常對話」的報案者其評分為1分，而 OHCA 案件報案者的平均得分為何？","options":{"A":"4.5分","B":"2.1分","C":"1.0分","D":"3.2分"},"answer":"B","manualChapter":"CH07","id":3430,"source":"TP題庫 (圖片匯入)"},{"question":"派遣員協助心肺復甦術 (DA-CPR) 的流程主要是由哪三個階段依序完成的？","options":{"A":"辨識、指導、監控","B":"詢問、派遣、到達前指導","C":"評估、給藥、電擊","D":"檢傷、通報、後送"},"answer":"A","manualChapter":"CH07","id":3437,"source":"TP題庫 (圖片匯入)"},{"question":"以下何者正確？","options":{"A":"情緒內容及配合度量表(ECCS): 將報案者的情緒反應量化，最高 5分(正常對話)最低0分(歇斯底里)。","B":"醫療優先派遣原則為詢問、派遣和指導三部曲","C":"國際緊急醫療派遣協會把派遣模式分成O.B. R .A V E六個等級","D":"派遣模式中的連結派遣模式(PA)適合應用於偏遠地區、醫療院所分散不均"},"answer":"B","manualChapter":"CH07","source":"TP題庫 (圖片匯入) - EMT-P 第 7 章 P.132.155.157.168","id":3482},{"question":"民眾向指揮中心報案，稱一名路人倒臥在人行道上，派遣員接下來應該進行何種作為？","options":{"A":"詢問報案人所在位置的地址","B":"向報案人確認連絡方式","C":"請報案人先確認意識及正常呼吸","D":"啟動DACPR流程"},"answer":"A","source":"圖片匯入","manualChapter":"CH07","id":3562,"matchedChapters":["CH07"]},{"question":"一位收縮性心衰竭病人，出現心房顫動併快速心室反應(atrial fibrillation with rapid ventricular Tesponse) 心電圖顯示矯正後的QTc > 500 milliseconds 為避免心衰竭惡化也避免 QTc進一步延長，可考慮何種藥物治療？","options":{"A":"Adenosine","B":"Amiodarone","C":"Diltiazem","D":"Digoxin"},"answer":"D","source":"圖片匯入","manualChapter":"CH07","id":3592,"matchedChapters":["CH07"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

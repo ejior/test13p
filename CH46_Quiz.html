@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 46 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：32 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH46</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":69,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMT可以用CAGE方法來評估病患是否有酒精成瘾問題。CAGE說明何者為非？","options":{"A":"Careless病患是否長期沒有人關心","B":"Annoyance病患是否因喝酒而遭親友嫌棄","C":"Guilty病患是否因喝酒而有罪惡感","D":"Eye opener病患是否一早起床張開眼就想找酒喝"},"answer":"A","manualChapter":"CH46"},{"id":907,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於行為急症，下列敘述何者為是？","options":{"A":"救護技術員在警察告知後就可以強制將病患約束及送醫","B":"盡量避免使用開放性問題而被病患引導進而讓場面失控","C":"盡量穩定病患情緒及情勢，儘速轉介至精神科接受評估","D":"病患家屬較清楚病患情形，可以幫忙協助介入以穩定病患情緒"},"answer":"C","manualChapter":"CH46"},{"id":953,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關酒精對人體的危害，下列敘述何者為非？","options":{"A":"酒精會抑制維生素B1的在小腸的吸收而造成病患Wernicke-Korsakoff syndrome","B":"喝酒以後排尿量增加，是因為酒精抑制抗利尿激素的分泌，會造成脫水以及電解質不平衡","C":"長期酗酒可能和病患的腸胃道出血以及肝硬化沒有相關","D":"酒精會影響心臟的肌肉而使心臟收縮的力量降低"},"answer":"C","manualChapter":"CH46"},{"id":955,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"有關評估以及和行為急症的病患會談的技巧，下列敘述何者為非？","options":{"A":"許多病患有暴力傾向，救護技術員首先必須確認現場環境安全","B":"為了要和行為急症的病患建立好彼此的關係，適當的肢體接觸是必須的","C":"精神狀態檢查五步驟包括:觀察病患外觀、病患言語特徵、病患情緒特徵、評估病患思想以及決定病患定向感","D":"使用開放式的問題，讓病患描述自己的情況，誘導病患說話才較容易評估病患的病情"},"answer":"B","manualChapter":"CH46"},{"id":983,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"80歲的老先生在家中大吼大叫亂摔東西，被家人發現打119求助。你到了現場初步評估，發現老先生雖然胡言亂語但生命徵象均正常，聞起來酒氣很重，進一步詢問下其家人提及老先生還有失智的病史，請問下列有關行為急症及老人神經症狀的表現，何者為非？","options":{"A":"失智症是對時間和地點慢慢進展的記憶喪失，但即使病患有失智症的病史，也應該把病患當作譫妄來處理，因為有可能是危及生命的急症","B":"酒癮判定可以用CAGE（Cut down.Annoyance.Guilty.Eye opener）來輔助篩檢","C":"精神狀態檢查五步驟包括觀察病患外觀.病患言語特徵.病患情緒特徵.評估病患思想以及決定病患定向感","D":"這位80歲的老先生酒氣很重，而且沒有局部神經學症狀，不會是腦血管疾病所引起之意識障礙"},"answer":"D","manualChapter":"CH46","matchedChapters":["CH46"]},{"id":1009,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"有關酒精對人體的影響，下列敘述何者為非？","options":{"A":"酒精的利尿效果會造成電解質不平衡","B":"長期酗酒可能造成嚴重的消化系統疾病，如：肝硬化.腸胃道出血或胰臟炎","C":"酒精可以擴張血管，所以對心血管系統不會造成任何影響","D":"長期濫用酒精會造成免疫系統的抑制"},"answer":"C","manualChapter":"CH46"},{"id":1013,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關於精神狀態檢查五步驟，下列何者為非？","options":{"A":"觀察病患外觀，例如亢奮／冷漠／混亂／理性","B":"病患言語與情緒特徵","C":"評估病患生命徵象","D":"決定病患定向感（人.事.時.地.物）"},"answer":"C","manualChapter":"CH46","matchedChapters":["CH46"]},{"id":1016,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關於疑似性侵案件的處理，下列何者為是？","options":{"A":"盡可能問到病患被性侵之詳細過程","B":"應該於現場進行會陰部的檢查，檢視有無傷口","C":"需儘快以生理食鹽水清洗傷口及會陰部","D":"將病患移至救護車以提供病患之隱私"},"answer":"D","manualChapter":"CH46","matchedChapters":["CH46"]},{"id":1029,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"長期酗酒對人體消化系統的影響，下列敘述何者最正確？","options":{"A":"長期酗酒病人腸胃道出血的原因只和食道靜脈曲張有關，和胃潰瘍無關","B":"長期酗酒病人會產生肝硬化以及腹水，但是不會影響凝血因子的生成","C":"長期酗酒病人會有急慢性胰臟炎生成的可能性，並誘發糖尿病的產生","D":"長期酗酒病人生成肝硬化的機轉未知，急性胰臟炎則是酒精的毒性引起"},"answer":"C","manualChapter":"CH46"},{"id":2066,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"酒精成癮可利用”CAGE”四個問題進行篩檢，若其中有兩個陽性，則有約七成的機會為酒精成癮病人，下列關於這四個問題的描述何者不正確？","options":{"A":"C代表Cut down：必須詢問病人對於戒酒是否有困難。","B":"A代表Annoyance：必須詢問病人是否因喝酒而造成家人或朋友的厭惡。","C":"G代表Guilty：必須詢問病人是否覺得因長期喝酒而有罪惡感。","D":"E代表Everyday：必須詢問病人是否每天都要找酒喝。"},"answer":"D","manualChapter":"CH46"},{"id":2160,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"判定酒癮病人，其中以「CAGE」提及四個問題最為簡單，其中若有兩個陽性，則有約七成的機會為酒精成癮病人。關於「CAGE」的敘述，下列何者最不適當？","options":{"A":"C代表Cut down：必須詢問病人對於戒酒是否有困難。","B":"A代表Annoyance：必須詢問病人是否因喝酒而造成家人或朋友的厭惡。","C":"G代表Guilty：必須詢問病人是否覺得因長期喝酒而有罪惡感。","D":"E代表Eye closer：必須詢問病人是否晚上睡覺前要找酒喝才閉眼。"},"answer":"D","manualChapter":"CH46"},{"id":2284,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"民眾報案家中16歲的女兒因感情因素想跳樓，救護人員到場後，母親(報案者)擋在門口、表示女兒只是一時情緒不穩定，沒有精神病史，目前也已穩定且在房間裡休息、也有朋友陪同。病人母親要求救護人員不要打擾她、且表示拒絕救護與警察人員入內。此時的處置方式，何者最為適當？","options":{"A":"只要確定病人母親身份並請她於救護紀錄表簽名後，即可離開，不須作過多的解釋與說明，以免侵犯病人隱私。","B":"母親是病人的法定代理人，能代理法律行為(如簽約)，但不能代理事實行為(如急病狀態與否)，所以最好還是持續溝通、要見到病人。","C":"即使接觸傷病患弊大於利，救護人員也絕對不可聽信二手資訊(如病人母親轉述)，必須堅持見到病人本人並完整評估，才可返隊。","D":"這個情境符合法律上的緊急避難，而消防救護人員因具有執行公務的身份，可直接援引行政執行法之規定，進行強制進入。"},"answer":"B","manualChapter":"CH46","matchedChapters":["CH46"]},{"id":2451,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"我們可以利用CAGE的簡易口訣，提早發現同仁可能有酗酒的問題，請問下列關於CAGE的敘述，何者錯誤？","options":{"A":"C代表Continuity，我們可以先詢問同仁是否已不自覺的連續多天飲酒？","B":"A代表Annoyance，可以接著詢問同仁是否因喝酒而造成家人或朋友的嫌惡？","C":"G代表Guilty，下一步是詢問同仁是否會覺得這樣長期飲酒有罪惡感？","D":"E代表Eye opener，可以詢問同仁是否一早起來就會覺得想要找酒來喝？"},"answer":"A","manualChapter":"CH46"},{"id":2452,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"救護現場一名36歲女性，明顯眼神紊亂，表示自己有超能力可以操縱氣體，且她聽到居禮夫人叫她操縱瓦斯進行發電；跟家人詢問後，家人表示病人無過去病史，但這半個月以來此類妄想此情形反覆發生，這次是因為已有明顯危害自己跟家人人身安全的疑慮，才報案處理。請問以下描述，何者最適當？","options":{"A":"根據病人臨床表現及家人提供的資訊，此病人有可能的臆斷應為躁症發作。","B":"以溝通原則來說，問答採用「是居禮夫人叫你開瓦斯嗎？」比「居禮夫人跟你說了什麼？」還要適合。","C":"除了過去病史之外，還應該詢問家族內是否有身心科病史、病人最近是否有使用娛樂性用藥或毒品。","D":"此病人已有明顯自傷傷人之疑慮，故在警察尚未抵達之前，救護員可以依法將病人強制約束及送醫。"},"answer":"C","manualChapter":"CH46","matchedChapters":["CH46"]},{"id":2499,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"45歲女性病人，因酒後呼吸困難而打119求救。您到場後發現病人意識嗜睡、呼吸急促，主訴：呼吸喘，四肢無力麻木，以及腹部不適，現場生命徵象：血壓102/66 mmHg、脈搏92/min、呼吸28/min、血氧濃度room air 100%。此病人的後續處置何者為是？","options":{"A":"此病人是過度換氣症候群，只要引導呼吸或以塑膠袋罩住口鼻即可改善。","B":"可盡速給予含糖點滴，以排除低血糖引起的症狀。","C":"可給予氣管擴張劑，以改善病人呼吸喘的不適。","D":"需評估現場是否有其他物質或藥物引起呼吸代償的可能。"},"answer":"D","manualChapter":"CH46"},{"question":"下列何者不是酒精依賴症候群？","options":{"A":"會有規律的物質使用模式","B":"會有生理上的物質耐受性","C":"戒斷後容易再次上癮","D":"會有心理上的耐受性"},"answer":"D","manualChapter":"CH46","id":3379,"source":"TP題庫 (圖片匯入)"},{"question":"危機處置是在病人急性混亂期間，需主動採取的短暫動作。其處置目標為：穩定情勢或病人情緒、動員現場人力資源、使病人情緒緒恢復正常。下列步驟何者為是？","options":{"A":"第一步建立心理接觸 第二步是藉由詢問以瞭解目前情勢和發現過去病史以探索問題 第三步是分析此次狀況可能的解決辦法 第四步採取具體行動 第五步為個案追蹤並確認所選方案有成果","B":"第一步是藉由詢問以瞭解目前情勢和發現過去病史以探索問題 第二步建立心理接觸 第三步是分析此次狀況可能的解決辦法 第四步採取具體行動 第五步為個案追蹤並確認所選方案有成果","C":"第一步是分析此次狀況可能的解決辦法 第二步建立心理接觸 第三步藉由詢問以瞭解目前情勢和發現過去病史以探索問題 第四步採取具體行動 第五步為個案追蹤並確認所選方案有成果","D":"第一步是藉由詢問以瞭解目前情勢和發現過去病史以探索問題 第二步是分析此次狀況可能的解決辦法 第三步建立心理接觸 第四步採取具體行動 第五步為個案追蹤並確認所選方案有成果"},"answer":"A","source":"圖片匯入","manualChapter":"CH46","id":3604,"matchedChapters":["CH46"]},{"question":"有關約束病人的適應症下列何者最不適當？","options":{"A":"防止病人傷害自己","B":"防止病人傷害現場其他人員(家屬、警察、救護技術員、社福人員……等等)","C":"防止病人對現場所有人造成心理創傷","D":"防止對環境的嚴重干擾或破壞"},"answer":"C","source":"圖片匯入","manualChapter":"CH46","id":3605,"matchedChapters":["CH46"]},{"source":"EMT-P 第 46 章 P.1214","question":"在處理精神危機時，救護員建議與病人交談時保持的最佳社交距離是多少公尺？","options":{"A":"0.5~1.0公尺","B":"至少5公尺以上","C":"1.2~3.6公尺","D":"4.0~6.0公尺"},"answer":"C","matchedChapters":["CH46"],"manualChapter":"CH46","id":3621},{"source":"EMT-P 第 46 章 P.1219","question":"關於化學鎮靜藥物Haloperidol的敘述何者最正確？","options":{"A":"通常給予3劑(2.5mg~7.5mg)，每隔30~60分鐘重複給予，藥物半衰期為10~19小時","B":"椎體外症候群EPS是使用Haldol的潛在副作用，治療副作用時應避免使用BZD類藥物","C":"許多研究指出 Haloperidol治療甲基安非他命中毒的病人是有害的，因為這類病人常在約束過程中發生橫紋肌溶解、心肌缺血及心律不整等症狀","D":"同時使用Haloperidol與Lorazepam可以加速鎮靜生效，且發生EPS的機率比單獨使用Haloperidol更低"},"answer":"D","manualChapter":"CH46","matchedChapters":["CH46"],"id":3630},{"source":"EMT-P 第 46 章 P.1227","question":"一位患者自述腦海中一直有個迷之音要他自殺，其家屬表示願意陪伴及提供需要的支持，患者欲尋求幫助卻表現出猶豫不決的樣子。請依「精神病人高風險檢傷評估量表」決定這位患者是否需要立即送醫?","options":{"A":"7分，門診或居家治療即可","B":"9分，若患者不配合須強制送醫","C":"8分，立即送醫","D":"6分，公衛護理師或關訪員或心理衛生社工訪視"},"answer":"C","manualChapter":"CH46","matchedChapters":["CH46"],"id":3649},{"source":"EMT-P 第 46 章 P.1232","question":"當懷疑病人有酒精成癮問題時，可以使用CAGE篩檢法，只要符合兩項，就有七成機率為酒精成癮患者，請問以下檢測項目何者錯誤？","options":{"A":"C(Cut down):詢問病人對於戒酒是否有困難。","B":"A(Annoyance):詢問病人是否因喝酒而造成家人或朋友的厭惡。","C":"G(Guilty):詢問病人是否覺得因長期喝酒而有罪惡感。","D":"E(Excited):詢問病人是否對喝酒這件事始終保持興奮感，不喝就會情緒低落。"},"answer":"D","manualChapter":"CH46","matchedChapters":["CH46"],"id":3650},{"source":"EMT-P 第 46 章 P.1214","question":"在與行為急症病人對話時，為了給予病人尊重並減少其心理負擔與敵意，根據文化人類學家提出的社交距離，建議至少保持多少公尺以上？","options":{"A":"0.5","B":"1.2","C":"4.5","D":"6"},"answer":"B","manualChapter":"CH46","matchedChapters":["CH46"],"id":3654},{"source":"EMT-P 第 46 章 P.1212","question":"依據精神衛生法第3條，下列哪一項特稱不包刮在法律定義的精神疾病範疇內？","options":{"A":"反社會人格違常者","B":"精神官能症","C":"物質使用障礙症","D":"思覺失調症"},"answer":"A","manualChapter":"CH46","matchedChapters":["CH46"],"id":3655},{"source":"EMT-P 第 46 章 P.1215","question":"EMT-P 在現場運用「眼、耳、鼻、舌、身、意」評估病人的暴力風險，下列對應何者正確？","options":{"A":"舌：評估病人是否有幻聽或因症狀干擾而聽不到外界聲音","B":"鼻：觀察病人是否呼吸急促、焦躁不安無法緩解","C":"身：評估病人的敵意用詞、喃喃自語或妄想內容","D":"意：評估病人是否有攻擊舉動、揮拳或用拳頭打東西"},"answer":"B","manualChapter":"CH46","matchedChapters":["CH46"],"id":3677},{"source":"EMT-P 第 46 章 P.1214","question":"當 EMT-P 抵達行為急症現場，使用「DEFUSE」言語降階技巧時，下列哪一項處置不當？","options":{"A":"Decide：先判斷病人是否能參與對話，若完全失去理智且有即時威脅則不適合降階","B":"Ensure Safety：清除現場可能被用作武器的物品，並保持至少兩個手臂的距離","C":"Set Limits：明確設定會談界限，並以事實描述後果而非進行恐嚇","D":"Form Relationship：為了表示親近與建立信任，應主動觸摸病人或保持在 0.5 公尺內對話"},"answer":"D","manualChapter":"CH46","matchedChapters":["CH46"],"id":3679},{"source":"EMT-P 第 46 章 P.1217","question":"執行行為急症救護時，經由衛生所駐點人員判定有必要強制就醫，需物理約束時，下列行為較為正確？","options":{"A":"可將患者背部朝上並以身體部位壓著以確保約束帶綁好後再移開","B":"患者在約束後仍暴躁可到院後再由院方評估生命徵象","C":"約束上肢時建議將患者雙手皆向上擺放約束，可使患者難以產生力道掙脫","D":"若需要四肢以外的額外約束可在胸部附近放置一條床單綁在擔架上，但不可以綁太緊影響呼吸時胸部擴張"},"answer":"D","manualChapter":"CH46","matchedChapters":["CH46"],"id":3681},{"source":"EMT-P 第 46 章 P.1232","question":"準自殺行為及自殺的危險因素不包括下列何者？","options":{"A":"執行一次或多次的準自殺行為","B":"單身，分居或離婚","C":"沒有職業或退休","D":"與家人或社會相處融洽"},"answer":"D","manualChapter":"CH46","matchedChapters":["CH46"],"id":3685},{"source":"EMT-P 第 46 章 P.1214","question":"請問以下哪一樣不屬於精神危機的態樣？","options":{"A":"失去現實感","B":"失去希望","C":"失去控制","D":"失去自我"},"answer":"D","manualChapter":"CH46","matchedChapters":["CH46"],"id":3712},{"source":"EMT-P 第 46 章 P.1214","question":"在面對精神危機的時候，救護人員不需要精確診斷疾病，但要能分辨病人是否陷入危機。當發現病人表現為不成比例的焦慮、緊張、恐慌時，是處於何種精神危機態樣？","options":{"A":"為失去現實感","B":"失去希望","C":"失去控制","D":"失去穩定的想法"},"answer":"D","manualChapter":"CH46","matchedChapters":["CH46"],"id":3715},{"source":"EMT-P 第 46 章 P.1218","question":"面對具備暴力傾向的行為急症病人，且病人持續對抗物理約束時，病人可能發生何種併發症，以下何者為非？","options":{"A":"姿勢性窒息","B":"高體溫","C":"副交感神經興奮","D":"代謝性酸中毒"},"answer":"C","id":3726,"manualChapter":"CH46","matchedChapters":["CH46"]},{"source":"EMT-P 第 46 章 P.1216","question":"關於DEFUSE言語降階技巧中的E步驟，下列何者最適當？","options":{"A":"確保有足夠後援、清除現場武器物品、保持適當距離","B":"直接靠近病人已建立信任感","C":"告訴病人他是精神病需要吃藥","D":"立即使用物理約束控制病人"},"answer":"A","id":3727,"manualChapter":"CH46","matchedChapters":["CH46"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

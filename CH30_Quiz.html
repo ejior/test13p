@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 30 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：54 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH30</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":47,"source":"105 高級救護技術員甄試筆試題目.doc","question":"發生外傷性橫紋肌溶解症時，下列何者為非？","options":{"A":"大量輸液","B":"口服補充KCL","C":"輸液補充Sodium Bicarbonate鹼化尿液","D":"可能造成急性腎衰竭"},"answer":"B","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":48,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於骨骼肌肉系統外傷之處理，下列何者為非？","options":{"A":"應注意受傷機轉","B":"理學檢查的重點包括遠端脈搏","C":"最常見的危急生命的電解質不平衡是高血鈣","D":"肢體大出血無法加壓止血時使用止血帶有幫助"},"answer":"C","manualChapter":"CH30"},{"id":162,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"成人骨折部位和可能有的出血量之關係，下列何者為非？","options":{"A":"脛，腓骨：500 mL","B":"肱骨：750 mL","C":"股骨：1000 mL","D":"骨盆：1500-3000 mL"},"answer":"B","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":191,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"下列哪項骨骼肌肉外傷會有潛在危及生命的可能？","options":{"A":"髖關節脫白","B":"脛骨與腓骨非開放性骨折","C":"不穩定型骨盆骨折","D":"膝關節脫白合併末稍肢體麻木"},"answer":"C","manualChapter":"CH30"},{"id":415,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"在壓碎傷症候群（crush syndrome）患者，其抽血可見到下列變化，何者除外？","options":{"A":"肌肉酵素（如CK）上升","B":"嚴重者腎功能（如creatinine）會上升","C":"電解質異常：如高血鉀、高血鈣、高血磷","D":"酸鹼質異常：如代謝性酸中毒"},"answer":"C","manualChapter":"CH30"},{"id":694,"source":"第五章 創傷急症(2012-2014).doc","question":"下列關於腔室症候群的描述，何者為非？","options":{"A":"最常發生於小腿，可能導致截肢等併發症，故須早期診斷","B":"臨床上用七個P開頭的英文字描述其症狀（7Ps），其中pain與pulselessness為早期症狀須儘早介入處理","C":"若已經出現paralysis症狀，多為晚期，發生併發症的機會也將上升","D":"到院後監測腔室內壓力，與及早接受筋膜切開手術（fasciotomy）為其重要處置"},"answer":"B","manualChapter":"CH30"},{"id":695,"source":"第五章 創傷急症(2012-2014).doc","question":"下列關於電傷害的評估與處置，何者為非？","options":{"A":"須給予大量點滴輸液，以維持至少有每小時70～100 ml的尿輸出量，用Parkland Formula即可估算每小時大約要給予的點滴流速","B":"輸液中可加入碳酸氫鈉溶液（sodiun bicarbonate）鹼化尿液，須注意碳酸氫鈉不可和鈣離子同時輸注","C":"嚴重者使用mannitol給予滲透壓性利尿至每小時300 ml尿輸出量","D":"若尿液顏色呈現深咖啡色如可樂狀，可能意味橫紋肌溶解，要盡可能增加輸液以促進量增加，並注意是否有腎衰竭之情況發生"},"answer":"A","manualChapter":"CH30"},{"id":709,"source":"第五章 創傷急症(2012-2014).doc","question":"一位30歲男性車禍翻車，右腿壓在車下約2小時後才脫困，理學檢查發現右腿冰冷、腫脹、瘀青、疼痛且無法移動，右小腿有一個0.5公分的小傷囗，雖然生命跡象穩定沒有休克，但右腿量不到動脈脈搏，該病人經初部處理後，下列何步驟可增加右腿存活率?","options":{"A":"應考慮在重物被移除前，於患肢暫時使用止血帶","B":"到院前處置重點為加壓止血，並迅速後送至適合的急救責任醫院，接受血管修補或重建手術","C":"使用骨骼牽引術","D":"到院前處置包括移除束縛物及不可以包紮太緊，並儘速送醫，到院後則須監測腔室內壓力，及早接受筋膜切開手術（fasciotomy）"},"answer":"D","manualChapter":"CH30"},{"id":721,"source":"第五章 創傷急症(2012-2014).doc","question":"關於骨骼肌肉系統外傷之處理，下列何者為錯？","options":{"A":"應注意受傷機轉、現場狀況、受傷前病人的狀況","B":"理學檢查重點包括肢體顏色、血液循環、關節或肢體可活動的範圍、神經分佈有無缺等","C":"應辨識有無潛在危及生命的電解質不平衡，例如高血鈣及高血鉀","D":"辨識有無危及肢體存活的傷害"},"answer":"C","manualChapter":"CH30"},{"id":740,"source":"第五章 創傷急症(2012-2014).doc","question":"在房屋倒塌的現場，一35歲男性雙下肢被壓迫已超過12個鐘頭，現傷患即將脫困。請問下列敘述何者正確？","options":{"A":"為防止休克，在脫困前應給予大量乳酸林格氏液靜脈輸注","B":"傷患兩下肢長時間缺血，使用止血帶會加重下肢缺血狀況，因此禁止使用","C":"血液中的鈣離子透過被破壞的細胞膜流進細胞內，造成全身性的低血鈣","D":"產生腔室症候群的原因是下肢肢體受壓迫導致腔室空間變小、壓力變大所致"},"answer":"C","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":787,"source":"第五章 創傷急症(2012-2014).doc","question":"如下圖的傷口，應該被描述成？","options":{"A":"挫傷","B":"穿剌傷","C":"剝離傷","D":"撕裂傷"},"answer":"D","manualChapter":"CH30","matchedChapters":["NeedImage"],"image":"題庫圖片/787.png"},{"id":789,"source":"第五章 創傷急症(2012-2014).doc","question":"如下圖的傷囗，應該被描述成？","options":{"A":"挫傷","B":"撕裂傷","C":"剝離傷","D":"穿剌傷"},"answer":"C","manualChapter":"CH30","image":"題庫圖片/789.png"},{"id":792,"source":"第五章 創傷急症(2015-2018).doc","question":"關於壓碎性傷害，以下敘述何者為非？","options":{"A":"肢體長期壓迫，導致受傷肌肉釋放毒性物質引起急性腎衰竭","B":"可能出現高CK.高鉀.高磷.低鈣的情形","C":"可以大量輸液，以及鹼化尿液來治療","D":"受傷後數個小時內，CK值不高即可排除"},"answer":"D","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":795,"source":"第五章 創傷急症(2015-2018).doc","question":"某一工人在建築工地倒塌中被卡在瓦礫中，約6個小時後被救，送至急診室，經檢查並無明顯骨折，但傷患下半身酸痛無力，再來應做那些檢查？","options":{"A":"電腦斷層","B":"血糖測定","C":"血液生化.CPK及Myoglobulin測定","D":"神經傳導及肌電圖檢查"},"answer":"C","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":809,"source":"第五章 創傷急症(2015-2018).doc","question":"四肢肌肉若遭受外力創傷，可能產生腔室症候群或壓碎傷症候群（Crush syndrome），關於兩者以下敘述何者為是？","options":{"A":"腔室症候群可能起因於壓碎傷症候群","B":"開放性骨折因為已經打破腔室，所以不會造成腔室症候群","C":"高血鉀是腔室症候群患者常見的致命性併發症，因此應給予大量輸液與監測心電圖","D":"壓碎傷症候群一旦發生，該患處肢體一定不保，因此治療方針是儘速截肢以挽救生命"},"answer":"A","manualChapter":"CH30"},{"id":835,"source":"第五章 創傷急症(2015-2018).doc","question":"地震獲救的傷患中，有多人因為壓碎傷症候群（Crush syndrome）需住院治療，尤其是在事故後4到6小時以後才被脫困救出的傷患。該類傷患可能於斷瓦殘壁間，在肢體被重物壓迫的狀態存活數天，但卻可能在重物被移除，脫困數分鐘內死亡。下列描述何者為非？","options":{"A":"受壓迫的肢體突然被鬆開時，會造成以下現象：休克(低血壓)、急性腎功能衰竭跟緊急的代謝異常","B":"在脫困出傷患、鬆開受壓迫的肢體前，應給予大量靜脈輸液","C":"監測心律，注意有無高血鉀之變化，必要時尋求醫療指導，使用碳酸氫鈉輸注控制高血鉀、酸血症並鹼化尿液減低腎衰竭","D":"注意有無其他併發症，如腔室症候群、肢體無力及麻痺是腔室症候群最早期的症狀"},"answer":"D","manualChapter":"CH30"},{"id":836,"source":"第五章 創傷急症(2015-2018).doc","question":"電傷害是電流通過身體組織所造成的傷害，而其嚴重度端看電流本身的強度與性質、接觸電流的時間長短、電流經過的身體部位來決定。依電源的不同可分為：閃電電擊、高壓電及家用電，下列描述何者為是？","options":{"A":"閃電電擊的死亡率最高；高壓電所造成的軟組織併發症最多，且住院時間最長","B":"高壓電電傷害的致命性心律不整通常可在12小時內完全緩解，使用連續性的心電圖監測不宜超過一天","C":"電阻以骨骼最低，血管.肌肉.皮膚介於中間，神經最高。傷害的嚴重度跟單位肢體截面積與通過的電流密度相關","D":"表皮燒傷遠比深部的軟組織傷害更多更嚴重，越是高壓電所造成的傷害越是如此"},"answer":"A","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":841,"source":"第五章 創傷急症(2015-2018).doc","question":"有關骨折或脫臼的固定，以下配對何者為非？","options":{"A":"肩關節脫臼，可用三角巾固定","B":"髖關節脫臼，可用骨盆固定帶","C":"骨盆骨折，可用KED固定","D":"股骨頸骨折，可用板夾或副木固定"},"answer":"B","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":856,"source":"第五章 創傷急症(2015-2018).doc","question":"壓傷症候群的敘述，下列何者為非？","options":{"A":"病患可能併發急性腎衰竭","B":"症狀可能有患肢癱瘓和深色的尿液","C":"血液檢查，常可見代謝性酸中毒，低血鉀，高血鈣","D":"需密切監測生命徵象，檢查尿量及尿液pH值"},"answer":"C","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":1116,"source":"第四章 非創傷急症(2015-2018).doc","question":"電擊與雷擊的急救處理原則，以下何者為非？","options":{"A":"閃電擊中，多人需急救時，應睬反向檢傷分類","B":"閃電擊中導致心臟停止比其他原因造成者，具有較高救活成功率，因些儘管在急救前心臟停止比較久，努力急救仍可能有效地救治","C":"閃電擊中常常造成VF，在急救過程需要多加注意是否需要去顫","D":"雖然大的電流比較會造成嚴重的傷害，家用電也有致死的可能"},"answer":"C","manualChapter":"CH30"},{"id":2026,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"55歲男性登山客，遭落石壓傷右下肢持續五小時無法脫困，關於相關評估及處置的描述，以下何者較為正確？","options":{"A":"此病人可能在重物被移除的數分鐘內死亡。","B":"應該在脫困後，迅速給予大量輸液。","C":"血液檢查，常可見代謝性酸中毒、低血鉀、高血鈣。","D":"可以使用碳酸氫鈉（Sodium bicarbonate）去酸化尿液，減少腎衰竭發生。"},"answer":"A","matchedChapters":["CH30"],"manualChapter":"CH30"},{"id":2036,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"下列關於骨骼肌肉創傷的敘述，何者為是？","options":{"A":"雙側股骨骨折應視為重大外傷，盡早送到創傷中心。","B":"脫臼傷患為避免神經血管傷害，應盡量在院前做適度的復位及牽引。","C":"截肢傷引起之外出血，如經止血帶成功止血，建議後送就近醫院爭取時效。","D":"骨骼創傷患者給予冰敷後疼痛緩解，可再根據預立醫囑給予止痛藥加強效果。"},"answer":"A","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":2132,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於骨骼肌肉的創傷，下列敘述何者最適當？","options":{"A":"長骨骨折可造成出血，如脛骨及腓骨骨折出血量可達500ml以上。","B":"當傷患因嚴重創傷造成意識不清，可適時的給予止痛劑。","C":"壓碎傷症候群(Crush syndrome)的傷患，容易發生在事故後1到2小時。","D":"處理截肢可直接放在冰塊上，放置在密閉塑膠袋送至醫療機構。"},"answer":"A","manualChapter":"CH30"},{"id":2133,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於骨骼肌肉損傷之評估與處置，下列敘述何者最不適當？","options":{"A":"外傷所造成的開放性骨折容易因外露的骨頭與外界環境接觸而造成感染，嚴重時甚至造成骨髓炎。","B":"老年人常於跌倒後造成鎖骨骨折，其中有80%鎖骨骨折是發生在鎖骨中三分之一處，無需特別考慮手術治療。","C":"肘關節損傷容易造成併發症，需評估有無合併神經及血管損傷，尤其是橈動脈及橈神經損傷。","D":"由高處墜落且腳先著地之患者都要考慮有無跟骨骨折的可能，其中約有10%患者會合併脊椎骨折。"},"answer":"C","manualChapter":"CH30"},{"id":2136,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"出勤一件颱風過後，台電人員搶修電線觸電救助案件(該案件處所電壓為1 , 000伏特以上)，下列處置何者最適當？","options":{"A":"高電壓情境下與患者保持距離，可利用樹枝將電線撥開救援患者。","B":"電流造成的內部損傷在觸電時便決定傷害深淺，通常不會持續惡化。","C":"應建立兩條大口徑的靜脈輸液管路，輸液選擇以含葡萄糖的生理食鹽水為主。","D":"電弧在高壓電下產生，應警戒環境中的金屬物及高壓電線，保持距離患者3~9公尺。"},"answer":"D","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":2222,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"下列有關骨骼肌肉創傷的敘述，下列何者為非？","options":{"A":"肩部創傷到院前評估處置重點為：評估有無合併神經及血管損傷、三角巾或八字肩帶固定、冰敷患處。","B":"肱骨遠端或中段骨折容易合併腋神經損傷。","C":"拳擊者骨折是因直接撞擊造成掌骨骨折，最常見為第五掌骨折。","D":"根據統計高處墜落跟骨骨折傷患中，10％會合併脊椎骨折；5％為雙側跟骨骨折。"},"answer":"B","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":2223,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"關於骨骼肌肉創傷，以下何者錯誤？","options":{"A":"腹部鈍挫傷中最常見的受傷器官是脾臟及肝臟。","B":"脫臼復位通常傷患會極度疼痛，因此不建議在現場執行。","C":"遇到截肢傷，應直接將斷肢放在冰上以增加保存及手術復原機率。","D":"在脫困出傷患、尤其在受壓迫超過4小時以上，鬆開受壓迫的肢體前應給予大量靜脈輸液或使用碳酸氫鈉鹼化。"},"answer":"C","manualChapter":"CH30"},{"id":2315,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"下列有關骨骼肌肉的創傷描述何者為是？","options":{"A":"鎖骨骨折常因肩部挫傷所致，所以80%的鎖骨骨折發生在外側三分之一處。","B":"打鬥造成之拳擊者骨折是因直接撞擊導致，所以最常見的為較長的第三掌骨骨折。","C":"髖關節脫臼中常見為後位脫臼，會導致患肢長度縮短及髖關節外轉。","D":"膝關節創傷常見膕動脈損傷，尤其容易發生在膝關節後脫臼的傷患上。"},"answer":"D","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":2516,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"45歲男性，於地震中受困於倒塌的建築物，經過數小時後，救援隊到達現場，現場血壓70/40mmHg、心跳115/分，左大腿開放性骨折、右大腿腫脹變形、且雙下肢都對疼痛無感覺，下列敘述何者較適當？","options":{"A":"雙大腿骨折不會是造成患者休克的原因，需再評估是否有其他內出血。","B":"因雙大腿都懷疑有骨折情形，加上血壓偏低，建議使用抗休克褲來改善休克。","C":"開放性骨折處應嘗試加以復位再包紮，以免搬運時造成二次傷害。","D":"患者可能已出現腔室症候群，需考慮執行筋膜切開術。"},"answer":"D","manualChapter":"CH30"},{"id":2524,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"二十歲男性，機車騎士與砂石車擦撞後倒地，你到現場發現他全身多處有肢體骨骼的創傷，關於肢體骨骼創傷的潛在風險描述，以下何者敘述何者為是？","options":{"A":"右小腿腫脹且異常疼痛，此現象是屬於潛在危及生命的肢體創傷。","B":"左前臂撕裂傷，傷口處可見骨頭，此現象是屬於潛在危及生命的肢體創傷。","C":"雙側大腿腫脹變形，此現象是屬於潛在危及生命的肢體創傷。","D":"右膝關節脫臼，右足呈現垂足(drop foot)，此現象是屬於潛在危及生命的肢體創傷。"},"answer":"C","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":2525,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"四十歲男性，遭巨石壓傷左小腿已經超過五小時無法脫困，你到現場協助處治，以下有關該傷者的處置敘述何者為非？","options":{"A":"因肢體或身體長期受到壓迫，導致受傷肌肉釋放毒性物質，引起急性腎衰竭。","B":"症狀可能有患肢癱瘓和深色的小便等。","C":"需密切監測生命徵象，每小時檢查尿量及尿液pH值。","D":"血液檢查，常可見代謝性酸中毒、低血鉀、高血鈣。"},"answer":"D","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":2599,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"你抵達現場發現一名男子被貨車輪胎壓住右大腿超過6小時，現場準備脫困。以下哪一項處置最為適當？","options":{"A":"立即移開重物讓病人脫困，再開始輸液。","B":"儘可能在脫困前先給予大量靜脈輸液，再鬆開壓迫。","C":"優先給予止痛藥後再考慮輸液。","D":"等病人完全脫困後再觀察是否出現休克再給輸液。"},"answer":"B","manualChapter":"CH30"},{"id":2600,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"高壓電廠工人維修時發生爆炸，現場有多名傷者，關於現場敘述何者最適當？","options":{"A":"靠近現場時，遠離高壓電線或金屬物3~9公尺，大於400伏特的高壓電會使乾燥樹枝也導電，確定電流切斷前不可輕易接觸傷患。","B":"現場可能產生高壓電弧致發生爆炸，傷患可能有氣胸，到第四階段可能直接撞擊地面造成肝臟損傷。","C":"電傷害可引起廣泛的血管壞死，這種傷害立即的內出血，動脈或靜脈血管的血栓與隨後的病發生，在救護現場很容易被發現。","D":"身體檢查查看有無電流入口及出口，高壓電經過人體時可能有多處傷口，會在皮膚上產生親吻型灼傷，常見於腋下、前臂及手肘。"},"answer":"D","manualChapter":"CH30","matchedChapters":["CH30"],"explanation":"CH30 p806\n處理電傷害過程中需警戒環境中的金屬物及高壓電線，至少遠離3 ~ 9 公尺，以免過於靠近引發電弧傷害。另外要注意，大於600伏特的高壓電，會使乾燥樹枝也能導電\n\n高壓電弧還會使周圍環境溫度急遽升高，會使空氣急遽膨脹而發生爆炸，病人可能被彈飛跌落，導致內臟鈍傷以及多處骨折，還可能噴飛週遭物體造成噴濺傷害\n\n電傷害可引起廣泛的血管壞死，血管的傷害一開始多半不明顯，所以在救護現場難以察覺。然而，這種傷害可導致立即或延遲性的內出血，動脈或靜脈血管的血栓和栓塞與隨後的併發症。"},{"id":3324,"question":"軟組織及肌肉骨骼外傷到院前處置中，控制致命性外出血的優先順序與正確方式，下列何者正確？","options":{"A":"肢體穿刺傷或嚴重鈍挫傷若無明顯外出血，可先不做止血處置","B":"加壓止血優先，但若為嚴重快速外出血（如手腕以上截肢），應儘早使用止血帶並送外傷中心","C":"為避免組織壞死，止血帶使用後必須在 15 分鐘內鬆開","D":"對於明顯休克病人，應優先大量輸液再考慮止血，以免延誤循環重建"},"answer":"B","source":"TP題庫","manualChapter":"CH30"},{"question":"在創傷病患的快速身體診察中，評估肢體時常用的口訣 D-B-P-C-T-M-A-L-S-P-S，其中「M」代表什麼？","options":{"A":"藥物 (Medication)","B":"機轉 (Mechanism)","C":"運動 (Motor)","D":"肌肉 (Muscle)"},"answer":"C","manualChapter":"CH30","id":3331,"source":"TP題庫 (圖片匯入)"},{"question":"「腔室症候群」與「壓砸傷症候群」的主要區別在於？","options":{"A":"腔室症候群是指局部腔室壓力上升導致缺血；壓砸傷症候群則是全身性系統問題","B":"兩者完全相同，只是名稱不同","C":"腔室症候群只發生在頭部","D":"只有壓砸傷症候群會痛"},"answer":"A","source":"圖片匯入","manualChapter":"CH30","id":3590,"matchedChapters":["CH30"]},{"id":3757,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"以下有關骨折及脫臼部位合併之常見周邊神經損傷，何者為非？","options":{"A":"肘關節脫臼→尺神經。","B":"遠端肱骨骨折→橈神經。","C":"膝關節脫臼→腓神經。","D":"髖關節脫臼→坐骨神經。"},"answer":"C","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":45450,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"一名患者傷口如下圖，有多處動脈出血點及大面積的軟組織損傷，脛骨、腓骨開放性骨折，請問以下何者是最理想的止血法？(複選，選「戰術止血帶止血法」也給分)","options":{"A":"戰術止血帶止血法。","B":"直接加壓止血法。","C":"止血棉填塞止血法。","D":"合併多種止血法。"},"answer":"D","manualChapter":"CH30","image":"題庫圖片/45450.png"},{"id":45538,"question":"填入空格：根據統計高處墜落跟骨骨折傷患中，____％會合併脊椎骨折；____％為雙側跟骨骨折。","options":{"A":"40、20","B":"5、10","C":"20、10","D":"10、5"},"answer":"D","source":"大白p801","manualChapter":"CH30"},{"id":45657,"question":"以下有關骨折及脫臼部位合併之常見周邊神經損傷，何者為非？","options":{"A":"肘關節脫臼→尺神經。","B":"遠端肱骨骨折→腋神經。","C":"膝關節脫臼→腓神經。","D":"髖關節脫臼(後位)→坐骨神經。"},"answer":"B","source":"同學出題","manualChapter":"CH30"},{"id":45732,"question":"軟組織及肌肉骨骼外傷非常常見，約有多少鈍挫傷病人合併肌肉骨骼方面的損傷，其中多數為單純骨骼或肌肉方面的外傷?","options":{"A":"10%","B":"30%","C":"60%","D":"85%"},"answer":"D","source":"大白","manualChapter":"CH30"},{"id":45734,"question":"填入空格：膠原蛋白是身體大多數組織的結構蛋白，所以膠原母細胞會在受傷的____小時內合成新的膠原蛋白，但直到____個月後，受傷後修復的組織才會回到原本的強度韌性與功能","options":{"A":"48、4","B":"24、4","C":"48、1","D":"24、1"},"answer":"A","source":"大白","manualChapter":"CH30"},{"id":45738,"question":"一位22 歲男性被1500 伏特的高壓電電傷送到急診室,最可能出現的心電圖表徵為何?","options":{"A":"PR interval shortening with RBBB","B":"QT prolongation","C":"peaked T wave, widened QRSs","D":"sinus tachycardia"},"answer":"C","source":"民國105進階專科護理/精神科考古題","manualChapter":"CH30","explanation":"高壓電電傷因組織破壞釋鉀,心電圖常呈高尖T波、QRS變寬(類高血鉀)。高壓電電傷造成廣泛組織壞死、細胞溶解釋出鉀離子，導致高血鉀；心電圖呈高尖對稱T波、QRS 增寬，並可致致命性心律不整或心臟停止；亦可直接造成心肌壞死與傳導損傷。處置須監測心電圖、血鉀並評估橫紋肌溶解與腎損傷。故處置須持續監測心電圖與血鉀，並評估合併的橫紋肌溶解與急性腎損傷。"},{"id":45758,"question":"在肩關節脫臼中，前脫位跟後脫位分別佔多少比例?","options":{"A":"50%、50%","B":"90%、10%","C":"30%、70%","D":"5%、95%"},"answer":"B","source":"大白P800","manualChapter":"CH30"},{"id":45760,"question":"拳擊者骨折是因直接撞擊造成掌骨骨折，最常見為第幾掌骨折","options":{"A":"1","B":"3","C":"4","D":"5"},"answer":"D","source":"大白P800","manualChapter":"CH30"},{"id":45762,"question":"膝部外傷常見的併發症不包含下列何者?","options":{"A":"十字韌帶損傷","B":"膕動脈損傷","C":"後脛神經損傷","D":"股動脈損傷"},"answer":"D","source":"大白P801","manualChapter":"CH30"},{"id":45763,"question":"如何使用碳酸氫鈉鹼化尿液可以減少腎衰竭的發生?","options":{"A":"將2 支針劑碳酸氫鈉(約35meq)加入生理食鹽水500 毫升，於半小時內滴注完畢","B":"將2 支針劑碳酸氫鈉(約35meq)加入生理食鹽水500 毫升，於一小時內滴注完畢","C":"將1 支針劑碳酸氫鈉(約35meq)加入生理食鹽水500 毫升，於半小時內滴注完畢","D":"將1 支針劑碳酸氫鈉(約35meq)加入生理食鹽水500 毫升，於一小時內滴注完畢"},"answer":"A","source":"大白p802","manualChapter":"CH30"},{"id":45764,"question":"骨折固定有直接的止血效果嗎?","options":{"A":"無直接的止血效果","B":"有相當良好的止血效果"},"answer":"A","source":"大白p798","manualChapter":"CH30"},{"id":45765,"question":"電傷害可分為的三種類型下列何者為非?","options":{"A":"直接接觸傷害","B":"閃燃燒傷","C":"放射線傷害","D":"電弧傷害"},"answer":"C","source":"大白p804","manualChapter":"CH30"},{"id":45766,"question":"填入空格：閃電可以傳遞電壓高達約____ 伏特以上，____安培的直流電流，溫度變化在攝氏8,800~33,300度之間。","options":{"A":"五千、1萬","B":"1億、20萬","C":"五千、20萬","D":"1億、1萬"},"answer":"B","source":"大白p804","manualChapter":"CH30"},{"id":45768,"question":"約多少比例被閃電擊中的人會併發心臟和呼吸驟停?","options":{"A":"10%","B":"30%","C":"60%","D":"90%"},"answer":"B","source":"大白p804","manualChapter":"CH30"},{"id":45771,"question":"壓碎傷症候群(Crush syndrome)的傷患，容易發生在事故後幾小時?","options":{"A":"1-2","B":"4-6","C":"10-12","D":"24-48"},"answer":"B","source":"大白801","manualChapter":"CH30"},{"id":45773,"question":"電傷害的致命性心律不整可以在幾小時內再度發生?","options":{"A":"1-2","B":"4-6","C":"10-12","D":"24-48"},"answer":"D","source":"大白807","manualChapter":"CH30"},{"id":45776,"question":"有關閃電燒傷的敘述，下列何者錯誤?","options":{"A":"燒傷的形狀是水平線性及羽毛狀的","B":"受電擊的持續時間非常短暫( 0.01~0.001秒)","C":"約30％被閃電擊中的人會併發心臟和呼吸驟停","D":"電流通過路徑是覆蓋性地通過皮膚表面，非穿透皮膚及皮下組織"},"answer":"A","source":"大白p804","manualChapter":"CH30"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

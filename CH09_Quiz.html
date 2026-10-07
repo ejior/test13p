@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 9 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：37 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH09</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":78,"source":"105 高級救護技術員甄試筆試題目.doc","question":"在EMS品質的六大面向中，「所有的傷病患都應該接受相同而完整的EMS服務」，是符合哪一個面向的品質要求？","options":{"A":"公平","B":"有效","C":"安全","D":"傷病患為中心"},"answer":"A","manualChapter":"CH09","matchedChapters":["CH09"]},{"id":79,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於EMS品質指標的分類，下列皆是結構面指標，但何者為非？","options":{"A":"EMT的離職率","B":"EMT1，EMT2，EMTP的比率","C":"統一的標準作業流程與定期修改的記錄","D":"將重傷病患送到創傷中心的比率"},"answer":"D","manualChapter":"CH09"},{"id":101,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"追求醫療救護品質，首要之務為","options":{"A":"有效","B":"及時","C":"公平","D":"安全"},"answer":"D","manualChapter":"CH09","matchedChapters":["CH09"]},{"id":108,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"緊急醫療救護系統「時效性指標」中，所謂「反應時間」（response time）是指","options":{"A":"到達現場時間減去通知出勤時間","B":"到達現場時間減去接獲求救電話時間","C":"接觸病患時間減去通知出勤時間","D":"接觸病患時間減去接獲求救電話時間"},"answer":"D","manualChapter":"CH09","matchedChapters":["CH09"]},{"id":202,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"有關2001年，美國國家醫學研究院（IOM）訂出醫療照護品質的六大面向和目標，何者為非","options":{"A":"病患為中心（Patient-centeredness）","B":"有效（Effective ness）","C":"效率（Efficiency）","D":"預後（Prognosis）"},"answer":"D","manualChapter":"CH09"},{"id":307,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"「疑似因心臟疾病引起之胸痛病患，有多少比例接受阿斯匹靈（aspirin）治療？」於品質評估架構三大構面中，屬於","options":{"A":"結構面","B":"過程面","C":"結果面","D":"有效面"},"answer":"B","manualChapter":"CH09"},{"id":308,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"將氣管內管插管的失敗原因分析後，收集資料，以各個原因所佔的比率高低，由高到低可繪成何種圖形易於分析？","options":{"A":"因果圖","B":"「柏拉圖分析圖」","C":"折線圖","D":"魚骨圖"},"answer":"B","manualChapter":"CH09"},{"id":335,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"有關品質指標管理，何者最不恰當？","options":{"A":"觀察一段時間內的指標數據的變化，走勢是逐步改善，還是正在變差","B":"使用合適的方式呈現數據的變化，可以是以圖片或表格呈現","C":"要求資料或數據的精確性","D":"根據需求，改變指標之定義"},"answer":"D","manualChapter":"CH09"},{"id":346,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"到院前心肺停止的病患在到院前回復自然心律的比例是屬於品質測量三大構面中的哪一面？","options":{"A":"結構面","B":"過程面","C":"結果面","D":"起始面"},"answer":"C","manualChapter":"CH09"},{"id":349,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"有關2001年，美國國家醫學研究院（IOM）訂出醫療照護品質的六大面向和目標，何者為非？","options":{"A":"病患為中心（Patient-centeredness）","B":"有效（Effectiveness）","C":"效率（Effliciency）","D":"預後（Prognosis）"},"answer":"D","manualChapter":"CH09"},{"id":350,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"某縣市政府消防局救護科為了提升高級救護技術員到院前氣管内插管成功率，除進行標竿學習外，亦同時邀請高級救護技術員針對插管失敗原因進行分析，以作為後續教育訓練的參考。請問分析過程中，你會使用下列何種圖表，最方便清楚表達插管失敗各個原因百分比所占的比率高低，得以針對重點項目，提出改善插管成功率之教育訓練計畫?","options":{"A":"因果圖（Cause and effect diagram）","B":"流程圖（Flow chart）","C":"柏拉圖分析（Pareto analysis）","D":"組織圖（Organizational chart）"},"answer":"C","manualChapter":"CH09"},{"id":363,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"下列關於品質管理的三大構面分析，何者為非？","options":{"A":"每一千次出勤之交通事故（EMS crashes）比例，屬於「過程面」","B":"疑似因心臟疾病引起之胸痛病患，有多少比例接受阿斯匹靈（aspirin）治療，屬於「過程面」","C":"EMS人員抵達現場後，若傷病患發生心肺功能停止（cardiac arrest），則傷病患能存活至離開急診部門及傷病患能存活至離開醫院之比例，屬於「過程面」","D":"實行氣管插管之傷病患中，誤插入食道但未被發現，屬於「過程面」"},"answer":"C","manualChapter":"CH09"},{"id":416,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"就緊急醫療系統品管而言，「是否訂有大量傷患應變計畫」應是哪一層面的指標？","options":{"A":"結構面","B":"過程面","C":"結果面","D":"以上皆非"},"answer":"A","manualChapter":"CH09"},{"id":919,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"就緊急醫療系統的品質指標，「結構、過程、結果」三大構面是廣泛使用的醫療品量模式。關於品質指標的觀念，以下敘述何者為是？","options":{"A":"「結構面」的指標，是指在照護提供者與傷病患之間發生的過程","B":"「過程面」的指標，是指傷病患在接受醫療救護後，其健康狀態所發生的改變，通常可以分成臨床預後及經濟預後兩大類指標","C":"「每一千次出勤之交通事故比例」是屬於過程面的指標","D":"「結果面」的指標，是指緊急醫療救護系統所擁有的人力、設備、資源等"},"answer":"C","manualChapter":"CH09"},{"id":2083,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"美國國家醫學研究院提出的品質目標六大面向中，公平(equity)意指：","options":{"A":"病人傷患應接受相同的緊急醫療救護服務。","B":"緊急救護員應接受相同的緊急醫療救護訓練。","C":"國內各EMS系統應訂有相同的品管指標。","D":"屬性相同之EMS案件應接受相同強度品管稽核。"},"answer":"A","manualChapter":"CH09"},{"id":2093,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"美國學者Avedis Donabedian提出的評估架構，是當今廣泛被使用的醫療品質測量模式。其品質測量的評估架構包括三大構面，不包括下列哪一項？","options":{"A":"有效（effectiveness）。","B":"結構（structure）。","C":"過程（process）。","D":"結果（outcome）。"},"answer":"A","manualChapter":"CH09","matchedChapters":["CH09"]},{"id":2183,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列何者最隸屬於「醫療品質測量模式」之「結構面」項目當中？","options":{"A":"OHCA病人接到電話至電擊給予之時間間距。","B":"現場檢傷分級為重度外傷(major trauma)，其被送至外傷中心(trauma center)之比例。","C":"傷病患能存活至離開醫院之比例。","D":"救護人員離職率。"},"answer":"D","manualChapter":"CH09"},{"id":2278,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"某縣市救護科決定對於所有胸痛病人都要做院前12導程心電圖，請問他最可能是僅基於品質目標六大面向中的哪一項做出這個決策？","options":{"A":"有效(effectiveness)。","B":"傷病人為中心(patient-centeredness)。","C":"安全(safety)。","D":"效率(efficiency)。"},"answer":"A","manualChapter":"CH09"},{"id":2476,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"對於減少頸椎之二次傷害，將脊椎固定(Spinal Immobilization)改為脊椎減移(Spinal Motion Restriction)。是符合「醫療照護品質」之哪一面向？","options":{"A":"有效(Effective ness)。","B":"安全(Safety)。","C":"傷病患為中心(Patient-centeredness)。","D":"效率(Efficiency)。"},"answer":"A","manualChapter":"CH09"},{"id":2477,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"品管有許多執行方式以及手法。若要觀察各品管特性隨時間變異之情形，比較適合使用那一種品管手法？","options":{"A":"柏拉圖。","B":"查核表。","C":"散布圖。","D":"管制圖。"},"answer":"D","manualChapter":"CH09"},{"id":2566,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"品質管理分析中有常見的七種分析方式，以下何者最不適當？","options":{"A":"魚骨圖。","B":"柏拉圖。","C":"甘特圖。","D":"層別法。"},"answer":"C","manualChapter":"CH09","explanation":"品質管理常見七大工具（QC七大手法）包含：魚骨圖（特性要因圖）、柏拉圖（Pareto chart）、查檢表、散佈圖、直方圖、管制圖及層別法。「甘特圖（Gantt chart）」是專案管理進度工具，不屬於QC七大手法。\n記憶技巧：QC七工具記憶口訣——魚柏查散直管層，甘特圖是專案排程工具非品管工具。"},{"id":45493,"question":"依據世界衛生組織 (WHO) 與美國國家醫學研究院 (IOM) 對醫療照護品質的定義，確保緊急醫療救護服務「不會因病人的性別、種族、地理位置或社會經濟地位而有落差」。此敘述屬於品質目標六大面向中的哪一項？","options":{"A":"有效 (Effectiveness)","B":"及時 (Timeliness)","C":"公平 (Equity)","D":"病人為中心 (Patient-centeredness)"},"answer":"C","explanation":"品質目標的六大面向中，「公平 (Equity)」強調提供的照護品質不應因為個人的性別、種族、地理位置或社會經濟地位等特徵而有所差異。","source":"AI出題","manualChapter":"CH09"},{"id":45494,"question":"在緊急醫療救護品質的測量中，學者 Donabedian 提出了著名的三大構面 (結構面、過程面、結果面)。下列哪一項品質指標屬於「過程面 (Process)」的測量？","options":{"A":"到院前心肺停止病人恢復自發性循環 (ROSC) 的比例","B":"救護車上配置自動體外心臟電擊去顫器 (AED) 的比例","C":"疑似心肌梗塞病人在現場接受十二導程心電圖檢查的執行率","D":"救護人員通過高級救護技術員 (EMT-P) 證照考試的合格率"},"answer":"C","explanation":"「過程面 (Process)」是指照護提供者與病人之間實際發生的醫療處置行為（做了什麼）。給予心電圖檢查、給予阿斯匹靈等都屬於過程面。選項 A 屬於「結果面」；選項 B、D 屬於「結構面」。","source":"AI出題","manualChapter":"CH09"},{"id":45495,"question":"在急救實務中，為了盡早處理可能致命的大出血，許多地區將傳統的外傷評估流程由「ABCDE」改為「XABCDE」，以強調出血控制的優先性。在品質改善的 ECRS 原則中，這項改變最符合下列哪一項原則？","options":{"A":"排除 (Eliminate)","B":"組合 (Combine)","C":"交換 / 重排 (Rearrange)","D":"簡化 (Simplify)"},"answer":"C","explanation":"ECRS 原則中的「交換 (Rearrange)」是指重新審視並調整程序的先後順序。將傳統的 ABCDE 順序調整為 XABCDE（優先處理大出血），正是為了提升救命效能而進行的「步驟交換/重排」。","source":"AI出題","manualChapter":"CH09"},{"id":45496,"question":"緊急醫療救護系統常使用各種品管分析工具來找出問題的核心。若品管小組希望利用「80/20 法則」來找出導致氣管內管插管失敗的「關鍵少數」原因，以便優先將資源投入改善，應選擇下列哪一種分析工具最為合適？","options":{"A":"管制圖 (Control chart)","B":"散佈圖 (Scatter diagram)","C":"柏拉圖 (Pareto chart)","D":"直方圖 (Histogram)"},"answer":"C","explanation":"「柏拉圖 (Pareto chart)」又稱主次因素分析圖，它結合了直方圖與折線圖，利用「80/20 法則」將發生頻率最高的原因依序排列，幫助決策者一眼看出導致問題的「關鍵少數」原因，以利優先改善。","source":"AI出題","manualChapter":"CH09"},{"id":45497,"question":"關於國際心肺復甦科學界所推崇的「烏次坦格式 (Utstein Style)」，下列敘述何者錯誤？","options":{"A":"它最初是在 1990 年由多個國際醫學會於挪威烏次坦修道院開會所制定的共識","B":"它的主要目的是為了統一全球心肺功能停止 (OHCA) 病人的資料登錄格式，以便進行跨系統的存活率比較與科學研究","C":"依據最新的 Utstein 模式，其應紀錄的核心項目僅侷限於「病人特徵」與「結果面」，並不包含「系統資源」與「派遣過程」","D":"推動 Utstein 格式登錄是各國急救系統進行「標竿學習 (Benchmarking)」的重要資料基礎"},"answer":"C","explanation":"Utstein 格式是一個完整的心肺停止資料登錄系統。依據 2014 及 2024 年版的更新，其登錄領域涵蓋了五大面向：系統 (System)、派遣 (Dispatch)、病人資料 (Patient)、過程與步驟 (Process)、預後結果 (Outcome)。因此選項 C 說不包含系統與派遣是錯誤的。","source":"AI出題","manualChapter":"CH09"},{"id":45498,"question":"美國緊急醫療救護醫師協會 (NAEMSP) 在近年發表的聯合聲明中指出，對於「非 OHCA」或「非時間急症」的病人，若一味地仰賴某單一指標作為救護績效的衡量標準，不僅會增加車禍風險，還會掩蓋真正影響病人預後的品質問題。請問此項受質疑的傳統指標為何？","options":{"A":"救護車到達現場的反應時間 (Response time)","B":"現場給藥的成功率","C":"病人滿意度調查分數","D":"救護車耗材的使用成本"},"answer":"A","explanation":"NAEMSP 在 2024 年的聲明指出，傳統 EMS 極度看重「反應時間 (Response time)」，但對於非心跳停止 (非 OHCA) 或非時間急症的病人來說，盲目追求縮短反應時間只會徒增救護車發生車禍的風險，而無助於實質的醫療品質與預後。","source":"AI出題","manualChapter":"CH09"},{"id":45499,"question":"若某一縣市的消防局為了監控救護員在現場執行 CPR 的按壓深度，每個月將收集到的數據計算出平均值，並設定上下各 3 個標準差為界線。若品管專員發現「連續 7 個月的數據都落在平均值下方」，便將其視為可歸屬的異常原因並立刻介入檢討。此種品質管理做法是應用了七大品管工具中的哪一項？","options":{"A":"魚骨圖 (Fishbone diagram)","B":"管制圖 (Control chart)","C":"層別法 (Stratification)","D":"查檢表 (Check sheet)"},"answer":"B","explanation":"「管制圖 (Control chart)」是利用樣本平均值作為中心線，上下各 3 個標準差作為管制上下限。當出現異常趨勢（例如連續 7 個點落在平均值同一側，或超出管制界線）時，就代表製程出現異常，必須介入檢討。","source":"AI出題","manualChapter":"CH09"},{"id":45500,"question":"針對全球復甦聯盟 (Global Resuscitation Alliance, GRA) 所提出提升社區 OHCA 存活率的 10 個步驟，下列何者「未」包含在其中？","options":{"A":"實施派遣員協助心肺復甦 (DA-CPR)","B":"強制要求所有急救責任醫院設立體外循環 (ECMO) 中心","C":"建立 OHCA 登錄系統以利監控急救品質","D":"針對第一反應員的 AED 部署計畫"},"answer":"B","explanation":"全球復甦聯盟 (GRA) 提出的 10 個步驟包含：建立登錄系統、實施 DA-CPR、推廣高品質 CPR、快速派遣、數位化紀錄、AED 部署、行動科技召喚志工、校園/社區教育、建立當責制、建立卓越文化。其中「未」包含強制要求所有醫院設立 ECMO 中心。","source":"AI出題","manualChapter":"CH09"},{"id":45501,"question":"台東縣消防局因應縣境狹長、醫療資源不均的特殊地理環境，發展出獨特的「雙線救護，中途接駁」高救隊執勤模式。關於此模式的敘述與其背後的品管意義，下列何者最為正確？","options":{"A":"該模式規定無論病情輕重，一律由高級救護技術員 (EMT-P) 優先單獨出勤，以減少派遣時間","B":"該模式成功降低了輕傷患者佔用醫學中心資源的比例，屬於「結果面」的品管指標","C":"這是透過檢視「結構面」的資源限制，進而改變「過程面」的派遣與處置策略，最終成功提升了 OHCA 病人的存活率","D":"該模式的成功證明了在偏鄉地區，大量增加基本救護車的數量比提升救護人員的技術等級更為重要"},"answer":"C","explanation":"台東縣因「結構面」的資源限制（幅員廣大且高級救護技術員不足），改變了「過程面」的作為（利用分級派遣，讓 ALS 高救隊與 BLS 救護車中途會合接駁），這種品質管理的策略最終成功在「結果面」大幅提升了 OHCA 病人的 ROSC 與存活出院率。","source":"AI出題","manualChapter":"CH09"},{"id":45502,"question":"高雄市政府消防局推動的「十二導程心電圖」品管專案，成功縮短了急性心肌梗塞 (AMI) 病人的 D2B (Door to Balloon) 時間。在此專案的發展過程中，消防局引進了「定心布」這項快速定位裝置，讓救護員只需 30 秒便可精確完成心電圖導極的貼片作業。依據 ECRS 品管原則，引進「定心布」最符合哪一項原則的精神？","options":{"A":"排除 (Eliminate)","B":"組合 (Combine)","C":"交換 (Rearrange)","D":"簡化 (Simplify)"},"answer":"D","explanation":"ECRS 原則中的「簡化 (Simplify)」是指針對必要的工作，以更簡單的設備或作法來提升效率。「定心布」的發明正是簡化了原本繁瑣的尋找肋間隙與貼片步驟，讓基層人員能快速、精準地完成 12 導程心電圖的操作。","source":"AI出題","manualChapter":"CH09"},{"id":45503,"question":"在品質管理的 PDCA 循環中，某救護隊針對「插管成功率低」的問題，開始收集現場插管失敗的案例數據，並將實際的成功率數據與預定目標進行比較，以研判兩者之間的差距與異常原因。這個動作屬於 PDCA 循環中的哪一個步驟？","options":{"A":"P (Plan / 計畫)","B":"D (Do / 執行)","C":"C (Check / 查核)","D":"A (Act / 行動)"},"answer":"C","explanation":"在 PDCA 循環中，「Check (查核)」的定義是：研究執行過程所收集到的資訊，並與目標相比較，研判目標值與實施結果之差距。選項 B 是實際執行與收集數據；選項 A 是擬定後續的修正計畫。","source":"AI出題","manualChapter":"CH09"},{"id":45504,"question":"根據 2024 年版 Utstein 模式，在 OHCA 資料登錄的「病人 (Patient)」領域中，下列哪一個項目屬於「核心項目 (Core)」而非「補充項目 (Supplemental)」？","options":{"A":"病人是否有共病 (Comorbidities)","B":"病人的先前神經功能 (Prior function)","C":"旁觀者是否目擊 (Bystander witnessed)","D":"是否有心室輔助裝置 (VAD)"},"answer":"C","explanation":"依據 2024 年版 Utstein 模式，「旁觀者目擊 (Bystander witnessed)」是判斷後續急救指標極重要的「核心項目 (Core)」。而共病、先前神經功能、心室輔助裝置 (VAD) 等則被歸類為「補充項目 (Supplemental)」。","source":"AI出題","manualChapter":"CH09"},{"id":45505,"question":"台北市政府消防局在提升腦中風病人照護品質的專案中，發現到院前施打血栓溶解劑 (rt-PA) 的比例偏低。品管團隊透過數據追蹤，發現只要救護員及早辨識出疑似中風並通報醫院，就能大幅增加醫院施打 rt-PA 的機會。在此專案中，「救護員執行中風評估並預先通報醫院的執行率」屬於 Donabedian 品質測量模式的哪一個構面？","options":{"A":"結構面 (Structure)","B":"過程面 (Process)","C":"結果面 (Outcome)","D":"效能面 (Efficacy)"},"answer":"B","explanation":"救護員「執行中風評估」並「預先通報醫院」，這是救護人員對病人所執行的「醫療處置行為與流程」，因此屬於 Donabedian 模式中的「過程面 (Process)」。","source":"AI出題","manualChapter":"CH09"},{"id":45506,"question":"將繁雜的品質異常事件數據（例如：救護員發生插管失敗的次數），依據人員的年資、發生月份或操作項目等不同特徵進行「分組」，以便進一步轉換為圖形來尋找隱藏的趨勢或數據間的差異。這種品管資料處理手法稱為：","options":{"A":"魚骨圖分析","B":"層別法 (Stratification)","C":"散佈圖分析","D":"標竿學習 (Benchmarking)"},"answer":"B","explanation":"「層別法 (Stratification)」是指將收集到的資料依據特定屬性（如年齡、年資、月份、單位等）進行分類與分組，目的是為了找出隱藏在龐大數據背後的特徵或趨勢差異。","source":"AI出題","manualChapter":"CH09"},{"id":45507,"question":"在探討緊急醫療服務 (EMS) 的績效時，常提到「標竿學習 (Benchmarking)」。關於 EMS 執行標竿學習的前提條件與作法，下列敘述何者錯誤？","options":{"A":"標竿學習的核心是尋找業界中表現卓越的組織作為模範，並學習其作業流程以強化自身品質","B":"在進行標竿學習的數據比較前，各組織之間必須對該項目的「定義與標準」（例如：何謂「插管成功」）達成統一與共識","C":"標竿學習所選定的指標項目，必須與「有效的照護 (effective care)」息息相關，否則比較該數據就沒有品管的實質意義","D":"為了達到最佳的標竿學習效果，EMS 組織應將主要預算與品管重心全數投入於競爭「反應時間 (Response time)」的全國排名，因其為決定各類急症存活率的唯一關鍵"},"answer":"D","explanation":"進行標竿學習時，指標必須與「有效的照護 (effective care)」相關（選項 C 正確），且各單位的定義必須統一（選項 B 正確）。選項 D 錯誤的原因為：反應時間並非衡量所有急症品質的唯一關鍵，過度盲目追求反而有害。","source":"AI出題","manualChapter":"CH09"},{"id":45731,"question":"某救護單位統計去年插管失敗的原因，共發生10次，統計結果顯示，操作技術不熟：4次、病人躁動：2次、器材操作問題：2次、視野不佳：1次、其他原因：1次。品管人員希望依據統計結果，找出應優先改善問題，以有限資源降低插管失敗率。此時最適合使用下列何種品管工具進行分析？","options":{"A":"魚骨圖","B":"直方圖","C":"柏拉圖","D":"散佈圖"},"answer":"C","source":"大白","manualChapter":"CH09","explanation":"柏拉圖(Pareto Chart)：\n又稱重點分析圖、主次因素分析法，屬於排序的直方圖與折線圖的組合，以發生的頻率累計排序的呈現，大多應用於帕雷托法則(80/20)，即關鍵的少數(20％)的影響力占比(80％)反而較高。用於職業安全上，可作為優先評定的方式，例如20％的危害事件將占80％的嚴重度(傷害)，則這些事件優先進行改善，這樣的方式也可以確保以較為經濟有效的手段解決問題"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

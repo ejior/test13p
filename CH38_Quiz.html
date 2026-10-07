@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 38 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：21 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH38</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":181,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"下列有關膽結石，膽囊炎與膽管炎的描述，何者為非？","options":{"A":"急性膽囊炎是指膽囊發炎，好發於30〜50歲的肥胖女性，然而年紀越大，男女間的比例就相差不多","B":"膽結石的症狀常見為飯後一到兩個小時後（尤其是晚上），突發性的噁心，嘔吐，右上腹痛，同時可能會伴隨著右邊肩胛骨的轉移痛","C":"膽管炎典型臨床症狀稱為夏柯式三合症（Charcot's triad）：發燒，黃疸與右上腹痛。","D":"因為膽結石的症狀常為飯後所引起，所以到院前的處置可以放置鼻胃管以減輕胃內壓カ（由當地醫療指導授權）"},"answer":"D","manualChapter":"CH38"},{"id":238,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"下列關於腸胃道急症的敘述何者為是?","options":{"A":"食道或胃靜脈曲張是因為肝門靜脈高壓所引起的靜脈曲張，多導因於肝硬化或腫瘤，可引起厲害的出血","B":"急性憩室炎，俗稱急性盲腸炎，常因冀石塞住開口，或感染導致淋巴結腫大，引起發炎","C":"痔瘡是指肛門內外靜脈曲張不正常的膨大曲張，出血量都不多，不會造成貧血","D":"急性肝炎最常見的原因為細菌性的，其中又以B型肝炎在台灣最多"},"answer":"A","manualChapter":"CH38"},{"id":252,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"黄色的鞏膜可見於哪種病人？","options":{"A":"腎衰竭","B":"脾腫大","C":"腦水腫","D":"膽道阻塞"},"answer":"D","manualChapter":"CH38","matchedChapters":["CH38"]},{"id":264,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列腹痛與相關位置對照，何者錯誤？","options":{"A":"膽囊炎常引起上腹或右上腹疼痛","B":"胰臟炎常引起左右上腹，或左下腹疼痛","C":"心肌缺氧或梗塞常引起上腹疼痛","D":"腹膜炎常引起全腹疼痛"},"answer":"B","manualChapter":"CH38"},{"id":567,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關於轉移痛，以下何者為是？","options":{"A":"急性闌尾炎，一開始會痛在右下腹，之後會轉移至肚臍周邊","B":"急性膽囊炎會有轉移痛到左側肩胛骨下方","C":"左側輸尿管結石引起疼痛，會轉移到腹股溝或左側睪丸處","D":"急性心肌梗塞，轉移痛會痛到右側肩膀的"},"answer":"C","manualChapter":"CH38"},{"id":1149,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列對於腸胃急症的敘述，何者為非？","options":{"A":"大部分的急性腸胃炎是由細菌所引起的，包括沙門氏桿菌、大腸桿菌、志賀氏桿菌等","B":"機械性腸阻塞最常見的原因為手術後的粘黏","C":"憩室炎的臨床症狀包括發燒與腹痛。而因為憩室通常在乙狀結腸較多，因此常常是以左下腹痛為表現","D":"痔瘡分為內痔與外痔，以肛門的梳狀線為分界"},"answer":"A","manualChapter":"CH38"},{"id":2147,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於腸阻塞與急性闌尾炎的病因、臨床表現及，下列何者最適當？(選擇「急性闌尾炎的臨床表徵為噁心、食慾變差與右下腹痛，典型疼痛位置(McBurney point)是指肚臍與右側前上腸骨脊連線外三分之二的點。」也給分)","options":{"A":"機械性腸阻塞多見於大腸，以粘黏為主要原因，麻痺性腸阻塞則通常由腸道受到外力擠壓所致，兩者均易導致糞便嵌塞。","B":"急性闌尾炎的臨床表徵為噁心、食慾變差與右下腹痛，典型疼痛位置(McBurney point)是指肚臍與右側前上腸骨脊連線外三分之二的點。","C":"急性闌尾炎的轉移痛常由肚臍周圍轉至右下腹，而機械性腸阻塞的原因多為粘黏或疝氣，嚴重者可能發生腸壞死或穿孔。","D":"麻痺性腸阻塞多由腫瘤或異物嵌塞所致，而急性闌尾炎的疼痛發展較緩慢，初期僅表現為輕微的肚臍周圍不適，易被誤認為一般腸胃不適。"},"answer":"C","manualChapter":"CH38"},{"id":2148,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"以下關於胰臟與胰臟炎相關的描述，何者最不適當？","options":{"A":"胰臟同時有外分泌與內分泌的功能。","B":"膽結石在膽囊管(cystic duct)造成阻塞，是常見急性胰臟炎的原因。","C":"慢性胰臟炎，常見於酒癮的病人。","D":"長期反覆的慢性胰臟炎，容易引起糖尿病。"},"answer":"B","manualChapter":"CH38","matchedChapters":["CH38"]},{"id":2329,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"45歲女性長期抽菸喝酒病史，凌晨突發急性上腹痛，下列敘述何者正確？","options":{"A":"急性肝炎常以急性上腹痛做為表現。","B":"從疼痛位置來考慮的話，不會是闌尾炎的表現。","C":"有可能是膽結石，東方人膽結石以色素結石為主。","D":"如為十二指腸潰瘍，通常進食會刺激胃酸分泌，導致症狀加重。"},"answer":"C","manualChapter":"CH38","explanation":"急性闌尾炎在早期病程中，因內臟神經傳導（內臟痛）常表現為上腹部（心窩處）或肚臍周圍的隱痛/悶痛，數小時後發炎擴散至壁層腹膜，才會轉移並局限於右下腹（麥氏點，McBurney's point）。因此，急性上腹痛不能排除闌尾炎的可能。\n\n急性肝炎大多以全身倦怠、食慾不振、噁心、茶色尿、黃疸等為主要表現，腹部若有不適多為右上腹隱痛或脹痛，極少以突發性急性劇烈上腹痛作為首要表現。"},{"id":2510,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"急性闌尾炎的典型臨床表徵為：食慾變差、噁心與右下腹痛點。請問此痛點的醫學名稱為？","options":{"A":"Morrison point。","B":"McBurney point。","C":"Charcot point。","D":"Zollinger-Ellison point。"},"answer":"B","manualChapter":"CH38","image":"題庫圖片/2510.png"},{"question":"病人主訴上腹痛且轉移背部，彎腰有時會緩解疼痛，請問以下何者最可能為病人疼痛原因?","options":{"A":"腹膜炎","B":"胰臟炎","C":"急性肝炎","D":"膽囊炎"},"answer":"B","manualChapter":"CH38","id":3344,"source":"TP題庫 (圖片匯入)"},{"question":"關於「食道與胃靜脈曲張」的成因與緊急處置，下列敘述何者錯誤？","options":{"A":"其出血風險與體循環之全身性動脈血壓成正比，故控制高血壓是預防破裂的主要手段。","B":"病人若發生大量吐血，到院前應協助其採取半坐臥姿，以降低血液嗆入氣道的風險。","C":"靜脈曲張破裂出血量極大，到院前需即時監測生命徵象並視情況執行靜脈輸液治療。","D":"此類疾病之靜脈曲張主要肇因於肝門靜脈高壓，導致消化系統血液回流受阻。"},"answer":"A","manualChapter":"CH38","id":3372,"source":"TP題庫 (圖片匯入)"},{"question":"急性膽囊炎是指導管或膽囊發炎，好發於 30-50 歲的肥胖女性。關於膽結石在東方人與西方人的成分差異，下列敘述何者正確？","options":{"A":"東方人常見的是膽固醇結石，與高脂肪飲食有關","B":"東方人常見的是色素結石，與遺傳因子及代謝有關","C":"西方人常見的是色素結石，與西方人常吃油膩有關","D":"東方人與西方人最常見的皆為草酸鈣結石"},"answer":"B","manualChapter":"CH38","id":3403,"source":"TP題庫 (圖片匯入)"},{"question":"下列關於腹部觸診之鑑別診斷,何者非右上腹之腹痛表現?","options":{"A":"膽囊炎","B":"食道炎","C":"肝炎","D":"胰臟炎"},"answer":"B","manualChapter":"CH38","id":3406,"source":"TP題庫 (圖片匯入)"},{"id":3526,"source":"TP題庫","question":"指揮中心來電45歲女性表示急性右上腹痛。到達現場初步評估時發現病人身上黃黃的。量測耳溫微燒39.2度。且有噁心嘔吐情形，請問患者最有可能的急病為何？","options":{"A":"胰臟炎","B":"腎盂腎炎","C":"急性膽囊炎","D":"猛爆性肝炎"},"answer":"C","manualChapter":"CH38"},{"question":"一名病患主訴「上腹部」疼痛，且疼痛感輻射至「左肩膀與左手」。作為 EMTP，您必須高度懷疑下列哪一種情況？","options":{"A":"膽囊炎","B":"輸尿管結石","C":"心肌梗塞或缺血","D":"盲腸炎"},"answer":"C","source":"圖片匯入","manualChapter":"CH38","id":3596,"matchedChapters":["CH38"],"explanation":"p1013"},{"id":45584,"question":"食道/胃靜脈曲張的病人死亡率極高，約占幾%?","options":{"A":"10%","B":"25%","C":"40%","D":"50%"},"answer":"B","source":"大白p1015","manualChapter":"CH38"},{"id":45586,"question":"下列何者非Charcot's triad (夏柯氏三徵象)的症狀?","options":{"A":"下肢水腫","B":"右下腹疼痛","C":"黃疸","D":"發燒"},"answer":"A","source":"大白p1023","manualChapter":"CH38"},{"id":45656,"question":"下列關於腸胃急症的敘述何者錯誤?","options":{"A":"肝臟、膽囊與胰臟屬於實體器官，可稱為「消化腺」，主要負責分泌或儲存消化液","B":"急性闌尾炎初期為上腹或肚臍周圍的內臟痛，隨發炎加劇轉變為右下腹的體覺痛","C":"胃潰瘍疼痛通常在進食後出現；十二指腸潰瘍好發於空腹或凌晨","D":"食道靜脈曲張由於肝硬化或肝腫瘤導致肝靜脈回流受阻，進而引發門脈高壓"},"answer":"D","source":"同學出題","manualChapter":"CH38"},{"id":45698,"question":"關於腸阻塞與急性闌尾炎的病因、臨床表現之描述，下列何者最適當？","options":{"A":"機械性腸阻塞多見於大腸，以粘黏為主要原因，麻痺性腸阻塞則通常由腸道受到外力擠壓所致，兩者均易導致糞便嵌塞。","B":"急性闌尾炎的臨床表徵為噁心、食慾變差與左下腹痛，典型疼痛位置為McBurney point(指肚臍與右側前上腸骨脊連線外三分之一的點)。","C":"急性闌尾炎的轉移痛常由肚臍周圍轉至右下腹，而機械性腸阻塞的原因多為粘黏或疝氣，嚴重者可能發生腸壞死或穿孔。","D":"麻痺性腸阻塞多由腫瘤或異物嵌塞所致，而急性闌尾炎的疼痛發展較緩慢，初期僅表現為輕微的肚臍周圍不適，易被誤認為一般腸胃不適。"},"answer":"C","source":"同學出題","manualChapter":"CH38"},{"id":45708,"question":"下列關於腸胃急症的敘述何者最不適當?","options":{"A":"疼痛型態可分為內臟痛(Visceral pain)、體覺痛(Somatic pain)以及轉移痛(Referred pain)","B":"腸胃道出血可能需要手術處理，院前著重維持生命徵象的穩定及送往合適醫院","C":"急性腸胃炎大部分是由病毒所引起的，傳染途徑為飛沫傳染，需注意群聚感染","D":"急性闌尾炎可能導致食慾下降、噁心、腹痛，必要時需手術切除闌尾"},"answer":"C","source":"同學出題","manualChapter":"CH38"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

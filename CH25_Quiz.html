@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 25 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：73 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH25</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":27,"source":"105 高級救護技術員甄試筆試題目.doc","question":"有關重大創傷三階段死亡率（tri-modal distribution）的敘述，何者正確？","options":{"A":"第一階段的死亡主因為嚴重出血與中樞神經系統重創","B":"第二階段的死亡主因為心因性休克與神經性休克","C":"有50％的死亡發生在創傷加護病房內","D":"良好的緊急醫療救護（EMS）可以降低第三階段的死亡率"},"answer":"A","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":60,"source":"105 高級救護技術員甄試筆試題目.doc","question":"一輛汽車因故撞上電線桿，下列狀況下，車上有三位需立刻送往創傷中心，何者為非？","options":{"A":"脫困時間10分鐘的後座乘客","B":"被從車內拋出的前座乘客","C":"評估後確認有骨盆骨折的駕駛","D":"GCS昏迷指數12的後座乘客"},"answer":"A","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":65,"source":"105 高級救護技術員甄試筆試題目.doc","question":"依北美NEXUS原則，下列病患皆屬於頭椎受傷的低危險群，但何者為非？","options":{"A":"無頸部後中線的壓痛點的病患","B":"無肢體無力或發麻的病患","C":"疑似有喝酒的病患時而清醒時而亂言亂語的病患","D":"沒有明顯骨折或大片外傷疼痛的病患"},"answer":"C","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":117,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"下列何者並非創傷病患初級評估之項目？","options":{"A":"頸椎固定及維持呼吸道通暢","B":"呼吸及換氣功能","C":"循環及控制出血","D":"病史詢問"},"answer":"D","manualChapter":"CH25"},{"id":151,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"根據NEXUS原則，下列何者不是屬於低度可能的頸椎受傷傷患","options":{"A":"頸部後中線沒有明顯的壓痛的傷患","B":"遭機車撞擊致右小腿開放性骨折的行人","C":"走路跌倒後四肢沒有發麻或乏力的病患","D":"意識完全清楚的傷患"},"answer":"B","manualChapter":"CH25"},{"id":257,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"請問下列何者需送往創傷中心？","options":{"A":"車禍患者GCS14分","B":"車禍患者年紀45歲","C":"機車車禍，患者右手腕開放性骨折","D":"汽車車禍，患者於30分鐘後脫困"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":258,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"請問關於創傷嚴重度評估何者正確","options":{"A":"RTS指數是依據GCS，平均動脈壓及呼吸速率為變項","B":"RTS小於12分，即應視為嚴重創傷","C":"AIS將身體分為5個解剖區域，每個解剖區域由0-6分代表","D":"ISS分數越高，死亡率越高，凡ISS大於等於14分屬嚴重創傷"},"answer":"B","manualChapter":"CH25"},{"id":259,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"請問何者非為創傷致命三病徵？","options":{"A":"凝血病變","B":"低體溫","C":"低血容","D":"酸血症"},"answer":"C","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":275,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"請問加拿大頸椎原則中（Canadian C-spine Rule），下列何者為非？","options":{"A":"酒醉意識不清","B":"二層樓高墜落","C":"頸部側邊壓痛","D":"肢體麻木無力"},"answer":"C","manualChapter":"CH25"},{"id":503,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列何者非創傷病患初步評估之項目？","options":{"A":"頸椎固定及維持呼吸道通暢","B":"呼吸及換氣功能","C":"循環及控制出血","D":"病史詢問"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":586,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"依據加拿大頸椎守則（Canadian C-spine Rule），下列何種情況不需要上頸圈？","options":{"A":"兩公尺高處落下","B":"肢體麻木或無力","C":"酒醉併意識昏迷","D":"頸部側邊有壓痛"},"answer":"D","manualChapter":"CH25"},{"id":691,"source":"第五章 創傷急症(2012-2014).doc","question":"一輛汽車因故撞上電線桿，下例何種傷情不是送往創傷中心的要件？","options":{"A":"評估後確認有骨盆骨折的駕駛","B":"被從車內拋出的前座乘客","C":"脫困時間10分鐘的後座乘客","D":"GCS昏迷指數12的後座乘客"},"answer":"C","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":693,"source":"第五章 創傷急症(2012-2014).doc","question":"一機車騎士因車禍掉入排水溝，頭部有受到撞擊，並被發現上腹部有擦傷及疼痛感。下列對於傷者的評估與處置，何者有誤？","options":{"A":"須評估兩側瞳孔大小與對光反應，若有不正常的瞳孔反應，可能意味顱內壓升高或是腦神經的受損","B":"須保護頸椎與維持呼吸道暢通，若傷者氧氣濃度無法維持，或昏迷指數小於9分，建議插管治療","C":"要考慮患者有腹部挫傷合併腹內出血的可能性，須監控其血壓與脈搏","D":"若患者血壓正常但脈搏為115下／分，如果考慮為出血性休克所造成，則其出血性休克已惡化到第三期"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":711,"source":"第五章 創傷急症(2012-2014).doc","question":"創傷死亡分三個高峰期，包括事故現場、急診急救期以及住院期，要降低創傷傷患所造成的死亡或傷殘，除必須加強EMS系統功能外，並需整合區域內創傷醫療資源。而創傷照護體系建立的目的在於：","options":{"A":"降低創傷可預防之死亡率","B":"減少對家人的衝擊（二次創傷）","C":"減少創傷傷患數及降低創傷嚴重度","D":"以上皆是"},"answer":"D","manualChapter":"CH25"},{"id":733,"source":"第五章 創傷急症(2012-2014).doc","question":"有關創傷的概念，下列敘述何者為非？","options":{"A":"現場檢傷分類指引（Field Triage）」與「創傷中心（Trauma Center）」是創傷照護體系兩大支柱","B":"由於受傷至接受確切照護的間期越短，傷患的存活率越高，因此EMT應將嚴重傷患送至最近的急救責任醫院以縮短處置時效","C":"損傷預防3E包括：教育訓練（Education）、法律強制（Enforcement）與安全計（Engineering）","D":"創傷之急性死亡約發生於受傷後1～4小時，主要原因為嚴重內臟損傷，其中仍以出血性克為最多"},"answer":"B","manualChapter":"CH25"},{"id":734,"source":"第五章 創傷急症(2012-2014).doc","question":"有關創傷嚴重度與現場檢傷分類的敘述，下列何者為非？","options":{"A":"所謂改良式創傷分數（Revised Trauma score，RTS）係以「昏迷指數（GCS）」、「平均動脈壓」和「呼吸速率」三個變項運算得來","B":"臨床上只要傷患在到院前RTS中任一變項的分數未達滿分（4分），即應將其視為嚴重創傷傷患","C":"所謂「檢傷不足（under-triage）」係指現場判定為「非嚴重創傷」，最後才發現是「嚴重創傷」者。一般可接受的比率為5～10％以內","D":"所謂「過度檢傷（over-triage）」係指現場判斷為「嚴重創傷」，最後卻診斷為「非嚴重創傷」者。一般可接受的比率為30～50％以內"},"answer":"A","manualChapter":"CH25"},{"id":739,"source":"第五章 創傷急症(2012-2014).doc","question":"一50歲女性機車騎士與遊覽車發生碰撞事故後倒地。EMT到達現場後發現醒躺在遊覽車右後輪旁。傷患主訴大腿疼痛無法行動，初步評估顯示傷患意識清醒、呼吸正常、脈搏每分110次、血壓100／60 mmHg、暴露身體顯示左大腿瘀青腫脹、靠近鼠蹊部有一約20公分寬之輪胎痕，其餘檢查並無明顯異常。請問下列敘述何者最正確？","options":{"A":"傷患可能有左側股骨骨折，故移動前應以夾板施行長腿固定（long leg splint）","B":"傷患可能有左側股骨骨折，固定後應抬高患肢以避免肢體腫脹","C":"左側股骨骨折並不足以解釋目前的生命徵象，因此需積極尋找其他可能的創傷","D":"傷患因有高能量之創傷機轉，最好直接後送至最近且最高級的急救責任醫院"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":742,"source":"第五章 創傷急症(2012-2014).doc","question":"創傷導致大量出血若未及時處置即可能發生「創傷致命三合症（Lethal Triad of Trauma）」，最後導致多重器官衰竭造成死亡。下列何者不屬於「創傷致命三合症」？","options":{"A":"凝血病變（coagulopathy）","B":"低血氧（hypoxia）","C":"低體溫（hypothermia）","D":"酸血症（acidosis）"},"answer":"B","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":743,"source":"第五章 創傷急症(2012-2014).doc","question":"有關創傷死亡三個高峰（Trimodal Distribution of Trauma Death）的敘述，下列何者錯誤？","options":{"A":"為Trunkey於1983年所發表，其中以受傷後1小時內死亡所佔的比率最高，約50％","B":"提升EMT-P對創傷急救的能力可以有效減少受傷後1小時內死亡的人數與比率","C":"早期死亡指受傷後1～4小時內死亡，主要原因為嚴重內臟損傷導致出血性休克","D":"晚期死亡指受傷1～4週後死亡，主要原因為感染導致敗血症及多重器官衰竭"},"answer":"B","manualChapter":"CH25"},{"id":747,"source":"第五章 創傷急症(2012-2014).doc","question":"下列狀況應考慮有高能量機轉，即使傷患現場生命徵象穩定，亦應視為嚴重多重創傷將其送往最近且最高層級的創傷急救責任醫院？甲：身體被車輛輾過。乙：機車或汽車碰撞事故中傷患被彈出車外，且距車體超過一公尺。丙：死亡車禍之同車倖存者（包括死者）。丁：由二樓以上（高6公尺以上）墜落。請問下列組合何者為是？","options":{"A":"只有甲","B":"只有甲、乙","C":"只有甲、乙、丙","D":"甲、乙、丙、丁都是"},"answer":"D","manualChapter":"CH25"},{"id":752,"source":"第五章 創傷急症(2012-2014).doc","question":"下列有關創傷急救概念的敘述，何者為非？","options":{"A":"因創傷導致死亡的傷患，約有50％左右於受傷後一小時內死亡","B":"急救的重點在幫助「可避免的死亡」不致發生","C":"評估的重點在注意「診斷上的錯誤」，因為診斷只有一個","D":"初步評估的目的是讓傷患的生命徵象穩定，再度評估的目的則是整體而詳細的評估傷患"},"answer":"C","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":754,"source":"第五章 創傷急症(2012-2014).doc","question":"陽明山發生小客車翻落山谷意外，救難人員到達現場後花了1個小時，才將某一傷患自變形的車體內救出，傷者意識模糊，臉色蒼白，四肢冰冷，脈搏微弱，雙下肢小腿處明顯變形。下列有關現場緊急救護人員之處置，何者最優先？","options":{"A":"因傷患傷勢嚴重，且困於現場時間太久，為爭取治療時效，立即送上救護車，前往距離現場最近的任何一家醫院","B":"為避免傷者於運送過程中因大量失血休克而死，必須立即給予大量點滴輸液，等到血壓穩定後，才能送往醫院","C":"立即將傷者的衣物移除，從頭檢查到腳，更不可遺忘背部，找出出血處，先進行初步止血，以免傷勢加重","D":"在為傷者戴上頸圈時若發現氣管偏右移，頸靜脈怒張，且左側呼吸音微弱，應考慮有左側張力性氣胸之可能，要先處理"},"answer":"D","manualChapter":"CH25"},{"id":767,"source":"第五章 創傷急症(2012-2014).doc","question":"你接獲通知有汽車撞擊護欄，到達現場發現一26歲男性為汽車駕駛，未繫安全帶，意識混亂，但可模糊說出自己姓名，呼吸速率28下／分，心跳126下／分，BP96／70 mmHg，下列敘述何者為非？","options":{"A":"傷患有休克狀況，應該要尋找可能出血的地方，如胸腔、腹腔、長骨骨折等","B":"考量可能出現頭部外傷，給予輸液應該小心，所以流速不可太快","C":"若是出血性休克，此狀況符合第三級休克（Class Ⅲ），預估出血量達30％以上","D":"應該要送至創傷中心，因為除了給予輸液復甦外，需要輸血甚至手術的機會很高"},"answer":"B","manualChapter":"CH25"},{"id":777,"source":"第五章 創傷急症(2012-2014).doc","question":"關於改良式創傷指數（RTS）評估內容，以下「何者為非」？","options":{"A":"GCS昏迷指數","B":"MAP平均動脈壓","C":"R·R·呼吸速率","D":"只要傷患在到院前RTS沒有滿分（＜12），救護技術員即應視之為嚴重創傷"},"answer":"B","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":797,"source":"第五章 創傷急症(2015-2018).doc","question":"20歲男性，騎機車發生車禍，送至急診室時，血壓70／50 mmHg、意識模糊、對痛有反應、喃喃自語、頭皮有血腫，經大量輸液後，血壓90/50 mmHg，皮膚仍然溼冷，微血管再填充時間為5秒，電腦斷層顯示額葉散在性的出血，下列何者處置為佳？","options":{"A":"給予mannitol，積極治療顱內壓昇高，以期治療低血壓","B":"給予昇壓劑，以提高腦灌注壓，改善腦部灌流","C":"安排胸部X光，與腹部超音波，積極地找尋其他的出血","D":"安排緊急開顱手術"},"answer":"C","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":800,"source":"第五章 創傷急症(2015-2018).doc","question":"關於創傷到院前救護的觀念，以下何者為是？","options":{"A":"越是嚴重的傷患，越需要就近送醫","B":"良好的到院前創傷救護系統能夠降低的是「不可預防死亡（non-preventable death）」，至於「可預防死亡」，（preventable death）則是要透過公衛手法，例如宣導騎機車使用安全帽，才能降低","C":"創傷出血性休克傷患的確定照護（Definite care）是緊急輸血","D":"現場創傷檢傷比較能夠容忍過度檢傷（over triage）而不是檢傷不足（under triage）"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":801,"source":"第五章 創傷急症(2015-2018).doc","question":"關於損傷預防的3個E，以下敘述何者為是？","options":{"A":"有權制定損傷預防相關法規的官員或議員都是被教育（education）的對象之一","B":"法律強制（enforcement）的效果最差，若非不得已，不建議使用","C":"緊急狀態宣告（emergency），針對天災人禍，對適用地區宣告緊急狀態，有助於避免傷害的發生","D":"安全設計（engineering）的例子：以科學方法測量煞車痕，推算車禍發生時的車速來幫助釐清肇事責任"},"answer":"A","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":803,"source":"第五章 創傷急症(2015-2018).doc","question":"貴單位的醫療指導決定明年1月1日起將創傷現場檢傷送創傷中心的條件，由GCS＜13改成≦14，假設醫療水準與人口組成，交通狀況均相似的假設下，請問您預估明年度的送醫狀況相較於今年度，下列敘述何者為是？","options":{"A":"會有更多的ISS≧16（嚴重創傷）傷患因為這個改變被正確送到創傷中心","B":"明年度創傷中心收治的總人數會下降","C":"會有更多的ISS＜16傷患被正確送到就近急救責任醫院","D":"不會有影響"},"answer":"A","manualChapter":"CH25"},{"id":806,"source":"第五章 創傷急症(2015-2018).doc","question":"關於創傷型式與機轉之敘述何者為是？","options":{"A":"高級救護技術員除應依循創傷初步與二度評估處置原則處置傷傷患外，特別強調創傷機轉的詢問，以判斷潛藏傷害並預防併發症發生","B":"爆炸傷是一種複合性的傷害，當爆炸發生時會有四階段的受傷機轉，首當其衝是呼吸道的吸入性傷害，屬於第一階段傷害，因此處置爆炸傷的傷患都必須立即穩定其呼吸道","C":"高速公路上，自小客車失事撞上右側護欄，車身嚴重擠壓變形，高級救護技術員到達現場評估脫困後之傷患，若其生命徵象穩定且無胸腹部疼痛，就不須後送創傷中心","D":"根據國外相關文獻統計，高處墜落是造成鈍挫傷最主要的原因，因其直接造成骨盆骨折及骨盆腔內器官之損傷"},"answer":"A","manualChapter":"CH25"},{"id":814,"source":"第五章 創傷急症(2015-2018).doc","question":"一名28歲男性，因邊走邊玩手機遊戲，穿越馬路時被時速40公里的汽車撞倒，你和分隊同仁到達現場時發現，患者意識清楚但左大腿變型，患者表示左腹部及左下肢疼痛，現場生命徵象如下：體溫36.8，心跳110/min，呼吸25/min，血壓130/85，血氧98%，根據以上描述，下列處置何者較不適當？","options":{"A":"該患者改良創傷指數（RTS）10分，依據此項評估應立即送往創傷中心","B":"患者左腹有受傷疼痛須考慮脾臟損傷併腹內出血，則依休克評估屬第2級休克","C":"因外傷機轉為行人被汽車撞擊且汽車車速達40/小時，依據此項評估應立即轉送創傷中心","D":"若意識清楚且鎖骨以上無外傷，同時無頸部疼動與上肢神經學症狀，可不上頸圈"},"answer":"A","manualChapter":"CH25"},{"id":816,"source":"第五章 創傷急症(2015-2018).doc","question":"對於創傷傷患，下列何者處置無法協助改善患者狀況？","options":{"A":"意識不清的患者給予口咽呼吸道（oropharyngeal airway）以暢通呼吸道","B":"氣管斷裂使用氣管內管插管","C":"張力性氣胸使用空針減壓及胸管置入","D":"低血容休克使用大管徑點滴溫暖輸液"},"answer":"B","manualChapter":"CH25"},{"id":823,"source":"第五章 創傷急症(2015-2018).doc","question":"一位45歲女性因汽車車禍，汽車翻滾導致同車乘客死亡，傷患被拋出車外，車禍現場傷患意識清醒抱怨嚴重頭痛，血壓130/80 mmHg，心跳每分鐘68次，呼吸次數每分鐘20下，下列何者為是？","options":{"A":"由生命徵象評估應送至創傷中心","B":"由年齡評估應送至創傷中心","C":"由傷害程度評估應送至創傷中心","D":"由創傷機轉評估應送至創傷中心"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":825,"source":"第五章 創傷急症(2015-2018).doc","question":"52歲男性傷患，現場機車與汽車對撞，在現場評估病患意識時，病患眼睛需疼痛刺激才可睜開眼睛，口中僅能發出無意義的聲音，但是手卻可以準確撥開同仁的手，而測量生命徵象時發現，傷患：血壓BP = 80/43 mmHg，心率HR = 132/min，體溫BT = 36.7℃，O2 sat血氧濃度= 87%，呼吸速率（R.R）= 30/min，請問依照改良創傷指數（RTS），此傷患之正確RTS是？","options":{"A":"8","B":"9","C":"10","D":"11"},"answer":"B","manualChapter":"CH25"},{"id":826,"source":"第五章 創傷急症(2015-2018).doc","question":"高速撞擊事故中，以下均為高能量機轉，何者為非？","options":{"A":"機動車事故車速每小時64公里以上","B":"行人被車速每小時35公里以上之車輛撞到","C":"撞擊時車輛凹陷達75公分以上","D":"與傷患對邊之車側凹陷達45公分以上"},"answer":"D","manualChapter":"CH25"},{"id":829,"source":"第五章 創傷急症(2015-2018).doc","question":"以下針對創傷形式與機轉”的描述，何者為非？","options":{"A":"所謂鈍挫傷係指因外力直接撞擊所造成的傷害。造成傷害的機轉包括壓迫及剪力","B":"刀刺傷屬低能量傷害，可為刀子.玻璃或剪刀等造成，僅會造成穿過部位損傷","C":"爆炸傷是一種複合性的傷害，當爆炸發生時會有四階段的受傷機轉，其中第二階段一被彈出撞擊地面或其他物體","D":"汽車碰撞事故中傷患被彈出車外，且距車體超過一公尺，是屬於高能量機轉，即傀現場生命徵象穩定，亦應視為嚴重多重創傷將其送往最近且最高層級的急救責任醫"},"answer":"C","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":830,"source":"第五章 創傷急症(2015-2018).doc","question":"出血性休克是嚴重創傷傷患最重要的致命原因之一，針對「出血」的描述何者為非？","options":{"A":"大部分外出血肇因於軟組織損傷，且多可以直接加壓方式止血，較少有致命性的出血","B":"體內可能因穿刺傷或鈍傷而出血，血液流失於血管外的體腔內，容易從外觀判定出血","C":"身體為防止持續失血，一些自我防衛機轉如局部血管收縮，血小板凝結，血栓形成，纖維結締組織生長，血管修補等便開始啟動","D":"動脈出血的失血量往往較多，較不易止血，處理不當常會導致低血容性休克；靜脈出血的失血速度相對較慢，止血比較容易"},"answer":"B","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":831,"source":"第五章 創傷急症(2015-2018).doc","question":"35歲男性機車騎士於十字路口自摔，未戴安全帽有頭部外傷，軀幹以及肢體處皆無明顯外傷，當您抵達現場後快速又專業的執行救護評估及處置，以下描述何者為是？","options":{"A":"在與傷患溝通時，患者自覺聽力受損但耳部外觀正常，要小心顱底骨折的可能","B":"眼眶周圍發覺有類似浣熊眼（Raccoon's eyes）瘀青則要懷疑有中顱底骨折","C":"頭皮一處15公分的撕裂傷正在流血，等到二評時再來包紮止血就好","D":"自行走上救護車，卻在送醫途中暫時失去意識，可能是硬腦膜下出血的清明期表現"},"answer":"A","manualChapter":"CH25"},{"id":832,"source":"第五章 創傷急症(2015-2018).doc","question":"45歲女性開車停紅綠燈時遭後方小貨車撞擊後受困於駕駛座上，有繫安全帶但安全氣啟動，傷患的雙腳夾困於儀表板跟座椅之間但無明顯外出血。您是抵達現場的高級救彟術員。在救助隊建立脫困途徑的同時，您被指派執行現場救護處置。下列描述何者為非？","options":{"A":"接近傷患前先與指揮官充分溝通，確保環境安全如車輛漏油控制，車輛已熄火等","B":"依據該創傷機轉，傷患頸部可能因為過度伸展的作用力而造成損傷","C":"體感溫暖，血壓為76/55 mmHg，心跳為每分鐘78下，出血性休克最有可能要立刻建立靜脈輸液來治療","D":"經過25分鐘後終於將傷患脫困而出，雖屬危急個案，但不需要將止血帶綁於雙腳夾傷處上方"},"answer":"C","matchedChapters":["CH25"],"manualChapter":"CH25"},{"id":844,"source":"第五章 創傷急症(2015-2018).doc","question":"上圖顯示轎車駕駛被砂石車從後追撞，掀開上衣後發現有安全帶的明顯勒痕。以下敘述，何者為非？","options":{"A":"依據該創傷機轉，傷患可能有頸椎損傷","B":"依據該創傷機轉，傷患可能有肩關節脫臼","C":"依據該創傷機轉，傷患可能有肝臟破裂","D":"依據該創傷機轉，傷患可能有橫膈膜疝氣"},"answer":"B","manualChapter":"CH25","matchedChapters":["NeedImage"],"image":"題庫圖片/844.png"},{"id":851,"source":"第五章 創傷急症(2015-2018).doc","question":"根據美國外科醫學會訂定「現場檢傷分類指引」，下列傷患狀況何者不需後送創傷中心？","options":{"A":"3歲小孩從約一公尺高的床上跌落，造成頭部受傷","B":"45歲女性搭乘小客車發生車禍，臉部擦傷，頸部痠痛，小客車駕駛當場死亡","C":"25歲男性機車車禍受傷，目前昏迷指數（GCS）14，呼吸速率22次/分","D":"35歲男性從火場救出，臉部及頭部有多處毛髮燒焦的痕跡"},"answer":"C","manualChapter":"CH25"},{"id":859,"source":"第五章 創傷急症(2015-2018).doc","question":"落實「損傷預防」重點有三，稱為損傷預防3E。下列何者不屬於損傷預防3E？","options":{"A":"流病研究（Epidemiology）","B":"教育訓練（Education）","C":"法律強制（Enforcement）","D":"安全設計（Engmeering）"},"answer":"A","manualChapter":"CH25"},{"id":860,"source":"第五章 創傷急症(2015-2018).doc","question":"交通事故傷患應送外傷中心的條件，下列何者為非？","options":{"A":"機車或汽車碰，車輛凹陷20公分","B":"軀幹被車輛輾過","C":"死亡車禍的同車倖存者","D":"行人被車速每小時大於35公里以上的車輛撞到"},"answer":"A","manualChapter":"CH25"},{"id":862,"source":"第五章 創傷急症(2015-2018).doc","question":"創傷照護體系的組成，下列何者為非？","options":{"A":"損傷預防","B":"到院前照護","C":"慢性照護","D":"住院後照護"},"answer":"C","manualChapter":"CH25"},{"id":863,"source":"第五章 創傷急症(2015-2018).doc","question":"有關創傷嚴重度的評估，下列何者為非？","options":{"A":"根據國外的經驗，救護技術員是可依定量的方法來評估創傷嚴重度","B":"臨床上創傷嚴重度的評估方式可分為生理學指數，解剖學指數與混合型指數","C":"對救護技術員而言'改良式創傷指數（Revised Trauma Score，RTS）常用來評估創傷的嚴","D":"昏迷指數無法用來判斷創傷的嚴重度"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":2021,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"針對成人創傷病人，下列狀況在初步評估時，何者是最需要被立即評估及處置？","options":{"A":"腹部腫脹且外觀有瘀傷。","B":"呼吸次數每分鐘38下。","C":"體溫35°C。","D":"昏迷指數（Glasgow Coma Scale score）為10分。"},"answer":"B","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":2037,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"改良式創傷指數(RTS)評估三種到院前生命徵象以判斷創傷嚴重度的工具，不包括？","options":{"A":"血氧飽和度(SpO 2 )。","B":"昏迷指數(GCS)。","C":"呼吸速率(RR)。","D":"收縮壓(SBP)。"},"answer":"A","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":2116,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"年輕男性機車騎士自摔，現場評估該傷患呼吸24次/分鐘、脈搏120次/分鐘、血壓100/50mmHg、血氧95%、GCS：E3V5M6、右上臂及右大腿骨折，關於該傷患創傷嚴重度評估，下列敘述何者最適當？","options":{"A":"依救護現場對緊急傷病人所使用的二級檢傷分類，該傷患為非危急個案。","B":"到院前依改良式創傷指數(RTS)評估該傷患分數為7.84，數值愈低預後愈好。","C":"到院前可用簡易創傷分數(AIS)評估該傷患，AIS分數愈高代表損傷愈輕。","D":"到院後可用創傷嚴重度分數(ISS)回顧該傷患的傷情嚴重度，若ISS ≧ 16即屬嚴重創傷。"},"answer":"D","manualChapter":"CH25"},{"id":2117,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"創傷嚴重度的評估方式可分為生理學指數、解剖學指數及混合型指數，生理學指數包含昏迷指數(GCS)、創傷指數(TS)、與改良式創傷指數(RTS)，試問下列哪一項非RTS評估項目？","options":{"A":"收縮壓。","B":"昏迷指數。","C":"脈搏速率。","D":"呼吸速率。"},"answer":"C","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":2118,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"對於嚴重創傷到院前處置的原則下列何者最適當？","options":{"A":"視情況請求支援，勿從事可能延誤送醫的救護。","B":"嚴重創傷傷患現場處置時間盡量以15分鐘為限。","C":"嚴重創傷傷患通常生命徵象不穩，應往最近的醫院送。","D":"嚴重創傷傷患休克應在現場為傷患執行靜脈輸液。"},"answer":"A","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":2119,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"一名50歲男性工人不慎從15公尺高處墜落，經急救人員抵達現場後發現其意識模糊，呼吸8次/分鐘，脈搏140次/分鐘，血壓80/50 mmHg，皮膚蒼白濕冷，腹部腫脹且觸診疼痛明顯，右腿異常扭曲且出現開放性骨折。現場無明顯的大出血。以下敘述何者最適當？","options":{"A":"現場立即進行開放性骨折的固定與包紮，並持續監測生命體徵，後送至最近的醫院以進行手術。","B":"迅速施行ABC處置，現場打上IV給予液體復甦並加強鎮痛劑的使用，以減少患者痛苦，後送至創傷中心。","C":"立即進行腹部壓迫以減少可能的內出血，並同時進行大量液體復甦以穩定血壓，後送至創傷中心。","D":"保護頸椎、維持呼吸道暢通，並視情況於後送途中進行輸液，務求盡快後送至創傷中心，同時通知創傷小組啟動。"},"answer":"D","manualChapter":"CH25"},{"id":2137,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"一名50歲男性爬山時不慎跌落山谷，EMT接觸評估時發現時地上有一大攤血跡，傷患意識躁動，臉上有擦傷，左胸及左腹部皆有瘀傷，骨盆不穩固，左大腿開放性骨折且有持續出血情形，生命徵象心跳：136下/分鐘，呼吸：30下/分鐘，血壓：74/53mmHg，SpO 2：88%，CRT 3秒，關於接下來首要處置，以下何者最優先？","options":{"A":"應立即給予高濃度氧氣維持血氧飽和率95%以上。","B":"傷患有休克現象，應立即準備大量輸液及通知醫院備血。","C":"應立即包紮止血，若考慮使用止血帶須注意勿打在受傷骨折處。","D":"應立即將股骨固定，減少其出血量以及有利後續搬運。"},"answer":"C","manualChapter":"CH25"},{"id":2208,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"下列有關爆炸傷的描述，何者為是？","options":{"A":"爆炸傷是複合性傷害，但並非所有爆炸傷都會經歷所有階段。","B":"爆炸傷第一階段傷害為燒傷。","C":"因爆炸彈出之患者，並非全部都視為頸椎受傷傷患。","D":"到達爆炸現場，應先將患者救出避免再次爆炸進而造成患者二次傷害。"},"answer":"A","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":2209,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"依據PHTLS的初級評估，下列部位發現創傷大量外出血(Exsanguinating hemorrhage)時的立即止血方式，何者最不適當？","options":{"A":"前臂：止血帶。","B":"腋下：止血紗布和壓力敷料。","C":"頸部：傳明酸(Tranexamic acid)靜脈注射。","D":"腹股溝處：肢幹交界型(junctional)止血帶。"},"answer":"C","manualChapter":"CH25"},{"id":2210,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"您抵達一名機車騎士騎車自撞路樹的車禍現場，傷患意識清楚無頸部疼痛或是上肢不適情形，但是呼吸淺快，血氧90%、臉色蒼白、皮膚明顯濕冷、脈搏較弱、腹部紅腫併明顯壓痛，左小腿有瘀青合併明顯變形，請問下列何者是您最應先做的處置？","options":{"A":"左小腿骨折固定。","B":"現場幫病人打點滴。","C":"給予氧氣協助呼吸。","D":"擦傷傷口包紮。"},"answer":"C","manualChapter":"CH25"},{"id":2224,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"50歲女性駕駛汽車出車禍，初步評估中發現全身多處擦挫傷，左小腿變形合併有一處深部撕裂傷口，沒有持續出血，現場亦無明顯外出血。下列關於這位傷患處置，何者最不適當？","options":{"A":"若遠端脈搏摸不到，可考慮牽引移動到原解剖位置。","B":"牽引過程中，傷患明顯疼痛或過程中有阻力時應停止動作。","C":"發現為開放性骨折，將外露的骨折或軟組織塞回傷口內。","D":"搬運過程中傷口開始出血，加壓仍無法控制出血，打上止血帶。"},"answer":"C","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":2304,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"有關損害預防的3E，下列何者為非？","options":{"A":"法律強制(enforcements)。","B":"教育訓練(education)。","C":"安全設計(engineering)。","D":"建立創傷中心(establish)。"},"answer":"D","manualChapter":"CH25"},{"id":2306,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於「外傷現場檢傷分類指引」的敘述，以下描述何者為是？","options":{"A":"包括年紀性別、生命徵象、受傷機轉、特殊傷患等四大項。","B":"過度檢傷會造成創傷中心壅擠。","C":"對老人的敏感度比較高。","D":"過度檢傷應該越低越好。"},"answer":"B","manualChapter":"CH25"},{"id":2326,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"創傷出血性死亡的三兄弟(hemorrhagic trauma triad of death)，何者正確？","options":{"A":"低血鈣、低血氧、高腦壓。","B":"低血氧、酸血症、凝血異常。","C":"低血鈣、低體溫、高腦壓。","D":"低體溫、酸血症、凝血異常。"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":2381,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"在進行區域EMS重大外傷品管時，針對下列哪一類傷患的死亡，我們應該深入了解院前院後是否有品管可改進之處？","options":{"A":"ISS低且RTS低的傷患。","B":"ISS低且RTS高的傷患。","C":"ISS高且RTS低的傷患。","D":"ISS高且RTS高的傷患。"},"answer":"B","manualChapter":"CH25"},{"id":2418,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"創傷嚴重度評估指數，以下何者為非？","options":{"A":"改良式創傷指數(RTS)，依據「昏迷指數」、「收縮壓」和「呼吸速率」三個變項，每一個變項分數0~4分，分數愈高則傷害愈高。每一個變項分數再乘以該項係數之後，三者相加即為創傷指數值。","B":"簡易創傷分數(AIS)，將身體分成六個解剖區域,包括:頭頸(head/neck )、顏面( face )、胸部( thorax )、腹部(abdomen)、肢體(extremity)、外觀軟組織(external)，每個解剖區域依損傷嚴重程度,由0~6分代表，分數越高表示越嚴重。","C":"ISS定義為「三個最嚴重創傷解剖區域之最高AIS分數平方總合」。ISS分數越高，死亡率越高。臨床上凡ISS ≧ 16即屬嚴重創傷。","D":"昏迷指數(GCS)最低3分，最高15分，分數高低與死亡率有明顯相關。"},"answer":"A","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":2432,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"一名35歲男性倒臥在工廠內，左下肢被捲入滾輪機器，您到達現場發現患者已脫困，但左下小腿傷勢十分嚴重，一直有鮮血冒出。根據PHTLS處置原則XABCDE，請問以下敘述何者為非？","options":{"A":"X：為控制可見的大出血。","B":"A：呼吸道處置、頸椎保護。","C":"C：確認循環相關問題，控制中度、輕度出血。","D":"D：鑑別診斷致命傷害。"},"answer":"D","matchedChapters":["CH25"],"manualChapter":"CH25"},{"id":2437,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"重大創傷時「創傷致命三合症(Lethal triad of trauma)」，不包含以下何者？","options":{"A":"凝血病變。","B":"酸血症。","C":"低體溫。","D":"低血氧。"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":2521,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"44歲男性傷者在與朋友飲酒後爭吵，跟對方打架，右手臂被酒瓶及刀子割傷，現場地上殘留大量鮮血，並持續噴血，指揮中心救護人員到現場，現場傷者臉色蒼白冒冷汗，意識對痛有反應，脈搏每分鐘140下，血壓80/50mmHg，呼吸每分鐘30次，現場離醫院為半小時車程，關於此傷者之處置，下列敘述何者為是？","options":{"A":"應立即以止血帶包紮傷者右手臂止血，但是避免組織缺氧到院前應定時鬆開。","B":"止血帶不建議使用兩條以上，避免增加組織壞死機會。","C":"盡量避免在衣物上直接打止血帶。","D":"目前因為止血帶止血功能良好，建議第一線使用。如果沒有，用三角巾代替效果也很好。"},"answer":"C","manualChapter":"CH25"},{"id":2522,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"在各種創傷嚴重度評估指數中，改良式創傷指數( RTS )與創傷嚴重度分數( ISS )是臨床上預測傷者存活率重要參考。請問下列傷者存活率最高的是？","options":{"A":"RTS分數高且ISS分數高的傷者。","B":"RTS分數高且ISS分數低的傷者。","C":"RTS分數低且ISS分數高的傷者。","D":"RTS分數低且ISS分數低的傷者。"},"answer":"B","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":2590,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"以下爆炸傷之描敘，何者最適當？","options":{"A":"爆裂飛散物擊中為第一級爆炸傷，中空器官受傷，包含耳膜破裂、肺挫傷等屬於此類。","B":"爆裂物的添加物造成的傷害為第二級爆炸傷，可能會導致細菌、化學物質或放射物質造成人體傷害。","C":"空氣震波或其他物體噴濺為第三級爆炸傷，常導致穿刺傷或鈍傷。","D":"爆炸產生的熱能及火焰為第四級爆炸傷，可能導致燒傷、壓碎傷、呼吸道的吸入性傷害。"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"question":"有關於爆炸傷的分級，何者有誤？","options":{"A":"第一級：中空器官受傷、腸子破裂","B":"第二級：穿刺傷","C":"第三級：鈍傷","D":"第四級：細菌級化學物質造成人體傷害"},"answer":"D","manualChapter":"CH25","id":3327,"source":"TP題庫 (圖片匯入)"},{"id":3523,"source":"TP題庫","question":"為了精進重大外傷後傷情準度，我們可以增加更多客觀或先進的儀器判斷，下列哪個是可以協助我們評估的檢查方式？","options":{"A":"超音波掃瞄","B":"組織血氧分壓","C":"到院前抽血檢測乳酸","D":"以上皆是"},"answer":"D","manualChapter":"CH25"},{"question":"下列何者為良好的外傷照護體系（外傷登錄、品質管理、研究）：A對的病人、B對的時間、C對的醫院、D好的預後。","options":{"A":"AB","B":"ABC","C":"ACD","D":"ABCD"},"answer":"D","source":"圖片匯入","manualChapter":"CH25","id":3589,"matchedChapters":["CH25"]},{"question":"研究顯示，將重大外傷送到外傷中心治療可以減少_____％的死亡率","options":{"A":"10%","B":"25%","C":"40%","D":"50%"},"answer":"B","source":"大白","manualChapter":"CH25","id":45482},{"question":"衛生福利部依據醫院對重大外傷、急性冠心症、急性腦中風、高危險妊娠及新生兒之照護品質，將急救責任醫院分成三個等級","options":{"A":"極嚴重級、重度級、中度級","B":"重度級、中度級、一般級","C":"重度級、中度級、輕度級","D":"極嚴重級、中度級、輕度級"},"answer":"B","source":"大白","manualChapter":"CH25","id":45484},{"id":45640,"question":"關於哈頓矩陣（Haddon Matrix）的敘述，下列何者錯誤？","options":{"A":"哈頓矩陣可將事件分為事件前、事件中及事件後三個階段進行分析。","B":"哈頓矩陣除了可分析交通事故，也可應用於溺水、火災及跌倒等傷害事件。","C":"哈頓矩陣主要從人、媒介／載具及環境等因素分析事件，環境因素還可進一步區分為物理與社會環境。","D":"哈頓矩陣主要用於事件發生後的醫療處置檢討，以此策略可較快分析原因。"},"answer":"D","source":"同學出題","manualChapter":"CH25"},{"id":45694,"question":"關於外傷的敘述，下列何者為非?","options":{"A":"外傷是台灣十大死因之一(2022年排第8)，大多數與交通事故有關。","B":"重度級急救責任醫院應全年無休，從急診到門診全程照護外傷病人。","C":"刀傷、槍傷患者需靜脈輸液等處置，由私家車逕行運送對病患無益。","D":"立即死亡仍然佔外傷死亡數最多，可透過損傷預防來減少事故發生。"},"answer":"C","source":"同學出題","manualChapter":"CH25"},{"id":45697,"question":"研究顯示對於重大外傷病人，越早施以適切治療預後越好，外傷照護體系的建立還可以減少15~20％的死亡率，關於外傷照護體系建立的目的何者為非?","options":{"A":"減少因外傷而產生的相關醫療費用","B":"避免對外傷病人之不適當照護","C":"增加可處置的外傷病人數及降低外傷嚴重度","D":"降低外傷可預防之死亡率"},"answer":"C","source":"同學出題","manualChapter":"CH25"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 54 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：25 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH54</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":86,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於大型活動（Mass Gathering）的觀念，以下何者錯誤??","options":{"A":"一般而言，大型活動是指群眾聚集人數超過1000人的活動","B":"在1999年的英倫醫學雜誌建議，每千人需有一位急救人員，每三千人需有一輛有高級救護技術員的救護車，每五千人則需一位急診醫師","C":"每次醫療照護無論是輕是重，應該都要確實填寫一份醫療救護紀錄單","D":"如現場無法在五分鐘內提供高級心臟救命術的醫療照顧，現場就必須準備AED"},"answer":"B","manualChapter":"CH54"},{"id":171,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"關於大型活動（Mass Gathering）的觀念，下列敘述何者為非？","options":{"A":"一般而言，大型活動是指群眾聚集人數超過1000人的活動","B":"在1999年的英倫醫學雜誌建議，大型活動每五百人人需有一位急救人員，每一千人需有一輛有高級救護技術員的救護車，每一萬人則需一位急診醫師","C":"無論輕症或重症，每次醫療照護需確實填寫一份醫療教護紀錄單，醫療人員也需要簽名","D":"現場應盡可能維持有教護車待命，若非病患的生命或肢體受威脅，儘量不要派用最後一輛救護車作轉送病患之用"},"answer":"B","manualChapter":"CH54"},{"id":268,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"大活動之緊急醫療救護之醫療需求方面，於1999年英倫醫學雜誌建議，下列何者錯誤?","options":{"A":"每千人需有1位急救人員","B":"每2千人需有1輛有高級救護技術員的救護車","C":"每3千人需有2輛有高級救護技術員的救護車","D":"每5千人需有1位急診醫師"},"answer":"C","manualChapter":"CH54"},{"id":373,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於大型活動（mass gathering）的觀念，以下何者敘述最不正確？","options":{"A":"一般而言、大型活動是指群眾聚集人數超過500人的活動","B":"在1999年的英倫醫學雜誌建議、每千人需有一位急救人員，每二千人需有一輛有高級救護技術員的救護車，每五千人則需一位急診醫師","C":"每次醫療照護、無論是輕微的還是嚴重的案例，最好都能確實填寫一份醫療救護紀錄單","D":"一般建議、如現場無法在五分鐘內提供高級心臟救命術的醫療照顧，現場就必須準備自動體外電擊器"},"answer":"A","manualChapter":"CH54"},{"id":394,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於大型活動（mass gathering）的觀念，以下何者敘述最不正確？","options":{"A":"一般而言，大型活動是指群眾聚集人數超過1,000人的活動","B":"在1999年的英倫醫學雜誌建議，大型活動每五百人需有一位急救人員，每一千人需有一輛有高級救護技術員的救護車，每一萬人則需一位急診醫師","C":"無論輕症或重症，每次醫療照護需確實填寫一份醫療救護紀錄單，醫療人員也需要簽名","D":"現場應盡可能維持有救護車待命。若非病患的生命或肢體受威脅，儘量不要派用最後一輛救護車作轉送病患之用"},"answer":"B","manualChapter":"CH54"},{"id":411,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於大型活動的緊急醫療救護規劃，以下何者為是？","options":{"A":"大型活動要處理的是中暑，低體溫，急性心肌梗塞與外傷，不需要針對恐怖攻擊做準備","B":"跨年夜施放煙火活動結束散場時，請藝人繼續現場表演可以預防性減少外傷傷患人數","C":"為了保障病患隱私以及醫療人員安全，醫療站的位置不可公開於民眾可以取得的海報或手冊中","D":"單一醫療站同時接收到超過15名以上的傷病患，才會面臨災難狀況"},"answer":"B","manualChapter":"CH54"},{"id":412,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於大型活動緊急醫療規劃，以下敘述何者為是？","options":{"A":"規劃重點首重「保護自己安全」","B":"如果醫療站相距甚遠，可以大量部屬救護機車與救護單車，以快速將傷者送到醫療站","C":"醫療站器材應該依照活動參與對象來考量，例如聽障奧運的醫療規劃就不需要利用廣播系統引導傷病患就醫或後送","D":"大型戶外活動的傷病患人數推估，如果活動時間地點跟上一屆相同，那人數推估就應該一樣"},"answer":"A","manualChapter":"CH54"},{"id":427,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關大型活動緊急醫療救護的敘述，何者有誤？","options":{"A":"大型群眾聚集活動，傷病及心臟停止的機會較低","B":"心臟停止病患的救活率，比大多數先進的緊急醫療救護系統為高","C":"治療心臟停止病人，電擊去顫為生存之鏈（Chainofsurvival）中最重要且最有效的一環","D":"超過二個人有類似特殊病況、傳染性疾病、嚴重病患，都需通知醫務執行長及總指揮"},"answer":"A","manualChapter":"CH54"},{"id":460,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於大型活動的緊急醫療救護，何者為非？","options":{"A":"大型活動與一般緊急災害事件最大的不同，在於事先的規劃、減災措施可以減少災害發生的機率與可能的人命、財產損失","B":"醫療站設置的評估，需考慮活動的性質、地理資訊、參與人員的人數與特質、舉辦時間等","C":"大型活動的現場醫療最好可以與當地的醫療衛生資源建立合作機制，以利傷患的後送","D":"事故指揮系統（Incident Command system）僅適用於災難時候場景，在大型活動的現場醫療救護規劃不適用"},"answer":"D","manualChapter":"CH54"},{"id":461,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於大型活動的緊急醫療救護規劃，下列何者為非？","options":{"A":"應針對恐怖攻擊進行規劃","B":"「保護自己的安全」為首要規劃重點","C":"醫療站位置最好設置在五分鐘路程內可到所有活動區域處","D":"若無法在十分鐘內提供ACLS的醫療照顧，則現場必須準備自動體外電擊器"},"answer":"D","manualChapter":"CH54"},{"id":467,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"大型活動緊急醫療救護的敘述，何者為是？","options":{"A":"在大型群眾聚集活動，心臟停止的發生機會較高，但救活率也比較高","B":"每千人的活動，建議配置一台有高級救護技術員的救護車","C":"每兩千人的活動，建議需有一位急診醫師在現場","D":"如果傷病患沒有超過15人，醫療站應該不會面臨大量傷患的問題"},"answer":"A","manualChapter":"CH54"},{"id":2085,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"你參與大型活動的醫療救護團隊，以下處置何者正確？","options":{"A":"醫療站動線必須事先測試，務必確認從傷害發生地到救護站都能夠允許救護車通行。","B":"傷患人數推估跟活動種類，持續時間，現場溫度與高度都有關，是可以事先大致預估的。","C":"大型活動的災難事件定義為15人以上或預估15人以上傷病患。","D":"我國目前對於大型集會活動的後送規劃與救護站裝備並沒有明文要求。"},"answer":"B","manualChapter":"CH54"},{"id":2174,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"大型路跑活動現場緊急醫療站的設置考驗主辦單位的應變能力，下列敘述何者正確？","options":{"A":"當有意外造成傷患出現時，應立即通報消防機關，請求119救護人員提供專業後送協助。","B":"救護站的設置應考量能否在五分鐘內提供救護服務為主。","C":"大型活動現場總指揮應由醫師擔任，以維護現場醫療品質。","D":"當發生災難，法定救護團隊到場時，應配合大型活動總指揮進行災難應變機制。"},"answer":"B","manualChapter":"CH54"},{"id":2462,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於大型活動的醫療規劃原則，下列敘述何者最不適當？","options":{"A":"醫療規劃時，「保護自己的安全」為首要規劃重點。","B":"醫療站動線必須讓急救人員可攜帶急救裝備順利往返。","C":"醫療站位置最好設置在8分鐘路程內可到所有活動區域處。","D":"預估傷患人數通常與活動種類、持續時間、現場溫度與高度有關。"},"answer":"C","manualChapter":"CH54"},{"id":2543,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"在大型活動，關於醫療站設站計畫的原則，下列何者正確？","options":{"A":"醫療站的地點選擇以遮蔽場所為佳，位置最好在短時間內可到達所有活動區域。","B":"緊急醫療救護的規劃，應從活動開始那一刻，直到活動結束那一刻。","C":"醫療站型式有固定式或移動式。通常有固定式的醫療站，就不需要移動式的醫療站。","D":"醫療站內停留時間很短，不需要醫療紀錄單。只要有病患姓名，登記人數報備即可。"},"answer":"A","manualChapter":"CH54"},{"id":2645,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"戶外活動現場氣溫為33°C，相對濕度75%，多名觀眾出現中暑前兆。此時主辦單位詢問你是否應該暫停活動，請問下列選擇何者最適當？","options":{"A":"係數為33 + 75×0.1 = 40.5，危險係數已達標準，應建議停止活動。","B":"係數為33 + 75×0.1 = 40.5，僅需增加醫護人員與救護車數量即可。","C":"係數為33 + 75×0.1 = 40.5，應設置冷水槽與冰袋降溫即可繼續活動。","D":"係數低於45，屬可接受範圍，可正常進行活動。"},"answer":"A","manualChapter":"CH54","matchedChapters":["CH54"]},{"question":"根據「路跑活動參與者安全維護及權益保障應注意事項」，關於熱中暑危險係數之判斷與應變，下列敘述何者正確？","options":{"A":"熱中暑危險係數 = 室外溫度(°C) + 室外相對濕度(%) × 1.0","B":"當危險係數大於 35 時，主辦單位應設置降溫設備（如冷水槽、碎冰）協助降溫","C":"當危險係數大於 35 時，主辦單位「宜」停止活動","D":"只有在危險係數大於 40 時，才需要開始配置醫師、護理人員或救護技術員"},"answer":"B","manualChapter":"CH54","id":3383,"source":"TP題庫 (圖片匯入)"},{"id":3531,"source":"TP題庫","question":"若某大型活動位於室外，熱中暑危險係數 36，同時，空氣品質指標 (AQI) 指數為 106。綜合這些數據，該活動在安全管理上可能面臨哪些主要挑戰？","options":{"A":"需同時應對熱危害與空氣品質風險","B":"熱中暑危險係數過高，需停止活動","C":"空氣品質指標過高，需停止活動","D":"環境條件良好，無需特別關注"},"answer":"A","manualChapter":"CH54"},{"source":"EMT-P 第 54 章 P.1485","question":"當熱中暑危險係數大於多少時，教材建議主辦單位應設置冷水槽、碎冰等降溫設備？","options":{"A":"45","B":"35","C":"30","D":"40"},"answer":"B","id":3729,"manualChapter":"CH54","matchedChapters":["CH54"]},{"source":"EMT-P 第 54 章 P.1492","question":"關於舉辦大型活動，請問熱中暑危險係數大於多少，主辦單位必須停止活動？","options":{"A":"38","B":"39","C":"40","D":"41"},"answer":"C","id":3740,"manualChapter":"CH54","matchedChapters":["CH54"]},{"source":"EMT-P 第 54 章 P.1485","question":"路跑活動當日活動區域之預測空氣品質指標達多少時，主辦單位應停止活動？","options":{"A":"151","B":"125","C":"101","D":"75"},"answer":"A","id":3743,"manualChapter":"CH54","matchedChapters":["CH54"]},{"source":"EMT-P 第 54 章 P.1485","question":"下列關於路跑活動敘述何者錯誤？","options":{"A":"熱中暑危險係數 = 室外溫度(°C) + 室外相對濕度(%)x0.1","B":"熱中暑危險係數大於35者，主辦單位應設置冷水槽、防水帆布、碎冰或其他降溫設備","C":"熱中暑危險係數大於 50者，主辦單位應停止活動。","D":"路跑活動當日活動區域之預測空氣品質指標(AQI)達151以上時，主辦單位宜停止活動。"},"answer":"C","id":3747,"manualChapter":"CH54","matchedChapters":["CH54"]},{"source":"EMT-P 第 54 章 P.1491","question":"關於大型活動醫療配置原則，下列何者最能反映「風險導向」概念？","options":{"A":"所有路段平均配置相同資源","B":"依主辦單位預算隨機調整","C":"對高風險區域增加醫療人力與設備","D":"僅配置終點醫療站"},"answer":"C","id":3748,"manualChapter":"CH54","matchedChapters":["CH54"]},{"id":45508,"question":"戶外活動現場氣溫為30°C，相對濕度65%，多名觀眾出現中暑前兆。此時主辦單位詢問你是否應該暫停活動，請問下列選擇何者最適當？","options":{"A":"係數為 30 + 65×0.1 = 36.5，危險係數已達標準，應建議停止活動。","B":"係數為 30 + 65×0.1 = 36.5，僅需增加醫護人員與救護車數量即可。","C":"係數為 30 + 65×0.1 = 36.5，應設置冷水槽、防水帆布或其他降溫設備。","D":"係數低於40，屬可接受範圍，不用新增處置，可照常進行原本活動。"},"answer":"C","explanation":"P1485\n熱中暑危險係數＝室外溫度(℃)＋室外相對濕度(%)×0.1，係數大於35者，主辦單位應於各服務區、醫療站及救護站內，設置冷水槽、防水帆布、碎冰或其他降溫設備，協助參與者降溫及緊急救護處置；熱中暑危險係數大於40者，主辦單位宜停止活動。","source":"同學出題","manualChapter":"CH54"},{"id":45628,"question":"戶外活動現場氣溫為30°C，相對濕度65%，多名觀眾出現中暑前兆。此時主辦單位詢問你是否應該暫停活動，請問下列選擇何者最適當？","options":{"A":"係數為 30 + 65×0.1 = 36.5，危險係數已達標準，應建議停止活動。","B":"係數為 30 + 65×0.1 = 36.5，僅需增加醫護人員與救護車數量即可。","C":"係數為 30 + 65×0.1 = 36.5，應設置冷水槽、防水帆布或其他降溫設備。","D":"係數低於40，屬可接受範圍，不用新增處置，可照常進行原本活動。"},"answer":"C","source":"同學出題","manualChapter":"CH54"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

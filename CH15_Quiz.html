@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 15 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：22 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH15</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":207,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"有關抽吸的敘述，下列敘述何者為非？","options":{"A":"抽吸管依型式可分為軟式管及硬式管","B":"固定式抽吸裝置應可提供超過300 mmHg的吸力，以及40 L / min的流量","C":"抽吸時盡量以無菌方式操作，先將管子放到入口，再邊旋轉邊向內插入抽吸管","D":"抽吸時同時做一壓一放的動作，避免做連續性的抽吸動作，以免吸住呼吸道管壁造成傷害"},"answer":"C","matchedChapters":["CH15"],"manualChapter":"CH15"},{"id":212,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"對於甦醒球的使用（亦稱「袋-辦-面罩」BVM；bag-valve-mask）下列敘述何者為非？","options":{"A":"以單人操作甦醒球可達到的通氣（ventilation）效果，比口對口人工呼吸的效果來得好","B":"每次擠壓大約1秒鐘即可","C":"急救時成年人適當的潮氣容積大約為每公斤6〜7毫升","D":"甦醒球的容量大約1600ml，因此單手擠壓即可"},"answer":"A","matchedChapters":["CH15"],"manualChapter":"CH15"},{"id":279,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列何者非環甲切開術之時機？","options":{"A":"嚴重的顏面外傷","B":"嚴重的脊椎外傷","C":"異物梗塞無法排除","D":"頸部皮下氣腫"},"answer":"D","manualChapter":"CH15"},{"id":501,"source":"第三章 病患評估與理學檢查(2012-2014).doc","question":"下列病患需要考慮放置氣管內管（endotracheal intubation），何者除外？","options":{"A":"頸部深部感染出現喘鳴音（stridor）","B":"火場傷患出現聲音沙啞（hoarseness）且咳出含碳塵痰液","C":"藥物過敏性產生眼眶周邊水腫、上呼吸道沒有喘鳴音（stridor）但有細支氣管痙攣收縮造成雙側瀰漫性哮喘（wheezes），血壓為140/92毫米汞柱，指尖血氧濃度為93%之病患","D":"上述病患均需立即放置氣管內管以保護呼吸道的暢通"},"answer":"C","manualChapter":"CH15"},{"id":635,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"有關「喉罩呼吸道（LMA）」的描述，何者為非？","options":{"A":"在侷限空間及外傷頸椎固定的考量下，喉罩呼吸道有其獨到的優點","B":"無法使用潮氣末二氧化碳偵測器來偵測位置是否正確","C":"不適用於意識清醒或尚有嘔吐反射的病患","D":"可用來協助氣管內管的置放"},"answer":"B","manualChapter":"CH15"},{"id":652,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"以下不同之給氧裝置，請依照可提供之氣氣濃度，由低至高排列。（1）鼻管。（2）簡單型氧氣面罩。（3）非再吸入型氧氣面罩（4）面罩+甦醒球（使用純氧+氧氣儲存袋）","options":{"A":"（1）（3）（2）（4）","B":"（4）（3）（2）（1）","C":"（1）（2）（3）（4）","D":"（4）（1）（2）（3）"},"answer":"C","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":653,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"以下針對LMA（Laryngeal mask airway喉罩呼吸道）的敘何者為非？","options":{"A":"與氣管内管相比，LMA的置放不僅學習容易、又不必使用喉頭鏡，不需要求目視聲帶，不須張大嘴巴，所以成功率較高","B":"在局限空間及外傷頸椎固定的考量下，喉罩呼吸道有其獨到的優點，而且又可以保護呼吸道，避免呼吸道吸入性嗆傷，所以成為到院前救護的標準配備","C":"不宜使用在腐蝕性喉部傷害、食道外傷或病變的病患","D":"一般成人可選擇使用5號"},"answer":"B","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":662,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"有關氧氣供應裝置的比較，下列敘述何者為非？","options":{"A":"凡德里面罩可以提供40～80％的氧氣濃度。","B":"簡單型氧氣面罩，在流速6～10L/min時，可以提供35～60％的氧氣濃度","C":"非再吸入型氣面罩，使用氧氣流速10～15L/min時，可以提供80～100％的氧氣濃度","D":"鼻管用於提供低濃度氧氣，最高流速為6L/min"},"answer":"A","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":663,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"有關抽吸的敘述，下列敘述何者為非？","options":{"A":"抽吸管依型式可分為軟式管及硬式管","B":"固定式抽吸裝置應可提供超過300mmHg的吸力，以及40L/min的流量","C":"抽吸時盡量以無菌方式操作，先將管子放到入口，再邊旋轉邊向內插入抽吸管","D":"抽吸時同時做一壓一放的動作，避免做連續性的抽吸動作，以免吸住呼吸道管壁造成傷害"},"answer":"C","matchedChapters":["CH15"],"manualChapter":"CH15"},{"id":671,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"您照一位罹患慢性阻塞性疾病，主訴呼吸喘的病人。經評估您決定使用鼻管避免二氧化碳蓄積。請問當您將氧氣流速流速調整至2L/min時，您預估可提供多少％之氣氣供應？","options":{"A":"28％","B":"32％","C":"36％","D":"40％"},"answer":"A","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":677,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"在下列何種情形下不能放置鼻咽呼吸道（Nasopharyngeal Airway）？","options":{"A":"呼吸困難時","B":"單側鼻孔內放置有阻力時","C":"鼻子和嘴巴有血絲時","D":"檢查病患發現有熊貓眼（raccoon eye）和鼻漏的情況"},"answer":"D","manualChapter":"CH15"},{"id":688,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"下列何者不是困難插管的評估與預測因子？","options":{"A":"嘴巴張大超過3指幅","B":"下巴尖端至舌骨距離超過3指幅","C":"舌骨至甲狀軟骨距離超過2指幅","D":"下頷骨至環狀軟骨距離超過3指幅"},"answer":"D","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":1036,"source":"第四章 非創傷急症(2012-2014).doc","question":"ACLS建議在CPR的過程中，應儘量全程使用ETCO2。連續監測，乃是基於三個重要原因，何者除外？","options":{"A":"它是CPR品質的生理性指標之一","B":"它是過度換氣的生理性指標之一","C":"它是確認插管位置是否正確最客觀的工具","D":"它能在不中斷壓胸的情形下顯示病人是否回復心跳"},"answer":"B","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":1047,"source":"第四章 非創傷急症(2012-2014).doc","question":"下列敘述何者有誤？","options":{"A":"於無意識的病人，最常見的呼吸道阻塞原因為會厭倒下造成","B":"CPR時由施救者囗中吹出的氧氣濃度約17%","C":"CPR經評估脈搏恢復後應維持吹氣每分鐘10～12次","D":"LMA可以在到院前使用以暫時取代氣管內管"},"answer":"A","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":1048,"source":"第四章 非創傷急症(2012-2014).doc","question":"下列打開呼吸道的方式及輔助呼吸道的使用何者較適當？","options":{"A":"非外傷昏迷病人一律以下巴推擠法打開呼吸道","B":"意識昏迷併有鎖骨以上創傷病人一律以壓額抬下巴法來打開呼吸道","C":"教導一般民眾不論創傷或非創傷病患一律使用壓額抬下巴法（頭後斜／下顎上提法）來打開呼吸道","D":"意識不清，顏面部創傷病人使用鼻咽呼吸道較適合"},"answer":"C","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":2294,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"有關抽吸，下列何者為非？","options":{"A":"抽吸過程中，若病人心跳加快，表示病人缺氧，須立刻停止抽吸。","B":"抽吸可能引發肺部塌陷，連帶引發缺氧，導致心律干擾甚至心跳停止。","C":"抽吸引發咳嗽可使顱內壓上升，使頭部外傷病人增加腦疝脫的危險。","D":"抽吸因呼吸道受刺激可導致血壓升高及心律不整。"},"answer":"A","matchedChapters":["CH15"],"manualChapter":"CH15"},{"id":2298,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"以下各種方式為救護技術員用來評估病人呼吸道是否暢通的方法，何者為非？","options":{"A":"評估病人是否順暢說話。","B":"檢查病人血氧濃度是否大於94%。","C":"檢查病人是否有發出喘鳴聲(stridor)。","D":"檢視病人口腔內是否有異物的存在。"},"answer":"B","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":2479,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"體重150公斤身高160公分男性OHCA救護，欲進行氣管插管，以下何者擺位最適當？","options":{"A":"墊高肩部。","B":"墊高頸部。","C":"墊高頭部。","D":"墊高胸部。"},"answer":"C","manualChapter":"CH15"},{"id":2481,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"體重150公斤身高160公分男性OHCA救護，欲進行氣管插管，若嘗試插管兩次失敗，以下何者最適當？","options":{"A":"抽吸後再次嘗試插管。","B":"擺位後再次嘗試插管。","C":"抽吸後放置口咽呼吸道。","D":"選擇放置聲門上呼吸道。"},"answer":"D","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":2512,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"根據ACLS 2015建議，病人被插入氣管內管後要確認位置的方法，不包括？","options":{"A":"五點聽診(auscultations)。","B":"潮氣末二氧化碳監測(ETCO2)。","C":"超音波(ultrasound)。","D":"胸部X-光(CXR)。"},"answer":"D","manualChapter":"CH15","matchedChapters":["CH15"]},{"question":"填入空格：固定式抽吸裝置應可提供超過_____mmHg的吸力，以及_____L/min 的流量。移動式抽吸裝置雖然吸力較小，流量仍應不可小於20L/min。","options":{"A":"300，50","B":"300，40","C":"100，50","D":"100，50"},"answer":"B","source":"大白","id":45467,"manualChapter":"CH15"},{"id":45655,"question":"關於困難插管評估(HEAVEN)之患者可嘗試處置應變的方式，下列配對何者為非?","options":{"A":"低血氧：插管過程持續自鼻管給氧，流量開到15L/min。","B":"極端體重：兒童可考慮墊高肩膀、肥胖患者斜坡擺位。","C":"病人大量出血：使用SALAD技術協助移除下咽部液體。","D":"頸部活動度受限：可考慮優先選擇影像式喉頭鏡。"},"answer":"C","source":"同學出題","manualChapter":"CH15"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

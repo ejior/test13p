@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 52 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：82 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH52</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":89,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於事故指揮系統（ICS）的描述，以下何者錯誤？","options":{"A":"事故指揮官負責整個事故的應變和管理。最早抵達現場的工作人員當中，應以位階最高者擔任事故指揮官","B":"聯絡官在事故指揮系統中扮演的是個接合的點，聯繫相關的政府部門、非政府組織、和民間機構","C":"執行部門負責主要的應變工作，例如「警戒管制」，應該由執行部門負責","D":"後勤部門負責提供工作人員醫療照護、餐飲，處理設備和補給品；這個部門所提供服務的直接對象是工作人員，而不是災民"},"answer":"A","manualChapter":"CH52"},{"id":91,"source":"105 高級救護技術員甄試筆試題目.doc","question":"在大量傷病患事故的檢傷分類，以下觀念何者最不適當？","options":{"A":"如果事故的傷病患人數極多，事故應變的時間較長，那麼，應該考慮讓救護技術員輪流擔任檢傷員，避免同一個人長時間承受檢傷的心理壓力","B":"大量傷病患檢傷分類是非常表淺的診治方式，所著重的是在短時間內區別出病患的嚴重度，不能夠取代實際的診治病患","C":"檢傷員應該盡可能在第一時間就完整處理傷病患的傷勢，嚴重傷病患應該立即實施氣管內管插管等等急救步驟，以免延誤病情。完成後，再繼續評估下一名病患","D":"檢傷之後，不同嚴重度的傷病患所得到的現場處置應該有所區別，檢傷這個步驟才會有所意義"},"answer":"C","manualChapter":"CH52"},{"id":92,"source":"105 高級救護技術員甄試筆試題目.doc","question":"在大量傷病患事故的屍體處理，以下觀念何者最不適當？","options":{"A":"為了表示對死者的尊重，應該儘可能使用救護車把屍體載送到殯儀館或其他暫時安厝的場所","B":"明顯死亡的屍體，只有在獲得許可之後，才能夠移動位置，因為這牽涉到死因鑑識和其它的法律問題","C":"如果橫陳的屍體阻礙了逃生或援救的通道，這種緊急狀況下可以搬動屍體來開通通道","D":"在危害物質事故中，考量除污的問題，遺體通常先留置在原先地點，等到事故控制至一定階段後再移動"},"answer":"A","manualChapter":"CH52"},{"id":93,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於災難的描述，以下觀念何者最不適當？","options":{"A":"災難後的大量屍體會造成瘟疫，處理大量屍體最有效的方法就是集體埋入土坑","B":"自然災難時，通常民眾善良的本性會激發出來，自助互助的狀況非常常見，很少會有治安的問題","C":"目前的科技有很多方法可以協助鑑識大量屍體，應該儘可能鑑識屍體身分","D":"在自然災難中，最貧窮的區域通常死傷最嚴重"},"answer":"A","manualChapter":"CH52"},{"id":95,"source":"105 高級救護技術員甄試筆試題目.doc","question":"根據『事故指揮系統』（ICS），以下哪位主管的管理範疇超過了合理範圍？","options":{"A":"『事故指揮官』管理：安全官發言官聯絡官各一名，執行部門80人，計畫部門5人與後勤部門4人","B":"『執行部門部長』管理：一個待命區群組（包括五台救護車，共15個人），一台後送救護直升機（3人），一個現場封鎖小隊（7人），一個搜索搶救群組（內含三個特勤小隊，共12人），一個警方霹靂小組（6人）","C":"『基隆河左岸區域主管』管理：一個河岸搜索小隊（6人），一個河面搜索小隊（6人），一個緊急救護小隊（2人），一台救護車（2人），一台加護型救護車（3人），一台後送救護直升機（3人），自願加入之義消一組（3人），急診醫護團隊（4人）","D":"『後勤部門部長』管理：通訊組（10人，包括一個電話中心），後勤醫療組（6人），飲食組（20人，包括兩單位的野戰廚房），物資供應組（6人），設備管理組（6人），運輸組（12人，包括2台教護車，一台卡車）"},"answer":"C","manualChapter":"CH52"},{"id":96,"source":"105 高級救護技術員甄試筆試題目.doc","question":"以下災難應變的概念，何者正確？","options":{"A":"多重傷病患檢傷的概念是在資源嚴重不足下，盡可能使大多數的傷病患可以得到必要治療，START檢傷法是其中的代表","B":"根據ICS，第一台抵達的應變車輛應該查看現場安全，並等待事故指揮官抵達","C":"應用START檢傷法時，如果你遇到有一個病患無法自行行走且明顯有換氣過度症候群，呼吸速率高達40次/分鐘，應檢為紅色重傷","D":"當後送單位將病患送達醫院後，在醫院內應該進行次級檢傷以決定看診先後次序"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":98,"source":"105 高級救護技術員甄試筆試題目.doc","question":"根據ICS，事故指揮官的管理幕僚包括發言官、安全官與聯絡官，以下何者正確？","options":{"A":"安全官審核應變工作人員的醫療照護計畫","B":"發言官必須批准新聞的發佈","C":"聯絡官必須定期舉行記者會","D":"發言官必須掌握相關機構名單與聯絡方式，並與這些機構交流資訊"},"answer":"A","manualChapter":"CH52"},{"id":163,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"關於事故指揮系統中的發言官（Public Information Offcer）職掌，下列何者為是？","options":{"A":"批准新聞發佈","B":"作為事故應變的對口聯絡人，和相關機構交流資訊","C":"定時舉行記者會","D":"評估事故的安全環境與危害物質的狀況，依狀況擬定防護措施"},"answer":"C","manualChapter":"CH52"},{"id":164,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"某炸彈爆炸案現場發現疑似未爆彈，現場教護指揮官決定跟國軍請求炸彈拆除小組前往處理，該小組成員均有炸彈拆除之處理能力，請問此小組編入現場事故指揮系統（Incident Command System）ICS後可歸類於執行部門的何種單位？","options":{"A":"此小組屬於任務編組（Task Force）","B":"此小組屬於特勤小組（Strike Team）","C":"此小組屬於單一資源（Single Resource）","D":"此小組屬於臨時編組（Temporary Unit）"},"answer":"B","manualChapter":"CH52"},{"id":176,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"在大量傷病患事故，依據START（Simple Triage And Rapid Treatment，簡易分類並迅速治療）檢傷法，下列判定何者為是？","options":{"A":"二十歲男性，癱軟坐在地上，爬不起來，呼吸每分鐘20次，橈動脈脈搏很強，可以和工作人員清楚對談，應該判定為報傷","B":"十歲孩童，呼吸每分鐘42次，微血管充填時間3秒，對工作人員的問話毫不理會，跑來跑去哭喊著找媽媽，應該判定為紅色","C":"五十歲女性，左右小腿均骨折，呼吸每分鐘20次，微血管充填時間1秒，可以和工作人員清楚對談，應該判定為中傷","D":"一百歲老公公，左大腿骨折變形，呼吸每分鐘8次，微血管充填時間5秒，意識不清，應該判定為黑色"},"answer":"C","manualChapter":"CH52"},{"id":198,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"在事故應變時，「危機溝通」相當重要。與民眾或是新聞媒體溝通時，下列作法何者為非？","options":{"A":"發言時不應該偏袒特定的媒體，但如果有媒體特別想要了解某些專業的問題，可以轉介给適合的專家","B":"對大眾發言時應儘量使用專業術語，以提升應變工作人員的專業形象","C":"發言時，盡可能不要接受或引用未經證實的消息","D":"發言官必須監控新聞媒體或群眾之間是否出現謠言，如果謠言可能造成群眾嚴重的負面效應，甚至影響到事故應變進行，發言官應及時向事故指揮官報告，並在授權之下儘速澄清"},"answer":"B","manualChapter":"CH52"},{"id":371,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"以大量傷病患事故，依據START（simple triage and rapid treatment，簡易分類並迅速治療）檢傷法，以下何者的判定最正確？","options":{"A":"12歲孩童，跑來跑去哭喊著找媽媽，呼吸每分鐘45次，微血管充填時間3秒，對工作人員的問話毫不理會，應該判定為紅色","B":"60歲女性，左右小腿均骨折，呼吸每分鐘20次，微血管充填時間1秒，可以和工作人員清楚對談，應該判定為重傷","C":"90歲老公公，左大腿骨折變形，呼吸每分鐘10次，微血管充填時間3秒，意識不清，應判定為黑色","D":"20歲男性，癱軟坐在地上，爬不起來，呼吸每分鐘20次，橈動脈脈搏很強，可以和工作人員清楚對談，應該判定為輕傷"},"answer":"A","manualChapter":"CH52"},{"id":377,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"某次災難事件後，媒體盛讚某同仁擔任執行部門長官深具專業典範，該員同時掌控下屬11個單位的活動並達成救災任務。在災後內部討論中，身為事故指揮官的你會給什麼意見？","options":{"A":"欣賞同仁的傑出表現，但若日後遇到類似事故，建議採取「聯合指揮」原則，救災救難會更有效率","B":"欣賞同仁的傑出表現，但若日後遇到類似事故，建議採取「統一指揮」，讓下屬只跟一位上級報告，避免情報混亂","C":"欣賞同仁的傑出表現，但若日後遇到類似事故，建議採取「管理範疇」原則，避同掌控太多下屬單位","D":"欣賞同仁的傑出表現，但若日後遇到類似事故，建議採取「指揮鏈」原則，可以同時掌控更多下屬單位"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":378,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"以下災難應變的概念，何者正確？","options":{"A":"多重傷病患檢傷的概念是在資源嚴重不足下，盡可能使大多數的傷病患可以得到必要治療，START檢傷法是其中的代表","B":"根據事故指揮系統，第一台抵達的應變車輛應該查看現場安全，並等待事故指揮官抵達","C":"應用START檢傷法時，如果你遇到有一個病患無法自行行走且明顯有換氣過度症候群，呼吸速率高達40次／分鐘，應檢為紅色重傷","D":"當後送單位將病患送達醫院後，在醫院內應該進行次級檢傷以決定看診先後次序"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":381,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"我國某消防單位受命進行風災緊急應變，請問下列應變措施何者正確？","options":{"A":"在該地區唯一可用聯外道路上設立車輛待命區","B":"將所有的輕傷病患集中在一台巴士上後送是相當危險的作法","C":"無論病患狀況如何，所有後送均應送至最近急救責任醫院，不可聽任病患或家屬要求送往次近醫院","D":"若災區出現志工欲加入救災行列，若現場已成立計劃部門則向該部門報到，否則應指示該員向事故指揮官報到"},"answer":"D","manualChapter":"CH52"},{"id":382,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"根據以下ICS地圖，下列選項何者為是？","options":{"A":"◤是事故地點，可以看到周圍有基地B與營地C圍繞作業","B":"H是hospital的縮寫，指的就是位於山丘制高點的救護站，可以避免化學物質流入救護站","C":"S是staging area的縮寫，指的是待命區，必需有腹地且不會影響交通","D":"最左上角的X是後送站，最好設立在交通方便的市區內以便後送"},"answer":"C","image":"題庫圖片/382.png","manualChapter":"CH52"},{"id":387,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"以下關於事故指揮系統中的發言官（public information officer）職掌，何者為是？","options":{"A":"批准新聞發佈","B":"作為事故應變的對口聯絡人，和相關機構交流資訊","C":"定時舉行記者會","D":"評估事故的安全環境與危害物質的狀況，依狀況擬定防護措施。"},"answer":"C","manualChapter":"CH52"},{"id":388,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"某炸彈爆炸案現場發現疑似未爆彈，現場救護指揮官決定跟國軍請求炸彈拆除小組前往處理，該小組成員均有炸彈拆除之處理能力，請問此小組編入現場ICS後可歸類於執行部門的何種單位？","options":{"A":"此小組屬於任務編組（task force）","B":"此小組屬於特勤小組（strike team）","C":"此小組屬於單一資源（single resource）","D":"此小組屬於臨時編組（temporary unit）"},"answer":"B","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":390,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"2013年4月15日美國波士頓馬拉松爆炸案，現場的醫療指導醫師指示EMT「不做現場檢傷」，以最快的速度將所有的傷者直接搬運到距離現場最近的醫療站，請問以下敘述何者為是？","options":{"A":"這是因為國際賽事現場有許多媒體，若從事現場檢傷會導致媒體圍觀，侵犯病患隱私","B":"這是因為爆炸傷害是特殊狀況，不適用大量傷患檢傷系統","C":"這是因為現場若有可能遭受再次恐怖攻擊，在檢傷之前先行移動傷病患是合理的","D":"這是因為檢傷比脫困更花時間，因此故意省略檢傷步驟"},"answer":"C","manualChapter":"CH52"},{"id":397,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"以下何者是事故指揮系統（incident command system，ICS）的基本架構？","options":{"A":"指揮，安全，有效，及時，公平","B":"指揮，安全警戒，災害控制，緊急救護，確適醫療","C":"指揮，執行，安全，聯絡，發言","D":"指揮，執行，計畫，後勤，財務行政"},"answer":"D","manualChapter":"CH52"},{"id":398,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"對於多重傷病患事故（multiple casualty incident）和大量傷病患事故（mass casualty incident）的觀念，以下何者最不正確？","options":{"A":"「多重病患事故」是指傷病患人數多於一人，但尚未超過該地區或系統所能負荷的能量重傷病","B":"依照「多重病患事故」的觀念，現場傷勢最嚴重的病患，即使已無呼吸心跳，也應該優先搶救","C":"依照「大量傷病患事故」檢傷分類的觀念，最應該優先處理的，是傷勢危急但是還可能得救的傷病患，而不是那些即使耗用很多資源也無法拯救生命的瀕死傷病患","D":"依照國際慣例，所有的「大量傷病患檢傷法」都把傷病患區分為黑、紅、黃、綠這四種顏色，優先搶救紅色病患"},"answer":"D","manualChapter":"CH52"},{"id":401,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"在大量傷病患事故的檢傷分類，以下觀念何者最不適當？","options":{"A":"檢傷員應該盡可能在第一時間就完整處理傷病患的傷勢，嚴重傷病患應該立即實施氣管內管插管等等急救步驟，以免延誤病情","B":"如果事故的傷病患人數極多，事故應變的時間較長，那麼，應該考慮讓救護技術員輪流擔任檢傷員，避免同一個人長時間承受檢傷的心理壓力","C":"大量傷病患檢傷分類是非常表淺的診治方式，所著重的是在短時間內區別出病患的嚴重度，不能夠取代實際的診治病患","D":"檢傷之後，不同嚴重度的傷病患所得到的現場處置應該有所區別，檢傷這個步驟才會有所意義"},"answer":"A","manualChapter":"CH52"},{"id":404,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於事故應變，以下描述何者最不適當？","options":{"A":"在實際狀況下，抵達醫院的傷病患，絕大部分都已經經過檢傷、初步處理、和除污的步驟","B":"事故應變所動用的人力和物資是相當可觀的，如果在平時沒有釐清經費的限制，也沒有先訂定資源調度的機制，很可能會在事後面臨索償無門的窘境","C":"最初的現場搜救，大部分是由事故的生還者自行進行","D":"如果事故地點的交通順暢，那麼傷病患很可能會經由非救護車的交通工具，例如私人汽車、警車、巴士、計程車、甚至徒步到醫院"},"answer":"A","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":414,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於START檢傷法，以下敘述何者為是？","options":{"A":"最開始第一步是評估呼吸是否超過30下，或是沒有呼吸","B":"明顯正在出血的開放性傷口可以請輕傷病患幫忙壓迫止血，檢傷人員則迅速移往下個需要檢傷之病患","C":"必須現場有超過15名傷病患才能夠使用此檢傷法","D":"根據以往實戰經驗，評估循環時，採用微血管回填時間比評估橈動脈的有無更為實用方便"},"answer":"B","manualChapter":"CH52"},{"id":417,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"災難應變中，「事故」的周期包括：甲、應變；乙、準備；丙、復原；丁、減災。正確的順序是？","options":{"A":"甲→丁→丙→乙","B":"乙→丙→丁→甲","C":"乙→丁→丙→甲","D":"丁→乙→甲→丙"},"answer":"D","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":418,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"關於事故指揮系統的敘述，下列敘何者為是？","options":{"A":"事故指揮官必須由現場人員出任，而且必須是原本組織中行政位階最高者擔任","B":"聯絡官需依照事故指揮官的指示，設定可以發佈的新聞種類","C":"為了避免媒體散發不實消息，發言官要盡量避免召開記者會，最好等到事件結束後再來召開","D":"夜間高速公路發生連環車禍，現場安全官需確定每個救護人員都穿著反光背心，且協調高速公路警察設立安全錐，導引車流遠離救護現場"},"answer":"D","manualChapter":"CH52"},{"id":419,"source":"第七章 大量傷患與災難應變(2012-2014).doc","question":"在事故發生時，按照事故指揮系統，可以分成多個部門及組別；其中建立文書資料彙整、管理的機制，負責保管及備份事故應變的相關文件工作至為重要，請問這屬於哪一個部門的任務？","options":{"A":"後勤部門","B":"計畫部門","C":"執行部門","D":"財務行政部門"},"answer":"B","manualChapter":"CH52"},{"id":422,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關如「八仙塵暴」大量傷患事故的描述，何者有誤？","options":{"A":"傷患人數與嚴重度大於區域救護資源，可稱為災難","B":"現場傷患，應先做適檢傷分類與處置後後送","C":"以改良式的START（Revised START）檢傷法，可以有效處理「八仙塵暴」大量傷患事故","D":"現場事故控制管理應優於個別傷患處置"},"answer":"C","manualChapter":"CH52"},{"id":423,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關事故應變管理週期之順序，何者為是？1.準備2.應變3.復原4.減災","options":{"A":"1234","B":"1243","C":"4231","D":"4123"},"answer":"D","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":424,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關事故指揮系統ICS（Incident Command System）的敘述，何者有誤？","options":{"A":"指揮架構應配合平時行政組織架構，以發揮指揮效能","B":"指揮權轉移，應轉給ICS運作經驗夠的適任人員，而不是以位階高的人員","C":"事故中指揮權轉移，不宜過於頻繁","D":"事故規模不大，未被指定的職位，由事故指揮官兼任"},"answer":"A","manualChapter":"CH52"},{"id":425,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"當災難發生時，你是第一輛救護車，由資深的你擔任事故指揮官。長官與支援同僚也陸續抵達，這時候指揮權的轉移，何者最不適當？","options":{"A":"由職級高者，層層轉移","B":"可轉移給對事故指揮系統熟悉經驗多之同僚","C":"事故中指揮權轉移，不宜過於頻繁","D":"指揮權的轉移必須依照事故應變的整體狀況來決定"},"answer":"A","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":430,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"下列對災難後的醫療需求的描述，何者為是？","options":{"A":"最大的醫療需求是在前24小時，高峰期：持續三至五天","B":"急性期內科和創傷病患為主","C":"大多數的受害者都是依靠外來的醫療隊伍支援","D":"災區裡的醫療體系不太會受到衝擊"},"answer":"A","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":431,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"一生產鐵片的工廠發生大爆炸，已知傷患有五百位，於檢傷分類時，下列何者為非？","options":{"A":"寬五公分的鐵片，貫穿頸部，病患無呼吸、無脈搏，給予傷票“黑”","B":"寬五公分的鐵片，一端刺穿入胸內，病患呼吸急迫，給予傷票“紅”","C":"寬五公分鐵片，貫穿右大腿，病患不能行走，紅色鮮血直流，給予傷票“黃”","D":"病患左小腿撕裂傷十公分，深可見肌肉，無法行走，給予傷票“黃”"},"answer":"C","manualChapter":"CH52"},{"id":432,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"在災難事故現場，下列何者不是在醫療站時決定病患治療優先順位的影響因素？","options":{"A":"年齡","B":"送達醫療站的先後順序","C":"預估的醫療資源消耗","D":"需要穩定的ABC異常"},"answer":"B","manualChapter":"CH52"},{"id":433,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關START的敘述，何者正確？","options":{"A":"觀察病患的意識狀況為第一步驟","B":"凡是沒有呼吸，可立刻判為黑色","C":"呼吸速度超過每分鐘30下，應判為紅色","D":"START的快速治療主要包括心肺復甦術"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":434,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"在現場進行的初級檢傷時，只能做某些拯救生命的必要措施，這些可歸納成囗訣BASIC，以下選項何者為非？","options":{"A":"Breathe呼吸","B":"Airway呼吸道","C":"Shock休克預防","D":"Classification分類"},"answer":"A","manualChapter":"CH52"},{"id":435,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"下列有關事故指揮系統的描述，下列何者為非？","options":{"A":"共通詞彙（Common terminolog）","B":"模組化（Modular）","C":"管理範疇（Span of Command）","D":"交叉指揮（Conjugated command）"},"answer":"D","manualChapter":"CH52"},{"id":441,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"危物質災難事件如果已經被限制在一定範圍內，事故現場可以劃分出污染區（或為區、紅區）、控制區（或稱為暖區、黃區）及安全區（或稱為冷區、綠區）三個區峨、為層區管制·於層區管制的念，以下敘述何者為非？","options":{"A":"事故周直接或間接（如受污染之傷患及器材）受到危害物質影響之處，應劃定為熱區","B":"安全區在事件開始時即需建立，將支援人員器材集結於此，並設定由下風高處做為嵈區及熱區的出人位置","C":"黃區為介於污染區及安全區之間的緩衝區域，作為除污及病人緊急醫療處理之處","D":"除污走廊應該位於暖區"},"answer":"B","manualChapter":"CH52"},{"id":445,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"在大量傷病患事故，依據START（Simple Triage And Rapid Treatment，簡易分類並迅速治療）檢傷法，以下判定何者為是？","options":{"A":"二十歲男性，癱軟坐在地上，爬不起來，呼吸每分鐘20次，橈動脈脈搏很強，可以和工作人員清楚對談，應該判定為輕傷","B":"十歲孩童，呼吸每分鐘42次，微血管充填時間3秒，對工作人員的問話毫不理會，跑來跑去哭喊著找媽媽，應該判定為紅色","C":"五十歲女性，左右小腿均骨折，呼吸每分鐘20次，微血管充填時間1秒，可以和工作人員清楚對談，應該判定為中傷","D":"一百歲老公公，左大腿骨折變形，呼吸每分鐘8次，微血管充填時間5秒，意識不清，應該判定為黑色"},"answer":"C","manualChapter":"CH52"},{"id":447,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"事故指揮系統（IncidentCommandsystem）創建於1970年代，目的是簡化溝通以及建立明確的指揮系統·以下相關敘述何者為非？","options":{"A":"災難事件指揮系統是由功能的需求·而非個人原有的頭銜，來組織整個架構","B":"災難事件指揮系統應該要等上級指示之後再啟動，越晚成立越能夠有完整的架構與功能，也旨發揮越大的作用","C":"不論災難的本質如何，災難事件指揮系統的架構都是類似的，差異主要是核心人士的特殊專業考量","D":"災難事件指揮系統中，安全官（Safety Officer）的主要任務是負責工作人員的安全，以及特殊災難所需要的特殊技術（例如輻射線偵測以及處理生物感染控制）"},"answer":"B","manualChapter":"CH52"},{"id":448,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於事故指揮系統（Incident Command system）中財務行政部門的功能，下列何為非？","options":{"A":"分析財務成本","B":"維護電力及衛生設備","C":"追蹤應變人員的工作時間","D":"負責與廠商或其它部門簽訂財務契約"},"answer":"B","manualChapter":"CH52"},{"id":449,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於事故指揮系統（Incident command system）的描述，簡稱ICS，下列何者為非？","options":{"A":"主要架構包含指揮、執行、計畫、後勤、財務行政等五個主要的部門","B":"實際使用時，不一定每一組都要成立，是需求及現有資源而決定","C":"ICS架構一旦確立後，就只能增加，不能減少","D":"ICS中一定要有的單位是指揮官"},"answer":"C","manualChapter":"CH52"},{"id":450,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於事故指揮系統（Incident Command system），以下敘述何者為是？","options":{"A":"監督者與下屬的人數比例，建議是1：8較為合適","B":"安全官除了要確保救災及災難受害者安全外，同時要定期向媒體發布相關訊息","C":"資訊（Information）、聯絡（Liaison）、安全（security）等三項是輔助指揮的功能，可以由專人負責，或是由指揮官兼任","D":"指揮官必須對所有的災難都有非常專業的了解，否則不能擔任指揮官"},"answer":"C","manualChapter":"CH52"},{"id":451,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於災害現場的現場救護，何者為非？","options":{"A":"主要重點包含檢傷、治療及後送","B":"治療區一定包含重傷、中傷及輕傷區","C":"救護車後送的傷患人數通常只佔所有就醫傷患的一部分，所以後送時儘可能將中傷與重傷病患分配至不同醫院以避免壅塞","D":"檢傷是動態的，在現場救護區進行的檢傷統稱為「次級檢傷」，與檢傷的次數無關"},"answer":"B","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":452,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關院外災害現場緊急應變作業，下列敘述何者為非？","options":{"A":"在大量傷病患事故，可以簡易檢傷及快速治療法則（Simple Triage and Rapid Treatment,START）做檢傷分類","B":"在災害現場若有危及救護人員的情況，應以減少現場處置快速轉送為原則","C":"可將輕傷病人送往較遠的醫院，以免造成當地醫院急診壅塞，而無法有效處理重症病人","D":"為了儘速救災，指揮官應要求最近急救責任醫院派出醫療人員組成救護隊前往救援"},"answer":"D","manualChapter":"CH52"},{"id":453,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"在大量傷病事故，依照Simple Triage and Rapid Treatment（START）檢傷分類法評估以下病患：．中年女性：可行走，全身多處擦傷，包括兩側膝蓋與左側手掌，左小腿有4公分之撕裂傷持續出血中。．老年男性：意識不清對痛無反應，橈動脈摸得到。左頭皮有10公分撕裂傷，持續流血。．年輕女性：無法行走，意識清醒，血壓130/58 mmHg，脈搏126/分鐘，呼吸20/分鐘，跌倒後右膝蓋腫脹。．中年男性：無法行走，意識混亂，血壓130/60 mmHg，脈搏130/分鐘，呼吸36/分鐘，颜面部呈焦黑，眉毛被燒至焦黑，呼吸困難。．老年男性：四肢無力無法移動，不停呼叫求救，但可以配合簡單指令，血壓125/60 mmHg，脈搏90/分鐘，呼吸12/分鐘，除前額血腫外無其他明顯外傷。．年輕男性：可行走，意識清楚，血壓110/68 mmHg，心跳89/分鐘，呼吸16/分鐘，左小腿壓傷，輕微腫脹，表面擦傷約8公分×4公分，無變形或出血。．中年女性：無法行走，打開呼吸道後沒有呼吸，沒有脈搏。遭重物壓迫後左側小腿截肢，附近發現殘肢。經過你的檢傷分類後，請問分類的結果應該為何？","options":{"A":"2黑1紅2黃2綠","B":"1黑2紅2黃2綠","C":"1黑2紅1黃3綠","D":"2黑2紅1黃2綠"},"answer":"B","manualChapter":"CH52"},{"id":454,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"使用START（Simple Triage And Rapid Treatment）方法進行檢傷分類時，容易被「輕症重判」的病患，下列何者為非？","options":{"A":"失聰傷患","B":"嗆傷傷患","C":"過度換氣傷患","D":"下肢殘障傷患"},"answer":"B","manualChapter":"CH52"},{"id":464,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"事故指揮系統（ICS）各核心職位與任務的敘述，哪一個最不妥當？","options":{"A":"事故指揮官：監控各部門的應變效率","B":"聯絡官：聯絡安排參訪或訪談","C":"發言官：提供必要的消息給應變工作人員","D":"安全官：審核應變工作人員的醫療照護計畫"},"answer":"B","manualChapter":"CH52"},{"id":790,"source":"第五章 創傷急症(2012-2014).doc","question":"某夏日下午，你正與朋友約在高爾夫球場咖啡廳聊天，聊的正開心的時候外面突然下起大雷雨且雷電交加，此時聽到球場工作人員大叫：「有一組球友被雷擊了！」；身為高級救護技術員的你，此時當然放下手中的飲料飛奔至現場幫忙。映入眼簾的是有三名病患倒在地上，另有一名病患在旁邊呆站著喃喃自語，請問下列敘述何者為非？","options":{"A":"在做現場評估救護以前，應先確認環境安全，考慮請人幫忙將倒地三人移至安全處，以免再遭雷擊","B":"甲病患倒在地上但意識清楚，看起來非常緊張且不斷請求你幫忙，說著他全身好麻無起身，除呼吸每分鐘32下外，生命徵象看來穩定，全身無明顯外傷，橈動脈摸的到，此病患應判成綠色。","C":"乙病患有意識，外觀除右下肢嚴重變形外看起來均正常，橈動脈摸的到且可以遵從你的指令做動作，此病患應判為黃色。","D":"丙病患無意識無呼吸，打開呼吸道兩次仍然沒有自發性呼吸，此病患應判為黑色傷患但需優先救治。"},"answer":"B","manualChapter":"CH52"},{"id":810,"source":"第五章 創傷急症(2015-2018).doc","question":"在多重外傷病患之急救時，pulse oximetry為一種非常有用的非侵襲性之工具，被用來偵測血中血紅素氧氣之飽和度。Pulse oximeter的感應器可方便的置於許多體表處。但是下列何處並不適合？","options":{"A":"手指","B":"耳垂","C":"量自動血壓計的四肢","D":"腳趾"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":914,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於事故指揮系統（Incident Command System），以下敘述何者最不適當？","options":{"A":"事故指揮系統是由功能的需求，而非個人原有的頭銜，來組織整個架構","B":"應該要等上級指示之後再啟動事故指揮系統，越晚成立越能夠有完整的架構與功能，也才能發揮越大的作用","C":"事故指揮系統具有明確的架構，但並非每個事故都必須要啟動所有的功能群","D":"不論事故的本質如何，事故指揮系統的架構都是類似的，差異主要是核心人士的特殊專業考量"},"answer":"B","manualChapter":"CH52"},{"id":921,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於事故指揮系統（incident command system，ICS）的描述，以下觀念何者為非？","options":{"A":"事故指揮官（incident commander）必須確認指揮權順利轉移，並決定解除動員的時機和流程","B":"安全官（safety officer）必須評估事故的安全環境與危害物質的狀況，依狀況擬定防護措施","C":"執行部門（operation section）通常是事故現場最先成立的部門，如果後續來協助的人員和器材相當多，應該自行選定不同地點開始工作，以免混亂","D":"後勤部門（logistic section）負責提供工作人員醫療照護、餐飲，處理設備和補給品；這個部門所提供服務的直接對象是工作人員，而不是災民"},"answer":"C","manualChapter":"CH52"},{"id":922,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於多重傷病患事故（multiple casualty incident）和大量傷病患事故（mass casualty incident）的觀念，以下何者為非？","options":{"A":"「多照重傷病患事故」是指傷病患人數多於一人，但尚未超過該地區或系統所能負荷的能量","B":"依照「多照重傷病患事故」的觀念，現場傷勢最嚴重的病患，即使已無呼吸心跳，也應該優先搶救","C":"依照「大量傷病患事故」檢傷分類的觀念，最應該優先處理的，是傷勢危急但是還可能得救的傷病患，而不是那些即使耗用很多資源也無法拯救生命的瀕死傷病患","D":"依照國際慣例，所有的「大量傷病患檢傷法」都把傷病患區分為黑、紅、黃、綠這四種顏色，優先搶救紅色病患"},"answer":"D","manualChapter":"CH52"},{"id":923,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於事故應變的原則，以下何者為非？","options":{"A":"依照管理範疇（span of command）的觀念，可以有效管理的人數或單位通常是有限的，所以每個單位底下的子單位最好可以控制在3～7個之間","B":"如果有更適任或階層更高的人員已經抵達現場加入應變，那麼，在專業技術或法律規範的考量下，可以考量轉移指揮權","C":"平常一起工作的人員，或是同一個機構的人員，應該都要儘可能打散重新編組，使得記錄及通訊連絡更有效率","D":"報案電話應該保留給緊急事故通報之用，所以應該宣導民眾，盡量不要撥打119或110來詢問傷病患的動向"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":927,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"在大量傷病患事故的屍體處理，以下觀念何者為非？","options":{"A":"明顯死亡的屍體，只有在獲得許可之後，才能夠移動位置，因為這牽涉到死因鑑識和其它的法律問題","B":"如果橫陳的屍體阻礙了逃生或援救的通道，這種緊急狀況下可以搬動屍體來開通通道","C":"在危害物質事故中，考量除污的問題，遺體通常先留置在原先地點，等到事故控制至一定階段後再移動","D":"為了表示對死者的尊重，應該儘可能使用救護車把屍體載送到殯儀館或其他暫時安厝的場所"},"answer":"D","manualChapter":"CH52"},{"id":2081,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"下列有關START檢傷法的限制，何者為非？","options":{"A":"START檢傷法所適用的對象主要是鈍傷的傷病患，對於穿刺傷、嗆傷、化災傷病患的分類就不是那麼可靠。","B":"START檢傷法容易「輕症重判」，而不會「重症輕判」。","C":"孕婦也很容易誤判嚴重度，因為懷孕期的生理變化使得她們相對上可以容忍較多的失血。","D":"氣溫偏低的狀況下，人體周邊血管會收縮以減少體熱散逸，因此正常人的微血管充填時間也很可能超過兩秒，造成輕症重判。"},"answer":"B","manualChapter":"CH52"},{"id":2082,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"事故指揮系統中，安全官的職責不包含以下哪個？","options":{"A":"緊急制止危險的救援行動。","B":"以對事故指揮官提出安全方面的建議。","C":"確保工作人員都能夠保護自己和民眾的安危。","D":"執行人員出入管制。"},"answer":"D","manualChapter":"CH52"},{"id":2087,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"你是大量傷患現場的後送小組成員，你手上還有三個重傷與十多個輕傷傷患，最近的醫院是地區醫院等級，已經被自行前往的病人癱瘓。合理距離內還有一家區域醫院與醫學中心是急救責任醫院，請問以下的處置何者最為正確？","options":{"A":"可以將剩下三位重傷病人『輪送』這三家醫院，避免通通都送往醫學中心。","B":"十多個輕傷傷患可以採用『群送』到醫學中心，避免他們脫離現場自動前往最近地區醫院加深壅塞。","C":"地區醫院要求消防局協助將某些處理過的重傷傷患轉至醫學中心，由於我國法律禁止消防單位做『院際轉診』，所以應予以婉拒並提供民間救護車聯絡方式。","D":"重傷傷患可採取『繞道』跳過最近的地區醫院，在跟地區醫院溝通後，某些重傷患者可以送至該院，而不用送到醫學中心。"},"answer":"D","matchedChapters":["CH52"],"manualChapter":"CH52"},{"id":2170,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"有關於大量傷患後送原則，下列敘述何者最不適當？","options":{"A":"當有一群傷患產生，且傷情都差不多，可以採取「群送」的概念，送往較遠的醫院。","B":"當醫院已經超過負荷，可以採取「滿載」的概念，避免送往該家醫院。","C":"當出現特殊傷病患時，可以採取「繞道」的概念，將患者送往醫學中心救治。","D":"當附近醫院能量都差不多時，可以採取「輪送」的概念，避免醫院短時間接收太多傷患。"},"answer":"B","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":2179,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"颱風期間，出勤執行緊急救護任務，徒步前進時發現路段積水且有電線落於其中。下列處置，何者最適當？","options":{"A":"立即撤回並待命。","B":"穿戴絕緣防護裝備並繼續執行。","C":"等待當地單位確認電源狀況。","D":"使用船隻繞過危險區域。"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":2265,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"工廠爆炸多人被救出，現場採START/JumpSTART檢傷，其中rapid treatment快速治療，何者不是？","options":{"A":"暢通呼吸道。","B":"直接加壓止血。","C":"給予胸封貼。","D":"給予人工呼吸。"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":2266,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"事故指揮系統( Incident Command System，ICS )將事故指揮官下轄的工作人員區劃為管理幕僚(management staff)與功能幕僚(supportive staff)兩大類型。對於規劃在管理幕僚的人員裡，下列何者為非？","options":{"A":"發言官(Public Information Officer，PIO)。","B":"安全官(Safety Officer)。","C":"聯絡官(Iiaison Officer)。","D":"財務官(Finance Officer)。"},"answer":"D","manualChapter":"CH52"},{"id":2363,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於三級檢傷，下列敘述何者為非？","options":{"A":"在現場進行的檢傷分類稱為現場檢傷(field triage)，也有人稱為初級檢傷(primary triage)。","B":"初級檢傷，口訣BASIC，也就是B (Bleeding，控制出血)，A(Airway，呼吸道)，S (Shock，預防休克)，I(Ice packing，冰敷)，C(Classification，分類)。","C":"SAVE檢傷法是目前較為人所知的次級檢傷方式。","D":"傷病患後送到醫療院所之後，在醫院內進行的檢傷稱為三級檢傷(tertiary triage)。"},"answer":"B","manualChapter":"CH52"},{"id":2375,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"下列何者不是「事故指揮系統ICS」之核心價值？","options":{"A":"共通詞彙：使用標準化詞彙，在跨部會應變通訊時，避免誤解。","B":"模組化：採由上而下的設計，根據事故種類跟發展，可將基本架構擴編或者縮編，具有彈性。","C":"指揮：事故一開始就必須建立明確的指揮系統，並且隨事故發展轉移指揮權。","D":"發言：根據事故指揮官指示，設定發言人，提供正確且正式的新聞。"},"answer":"D","manualChapter":"CH52"},{"id":2376,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於安全官的任務，下列何者最不適當？","options":{"A":"審核應變行動計畫的安全議題。","B":"緊急制止危險的應變行動。","C":"參與計畫會議。","D":"評估現場狀況。"},"answer":"D","manualChapter":"CH52"},{"id":2457,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"大地震後災區病人的預期健康狀況，下列何者為非？","options":{"A":"急性心肌梗塞比例會增加。","B":"孕婦流產及早產的情形將較為少見。","C":"大部份嚴重的傷患，應該都是合併多處創傷。","D":"傷患常因頭、胸部嚴重壓傷造成立即死亡。"},"answer":"B","manualChapter":"CH52"},{"id":2459,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"使用START法進行檢傷時有些傷患的病情容易被誤判為重症，但下列何者除外？","options":{"A":"孕婦。","B":"失聰傷患。","C":"下肢殘障傷患。","D":"過度換氣傷患。"},"answer":"A","manualChapter":"CH52"},{"id":2465,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"事故指揮系統中，以下哪項應為執行部部長的任務？","options":{"A":"確保轄屬的工作人員都依照安全規範執行任務。","B":"收集、分析、散發資訊。","C":"提供資源和服務，以協助事故應變順利進行。","D":"保存災害復原記錄與損害記錄。"},"answer":"A","manualChapter":"CH52"},{"id":2466,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"大量傷患檢傷分類大部分的國家係分成四級，依照顏色來表示，下列敘述何者錯誤？","options":{"A":"紅色：重傷，屬於優先處理患者，患者通常傷勢嚴重危及生命，但若及時治療存活機會大，如身體大量出血，上呼吸道阻塞，張力性氣胸。","B":"黃色：中傷，暫緩治療，患者通常有顯著傷勢，但是稍微晚點處置不會危及生命，也不會造成嚴重的後遺症，如股骨骨折。","C":"綠色：皮肉輕傷，可自己行走，延遲處理也不會有後遺症。但需要小心有惡化成紅色或黃色的情形。","D":"黑色(白色)：瀕死，多處重大創傷或者已經是明顯死亡的傷病患，全世界處理順序都是最後處治。"},"answer":"D","manualChapter":"CH52"},{"id":2467,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"事故應變的現場作業又區分為現場評估→集結檢傷→現場救護→確適醫療。以下敘述何者錯誤？","options":{"A":"現場評估的重點包含4個S，也就是確保安全(Safety)，事故資訊(Size-up)，狀況回報(Send Information)，及建立指揮(Set up)。","B":"集結檢傷屬於現場檢傷，主要目的在決定醫療處理的優先順序，因此屬於初級檢傷。","C":"現場救護被視為事故現場與確適醫療之間的過渡階段，主要的重點有3T，檢傷(Triage)，治療(Treatment)，後送(Transport)。","D":"確適醫療是指醫院有足夠能力以及足夠容量來處理這個患者，不需要再轉介至其他醫療院所治療。"},"answer":"B","manualChapter":"CH52"},{"id":2468,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"對於大量傷患後送至確適醫療單位的原則與現況，下列敘述何者為非？","options":{"A":"相較於重症傷患，輕症傷患常在初期湧入醫院消耗大量處理能量，以致當重症傷患送達時沒有足夠人力和設備處理。","B":"輪送(rotating)適用於事故地點附近醫院的距離、處理能力和容量都相似時，將嚴重度類似的傷患輪流後送以避免醫院不堪負荷。","C":"當某醫院已超乎負荷，沒有能力接收新傷患時，應採取繞道(bypass)原則，避開這家無法負荷的醫院。","D":"群送(packaging)適合用於輕症傷患，將一整群傷患一起送到某家醫療院所，轉送前須確認該醫院有足夠的接收容量。"},"answer":"C","manualChapter":"CH52","explanation":"大量傷患後送原則有輪送、群送、分流及繞道\n輪送指醫院處理能力和容量都類似，避免某一家醫院在短時間接收太多病人，不堪負荷，是一種分配的方式。\n群送指將一整群輕傷病人以救護巴士等車輛一起送到較遠的醫療院所，降低\n病人追蹤困難，需事先確認該醫院有足夠的接收容量。\n分流指醫院已經超乎負荷，這時應該將病人後送到其他醫院。\n繞道指能處理重症或特殊病人的醫院較遠，為避免送到最近醫院無法處理而浪費時間轉院，故直接送較遠能處理之醫院。記憶技巧：大量傷患後送原則：輪送、群送、分流及繞道，各有不同情境。"},{"id":2544,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"關於事故指揮系統(ICS)計劃部門的功能，下列何者為非？","options":{"A":"提供現況報告。","B":"徵詢專家意見。","C":"協助制定事故執行計劃。","D":"保存災害復原記錄與損害記錄。"},"answer":"D","manualChapter":"CH52"},{"id":2549,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"下列有關START檢傷法的描述，何者為非？","options":{"A":"鈍傷的傷病患適用於START檢傷法。","B":"八仙樂園粉塵暴燃事件的傷病患，若使用START檢傷法，則不是那麼準確。","C":"郵輪觸礁的落海旅客，所受傷害除了創傷之外，也會受到低體溫和嗆入的傷害。這時候使用START檢傷法很可能不準確。","D":"爆炸造成穿刺傷為主的大量傷患，以及化災的大量傷病患，也都適用於START檢傷法。"},"answer":"D","manualChapter":"CH52"},{"id":2550,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"大型事故應變時，關於事故指揮系統的敘述，以下何者為是？","options":{"A":"後勤部門應設立待命區，現場剛報到而尚未指派任務的救護人員和器材，應該先在該區待命。","B":"後勤部門也該有服務功能，譬如工作人員受傷時，後勤醫療組應提供相關的醫療服務。","C":"執行部門通常是事故現場最後成立的部門，所謂謀定而後動，可避免後續事件擴大。","D":"執行部門在進行任務編組時，應確實掌握相同職類的人員才可以編成一組，以避免任務分派混淆。"},"answer":"B","manualChapter":"CH52"},{"id":2551,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"大量傷病患事件時，若依據START/JumpSTART檢傷法，對傷病患進行檢傷，下列何者為是？","options":{"A":"65歲男性，聽到你的呼喊，無法自行前往集合，但是可以望著你，揮揮手示意你過去攙扶他。你評估他呼吸每分鐘38次，給予判定為中傷。","B":"80歲女性，呼喊集合時，可以自行行走，但是眼神十分疲憊，你給予判定為中傷。","C":"7歲小男孩，爸爸抱著，無法自行行走，呼吸每分鐘32次，可以觸摸到脈搏，對你的叫喚有反應，判定為中傷。","D":"56歲男性，癱坐地上，呼吸每分鐘26次，微血管充填時間1秒，可以依指令舉起右手，判定為輕傷。"},"answer":"C","manualChapter":"CH52"},{"id":2643,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"有關SALT檢傷法之敘述，下列何者最適當？","options":{"A":"第一步先對病人進行整體分類，靜止不動以及有明顯生命垂危的病人應該列為最優先評估順位。","B":"個別評估實施有限的救命措施，係指僅可使用止血帶來控制大出血，其他處置待檢傷分類後再操作。","C":"SALT檢傷法將傷患分為立即、預期、延遲、輕微等4個類別。","D":"當現有資源不足以應付病人傷勢而預期無法生存，則應將其分類為預期，並標記為黑色。"},"answer":"A","manualChapter":"CH52"},{"id":3311,"source":"AI出題","manualChapter":"CH52","question":"關於大型災害事故現場的事故指揮體系（ICS）與地點建立觀念，下列敘述何者正確？","options":{"A":"人員裝備集結區（Staging Area）應該設在危險的黃區（管制區），以便資源能在第一時間衝入紅區救援","B":"醫療救護站（Treatment Area）應區分為紅、黃、綠區，通常會選擇設置在交通便利、安全且與事故指揮所（ICP）保持適當距離的冷區","C":"為了簡化通訊，事故現場的最高指揮官（IC）必須親自兼任所有幕僚長與各組組長職務，不應轉授權","D":"當多個跨單位（如消防、警察、衛生局）共同進駐事故指揮所時，應採取各自獨立指揮模式，不需建立聯合指揮（Unified Command）"},"answer":"B"},{"id":3326,"question":"現場評估的重點包含4個S，請問下列何者為非?","options":{"A":"確保安全(Safety)","B":"分類(Sort)","C":"狀況回報(Send Information)","D":"建立指揮(Set up)"},"answer":"B","source":"TP題庫","manualChapter":"CH52"},{"question":"負責提供事故應變所需的資源與服務，且支援的對象為工作人員，並非事故中的傷病患，為ICS架構中的？","options":{"A":"後勤部門","B":"計劃部門","C":"執行部門","D":"以上皆非"},"answer":"A","manualChapter":"CH52","id":3355,"source":"TP題庫 (圖片匯入)"},{"question":"下列事故指揮系統的核心價值，何者不是?","options":{"A":"共通詞彙","B":"指揮","C":"模組化","D":"人員安全"},"answer":"D","manualChapter":"CH52","source":"TP題庫 (圖片匯入) - EMT-P 第 52 章 P.1413","id":3473},{"source":"EMT-P 第 52 章 P.1440","question":"災難檢傷區的主要目的為何？","options":{"A":"決定脫困的優先順序及給予傷患","B":"決定醫療優先順序或後送優先順序","C":"初次辨識死者身份","D":"給予救護處置"},"answer":"B","id":3734,"manualChapter":"CH52","matchedChapters":["CH52"]},{"id":45660,"question":"在SALT檢傷法中，救命介入措施(LSI)包含下列何者？","options":{"A":"對疑似張力性氣胸患者執行針刺減壓","B":"明顯休克徵象的患者給予建立IV/IO靜脈輸液","C":"呼吸衰竭的患者預防性置入聲門上呼吸道","D":"給予保暖物品以預防低體溫"},"answer":"A","source":"同學出題","manualChapter":"CH52"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

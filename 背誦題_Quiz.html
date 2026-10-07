@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">背誦題 測驗</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：86 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：背誦題</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":9,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMTP給病患舌下含NTG片時，應在救護紀錄表上紀載的給藥途徑縮寫是？","options":{"A":"P.O.","B":"S.L.","C":"PR","D":"S.C."},"answer":"B","manualChapter":"背誦題","matchedChapters":["背誦題"]},{"id":260,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"有關一氧化碳血紅素半衰期，在一大氣氣壓100％氧氣約為多久？","options":{"A":"30分鐘","B":"60分鐘","C":"90分鐘","D":"120分鐘"},"answer":"C","manualChapter":"背誦題","matchedChapters":["背誦題"]},{"id":646,"source":"第二章 基礎醫學與呼吸處置(2015-2018).doc","question":"到院前處置中，我們可以依照成人傷患骨折的部位估計其出血量。以下何者為非？","options":{"A":"單側肱骨骨折出血量約250mL","B":"雙側股骨骨折出血量約1,000mL","C":"骨盆骨折出血量約1,500～3000mL","D":"雙側脛腓骨骨折約1,000mL"},"answer":"B","manualChapter":"背誦題","matchedChapters":["背誦題"]},{"id":1050,"source":"第四章 非創傷急症(2012-2014).doc","question":"對於張力性氣胸進行針刺減壓的正確位置是？","options":{"A":"鎖骨中線第二肋間","B":"腋中線第二肋間","C":"腋中線第三肋間","D":"鎖骨中線第三肋間"},"answer":"A","matchedChapters":["背誦題"],"manualChapter":"背誦題"},{"id":2206,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"關於成人基本救命術(basic life support)目前的科學證據與急救指引，以下敘述何者最適當？","options":{"A":"因心室顫動或無脈性心室頻脈的OHCA病人，每延遲一分鐘的心肺復甦術會使存活率下降17~20%。","B":"電擊去顫前，目擊者有施行心肺復甦術，OHCA病人的存活率下降會比較慢，大約每分鐘降3~4%。","C":"高品質心肺復甦術包含盡量減少中斷壓胸時間，是指胸部按壓時間須佔所有搶救時間的50%以上。","D":"從病人心跳停止導致腦部沒有血液供應的那一刻起，10分鐘後腦細胞就會因為缺氧而開始分解破壞。"},"answer":"B","matchedChapters":["背誦題"],"manualChapter":"背誦題","explanation":"p629 CH23 研究顯示，對於發生心室顫動或無脈性心室頻脈而猝死的病人，每延遲一分鐘的心肺復甦術會使存活率下降7~10％，當目擊者有施行心肺復甦術時，存活率的下降會比較慢，大約每分鐘降3~4％。"},{"id":2602,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"35歲女性，體重約50公斤火場救出後經初步評估為整隻右手臂及整隻右腿的深度灼傷（皆為二度或三度灼傷），根據修正後布魯克公式(modified Brooke formula)前八小時應給予多少輸液量？","options":{"A":"1,350ml。","B":"1,800ml。","C":"2,700ml。","D":"3,600ml。"},"answer":"A","manualChapter":"背誦題","matchedChapters":["背誦題"]},{"id":3534,"source":"AI出題","question":"急性肝炎（Acute Hepatitis）最常見的致病原因及傳染途徑?","options":{"A":"病毒性，血液或體液傳染","B":"細菌性，血液或體液傳染","C":"病毒性，接觸傳染","D":"細菌性，接觸傳染"},"answer":"A","manualChapter":"背誦題","matchedChapters":["背誦題"]},{"source":"EMT-P 第 44 章 P.1149","question":"熱衰竭病患的中心體溫通常會升高到攝氏多少度左右？","options":{"A":"43°C","B":"39°C","C":"37°C","D":"41°C"},"answer":"B","manualChapter":"背誦題","matchedChapters":["CH44"],"id":3865},{"source":"練習卷","question":"孕婦失去多少血容量才會出現低血容症狀?","options":{"A":"10-15%","B":"20-25%","C":"30-35%","D":"40-45%"},"answer":"C","id":45452,"manualChapter":"背誦題"},{"id":45456,"question":"請填入空格：Hyperacute T wave通常在心肌梗塞後第____個小時內出現(相對標準：超過其前 QRS 幅度的50%，若超過75%則一定視為超急性 T 波)-臨床上看到超急性 T 波時，應警覺病人有極高機率發生____。","options":{"A":"1，stemi","B":"3，stemi","C":"1，VF","D":"3，VF"},"answer":"C","source":"自訂新增","manualChapter":"背誦題"},{"id":45464,"question":"愛滋病患者在 CD4 淋巴球總數下降到約多少範圍時，會開始出現正常人少見的伺機性感染（如肺囊蟲肺炎）？","options":{"A":"800~1200 顆/μL","B":"10~50 顆/μL","C":">500 顆/μL","D":"200~350 顆/μL"},"answer":"D","source":"TP題庫","manualChapter":"背誦題","explanation":"p1103 CH42 一般而言，血液中CD4細胞數與病人得到的伺機性感染種類有關，通常CD4在血液中總數超過500顆/μL時病人不容易有伺機性感染，但CD4細胞數目在愛滋病毒長期破壞下會逐漸減少，當其總數下降到200~350顆/μL左右或更低時，便開始出現正常人不會得到的伺機性感染，包括肺囊蟲引發呼吸急促甚至呼吸衰竭、肺結核(10.6％愛滋病毒感染者)、巨細胞病毒/黴菌感染，死亡率很高的禽型分枝桿菌(MAC)感染，甚至一些罕見癌症，腦部病變及寄生蟲感染等。"},{"id":45465,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列台灣常見的毒蛇咬傷後，哪一種可能會引起呼吸衰竭？","options":{"A":"赤尾青竹絲","B":"龜殼花","C":"百步蛇","D":"眼鏡蛇"},"answer":"D","manualChapter":"背誦題"},{"question":"填入空格：固定式抽吸裝置應可提供超過_____mmHg的吸力，以及_____L/min 的流量。移動式抽吸裝置雖然吸力較小，流量仍應不可小於20L/min。","options":{"A":"300，50","B":"300，40","C":"100，50","D":"100，50"},"answer":"B","source":"大白","id":45468,"manualChapter":"背誦題"},{"question":"研究顯示，將重大外傷送到外傷中心治療可以減少_____％的死亡率","options":{"A":"10%","B":"25%","C":"40%","D":"50%"},"answer":"B","source":"大白","manualChapter":"背誦題","id":45483},{"question":"衛生福利部依據醫院對重大外傷、急性冠心症、急性腦中風、高危險妊娠及新生兒之照護品質，將急救責任醫院分成三個等級","options":{"A":"極嚴重級、重度級、中度級","B":"重度級、中度級、一般級","C":"重度級、中度級、輕度級","D":"極嚴重級、中度級、輕度級"},"answer":"B","source":"大白","manualChapter":"背誦題","id":45485},{"id":45488,"question":"下列哪項非新生兒發生癲癇重積的代謝疾患原因？","options":{"A":"低血糖","B":"低血鈣","C":"低血鉀","D":"低血鈉"},"answer":"C","source":"大白","manualChapter":"背誦題"},{"id":45490,"question":"乙二醇的毒性作用可以影響中樞神經、心肺系統以及腎臟系統，並且會造成哪種電解質異常?","options":{"A":"高血鉀","B":"低血鈣","C":"高血鈣","D":"低血鎂"},"answer":"B","source":"大白","manualChapter":"背誦題","explanation":"p1373 CH50 乙二醇的毒性來自於有毒代謝物的累積，特別是代謝以後產生的乙醇酸及草酸。這些主要發生在肝臟及腎臟。這個毒性作用可以影響中樞神經、心肺系統以及腎臟系統，並且會造成低血鈣。"},{"id":45492,"question":"目標體溫管理除了會影響免疫系統，同時與何種電解質異常有關?","options":{"A":"高血鉀","B":"低血鈉","C":"低血鈣","D":"高血鎂"},"answer":"C","source":"大白","manualChapter":"背誦題","explanation":"目標體溫管理（Targeted Temperature Management, TTM，特別是低體溫期 32–34°C）常會對電解質造成偏低的情形，針對免疫系統，低體溫會抑制發炎反應與細胞激素釋放，同時也會抑制白血球趨化、吞噬能力與免疫功能，進而增加感染（尤其是肺炎與敗血症）的風險。"},{"id":45513,"question":"關於懷孕分期及症狀，下列敘述何者正確?","options":{"A":"懷孕第一期指第一到三月，此時陰道出血有可能是急迫性流產或子宮外孕","B":"懷孕第二期指第三到五月，有可能發生子癇前症和子癇症","C":"懷孕第三期指第六到九月，陰道出血合併腹痛有可能是因為胎盤早期剝離","D":"懷孕第一期指第一到二月，此時血壓將會下降10~15mmHg"},"answer":"A","explanation":"P1297\n懷孕一般可以三個月為一期，第一期指第一到三月、第二期指第四到六月、第三期指第七到九月。\n如果懷孕第一期的病人，陰道出血有可能是因急迫性流產、完全性流產或子宮外孕。在懷孕第三期的病人，陰道出血合併腹痛有可能是因為胎盤早期剝離。\n血壓在懷孕第二期將會下降10~15mmHg。\n自發性流產和子宮外孕一般發生在懷孕第一期，子癇前症和子癇症一般發生在懷孕第二期，而胎盤早期剝離、前置胎盤則發生於懷孕第三期。","source":"同學出題","manualChapter":"背誦題"},{"id":45515,"question":"血友病（Hemophilia）患者因凝血因子缺乏而容易反覆出血。在各類出血併發症中，下列何者為導致血友病患者死亡的最主要出血部位？","options":{"A":"關節腔出血（Hemarthrosis）","B":"腸胃道出血（Gastrointestinal bleeding）","C":"中樞神經系統／顱內出血（Intracranial hemorrhage）","D":"腹膜後腔出血（Retroperitoneal bleeding）"},"answer":"C","source":"大白","manualChapter":"背誦題"},{"id":45518,"question":"填入空格：______將口腔及鼻腔分開；______連接鼻腔與鼻咽。","options":{"A":"硬顎、外鼻孔","B":"硬顎、內鼻孔","C":"軟顎、外鼻孔","D":"軟顎、內鼻孔"},"answer":"B","source":"大白 p266","manualChapter":"背誦題"},{"id":45520,"question":"細胞外液沒有以下哪些電解質?","options":{"A":"鉀離子","B":"鈉離子","C":"氯離子","D":"重碳酸根離子"},"answer":"A","source":"大白 p255","manualChapter":"背誦題"},{"id":45522,"question":"臨床解剖與超音波檢查常將腹部及骨盆內部空間劃分，下列何者為構成腹部內部空間的三個主要腔室？","options":{"A":"胸膜腔、縱隔腔、腹膜腔","B":"腹膜腔、後腹腔、骨盆腔","C":"腹膜腔、心包膜腔、胸膜腔","D":"後腹腔、胸膜腔、骨盆腔"},"answer":"B","source":"大白","manualChapter":"背誦題"},{"id":45524,"question":"有關細胞膜與細胞的「靜止膜電位」及「動作電位」敘述，下列何者正確？","options":{"A":"細胞膜主要結構為雙層磷脂層，外層帶親水性","B":"細胞膜內外間具有電位差，在靜止狀態下細胞膜通常維持「內正外負」的狀態","C":"動作電位的形成首先是由鉀離子通道開啟使細胞膜去極化","D":"一般來說氯離子的濃度是細胞內比細胞外高"},"answer":"A","source":"大白","manualChapter":"背誦題"},{"id":45529,"question":"填入空格：從病人心跳停止導致腦部失去血液供應的那一刻算起，____分鐘後腦細胞就會因為缺氧而損傷，____ 分鐘後將產生不可逆的大範圍壞死","options":{"A":"10、20","B":"8、 16","C":"1、10","D":"4、10"},"answer":"D","source":"大白","manualChapter":"背誦題"},{"id":45530,"question":"填入空格：猝死病人若能在____分鐘內接受心肺復甦術，並且在____分鐘內接受必要的電擊去顫術，甚至恢復自發性心肺循環，將可使存活率提高至____％之多","options":{"A":"10、15、 49~75％","B":"4、  8、 35~50％","C":"4、 8、 49~75％","D":"10 、 15、 35~50％"},"answer":"C","source":"大白","manualChapter":"背誦題","explanation":"CH23 p627"},{"id":45531,"question":"CPR是維持心臟和腦部灌流最重要的急救措施，因此施救者須盡量減少中斷壓胸的時間。CCF即「持續壓胸時間加總」占「整體搶救過程的總時程」的比例。關於CCF的目標敘述何者錯誤?","options":{"A":"CCF最好能達到80％以上","B":"施救者之間換手的間隔要小於10秒","C":"電擊前停止壓胸到電擊後恢復壓胸其間隔(peri-shock pause)盡量小於20 秒","D":"CCF至少達到60％以上"},"answer":"B","source":"大白","manualChapter":"背誦題","explanation":"CH23 p634\n施救者之間換手的間隔要小於5秒"},{"id":45533,"question":"填入空格：從40~80歲時，腎臟的重量約減少____ ％，腎功能的持續下降容易使高齡病人因為外傷、泌尿道阻塞、感染或血管阻塞而造成腎衰竭。","options":{"A":"10%","B":"20%","C":"40%","D":"50%"},"answer":"B","source":"大白","manualChapter":"背誦題"},{"id":45535,"question":"填入空格：從30歲到80歲時，腎血流量平均降低____ ％，腎血流量的降低會造成腎小球過濾速度等比例的減少，約每10年下降8mL/min。","options":{"A":"10%","B":"20%","C":"40%","D":"50%"},"answer":"D","source":"大白","manualChapter":"背誦題"},{"id":45537,"question":"填入空格：當一個人65 歲以後，淨體重會減少____ ％和脂肪組織會增加____ ％，這些身體組成的改變會影響到給藥的劑量及頻率","options":{"A":"10、30","B":"25、35","C":"25、50","D":"10、35"},"answer":"B","source":"大白","manualChapter":"背誦題"},{"id":45539,"question":"填入空格：根據統計高處墜落跟骨骨折傷患中，____％會合併脊椎骨折；____％為雙側跟骨骨折。","options":{"A":"40、20","B":"5、10","C":"20、10","D":"10、5"},"answer":"D","source":"大白p801","manualChapter":"背誦題"},{"id":45543,"question":"填入空格：高血糖高滲透壓(HHS)昏迷是糖尿病高齡病人一個嚴重的併發症，死亡率約有____％。","options":{"A":"10~30％","B":"30~60％","C":"60~80％","D":"20~50％"},"answer":"D","source":"大白 p1251","manualChapter":"背誦題"},{"id":45545,"question":"填入空格：大約____％的高齡病人有糖尿病，第二型糖尿病(非胰島素依賴性)在高齡病人中最常見","options":{"A":"5％","B":"20％","C":"40％","D":"60％"},"answer":"B","source":"大白 p1251","manualChapter":"背誦題"},{"id":45547,"question":"填入空格：腸胃道出血最常發生在____歲的病人中，死亡率大約____％","options":{"A":"30-40、10%","B":"30-40、30%","C":"60-90、10%","D":"60-90、30%"},"answer":"C","source":"大白 p1252","manualChapter":"背誦題"},{"id":45549,"question":"填入空格：肝動脈來自腹腔幹，成人每分鐘的肝臟血流量有____毫升","options":{"A":"500~1,000","B":"1,000~1,500","C":"1,500 ~2,000","D":"2,000~2,500"},"answer":"C","source":"","manualChapter":"背誦題"},{"id":45551,"question":"填入空格：寶寶腦部與神經系統為了要給予腦部成長的空間，後囟門，即頭顱骨間未癒合之關節，直到____個月大前都會保持開啟，前囟門於出生後____個月都不會閉合","options":{"A":"3、9~18","B":"9~18、3","C":"6、9~18","D":"9~18、6"},"answer":"A","source":"","manualChapter":"背誦題"},{"id":45553,"question":"學齡前兒童的何種組織在比例上會比成人偏大，且免疫系統正經歷許多變化?","options":{"A":"淋巴組織","B":"腦組織","C":"肺泡組織","D":"肌肉組織"},"answer":"A","source":"大白p314","manualChapter":"背誦題"},{"id":45555,"question":"心臟位於胸腔之中，受到胸廓骨骼的嚴密保護，位置大約位在胸骨及第___肋骨後之縱隔腔","options":{"A":"1-3","B":"3-6","C":"4-8","D":"9-12"},"answer":"B","source":"大白p539","manualChapter":"背誦題"},{"id":45557,"question":"橫膈肌向上進入胸部，最高位可達第幾肋?","options":{"A":"2","B":"4","C":"6","D":"8"},"answer":"B","source":"大白p749","manualChapter":"背誦題"},{"id":45559,"question":"幾歲進入成人晚期?","options":{"A":"51","B":"61","C":"71","D":"81"},"answer":"B","source":"大白p319","manualChapter":"背誦題"},{"id":45561,"question":"肺部可容納平常所需氣體幾倍的容量?","options":{"A":"3","B":"5","C":"8","D":"10"},"answer":"C","source":"大白p333","manualChapter":"背誦題"},{"id":45563,"question":"人體內腦脊髓液的總體積約為幾毫升?","options":{"A":"10-30","B":"50-80","C":"125-150","D":"200-300"},"answer":"C","source":"大白p962","manualChapter":"背誦題"},{"id":45566,"question":"STEMI 發生多久後的 T 波倒立，在臨床上被視為重灌流現象?","options":{"A":"1小時內","B":"24-48小時","C":"5-7天","D":"1-3週"},"answer":"D","source":"大白p903","manualChapter":"背誦題"},{"id":45568,"question":"規則陣痛之定義為兩次陣痛之間隔⼩於幾分鐘?","options":{"A":"1","B":"5","C":"10","D":"30"},"answer":"B","source":"大白p1297","manualChapter":"背誦題"},{"id":45570,"question":"填入空格：子宮頸的擴張速度在初產婦可達每小時____公分，而經產婦(生第二胎以上)每小時可達____公分?","options":{"A":"2、10","B":"1、2","C":"3、5","D":"5、10"},"answer":"D","source":"大白p1297","manualChapter":"背誦題"},{"id":45572,"question":"何種病患常見的中心體溫範圍最高通常不超過攝氏39度？","options":{"A":"熱中暑","B":"熱衰竭","C":"熱痙攣","D":"以上皆是"},"answer":"B","source":"大白p1149","manualChapter":"背誦題"},{"id":45574,"question":"何種白血球會釋放組織胺產生局部的發炎或引發過敏反應？","options":{"A":"嗜中性白血球","B":"嗜酸性白血球","C":"淋巴球","D":"嗜鹼性白血球"},"answer":"D","source":"大白p291","manualChapter":"背誦題"},{"id":45576,"question":"何種白血球會分化成T細胞、B細胞及NK細胞(Natural Killer)，T細胞可以直接攻擊抗原及召喚其它淋巴球、B細胞可分泌抗體、NK細胞負責監察及破壞體內不正常的細胞?","options":{"A":"嗜中性白血球","B":"嗜酸性白血球","C":"淋巴球","D":"嗜鹼性白血球"},"answer":"C","source":"大白p291","manualChapter":"背誦題"},{"id":45578,"question":"何種白血球只占白血球的3％，但在特殊狀況如過敏反應或寄生蟲感染時數量大增，可吞噬抗原抗體複合物","options":{"A":"嗜中性白血球","B":"嗜酸性白血球","C":"淋巴球","D":"嗜鹼性白血球"},"answer":"B","source":"大白p291","manualChapter":"背誦題"},{"id":45580,"question":"何種白血球數目最多(約50 ~70％），具有吞噬細菌的作用","options":{"A":"嗜中性白血球","B":"嗜酸性白血球","C":"淋巴球","D":"嗜鹼性白血球"},"answer":"A","source":"大白p291","manualChapter":"背誦題"},{"id":45581,"question":"何種腺體的功能是增加鈣離子濃度？","options":{"A":"腎上腺素","B":"副甲狀腺素","C":"甲狀腺","D":"性腺"},"answer":"B","source":"大白","manualChapter":"背誦題"},{"id":45583,"question":"麻痺性腸阻塞定義上為超過幾分鐘以上沒有聽到腸蠕動音?","options":{"A":"1","B":"2","C":"3","D":"4"},"answer":"B","source":"大白p550","manualChapter":"背誦題"},{"id":45585,"question":"食道/胃靜脈曲張的病人死亡率極高，約占幾%?","options":{"A":"10%","B":"25%","C":"40%","D":"50%"},"answer":"B","source":"大白p1015","manualChapter":"背誦題"},{"id":45608,"question":"填入空格：產後大出血定義為自然產後____內出血量大於____、剖腹生產超過____的出血","options":{"A":"1小時、 1,000 cc、2,000 cc","B":"1小時、500cc、1,000 cc","C":"24小時、1,000 cc、2,000 cc","D":"24小時、500cc、1,000 cc"},"answer":"D","source":"大白p1302","manualChapter":"背誦題"},{"id":45610,"question":"根據統計，約有多少的外傷死亡導因於胸部外傷?","options":{"A":"10%","B":"25%","C":"40%","D":"50%"},"answer":"B","source":"大白p754","manualChapter":"背誦題"},{"id":45710,"source":"第五章 創傷急症(2012-2014).doc","question":"以過度換氣（hyperventilation）來降低顱內壓時，應將動脈血液血的PaCO2控制在約：","options":{"A":"40～45 mmHg","B":"30～40 mmHg","C":"20～25 mmHg","D":"15～20 mmHg"},"answer":"B","manualChapter":"背誦題"},{"id":45711,"question":"當血中二氧化碳分壓(PCO2)控制在多少mmHg左右時，可以減少腦部血流量，但並不一定會持續降低顱內壓","options":{"A":"10","B":"30","C":"50","D":"80"},"answer":"B","source":"大白p964","manualChapter":"背誦題"},{"id":45714,"question":"胎盤早期剝離通常發生在懷孕第幾期?","options":{"A":"1","B":"2","C":"3","D":"4"},"answer":"C","source":"大白","manualChapter":"背誦題"},{"id":45716,"question":"羊水栓塞(amniotic fluid embolism)佔產婦死亡率約多少?","options":{"A":"5-10%","B":"10-20 %","C":"30-40%","D":"70-80%"},"answer":"D","source":"大白p1295","manualChapter":"背誦題"},{"id":45719,"question":"臍帶連接胎兒和胎盤，長約45公分，直徑約1.5公分，並包含?","options":{"A":"2條運送充氧血的動脈與1條運送缺氧血的靜脈","B":"1條運送充氧血的動脈與2條運送缺氧血的靜脈","C":"2條運送缺氧血的動脈與1條運送充氧血的靜脈","D":"1條運送缺氧血的動脈與2條運送充氧血的靜脈"},"answer":"C","source":"大白p1297","manualChapter":"背誦題"},{"id":45721,"question":"懷孕初期會有噁心的症狀，通常開始與結束於懷孕第幾周之間?","options":{"A":"1-3周","B":"5-10周","C":"6-14周","D":"17-21周"},"answer":"C","source":"大白p1297","manualChapter":"背誦題"},{"id":45726,"question":"急產發生率約為多少?","options":{"A":"2%","B":"10%","C":"20%","D":"35%"},"answer":"A","source":"大白p1297","manualChapter":"背誦題"},{"id":45729,"question":"羊水栓塞為羊水雜質經何種管道進入母體肺部血管造成?","options":{"A":"臍帶","B":"子宮動脈","C":"子宮頸靜脈","D":"胎兒下腔靜脈"},"answer":"C","source":"大白p1303","manualChapter":"背誦題"},{"id":45733,"question":"軟組織及肌肉骨骼外傷非常常見，約有多少鈍挫傷病人合併肌肉骨骼方面的損傷，其中多數為單純骨骼或肌肉方面的外傷?","options":{"A":"10%","B":"30%","C":"60%","D":"85%"},"answer":"D","source":"大白","manualChapter":"背誦題"},{"id":45735,"question":"填入空格：膠原蛋白是身體大多數組織的結構蛋白，所以膠原母細胞會在受傷的____小時內合成新的膠原蛋白，但直到____個月後，受傷後修復的組織才會回到原本的強度韌性與功能","options":{"A":"48、4","B":"24、4","C":"48、1","D":"24、1"},"answer":"A","source":"大白","manualChapter":"背誦題"},{"id":45737,"question":"下列何者非黏液性水腫(myxedema)的臨床症狀?","options":{"A":"臉部缺乏表情","B":"肌腱反射降低","C":"意識混亂","D":"皮膚黃褐粗糙"},"answer":"C","source":"大白p1000","manualChapter":"背誦題"},{"id":45741,"question":"HCO3的正常值(mEq/L)在何者區間?","options":{"A":"22-26","B":"35-45","C":"70-80","D":"90-100"},"answer":"A","source":"大白","manualChapter":"背誦題"},{"id":45743,"question":"正常成年人有幾顆牙齒?","options":{"A":"30","B":"32","C":"34","D":"36"},"answer":"B","source":"大白p744","manualChapter":"背誦題"},{"id":45750,"question":"請問連接中耳腔與咽喉部的構造為下列何者?","options":{"A":"內耳","B":"聽骨","C":"耳咽管","D":"前庭組合"},"answer":"C","source":"大白p296","manualChapter":"背誦題"},{"id":45754,"question":"正常腸音頻率範圍則約在每分鐘幾下之間屬正常?","options":{"A":"1-3","B":"20-50","C":"5-30","D":"50-100"},"answer":"C","source":"大白p550","manualChapter":"背誦題"},{"id":45759,"question":"在肩關節脫臼中，前脫位跟後脫位分別佔多少比例?","options":{"A":"50%、50%","B":"90%、10%","C":"30%、70%","D":"5%、95%"},"answer":"B","source":"大白P800","manualChapter":"背誦題"},{"id":45761,"question":"拳擊者骨折是因直接撞擊造成掌骨骨折，最常見為第幾掌骨折","options":{"A":"1","B":"3","C":"4","D":"5"},"answer":"D","source":"大白P800","manualChapter":"背誦題"},{"id":45767,"question":"填入空格：閃電可以傳遞電壓高達約____ 伏特以上，____安培的直流電流，溫度變化在攝氏8,800~33,300度之間。","options":{"A":"五千、1萬","B":"1億、20萬","C":"五千、20萬","D":"1億、1萬"},"answer":"B","source":"大白p804","manualChapter":"背誦題"},{"id":45769,"question":"約多少比例被閃電擊中的人會併發心臟和呼吸驟停?","options":{"A":"10%","B":"30%","C":"60%","D":"90%"},"answer":"B","source":"大白p804","manualChapter":"背誦題"},{"source":"EMT-P 第 46 章 P.1214","question":"在處理精神危機時，救護員建議與病人交談時保持的最佳社交距離是多少公尺？","options":{"A":"0.5~1.0公尺","B":"至少5公尺以上","C":"1.2~3.6公尺","D":"4.0~6.0公尺"},"answer":"C","matchedChapters":["CH46"],"manualChapter":"背誦題","id":45770},{"id":45772,"question":"壓碎傷症候群(Crush syndrome)的傷患，容易發生在事故後幾小時?","options":{"A":"1-2","B":"4-6","C":"10-12","D":"24-48"},"answer":"B","source":"大白801","manualChapter":"背誦題"},{"id":45774,"question":"電傷害的致命性心律不整可以在幾小時內再度發生?","options":{"A":"1-2","B":"4-6","C":"10-12","D":"24-48"},"answer":"D","source":"大白807","manualChapter":"背誦題"},{"id":45787,"question":"清潔、消毒用漂白水(次氯酸鈉)皆應新鮮泡製，並於泡製後多久內使用完畢?","options":{"A":"1小時","B":"24小時","C":"3天","D":"7天"},"answer":"B","source":"大白p1122","manualChapter":"背誦題"},{"id":45811,"question":"請問何謂Mallory-Weiss syndrome 的症狀?","options":{"A":"血糖濃度下降，鈉、鉀離子不平衡，身體含水量流失及血壓下降，使得身體無法維持正常的血液循環","B":"細胞外的體液滲透壓突然下降，對中樞神經細胞內以及腦脊髓液的滲透壓造成影響","C":"劇烈嘔吐造成食道裂傷出血","D":"高燒、黃疸、急性腎症衰竭、血液凝固異常、及多重器官病變及衰竭"},"answer":"C","source":"大白","manualChapter":"背誦題"},{"id":45813,"question":"癌症病人中多少比例的人會發生腫瘤伴隨症候群?","options":{"A":"5%","B":"15%","C":"40%","D":"65%"},"answer":"B","source":"p1042","manualChapter":"背誦題"},{"question":"小兒低血糖定義? 新生兒血糖值小於多少以及嬰兒血糖值小於多少?","options":{"A":"90、90","B":"45、60","C":"70、60","D":"70、70"},"answer":"B","source":"大白p1277","id":45814,"manualChapter":"背誦題"},{"question":"填入空格：大部分的人在____歲都有骨質疏鬆，因為這時候的骨質密度會減少____","options":{"A":"80、1/2","B":"80、1/3","C":"70、1/2","D":"70、1/3"},"answer":"D","source":"大白p1254","id":45817,"manualChapter":"背誦題"},{"question":"血紅素中何種帶電的狀態稱為變性血紅素?","options":{"A":"鐵離子帶3價正電","B":"鐵離子帶3價負電","C":"鐵離子帶2價正電","D":"鐵離子帶2價負電"},"answer":"A","source":"大白","id":45819,"manualChapter":"背誦題"},{"question":"病人在食入毒物後幾小時內就接受處置，腸胃道除污是有用的","options":{"A":"1","B":"3","C":"5","D":"8"},"answer":"A","source":"大白p1318","id":45821,"manualChapter":"背誦題"},{"question":"嚴重的鐵中毒指的是食入超過每公斤多少毫克(mg/kg)則會產生心血管衰竭以及死亡。","options":{"A":"10","B":"60","C":"100","D":"300"},"answer":"B","source":"大白","id":45824,"manualChapter":"背誦題"},{"question":"對大部分的植物毒素來說，血液透析有移除效果嗎?","options":{"A":"有","B":"沒有","C":"","D":""},"answer":"B","source":"大白p1328","id":45826,"manualChapter":"背誦題"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

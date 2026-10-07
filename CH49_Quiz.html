@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 49 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：99 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH49</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":76,"source":"105 高級救護技術員甄試筆試題目.doc","question":"年輕孕婦懷孕急產產出一足月胎兒。剛出生時新生兒抽吸口鼻不會哭泣臉部也無表情，呼吸微弱不規則，脈搏微弱且約每分鐘120下，刺激時手腳僅有一些無力的收縮。外觀發現四肢發鉗，身體比較紅潤。請問其APGAR分數是？","options":{"A":"3分","B":"4分","C":"5分","D":"6分"},"answer":"C","manualChapter":"CH49"},{"id":81,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於生產之產程，以下何者為非？","options":{"A":"急產的定義為陣痛開始至胎兒產生小於三小時","B":"生產之第一個產程為規則陣痛開始至子宮頸全開","C":"生產之第二個產程（胎兒產出期）為子宮頭全開至胎兒生出完畢","D":"生產之第三個產程（胎盤產出期）為胎盤生出之過程"},"answer":"B","manualChapter":"CH49"},{"id":148,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"你接獲中心通報於火車站處有一孕婦於候車時突然下腹痛，你到達現場後初步外觀評估，此孕婦隆起腹部上緣約在肚臍附近，請問下列何者為非？","options":{"A":"懷孕約十二周","B":"無法聽到胎兒心跳","C":"須左側躺送醫","D":"若陰道有大量滲液，且PH = 7.5應懷疑羊水破裂"},"answer":"A","manualChapter":"CH49"},{"id":156,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"年輕孕婦懷孕40週突然感意識不清，119到現場發現她沒有脈搏，AED顯示為心室纖維震顫。此時急救的處置與一般ACLS略有不同，下列作法何者為是？","options":{"A":"Amiodarone在孕婦屬於C級用藥會導致時胎，禁止使用於孕婦","B":"若有需要插管，應該選用口徑較大的氣管內管（例如7.5＃或8＃）","C":"依照AHA最新指導原則，應該要左側躺比子宮左推手勢適合孕婦","D":"為了胎兒預後，若母親心跳停止，應該在心跳停止五分鐘內產出胎兒"},"answer":"D","manualChapter":"CH49"},{"id":180,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"胎兒出生後1分鐘會哭，呼吸慢而不規則，心率每分鐘80下，肌肉張力有一些曲屈，軀幹粉紅色，四肢藍色，其Apgar Score為幾分？","options":{"A":"4","B":"5","C":"6","D":"7"},"answer":"C","manualChapter":"CH49"},{"id":229,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"對於穩定規則窄QRS波頻脈，以下敘述何者為非？","options":{"A":"若發生於孕婦身上，因可能影響胎兒心律，因此不應使用Adenosine","B":"除了Adenosine之外，亦可選擇乙型腎上腺受體阻斷劑、毛地黃加以治療","C":"若使用鈣離子阻斷劑不必擔心引發有氣喘病史病患的氣喘，","D":"若藥物治療無效，可考慮電擊整流"},"answer":"A","manualChapter":"CH49"},{"id":246,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"關於懷孕婦女的急救，以下何者為非？","options":{"A":"應先急救母親，再考慮胎兒","B":"孕婦只要很小的失血量，就會出現血壓下降與週邊灌流不足（休克）的徵象","C":"若懷孕大於24週，孕婦儘可能保持左側躺的姿勢。右髖部墊高、長背板左傾15-30度，以減少子宮對主動脈，下腔靜脈的壓迫","D":"當母親心跳停止5分鐘內，剖腹產救出大於24-25週的胎兒，此時胎兒存活機率最高"},"answer":"B","manualChapter":"CH49"},{"id":283,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"請問有關孕婦下列敘述何者正確？","options":{"A":"生產三產程依序為：子宮收缩期，胎兒產出期，胎盤產出期","B":"新生兒檢查頸動脈為評估脈博最適合的方式","C":"孕婦發生羊水栓塞死亡率高達90％","D":"孕婦急救時，減少母親的缺氧容易造胎兒缺氣"},"answer":"A","manualChapter":"CH49"},{"id":284,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"下列關於孕婦急救重點，何者錯誤？","options":{"A":"靜脈點滴注射於橫膈以上","B":"評估血壓，收缩壓小於100或低於基本值70％以下，就應開始治療","C":"RSI藥物可選用一般較不會造成低血壓的麻醉藥","D":"孕婦心臟停止時，剖腹救出大於24週胎兒，胎兒存活率最高"},"answer":"B","manualChapter":"CH49"},{"id":299,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"年輕孕婦懷孕約40周，急產產出一足月胎兒。剛出生時新生兒抽吸口鼻不會哭泣，臉部也無表情，呼吸不規則且每分鐘約20下。脈搏微弱每分鐘約80下，刺激時手腳僅有一些無力的收縮。外觀發現四肢發紺，身體比較紅潤。請問第一分鐘的APGAR分數是？","options":{"A":"3分","B":"4分","C":"5分","D":"6分"},"answer":"B","manualChapter":"CH49"},{"id":770,"source":"第五章 創傷急症(2012-2014).doc","question":"孕婦在捷運站被人刺傷，你被通知前往現場，發現他懷孕32周，右胸上方有一穿刺傷囗，無氣血泡在其上，但是她呼吸急促，極度焦慮，而且呼喊「救命」，血壓80／60 mmHg，右胸呼吸音聽起來有減弱，最適當的第一步驟是？","options":{"A":"聯絡線上醫療指導，考慮經囗插管","B":"聯絡線上醫療指導，考慮右胸針刺減壓","C":"考慮將子宮左推","D":"考慮打兩條大口徑I.V.，開始給予輸液復甦"},"answer":"B","manualChapter":"CH49"},{"id":837,"source":"第五章 創傷急症(2015-2018).doc","question":"有關重大創傷（Major Trauma）的敘述，以下何者為是？","options":{"A":"所有孕婦或小兒創傷，都應視為重大創傷","B":"傷患的昏迷指數以及生命跡象都正常，則可排除重大創傷","C":"應後送到最近的任何醫院，以讓傷患儘快獲得初步治療","D":"應後送到最近的創傷中心，以讓傷患獲得確定處置改善"},"answer":"D","manualChapter":"CH49"},{"id":857,"source":"第五章 創傷急症(2015-2018).doc","question":"有關治療懷孕的外傷病患，下列敘述何者為是？","options":{"A":"評估處置的順序與未懷孕女性不同","B":"先治療孕婦的傷勢再對胎兒做早期評估","C":"X光檢查在懷孕初期不可使用","D":"孕婦傷患在到院前若呈現休克狀態，可以給予右側躺"},"answer":"B","manualChapter":"CH49"},{"id":864,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"年輕孕婦懷孕3週突然感到嚴重呼吸困難而打119求救，你到現場發現她有發紺、胸痛及休克現象，似乎快要窒息。此時急救的處置何者不正確？","options":{"A":"若量到她血壓偏低，建議以休克病患之頭低腳高方式運送","B":"可能的診斷為肺栓塞或是羊水栓塞","C":"為增加母親心輸出量，應該要左側躺或進行子宮左推手勢","D":"若母親心跳停止，應該在心跳停止後四到五分鐘內緊急剖腹產產出胎兒"},"answer":"A","manualChapter":"CH49"},{"id":865,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於子宮外孕（ectopic pregnancy），以下何者不正確？","options":{"A":"最常發生在受精後胚胎發育於輸卵管中","B":"可能會因腹腔內出血而有突發性腹痛、頭暈、昏倒或休克","C":"通常發生在懷孕第6到12週","D":"子宮外孕一定會有陰道出血"},"answer":"D","manualChapter":"CH49"},{"id":866,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於子癇前症及子癇症（eclampsia／pre-eclampsia），以下何者不正確？","options":{"A":"子癇前症亦稱妊娠毒血症，發生原因不明，通常發生於第一胎，最常發生在懷孕第二期","B":"病人在懷孕時會出現高血壓、水腫及尿蛋白三種症狀","C":"高血壓之定義為收縮壓≧140毫米汞柱或舒張壓≧90毫米汞柱","D":"子癇症則是子癇前症同時發生癲癇的情況。抽筋多為大發作，必須給予氧氣及硫酸鎂治療"},"answer":"A","manualChapter":"CH49"},{"id":868,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於孕婦重大外傷，以下何者不正確？","options":{"A":"除穿刺傷及嚴重腹部頓傷外，胎兒鮮少因外傷造成死亡","B":"母體可能耐受大量失血而無休克之症狀時，胎兒卻有可能因缺氧而面臨死亡","C":"孕婦懷孕過程中增加血量，所以約15％之出血量就會產生血壓低休克之症狀","D":"需將創傷之孕婦左側躺，並轉送至外傷中心或醫學中心"},"answer":"C","manualChapter":"CH49"},{"id":869,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"年輕孕懷孕40週突然感覺意識不清，119到現場發現她沒有脈搏，AED顯示為心室纖維震顫。此時急救的處置與一般ACLS略有不同，正確的作法是？","options":{"A":"Amiodarone在孕婦屬於C級用藥會導致畸，禁止使用於孕婦","B":"若有需要插管，應該選用口徑較大的氣管內管（例如7.5#或8#）","C":"依照AHA最新指導原則，應該要左側躺比子宮左推手是適合孕婦","D":"為了胎兒預後，若母親心跳停止，應該在心跳停止五分鐘內產生胎兒"},"answer":"D","manualChapter":"CH49"},{"id":870,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"年輕孕婦懷孕40週，急產產出一足月胎兒。剛出生時新生兒抽吸口鼻不會哭泣臉部也無表情，呼吸不規則，且每分鐘約20下。脈搏微弱且約每分鐘80下，刺激時手腳僅有一些無力的收縮。外觀發現四肢發紺，身體比較紅潤。請問其第一分鐘的APGAR分數是？","options":{"A":"3分","B":"4分","C":"5分","D":"6分"},"answer":"B","manualChapter":"CH49"},{"id":881,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一位38歲女士，懷孕第一胎32週，在家裡看電視時突然有尖銳的下腹痛，EMT到達現場時已無反應，無呼吸，無脈搏，下列急救步驟何者有誤？","options":{"A":"儘早插管、氣管內管size和一般成人一樣","B":"將孕婦左側躺約15～30度","C":"胎兒＞245～25週：母親心跳停止大於4分鐘，可考慮緊急剖腹產","D":"I.V.管路宜在上半身（橫膈以上）"},"answer":"A","manualChapter":"CH49"},{"id":909,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於懷孕婦女的創傷處理，下列敘述何者為是？","options":{"A":"胎兒極為脆弱，懷孕婦女的創傷極易造成胎兒死亡","B":"胎兒的死亡大多因母親死亡或嚴重休克所造成","C":"因父母護子心切，所以孕婦創傷之救護首重於是否傷及胎兒及胎兒評佸","D":"因胎盤供給胎兒血液及營養，即使少量出血也容易造成孕婦休克，因此必須儘快打上點點滴給予輸液治療"},"answer":"B","manualChapter":"CH49"},{"id":913,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於懷孕的敘述，下列敘述何者為是？","options":{"A":"懷孕一般以3個月為一期，分為三個3月期。在第二個3月期之後，胎兒快速成長並逐漸進入產程準備，胎兒在此時期產出多可存活","B":"懷孕第四個月時子宮將會增大至肚臍附近","C":"懷孕末期平躺時子宮將會壓迫下腔靜脈造成血壓降低，故急救時需讓孕婦維持右側躺","D":"前置胎盤常引起陣痛性陰道出血，有可能危及生命。若孕婦出現低血容休克時即容易發生胎兒窘迫的情形"},"answer":"A","manualChapter":"CH49"},{"id":970,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"輕孕婦懷孕40週，急產產出一足月胎兒。剛出生時新生兒抽吸口鼻會哭泣臉部也無表情.呼吸規則，且每分鐘約20下。脈搏微弱且約每分鐘80下，激時手腳僅有一些無的收縮，外觀發現四肢發紺，身體比較紅潤。請問其第一分鐘的APGAR分數是？","options":{"A":"3分","B":"4分","C":"5分","D":"6分"},"answer":"B","manualChapter":"CH49"},{"id":976,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"年輕孕婦懷孕40週突然感到嚴重呼吸困難而打119求救，你到現場發現她有有發紺.胸痛及休克現象，似乎快要窒息。此時急救的處置與一般ACLS略有不同，何者為是？","options":{"A":"若量到她血壓偏低，建議以休克病患之頭低腳高方式運送","B":"若有需要插管，應該選用口徑較大的氣管內管（例如7.5#或8#）","C":"為增加母親心輸出量，應該要右側躺或進行子宮右推手勢（LUD）","D":"為了胎兒預後，若母親心跳停止，應該在心跳停止的四到五分鐘內產出胎兒"},"answer":"D","manualChapter":"CH49"},{"id":984,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"下列有關婦產科急症的相關敘述，何者為非？","options":{"A":"前置胎盤可能跟前胎剖腹產.胎盤較大及子宮血管循環不良有關。通常會引起下腹劇烈疼痛，出血量可能會危及生命","B":"早產的危險因子包括外傷.前胎早產.泌尿道感染.多胎妊娠及子宮構造異常","C":"產後出血為產後期常見的併發症，其定義為產後大於500cc的出血。變大的子宮排空後必須收縮以控制出血，產後子宮無法適當收縮是出血最常見的原因","D":"子癇前症亦稱妊娠毒血症，通常發生於第一胎。病患在懷孕時會出現高血壓.水腫及尿蛋白，通常發生於懷孕第三期。若同時發生癲癇情況則稱為子癇症"},"answer":"A","manualChapter":"CH49","matchedChapters":["CH49"]},{"id":995,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"外傷救護勤務，病患為懷孕36周孕婦，車禍無明顯外傷，血壓80/60 mmHg，您在運送時想採取左側躺是為了？","options":{"A":"避免脹大子宮壓迫腹主動脈","B":"避免脹大子宮壓迫下腔靜脈而影響血液回流","C":"較易運送","D":"避免脹大子宮壓迫骨盆神經叢"},"answer":"B","manualChapter":"CH49"},{"id":996,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"妊娠20週時，子宮底高度大約在何處？","options":{"A":"骨盆腔邊緣處","B":"肚臍附近","C":"肚臍下二指寬處","D":"肚臍與劍突中間"},"answer":"B","manualChapter":"CH49"},{"id":1023,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"詢問產婦過去生產史時，常以G與P來記錄。請已經問一位G4P2的孕婦，過去總共流產或墮胎幾次？","options":{"A":"一次","B":"二次","C":"四次","D":"六次"},"answer":"A","manualChapter":"CH49"},{"id":1084,"source":"第四章 非創傷急症(2015-2018).doc","question":"對於穩定規則窄QRS波頻脈，以下敘述何者為非？","options":{"A":"若發生於孕婦身上，因可能影響胎兒心律，因此不應使用Adenosine","B":"除了Adenosine之外，亦可選擇乙型腎上腺受體阻斷劑、毛地黃加以治療","C":"若使用鈣離子阻斷劑不必擔心引發有氣喘病史病患的氣喘","D":"若藥物治療無效，可考慮電擊整流"},"answer":"A","manualChapter":"CH49"},{"id":1117,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於懷孕婦女的急救，以下何者為非？","options":{"A":"應先急救母親，再考慮胎兒","B":"孕婦只要很小的失血量，就會出現壓下降與週邊灌流不足（休克）的徵象","C":"若懷孕大於24週，孕婦儘可能保持左側躺的姿勢。右髖部墊高、長背板左傾15～30度，以減少子宮對主動脈、下腔靜脈的壓迫","D":"當母親心跳停止5分鐘內，剖腹產救出大於24～25週的胎兒，此時胎兒存活機率最高"},"answer":"B","manualChapter":"CH49"},{"id":1126,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於藥物給予與路徑選擇，下列何者為非？","options":{"A":"幫孕婦建立IV路徑一般建議在下半身（橫膈以下）","B":"若緊急時無法建立IV路徑，除了IM肌肉注射，Naloxone也可以由氣管內管給藥","C":"大部份的急救藥物都可以由IO骨內注射給予，吸收速度相當於IV靜脈注射","D":"在心臟衰竭合併喘鳴、或洗腎合併血壓降低病患身上給予點滴靜脈輸注須特別小心謹慎，因流速太快可能引發肺水腫導致呼吸困難惡化"},"answer":"A","manualChapter":"CH49"},{"id":2067,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"一名年38歲體重100Kg懷孕42週的經產婦（這是第四胎），到達現場時第一台救護車的夥伴已完成急產並正在進行新生兒急救。而你則被指派照顧產後的產婦。此時病人有意識有呼吸但很虛弱，臉色蒼白冒冷汗，胎盤已娩出但會陰部仍有大量持續性出血，血壓血氧量測發現BP: 80/50mmHg，HR: 150/min, SpO2: 96%，下列關於這位產婦的救護處置何者最不正確？","options":{"A":"用手在產婦下腹部進行按摩。","B":"讓胎兒吸允母親乳頭。","C":"若有外陰部撕裂傷合併大量出血應直接加壓止血。","D":"給予大量靜脈輸液維持灌流，並請求線上指導給予MgSO4幫助子宮收縮止血。"},"answer":"D","manualChapter":"CH49","matchedChapters":["CH49"]},{"id":2069,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"剛出生時新生兒抽吸口鼻會哭泣臉部也無表情，呼吸規則，且每分鐘約20下。脈搏微弱且約每分鐘80下，刺激時手腳僅有一些無的收縮。外觀發現四肢發紺，身體比較紅潤。請問其第一分鐘的APGAR分數是？ (多選)","options":{"A":"3。","B":"4。","C":"5。","D":"6。"},"answer":"B,C","manualChapter":"CH49"},{"id":2073,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"關於孕婦身體變化的敘述，下列何者為非？","options":{"A":"懷孕第三個月時可在恥骨上方可以檢查到增大的子宮。","B":"孕婦之心輸出量及總血量在34週時將可增加30%。","C":"孕婦之心跳於懷孕後期每分鐘可減少5到10下。","D":"孕婦之血壓在懷孕第二期將會下降10~15毫米汞柱。"},"answer":"C","manualChapter":"CH49"},{"id":2074,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"關於孕婦分娩的敘述，下列何者為非？","options":{"A":"急產定義為“規則陣痛開始至完成分娩時間”小於一個小時。","B":"規則陣痛之定義為兩次陣痛之間隔小於五分鐘。","C":"子宮頸的擴張速度在初產婦可達每小時五公分。","D":"子宮頸的擴張速度在經產婦（生第二胎以上）可達每小時十公分。"},"answer":"A","manualChapter":"CH49","explanation":"CH49 p1297 急產定義為「規則陣痛開始至完成分娩時間」小於3 個小時，而規則陣痛之定義為兩次陣痛之間隔小於5 分鐘。子宮頸的擴張速度在初產婦可達每小時5公分，而經產婦(生第二胎以上)每小時可達10公分。"},{"id":2165,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列有關婦產科病人的敘述，下列何者最不適當？","options":{"A":"子癇前症(pre-eclampsia)亦稱為妊娠毒血症，通常發生於第一胎。","B":"子癇症(eclampsia)一般發生在懷孕第二期。","C":"胎盤早期剝離、前置胎盤則發生於懷孕第三期。","D":"黃體破裂(Corpus luteum cyst)常發生於經期來潮後一週，特別容易在劇烈性行為時發生破裂的現象，會造成內出血。"},"answer":"D","manualChapter":"CH49","matchedChapters":["CH49"]},{"id":2166,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列關於孕婦懷孕過程中母體之變化，下列何者最不適當？","options":{"A":"孕婦若發生創傷事件，和正常成人相比更易有休克症狀。","B":"潮氣容積及每分鐘換氣量於懷孕後期增加30%。","C":"孕婦之總血量在34週時將可增加30%。","D":"破水但尚未臨盆之孕婦，如有破水之情形，為避免胎兒感染，需要住院施打抗生素。"},"answer":"A","manualChapter":"CH49"},{"id":2260,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"關於婦產急症，下列何者最為適當？","options":{"A":"如發生產後大出血，讓胎兒吸吮媽媽乳頭是可以考慮的處置。","B":"如有監測裝備，孕婦OHCA建議同時監測胎兒心跳。","C":"子癇前症通常發生在懷孕的第三期，癲癇發作時可以給予硫酸鎂。","D":"胎盤早期剝離最常發生於懷孕第二期會有突然的無痛大出血。"},"answer":"A","manualChapter":"CH49"},{"id":2261,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"30歲女性，懷孕30週，騎機車與小客車擦撞，您到現場發現她全身多處有擦傷，右下肢腫脹變形，主訴腹部疼痛。初步生命徵象：意識略顯焦躁，血壓85/40 mmHg，脈搏140次/min，血氧濃度為99%。胎心音監測胎兒心跳為110次/min。關於孕婦創傷的處置，下列敘述何者最為適當？","options":{"A":"常規給予氧氣並無益處，此病人血氧99%不建議給予氧氣治療。","B":"此病人出血量預估至少30%，建議盡快進行輸血。","C":"腹部疼痛須注意是否有子宮破裂或胎盤前置等情形。","D":"懷孕婦女不建議施打破傷風疫苗，避免造成畸胎。"},"answer":"B","manualChapter":"CH49"},{"id":2425,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於孕婦外傷，以下敘述何者最適當？","options":{"A":"孕婦需要供應胎兒所需，只要輕微出血(<10%總血量)，便會有明顯的血壓下降、心跳加速。","B":"安全帶使用可能增加子宮破裂的機會。","C":"如無脊髓外傷疑慮，孕婦可以考慮以右側躺方式運送，避免壓迫下腔靜脈。","D":"子宮貫穿傷中，胎兒較母親有較佳的預後。"},"answer":"B","manualChapter":"CH49"},{"id":2444,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"有關產婦急救敘述，下列何者最適當？","options":{"A":"維持正常去顫電擊的位置和電量。","B":"務必以左側躺姿勢進行壓胸急救。","C":"點滴注射時，儘量打在下肢靜脈。","D":"插管時應選用較大號的氣管內管。"},"answer":"A","manualChapter":"CH49","matchedChapters":["CH49"]},{"id":2515,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"根據美國外科醫學會外傷委員會之現場檢傷指引，下列何者最應該直接送至創傷中心？","options":{"A":"懷孕36週之孕婦，騎摩托車不慎和摩托車發生擦撞，肚子疼痛，可自行站立。","B":"未戴安全帽頭部撞到的地上的50歲男子，現場GCS14分。","C":"汽車相撞後，被困於車內的駕駛，現場花了將近十分鐘才脫困。","D":"工地工人，未做好防護措施，從三公尺高之鷹架跌落。"},"answer":"A","manualChapter":"CH49"},{"id":2527,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"30歲女性，懷孕30週，騎機車與小客車擦撞，你到現場發現她全身多處有擦傷，右下肢腫脹變形，主訴腹部疼痛。初步生命徵象:意識清楚，血壓100/40 mmHg，脈搏95/min，血氧濃度為99%。胎兒脈搏經胎心音機器監測為170/min。關於孕婦創傷的處置，下列敘述何者較為適當？","options":{"A":"一般創傷治療的優先順序與未懷孕者是不同的，到達現場確認環境安全後，需要優先評估胎兒的狀況。","B":"此傷者尚未出現低血容休克狀況，研判出血量不多，應該盡速上車後送。","C":"血氧狀況良好，不需要規則性給氧氣，以免造成孕婦肺部容易纖維化。","D":"該名傷者懷疑有腹腔內出血，可以執行腹腔電腦斷層檢查(高放射線劑量)。"},"answer":"D","manualChapter":"CH49"},{"id":2531,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"年輕孕婦懷孕40週，突然感到嚴重呼吸困難而打119求救。你到現場，發現她有發紺、胸痛及休克現象，似乎快要窒息。此時急救處置的正確作法是？","options":{"A":"若量到她血壓偏低，建議以休克病患之頭低腳高方式運送。","B":"若有需要插管，應該選用口徑較大的氣管內管(例如7.5#或8#)。","C":"為增加母親心輸出量，應該要左側躺或進行子宮左推手勢。","D":"為了胎兒預後，若母親心跳停止，應該在心跳停止的二十分鐘內產出胎兒。"},"answer":"C","manualChapter":"CH49"},{"id":2639,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"對於遭受性侵害女性病人之院前處置，下列何者最不適當？","options":{"A":"將病人移至救護車上再進行理學檢查，以提供病人隱私。","B":"溫柔詢問病人受侵害之身體部位有哪些，以利紀錄詳實可提供法院做為日後證據。","C":"除了骨盆腔之外傷，也要注意口腔或其他身體部位有無外傷。","D":"即使病人身上有抓傷與咬傷等易感染傷口，也不建議以生理食鹽水沖洗。"},"answer":"B","manualChapter":"CH49"},{"question":"關於婦產急症，下列何者正確？","options":{"A":"羊水栓塞指的是嬰兒於分娩時，將羊水吸入肺部引發肺栓塞導致出血、休克和瀰漫性血管內凝血異常等一系列病變。","B":"子癲前症亦稱為妊娠毒血症，發生原因不明，通常發生於孕婦生產雙胞胎、三胞胎時。","C":"子癲前症在懷孕時會出現高血壓、水腫及蛋白尿，通常發生在懷孕第三期。","D":"先兆性流產為常見懷孕婦女陰道出血的原因，多發生於懷孕前20週，通常在第6-12週，合併陰道出血及腹部絞痛，可能有下部酸痛的原因。"},"answer":"D","manualChapter":"CH49","id":3368,"source":"TP題庫 (圖片匯入)"},{"question":"以下關於生產相關急症及處置，何者正確？","options":{"A":"在擴張的子宮頸見到脫出及因頭夾住而發紺的臍帶，須以手指伸入子宮頸托住胎兒頭部避免缺氧。需先通知醫療指定才能進行。","B":"新生兒急救：(1) 氣道、(2) 呼吸、(3) 循環、(4) 乾燥、(5) 環境、(6) 家人等六點重點。其中最重要的是判斷新生兒的心跳或臍動脈脈搏每分鐘小於60下時須正壓給氣，每分鐘臍動脈脈搏小於50下時必須執行CPR。","C":"子癲前症亦稱為妊娠毒血症，通常發生於第一胎。病人在懷孕時會出現高血壓(收縮壓≥140mmHg或舒張壓≥90mmHg)、水腫及尿蛋白，通常發生在懷孕第三期。","D":"產後大出血定義為自然產後24小時內出血量大於1,000cc、剖腹生產超過2,000cc的出血。變大的子宮排空後必須收縮控制出血，產後子宮收縮不良(uterine atony)是出血最常見原因。"},"answer":"A","manualChapter":"CH49","id":3369,"source":"TP題庫 (圖片匯入)"},{"question":"關於外傷懷孕患者的評估及處置，請問下列敘述何者為非","options":{"A":"在孕婦生命徵象改變前，需因孕婦心輸出量會隨懷孕週數增加，應注意孕婦是否有休克的可能並加以處置，以防發生胎兒窘迫","B":"減緩子宮壓迫的方法除讓孕婦左側躺外，還可嘗試讓其右腳抬高使子宮向左移","C":"第三孕期的孕婦肺容積較少及需負擔胎兒氧氣消耗，遇外傷時更容易缺氧","D":"隨著懷孕週數增加，孕婦的腸胃道蠕動變快，胃較快排空，較不會嘔吐"},"answer":"D","manualChapter":"CH49","id":3459,"source":"TP題庫 (圖片匯入)"},{"question":"根據教材內容，關於「子癇症（Eclampsia）」與「子癇前症（Pre-eclampsia）」的區別與處置，下列敘述何者正確？","options":{"A":"子癇症病人的死亡率極低，在現場給予氧氣即可，不需送醫","B":"子癇症是指在子癇前症的基礎上，同時發生了癲癇抽搐的情況","C":"子癇症抽搐發生時，醫療救護人員應優先給予阿斯匹靈治療","D":"子癇前症的主要症狀僅有高血壓，不會出現尿蛋白或水腫"},"answer":"B","manualChapter":"CH49","source":"TP題庫 (圖片匯入) - EMT-P 第 49 章","id":3480},{"id":3529,"source":"TP題庫","question":"下列關於孕婦懷孕第三期何者錯誤？","options":{"A":"潮氣容積及每分鐘換氣量 (第三期多 30%)","B":"心跳變快 (第三期多 10-20下)","C":"心輸出量及總血量變高 (第三期多 30%)","D":"血壓變高 (第三期多 30%)"},"answer":"D","manualChapter":"CH49"},{"question":"先兆性流產或自然流產多發於懷孕前20週，其中最常見的發生時段為何？","options":{"A":"第1~4週","B":"第18~20週","C":"第6~12週","D":"第14~18週"},"answer":"C","source":"圖片匯入","manualChapter":"CH49","id":3606,"matchedChapters":["CH49"]},{"question":"急產的臨床核心特性（辨識警訊）：下列何者正確？","options":{"A":"正常柔和的子宮收縮","B":"產婦對痛有較高知覺","C":"很高的產道阻力","D":"發生率約為2%"},"answer":"D","source":"圖片匯入","manualChapter":"CH49","id":3608,"matchedChapters":["CH49"]},{"question":"有關懷孕婦女在第三個孕期（第 7 到 9 個月）的生理變化，下列敘述何者最適當？","options":{"A":"心跳速率維持穩定，不隨懷孕週數增加而改變","B":"血壓在第二期下降後，末期會回升至正常血壓","C":"呼吸深度不變，但每分鐘換氣量會因代償而下降","D":"心輸出量與總血量的可增加 10% 至 15%"},"answer":"B","source":"圖片匯入","manualChapter":"CH49","id":3609,"matchedChapters":["CH49"]},{"question":"足月懷孕婦女在平躺時容易發生低血壓的情況，其主要生理機制為何？","options":{"A":"橫膈膜上提壓迫胸腔導致回心血減少","B":"懷孕末期血管過度擴張導致相對性低血壓","C":"子宮壓迫下腔靜脈造成回心血量下降","D":"增大的子宮壓迫腹主動脈導致心輸出量減少"},"answer":"C","source":"圖片匯入","manualChapter":"CH49","id":3612,"matchedChapters":["CH49"]},{"source":"EMT-P 第 49 章 P.1301","question":"關於生產急症的敘述，下列何者錯誤？","options":{"A":"產後子宮收縮不良、嚴重產道撕裂傷、胎盤不完全脫離、凝血異常、胎盤組織殘留體內皆可能造成產後大出血，其中以子宮收縮不良最常見。","B":"當遇到臍帶脫出時，應手扶胎兒頭部，並使患者的胸部高於臀部，以減少臍帶壓力。","C":"遇到羊膜囊完整分娩時，可以在避免傷害胎兒的前提下，將羊水膜刺開。","D":"以上皆錯"},"answer":"B","manualChapter":"CH49","matchedChapters":["CH49"],"id":3651},{"source":"EMT-P 第 49 章 P.1297","question":"針對懷孕超過 20 週的孕婦進行心肺復甦術（CPR）時，下列處置何者最能有效緩解下腔靜脈受壓迫？","options":{"A":"將子宮手動向左側推移（Left Uterine Displacement）。","B":"維持標準仰臥姿勢，但增加壓胸的深度至 6cm。","C":"墊高產婦的臀部，使其呈現頭低腳高的姿勢。","D":"讓孕婦維持右側躺姿勢進行壓胸。"},"answer":"A","manualChapter":"CH49","matchedChapters":["CH49"],"id":3664},{"source":"EMT-P 第 49 章 P.1303","question":"下列何者為子癇前症 (pre-eclampsia) 的典型表現？","options":{"A":"低血壓、低血糖、發燒","B":"高血壓、水腫、尿蛋白","C":"心搏過慢、低體溫、腹瀉","D":"高血壓、低血糖、尿蛋白"},"answer":"B","manualChapter":"CH49","matchedChapters":["CH49"],"id":3673},{"source":"EMT-P 第 49 章 P.1303","question":"新生兒急救，救護技術員必須熟記：(1)氣溫、(2)呼吸、(3)循環、(4)乾燥、(5)環境、(6)家人，以上哪幾點？","options":{"A":"1、2、3、4、5","B":"1、2、3、4、6","C":"1、2、3、5、6","D":"1、2、3、4、5、6"},"answer":"D","manualChapter":"CH49","matchedChapters":["CH49"],"id":3680},{"source":"EMT-P 第 49 章 P.1305","question":"在婦科急症中，「卵巢囊腫破裂」最常發生的時機或情境為何？","options":{"A":"通常伴隨長期慢性的發燒與體重減輕。","B":"經期來潮前一週或激烈的性行為後。","C":"更年期後的婦女因荷爾蒙流失所致。","D":"懷孕初期（前四週）的正常生理反應。"},"answer":"B","manualChapter":"CH49","matchedChapters":["CH49"],"id":3682},{"source":"EMT-P 第 49 章","question":"關於妊娠期間的生理變化與相關定義，下列哪一項敘述「錯誤」","options":{"A":"妊娠 20 週以上的孕婦若平躺，可能因增大的子宮壓迫下腔靜脈導致「仰臥位低血壓綜合症」","B":"「早產」是指妊娠滿 20 週但未滿 37 週時的分娩","C":"懷孕期間心跳通常會增加，每分鐘約比平時多出 15-20次","D":"「流產」是指妊娠 24 週以前胎兒死亡或自然終止妊娠"},"answer":"D","manualChapter":"CH49","matchedChapters":["CH49"],"id":3684},{"source":"EMT-P 第 49 章 P.1297","question":"孕婦的心輸出量及總血量大約在懷孕第幾週時會增加約30%？","options":{"A":"第20週","B":"第12週","C":"第34週","D":"第40週"},"answer":"C","manualChapter":"CH49","matchedChapters":["CH49"],"id":3695},{"source":"EMT-P 第 49 章","question":"子癇前症 (Pre-eclampsia) 的三大典型症狀不包括下列何者？","options":{"A":"尿蛋白","B":"水腫","C":"全身性癲癇大發作","D":"高血壓 (收縮壓 ≥140mmHg)"},"answer":"C","manualChapter":"CH49","matchedChapters":["CH49"],"id":3699},{"source":"EMT-P 第 49 章 P.1295 - 1297","question":"關於婦產急症中孕婦的敘述以下何者錯誤？","options":{"A":"孕期主要分為三期，主要以三個月為一期，分為第一期、第二期及第三期。","B":"子癇前症亦稱為妊娠毒血症，發生原因不明，通常發生於第一胎。病人在懷孕時會出現高血壓(收縮壓≥140mmHg或舒張壓≥90mmHg)、水腫及尿蛋白，通常發生在懷孕第二期。","C":"羊水栓塞 (amniotic fluid embolism)：羊水栓塞是指在分娩前後羊水進入母體血管循環引發肺栓塞導致出血、休克和瀰漫性血管內凝血異常 (DIC) 等一系列病變","D":"孕婦在懷孕第二期時，血壓會上升10～15mmHg，而在懷孕末期血壓會降回正常血壓。"},"answer":"D","manualChapter":"CH49","matchedChapters":["CH49"],"id":3707},{"source":"EMT-P 第 49 章 P.1294","question":"一名孕婦G3P2（懷孕 3 次，分娩 2 次），妊娠34週，因劇烈腹痛、子宮持續緊繃、血壓下降送醫，陰道僅有少量出血，但胎心音持續下降。下列何者最能解釋此病人的臨床表現？","options":{"A":"前置胎盤","B":"胎盤早期剝離","C":"子宮外孕","D":"子癇前症"},"answer":"B","manualChapter":"CH49","matchedChapters":["CH49"],"id":3714},{"id":45512,"question":"關於懷孕分期及症狀，下列敘述何者正確?","options":{"A":"懷孕第一期指第一到三月，此時陰道出血有可能是急迫性流產或子宮外孕","B":"懷孕第二期指第三到五月，有可能發生子癇前症和子癇症","C":"懷孕第三期指第六到九月，陰道出血合併腹痛有可能是因為胎盤早期剝離","D":"懷孕第一期指第一到二月，此時血壓將會下降10~15mmHg"},"answer":"A","explanation":"P1297\n懷孕一般可以三個月為一期，第一期指第一到三月、第二期指第四到六月、第三期指第七到九月。\n如果懷孕第一期的病人，陰道出血有可能是因急迫性流產、完全性流產或子宮外孕。在懷孕第三期的病人，陰道出血合併腹痛有可能是因為胎盤早期剝離。\n血壓在懷孕第二期將會下降10~15mmHg。\n自發性流產和子宮外孕一般發生在懷孕第一期，子癇前症和子癇症一般發生在懷孕第二期，而胎盤早期剝離、前置胎盤則發生於懷孕第三期。","source":"同學出題","manualChapter":"CH49"},{"id":45567,"question":"規則陣痛之定義為兩次陣痛之間隔⼩於幾分鐘?","options":{"A":"1","B":"5","C":"10","D":"30"},"answer":"B","source":"大白p1297","manualChapter":"CH49"},{"id":45569,"question":"填入空格：子宮頸的擴張速度在初產婦可達每小時____公分，而經產婦(生第二胎以上)每小時可達____公分?","options":{"A":"2、10","B":"1、2","C":"3、5","D":"5、10"},"answer":"D","source":"大白p1297","manualChapter":"CH49"},{"id":45587,"question":"懷孕期間母體的生理會產生巨大變化。關於懷孕後期的生理改變，下列敘述何者錯誤？","options":{"A":"母體總血量與心輸出量約增加 30%","B":"潮氣容積與每分鐘換氣量增加，以因應胎兒的氧氣需求","C":"因為子宮增大壓迫下腔靜脈，懷孕後期產婦的血壓通常會比未懷孕時顯著降低 10~15 mmHg","D":"橫膈膜被增大的子宮往上推擠，可能導致產婦出現輕微的呼吸窘迫"},"answer":"C","explanation":"懷孕期間血壓的變化為：在「第二孕期 (4~6個月)」會下降約 10~15 mmHg，但在「懷孕末期」會回升至正常的產前血壓，而非顯著降低。","source":"AI出題","manualChapter":"CH49"},{"id":45588,"question":"到院前救護人員在搬運懷孕 30 週的孕婦時，若產婦採平躺姿勢，突然出現血壓下降、頭暈、冒冷汗的症狀。此現象最可能的原因與最佳處置為何？","options":{"A":"胎盤早期剝離導致內出血；應立即給予大量靜脈輸液","B":"仰臥性低血壓症候群；應將產婦改為左側躺，或徒手將子宮向左推","C":"子癇前症發作；應準備抽吸工具並給予高濃度氧氣","D":"羊水栓塞；應立即進行正壓通氣並準備 CPR"},"answer":"B","explanation":"仰臥性低血壓症候群 (Supine hypotensive syndrome) 常見於懷孕 20 週以上的孕婦，因為平躺時沉重的子宮會壓迫下腔靜脈，阻礙靜脈血液回流心臟，導致血壓下降。最佳處置為將產婦改為左側躺，或用手將子宮往左側推移。","source":"AI出題","manualChapter":"CH49"},{"id":45589,"question":"一名 32 歲懷孕 36 週的孕婦，突發劇烈下腹部持續性疼痛，腹部觸診時子宮僵硬如木板且有壓痛，無明顯陰道出血。產婦心跳 125 次/分，血壓 90/60 mmHg。依據臨床表徵，最可能的診斷為何？","options":{"A":"前置胎盤 (Placenta previa)","B":"胎盤早期剝離 (Abruptio placenta)","C":"子宮外孕 (Ectopic pregnancy)破裂","D":"骨盆腔發炎 (PID)"},"answer":"B","explanation":"「胎盤早期剝離」的典型特徵為劇烈腹痛、子宮收縮僵硬如木板，且出血可能隱藏在胎盤與子宮壁之間，導致外觀無明顯陰道出血，但病人已呈現休克。「前置胎盤」則是無痛性的鮮血流出。","source":"AI出題","manualChapter":"CH49"},{"id":45590,"question":"關於「前置胎盤」與「胎盤早期剝離」的臨床鑑別，下列敘述何者正確？","options":{"A":"前置胎盤通常伴隨劇烈腹痛；胎盤早期剝離則是無痛性出血","B":"胎盤早期剝離的陰道出血量一定比前置胎盤大，因此休克風險較高","C":"前置胎盤通常表現為無痛性、鮮紅色的陰道大出血；胎盤早期剝離則常伴隨子宮痙攣僵硬與強烈腹痛","D":"兩者皆主要發生在懷孕第一孕期 (前三個月)"},"answer":"C","explanation":"前置胎盤 (Placenta previa) 的特徵是無痛、鮮紅色的陰道大出血；胎盤早期剝離 (Abruptio placenta) 則是劇烈腹痛、子宮僵硬，出血可能隱藏。兩者皆主要發生於懷孕第三孕期 (後期)。","source":"AI出題","manualChapter":"CH49"},{"id":45591,"question":"救護人員抵達民宅，發現一名懷孕 38 週的產婦剛破水，且陰道口可見一條搏動的條索狀物體掉出（臍帶脫垂）。此時救護人員的優先處置為何？","options":{"A":"鼓勵產婦用力閉氣向下推擠，盡速讓胎兒娩出以解除臍帶壓迫","B":"用無菌紗布將脫出的臍帶輕輕塞回子宮頸內","C":"將產婦擺成膝胸臥式 (Knee-chest position)，戴無菌手套將手指伸入陰道把胎頭往上頂，減輕對臍帶的壓迫","D":"立即在現場用無菌剪刀夾斷臍帶，防止胎兒血液逆流"},"answer":"C","explanation":"臍帶脫垂時，胎頭會壓迫臍帶切斷胎兒的血流與氧氣。絕對不可將臍帶塞回（易造成血管痙攣），也不可讓產婦用力推擠。應讓產婦採取膝胸臥式 (Knee-chest position) 或墊高臀部，救護員需戴無菌手套將手指伸入陰道把胎頭往上托高，直到抵達醫院交接。","source":"AI出題","manualChapter":"CH49"},{"id":45592,"question":"一名曾有剖腹產病史的懷孕 39 週產婦，在家中待產陣痛時，突然發出慘叫，隨後表示陣痛停止了，但下腹部出現撕裂般的劇痛。救護員觸診腹部發現原本隨陣痛變硬的子宮變得異常柔軟，且產婦開始出現休克徵象。此為下列何種急症的典型表現？","options":{"A":"羊水栓塞 (Amniotic fluid embolism)","B":"子宮破裂 (Uterine rupture)","C":"前置胎盤 (Placenta previa)","D":"子癇症 (Eclampsia)"},"answer":"B","explanation":"子宮破裂常發生在有剖腹產疤痕的產婦。典型表現為待產時突然發生撕裂般劇痛，隨後陣痛停止，原本僵硬的子宮因破裂出血而變軟，產婦會迅速進入低血容性休克。","source":"AI出題","manualChapter":"CH49"},{"id":45593,"question":"在急產接生的流程中，當胎頭完全娩出後，救護技術員的第一個動作應該是？","options":{"A":"立刻用吸球抽吸新生兒的口部與鼻部","B":"檢查胎兒頸部是否有臍帶繞頸","C":"將胎頭向下牽引，協助上側肩膀娩出","D":"給予新生兒腳底刺激，促使其哭泣"},"answer":"B","explanation":"胎頭產出後，救護員的第一個動作必須是「滑動手指檢查頸部是否有臍帶繞頸」。若有，應嘗試將其輕輕滑過胎頭解開。","source":"AI出題","manualChapter":"CH49"},{"id":45594,"question":"關於新生兒娩出後的「斷臍」時機，依據目前美國婦產醫學會與世界衛生組織的建議，下列敘述何者正確？","options":{"A":"胎兒產出後應立刻 (10秒內) 夾斷臍帶，以防母體血液帶有感染源進入胎兒","B":"若無特殊情況，建議延遲斷臍至胎兒產出後 30~60 秒，讓胎盤血液回流至新生兒","C":"必須等到胎盤完全娩出後，才可以進行夾臍與斷臍","D":"救護員在到院前絕對不可剪斷臍帶，僅能使用臍帶夾夾住"},"answer":"B","explanation":"最新的醫學共識建議「延遲斷臍」。若新生兒狀況允許，應在胎兒產出後等待 30~60 秒再進行臍帶夾取，這有助於胎盤內的血液回流至新生兒，增加其血紅素儲備並減少貧血。","source":"AI出題","manualChapter":"CH49"},{"id":45595,"question":"關於新生兒急救的指標與處置，下列敘述何者正確？","options":{"A":"若新生兒軀幹粉紅但四肢發紺，代表嚴重缺氧，需立即實施 CPR","B":"若新生兒心跳為 80 次/分，應立即開始胸外按壓","C":"若新生兒心跳為 90 次/分，應立即給予正壓通氣 (PPV)","D":"若新生兒羊水有胎便染色，無論新生兒活力如何，產出後第一步必須立即進行氣管插管抽吸"},"answer":"C","explanation":"新生兒急救指標：心跳若 < 100 次/分，第一步是立即給予正壓通氣 (PPV)。若心跳 < 60 次/分，才開始胸外按壓。新生兒四肢發紺 (Acrocyanosis) 是初期正常現象，只要軀幹粉紅即不需過度緊張。最新版準則已不再建議常規對胎便染色新生兒進行插管抽吸。","source":"AI出題","manualChapter":"CH49"},{"id":45596,"question":"關於產後大出血 (Post-partum bleeding) 的定義與處置，下列何者正確？","options":{"A":"定義為自然產後 24 小時內出血量大於 1,000 cc","B":"最常見的原因是子宮頸撕裂傷","C":"若發生產後大出血，救護員應將手伸入產道內探查是否有殘留胎盤","D":"處置上應給予產婦子宮底環形按摩，以促進子宮收縮並控制出血"},"answer":"D","explanation":"產後大出血定義為自然產後 24 小時內出血大於 500 cc (剖腹產 >1000 cc)。最常見原因為子宮收縮不良。到院前處置應給予「子宮底環形按摩」促進收縮，嚴禁將手伸入產道探查。","source":"AI出題","manualChapter":"CH49"},{"id":45597,"question":"評估新生兒狀況的「阿普加評分 (Apgar Score)」包含五個項目。若一名剛出生一分鐘的新生兒表現如下：身體粉紅但四肢發紺、心跳 110 次/分、給予刺激時會皺眉但無明顯哭聲、四肢有輕微彎曲活動力、呼吸微弱不規則。請問其 Apgar Score 為幾分？","options":{"A":"4 分","B":"5 分","C":"6 分","D":"7 分"},"answer":"C","explanation":"Apgar Score 評分如下：\n* 外觀 (膚色)：軀幹粉紅、四肢發紺 -> 1 分。\n* 脈搏 (心跳)：110 次/分 (≥ 100) -> 2 分。\n* 反射 (Grimace)：皺眉但無大哭 -> 1 分。\n* 活動力 (肌肉張力)：輕微彎曲 -> 1 分。\n* 呼吸：微弱不規則 -> 1 分。\n總分 = 1+2+1+1+1 = 6 分 (輕度窘迫)。","source":"AI出題","manualChapter":"CH49"},{"id":45598,"question":"妊娠毒血症 (子癇前症) 若未妥善控制，進展為「子癇症 (Eclampsia)」時，產婦會出現下列哪一種最具威脅性的症狀？","options":{"A":"突發性肺栓塞","B":"瀰漫性血管內凝血 (DIC)","C":"癲癇大發作 (Tonic-clonic seizure)","D":"嚴重產後大出血"},"answer":"C","explanation":"子癇前症 (Pre-eclampsia) 的三大症狀為高血壓、水腫、蛋白尿。當病況惡化並引發「癲癇大發作 (全身性強直陣攣性發作)」時，即稱為子癇症 (Eclampsia)。","source":"AI出題","manualChapter":"CH49"},{"id":45599,"question":"救護人員抵達現場，發現一名產婦已將嬰兒產出，但嬰兒全身仍被一層完整的透明薄膜包覆著，囊內充滿液體。此現象稱為「人魚寶寶 (En-caul birth)」。救護員的下一步處置為何？","options":{"A":"連同羊膜囊一起將嬰兒保暖包覆，火速送醫，不可將其刺破以免感染","B":"迅速且輕柔地使用尖銳工具或手指將羊膜囊弄破，將嬰兒取出以進行評估與呼吸道處置","C":"立即在羊膜囊外進行 CPR 壓胸","D":"等待胎盤自行娩出後，羊膜囊會自動破裂，在此之前不需介入"},"answer":"B","explanation":"「人魚寶寶」出生時仍包覆在羊膜囊中，此時胎兒無法接觸空氣自主呼吸。救護員必須迅速且輕柔地（用尖銳工具或手指）將羊膜刺破並移除，以免新生兒窒息，並立即接續新生兒急救與保暖流程。","source":"AI出題","manualChapter":"CH49"},{"id":45600,"question":"關於性侵害案件的到院前救護處置原則，下列敘述何者「錯誤」？","options":{"A":"為了保全證據，絕對不可讓被害人在送醫前洗澡、刷牙或更換衣物","B":"應盡量由同性別的救護人員進行病史詢問與理學檢查","C":"為釐清案情，救護員應詳細詢問施暴者「是否有真正進入」等案發細節，並詳細記錄於救護紀錄表","D":"除非會陰部有危及生命的大出血需要加壓止血，否則不應對會陰部進行檢查與清理"},"answer":"C","explanation":"處理性侵案件時，救護員**絕對不可**過度詢問案發細節（如是否有真正進入），這會對受害者造成嚴重的「二次傷害」。病史詢問應僅限於醫療處置必要的範圍。","source":"AI出題","manualChapter":"CH49"},{"id":45601,"question":"肩難產 (Shoulder dystocia) 是一種嚴重的生產急症，通常發生在胎兒頭部娩出後，肩膀卡在產婦的恥骨聯合處無法產出。在到院前環境遇到此情況，救護員的處置何者最為適當？","options":{"A":"用力牽引胎兒頭部，將其硬拉出來","B":"使用器械將胎兒鎖骨折斷以縮小體積","C":"鼓勵產婦憋氣持續用力推擠","D":"立即請求醫療指導，準備緊急送醫，並避免牽引胎頭以免造成胎兒臂神經叢損傷"},"answer":"D","explanation":"肩難產發生時，胎兒的肩膀卡在母體恥骨後方。救護員**絕對不可用力牽引胎兒頭部**，否則會扯斷胎兒的臂神經叢造成永久殘廢。應避免產婦推擠，立即請求線上醫療指導並火速送醫。","source":"AI出題","manualChapter":"CH49"},{"id":45602,"question":"關於婦科急症「卵巢囊腫破裂」，下列敘述何者正確？","options":{"A":"最常發生在停經後的老年婦女","B":"破裂後會導致大量陰道出血，但腹部通常不會有疼痛感","C":"可能在劇烈性行為後發生，導致急性腹痛與內出血，嚴重者會引發低血容性休克","D":"處置上應讓病患採頭低腳高姿勢，並鼓勵其多喝水補充體液"},"answer":"C","explanation":"卵巢囊腫破裂常發生於年輕女性經期來潮前一週，或在激烈性行為後因外力破裂。囊腫破裂會將液體與血液釋放至腹腔，引發急性腹痛與內出血，嚴重時會導致休克。","source":"AI出題","manualChapter":"CH49"},{"id":45603,"question":"一名 28 歲女性，主訴突發性下腹劇痛，伴隨頭暈、冒冷汗。病史詢問發現其最後一次月經是 7 週前。理學檢查：血壓 80/50 mmHg，心跳 130 次/分，腹部有明顯壓痛與反彈痛。此時最需高度懷疑的急症為何？","options":{"A":"骨盆腔發炎 (PID)","B":"子宮內膜異位症急性發作","C":"子宮外孕破裂 (Ruptured ectopic pregnancy)","D":"卵巢過度刺激症候群 (OHSS)"},"answer":"C","explanation":"育齡期女性出現突發下腹痛、停經史 (最後一次月經 7 週前)，且伴隨低血容性休克徵象 (低血壓、心跳快)，在到院前必須高度懷疑並當作「子宮外孕破裂」處理，此為分秒必爭的致命急症。","source":"AI出題","manualChapter":"CH49"},{"id":45604,"question":"一名孕婦在分娩即將結束時，突然出現呼吸窘迫、發紺、血壓驟降並陷入休克，隨後發生心跳停止。由於該急症致死率極高（可達 80%），救護員應高度懷疑是下列何種併發症？","options":{"A":"羊水栓塞 (Amniotic fluid embolism)","B":"仰臥性低血壓症候群","C":"子癇前症","D":"前置胎盤大出血"},"answer":"A","explanation":"羊水栓塞是生產前後極其凶險的併發症。羊水進入母體血液循環後，會引發嚴重的過敏性休克、肺栓塞與瀰漫性血管內凝血 (DIC)，產婦會突發缺氧、休克並迅速失去生命徵象。","source":"AI出題","manualChapter":"CH49"},{"id":45605,"question":"在急產接生的流程中，當發現新生兒有「臍帶繞頸」的情況時，救護技術員的優先處置步驟為何？","options":{"A":"立即使用無菌剪刀將臍帶剪斷","B":"嘗試用手指將臍帶從胎兒頸部上方滑脫解開","C":"將產婦推上救護車，停止接生並立刻飆車送醫","D":"將胎兒倒提拉出以加速脫離產道"},"answer":"B","explanation":"發現臍帶繞頸時，首要動作是用手指嘗試將臍帶撐開，並從胎兒頭部上方滑脫解開。若纏繞過緊無法解開，才考慮在現場用兩把臍帶夾夾住後剪斷。","source":"AI出題","manualChapter":"CH49"},{"id":45606,"question":"人工生殖技術中常見的「卵巢過度刺激症候群 (OHSS)」，是由於大量賀爾蒙刺激卵巢所引起。下列何者「不是」OHSS 發展到重度時常見的致命併發症？","options":{"A":"大量腹水積聚","B":"呼吸困難","C":"骨盆腔神經壞死","D":"血液濃縮導致血栓形成"},"answer":"C","explanation":"人工生殖接受賀爾蒙治療引發的卵巢過度刺激症候群 (OHSS)，是因為微血管通透性增加，導致血液中水分大量漏出至腹腔或胸腔。常見併發症為大量腹水、呼吸困難，以及因血液濃縮而引發的血栓形成或腎衰竭。不包含神經壞死。","source":"AI出題","manualChapter":"CH49"},{"id":45607,"question":"填入空格：產後大出血定義為自然產後____內出血量大於____、剖腹生產超過____的出血","options":{"A":"1小時、 1,000 cc、2,000 cc","B":"1小時、500cc、1,000 cc","C":"24小時、1,000 cc、2,000 cc","D":"24小時、500cc、1,000 cc"},"answer":"D","source":"大白p1302","manualChapter":"CH49"},{"id":45678,"question":"關於懷孕分期及症狀，下列敘述何者正確?","options":{"A":"懷孕第一期指第一到三月，此時陰道出血有可能是急迫性流產或子宮外孕","B":"懷孕第二期指第三到五月，有可能發生子癇前症和子癇症","C":"懷孕第三期指第六到九月，陰道出血合併腹痛有可能是因為胎盤早期剝離","D":"懷孕第一期指第一到二月，此時血壓將會下降10~15mmHg"},"answer":"A","source":"同學出題","manualChapter":"CH49"},{"id":45713,"question":"胎盤早期剝離通常發生在懷孕第幾期?","options":{"A":"1","B":"2","C":"3","D":"4"},"answer":"C","source":"大白","manualChapter":"CH49"},{"id":45715,"question":"羊水栓塞(amniotic fluid embolism)佔產婦死亡率約多少?","options":{"A":"5-10%","B":"10-20 %","C":"30-40%","D":"70-80%"},"answer":"D","source":"大白p1295","manualChapter":"CH49"},{"id":45717,"question":"下列何者非女性生殖系統之構造?","options":{"A":"陰道","B":"胎盤","C":"子宮","D":"輸卵管"},"answer":"B","source":"大白p1297","manualChapter":"CH49"},{"id":45718,"question":"臍帶連接胎兒和胎盤，長約45公分，直徑約1.5公分，並包含?","options":{"A":"2條運送充氧血的動脈與1條運送缺氧血的靜脈","B":"1條運送充氧血的動脈與2條運送缺氧血的靜脈","C":"2條運送缺氧血的動脈與1條運送充氧血的靜脈","D":"1條運送缺氧血的動脈與2條運送充氧血的靜脈"},"answer":"C","source":"大白p1297","manualChapter":"CH49"},{"id":45720,"question":"懷孕初期會有噁心的症狀，通常開始與結束於懷孕第幾周之間?","options":{"A":"1-3周","B":"5-10周","C":"6-14周","D":"17-21周"},"answer":"C","source":"大白p1297","manualChapter":"CH49"},{"id":45722,"question":"下列何者非陰道出血的原因?","options":{"A":"胎盤早期剝離(abruptio placenta)","B":"妊娠劇吐(hyperemesis gravidarum)","C":"子宮外孕(ectopic pregnancy)","D":"急迫性流產(Threatened abortion)"},"answer":"B","source":"大白p1297","manualChapter":"CH49"},{"id":45723,"question":"下列何者非羊水及羊膜腔的功能或敘述?","options":{"A":"羊水可維持胎兒溫度之恆定，提供胎兒一個可活動之空間","B":"羊膜腔外充滿由胎兒尿液及其他分泌物組成之液體","C":"可緩衝外力對胎兒造成之傷害","D":"羊膜腔於胚胎周圍發育"},"answer":"B","source":"大白p1297","manualChapter":"CH49"},{"id":45725,"question":"急產發生率約為多少?","options":{"A":"2%","B":"10%","C":"20%","D":"35%"},"answer":"A","source":"大白p1297","manualChapter":"CH49"},{"id":45727,"question":"指揮中心通報一名急產案件，到達現場寶寶胎頭尚未娩出且媽媽沒有規則陣痛，請問下一步如何處置為非?","options":{"A":"立即準備生產包進行現場接生","B":"指導產婦「深呼吸不要憋氣，去醫院生比較安全」","C":"盡速上擔架床以約束帶固定雙腳，抬高床頭並給予氧氣","D":"詢問相關病史、懷孕幾月、懷孕幾胎、生產幾次"},"answer":"A","source":"大白p1298","manualChapter":"CH49"},{"id":45728,"question":"羊水栓塞為羊水雜質經何種管道進入母體肺部血管造成?","options":{"A":"臍帶","B":"子宮動脈","C":"子宮頸靜脈","D":"胎兒下腔靜脈"},"answer":"C","source":"大白p1303","manualChapter":"CH49"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

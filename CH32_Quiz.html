@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 32 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：29 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH32</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":2426,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"13歲男童，體重目測35公斤，現場GCS=E2V2M4，心跳150次/分鐘、血壓70/30mmHg、呼吸30次/分鐘、血氧75%，理學檢查：腹部有安全帶徵象、瞳孔等大（左2mm/右2mm)、氣管向右偏移、頸靜脈怒張、呼吸音：左側減低，左側胸部敲診為鼓音，以下描述何者最適當？","options":{"A":"腹部有安全帶徵象通常與嚴重腹內損傷無關。","B":"小兒組織柔軟，如果有肋骨骨折，胸腔內的損傷的機會不高。","C":"考慮患者有左側張力性氣胸，應於左胸第五肋間腋後線前側實行針刺減壓。","D":"可以先以700ml林格氏液快速輸注。"},"answer":"D","manualChapter":"CH32","matchedChapters":["CH32"]},{"id":2534,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"面對到院前心跳停止的兒童，若需使用骨針建立給藥途徑，請問骨針施打部位，下圖何處最為正確？","options":{"A":"A。","B":"B。","C":"C。","D":"D。"},"answer":"B","manualChapter":"CH32","matchedChapters":["NeedImage"],"image":"題庫圖片/2534.png"},{"question":"以下關於小兒呼吸道構造的敘述，何者錯誤？","options":{"A":"舌頭占比較大","B":"會厭較大且軟","C":"氣管較長","D":"呼吸道較細"},"answer":"C","manualChapter":"CH32","id":3339,"source":"TP題庫 (圖片匯入)"},{"question":"下列何者「不是」小兒外傷病人院前照護重點？","options":{"A":"頭部及意識評估","B":"循環系統、體表面積","C":"呼吸道、呼吸","D":"暴露（懷疑兒虐與疏忽）"},"answer":"D","manualChapter":"CH32","id":3340,"source":"TP題庫 (圖片匯入)"},{"question":"孕婦外傷中，哪一種指標可以用來作為判斷母體早期休克的良好參考？","options":{"A":"母體的血壓","B":"母體的體溫","C":"胎兒的心率","D":"母體的尿量"},"answer":"C","source":"圖片匯入","manualChapter":"CH32","id":3570,"matchedChapters":["CH32"]},{"question":"關於小兒外傷的呼吸道與通氣處置，下列敘述何者最為正確？","options":{"A":"嬰兒平躺時因後腦勺較為平坦，為維持頸椎中立，應在頸部下方墊高 2-3 公分。","B":"兒童舌頭占口腔比例較大，若無意識且無嘔吐反射，置入口咽呼吸道時應先反向插入再旋轉 180 度。","C":"體重小於 30 公斤的兒童，建議使用兒童專用的甦醒球，以避免過度通氣導致胃脹氣或張力性氣胸。","D":"針對 10 歲兒童，若無法進行氣管插管，首選的救援呼吸道處置為針刺環甲膜切開術。"},"answer":"C","manualChapter":"CH32","source":"AI出題","id":3784,"matchedChapters":["CH32"]},{"question":"關於小兒休克與循環評估，下列敘述何者最不適當？","options":{"A":"兒童的血循代償能力佳，在休克初期血壓通常不會改變，直到流失超過 45% 的血量才會出現明顯低血壓。","B":"對於兒童外傷出血性休克，初始輸液急救建議給予溫熱靜脈輸液，劑量為每公斤 20 毫升。","C":"嬰兒因為顱骨縫尚未閉合，大量的顱內出血可能導致低血容性休克，這點與成人單純頭部外傷不同。","D":"兒童發生張力性氣胸時，因胸廓較具彈性，針刺減壓的位置與成人相同，皆為腋前線第五肋間。"},"answer":"D","manualChapter":"CH32","source":"AI出題","id":3785,"matchedChapters":["CH32"]},{"question":"關於兒童神經學與暴露評估，下列敘述何者正確？","options":{"A":"4歲以下兒童的 GCS 評估中，最佳運動反應（M）的給分標準與成人完全不同，需依據其哭鬧程度判斷。","B":"兒童體表面積與體重比率較高，且皮下組織較薄，容易快速失溫，在初步評估暴露後必須立即保暖。","C":"評估兒童灼傷面積時，因兒童軀幹比例較大，故採用九則算法（Rule of Nines）比隆德-布勞德圖更準確。","D":"若 1 歲嬰兒遭受嚴重頭部鈍傷，因其囟門未閉合，顱內壓升高的早期症狀會比成人更早、更明顯出現。"},"answer":"B","manualChapter":"CH32","source":"AI出題","id":3786,"matchedChapters":["CH32"]},{"question":"隨著年紀增長，老年人生理機能退化會影響外傷的評估與預後。下列關於老年外傷病人生理變化的敘述，何者正確？","options":{"A":"老年人心血管系統退化，血管硬化導致脈壓平時較窄，這會使休克初期的脈壓縮小症狀更為明顯。","B":"腦部萎縮使得大腦與顱骨之間空間增加，發生硬腦膜下出血時，症狀可能相對輕微或延遲出現。","C":"由於腎臟功能退化，給予大量輸液急救時，老年人能更快速排出多餘水分，不易發生肺水腫。","D":"肌肉量減少使得發抖產熱能力降低，但因為皮下脂肪較厚，老年外傷病人反而不易發生低體溫。"},"answer":"B","manualChapter":"CH32","source":"AI出題","id":3787,"matchedChapters":["CH32"]},{"question":"在評估老年外傷病人時，用藥史是一個極為重要的關鍵。下列哪一種藥物與其潛在風險的配對「最不相關」？","options":{"A":"乙型交感神經阻斷劑（Beta-blockers）－ 掩蓋出血性休克初期的心搏過速代償反應。","B":"抗凝血劑（如 Warfarin）－ 輕微頭部外傷也可能導致嚴重的延遲性顱內出血。","C":"降血壓藥物－ 導致姿勢性低血壓，成為老人跌倒受傷的潛在原因。","D":"氣管擴張劑－ 導致老年人對疼痛的敏感度大幅降低，掩蓋骨折症狀。"},"answer":"D","manualChapter":"CH32","source":"AI出題","id":3788,"matchedChapters":["CH32"]},{"question":"孕婦在懷孕期間的生理變化，對外傷的耐受度與臨床表現有顯著影響。下列敘述何者「錯誤」？","options":{"A":"懷孕期間母體血量會增加近 50%，因此在出現休克症狀前，可能已經流失相當大量的血液。","B":"第三孕期的孕婦若平躺，膨脹的子宮會壓迫下腔靜脈，導致靜脈回流減少、心輸出量下降而產生低血壓。","C":"胎兒的血液循環優先於母體，當母體失血時，會先犧牲母體周邊血管灌流以維持胎盤的血液供應。","D":"懷孕期間呼吸道黏膜微血管會擴張導致水腫，加上腸胃蠕動變慢，使得孕婦發生呼吸道阻塞及吸入性肺炎的風險增加。"},"answer":"C","manualChapter":"CH32","source":"AI出題","id":3789,"matchedChapters":["CH32"]},{"question":"針對懷孕晚期（第三孕期）孕婦的外傷急救處置，下列哪一項操作「最不適當」？","options":{"A":"若孕婦因車禍導致頸椎受傷疑慮，使用長背板固定時，應在長背板右側墊高 10~15 公分，使孕婦向左側傾斜。","B":"評估孕婦的呼吸與血氧時，若血氧偏低，應給予高濃度氧氣，目標是維持血氧濃度在 95% 以上，以確保胎兒供氧。","C":"孕婦發生低血容性休克時，因胎兒心跳變化比母體血壓變化晚發生，故應以母體血壓下降作為判斷胎兒窘迫的早期指標。","D":"若孕婦無法翻身，救護技術員可嘗試用雙手將其子宮向左側推移，以減緩對下腔靜脈的壓迫。"},"answer":"C","manualChapter":"CH32","source":"AI出題","id":3790,"matchedChapters":["CH32"]},{"question":"Broselow 量尺（急救測量尺）是兒科急診常用的工具。關於其使用及兒童體重估算，下列敘述何者最精確？","options":{"A":"Broselow 量尺是直接測量兒童的體重，以決定急救藥物的劑量。","B":"研究指出，對於年齡小於 1 歲的嬰兒，使用「新版 APLS 公式」估算體重的準確度，優於最佳猜測法（Best Guess）。","C":"在肥胖率高的族群中，基於身高的估算方法（如 Broselow 量尺）通常會高估兒童的實際體重。","D":"兒童氣管內管的尺寸選擇，若使用 Broselow 量尺評估，通常無法同時建議相對應的喉頭鏡葉片尺寸。"},"answer":"B","manualChapter":"CH32","source":"AI出題","id":3791,"matchedChapters":["CH32"]},{"question":"關於親密伴侶暴力（Intimate Partner Violence, IPV）的辨識與處置，身為第一線救護人員，下列哪種情況「最不」應被視為疑似暴力的潛在警訊？","options":{"A":"病人對自己受傷的過程輕描淡寫，且描述的受傷機轉與實際傷勢嚴重程度明顯不符。","B":"病人的伴侶堅持在整個面談和身體檢查過程中陪同，並主導大部分的對話與回答。","C":"孕婦發生外傷，但傷勢僅集中或單獨出現在腹部。","D":"病人主動詳細說明跌倒的每個細節，且伴侶在旁表現出適度的焦慮與關心。"},"answer":"D","manualChapter":"CH32","source":"AI出題","id":3792,"matchedChapters":["CH32"]},{"question":"一名 75 歲男性從樓梯上摔落，意識清醒，主訴胸痛與右髖部疼痛。過去病史有高血壓（平時收縮壓約 160 mmHg）並規律服用藥物。現場測量血壓為 110/70 mmHg，心跳 85 次/分。關於這名病患的評估，下列何者「最不適當」？","options":{"A":"病患的收縮壓為 110 mmHg，在大眾標準屬正常範圍，因此可初步排除出血性休克的可能性。","B":"考慮到病患平時的高血壓，目前的 110 mmHg 可能已經代表他正處於低血容性休克的狀態。","C":"病患的心跳正常（85 次/分），可能是因為服用了乙型交感神經阻斷劑，抑制了代償性心跳加快的反應。","D":"老年人的胸廓彈性較差，即使是相對低能量的跌倒，也極有可能造成肋骨骨折甚至心臟挫傷。"},"answer":"A","manualChapter":"CH32","source":"AI出題","id":3793,"matchedChapters":["CH32"]},{"question":"小兒急救時，呼吸道的處置至關重要。下列關於兒童呼吸道特徵的描述，哪一項「不正確」？","options":{"A":"兒童的會厭較長且較大，插管時常需留意會厭可能遮擋聲門視線。","B":"嬰幼兒呼吸道最狹窄的部位是環狀軟骨處，而非像成人一樣位於聲門（聲帶）處。","C":"兒童的氣管較短，若插管過深，極容易滑入左側支氣管，造成右側肺部塌陷。","D":"嬰兒主要依賴鼻子呼吸，若鼻腔被分泌物阻塞，可能會迅速導致嚴重的呼吸窘迫。"},"answer":"C","manualChapter":"CH32","source":"AI出題","id":3794,"matchedChapters":["CH32"]},{"question":"兒童在外傷時若發生張力性氣胸，其臨床表現與成人有所不同。下列哪項原因最能解釋此差異？","options":{"A":"兒童肺部容積較小，氣胸不易造成縱膈腔偏移。","B":"兒童胸廓較柔軟，張力性氣胸易導致心血管衰竭，在正壓通氣時需特別提高警覺。","C":"兒童心肌收縮力較強，對張力性氣胸引起的靜脈回流減少有完全的代償作用。","D":"兒童發生氣胸時，橫膈膜會自動下移代償，因此不會出現呼吸急促的症狀。"},"answer":"B","manualChapter":"CH32","source":"AI出題","id":3795,"matchedChapters":["CH32"]},{"question":"孕婦發生嚴重車禍外傷，在進行心肺復甦術（CPR）時，下列處置何者「錯誤」？","options":{"A":"應盡量將孕婦左側傾斜，或以手將子宮向左推，以解除下腔靜脈壓迫。","B":"由於孕婦橫膈膜上移，按壓胸部的位點應比一般成人稍微偏下一至兩指幅。","C":"孕婦發生 OHCA，若符合適應症，母體仍可正常使用 AED 進行電擊去顫。","D":"孕婦的需氧量增加且肺容積減少，急救過程中的通氣支持與給氧極為重要。"},"answer":"B","manualChapter":"CH32","source":"AI出題","id":3796,"matchedChapters":["CH32"]},{"question":"關於老年人頭部外傷的特點，下列敘述何者正確？","options":{"A":"老年人腦部萎縮，硬腦膜外出血（EDH）發生的機率大幅增加。","B":"由於顱內空間增加，發生硬腦膜下出血（SDH）時，病人很快就會出現明顯的顱內壓增高症狀。","C":"老年人經常合併失智或聽力、視力障礙，使得判斷意識改變是因為急性外傷還是慢性退化變得困難。","D":"老年人跌倒造成頭部外傷，最常見的原因為突發性低血糖，故所有老年創傷患者首要處置是給予葡萄糖。"},"answer":"C","manualChapter":"CH32","source":"AI出題","id":3797,"matchedChapters":["CH32"]},{"question":"有關小兒燒燙傷的評估與處置，下列敘述何者最為適當？","options":{"A":"由於小兒體表面積比例與成人不同，使用「九的法則」估算 2 歲幼童的燒傷面積時，頭部應算為 9%。","B":"兒童體表面積相對於體重較大，燒燙傷後散失液體與體溫的速度極快，因此預防失溫非常重要。","C":"小於 30 公斤的幼童，燒傷輸液急救時不應給予含糖輸液，以免造成高血糖滲透壓利尿。","D":"兒童呼吸道較短，吸入性嗆傷的熱氣不易到達下呼吸道，故幾乎不會引起氣道水腫阻塞。"},"answer":"B","manualChapter":"CH32","source":"AI出題","id":3798,"matchedChapters":["CH32"]},{"question":"救護人員抵達家庭暴力現場，發現一名女性身上有多處瘀傷。下列哪一項詢問方式或作為「最符合」安全評估與保護病人的原則？","options":{"A":"在其伴侶面前直接詢問：「這些傷是你先生打的嗎？」以觀察伴侶的反應。","B":"趁伴侶不在場時，以不帶評判的語氣詢問：「您目前是否處於即時危險中？是否有安全的地方可以去？」","C":"認為這是家庭私事，只要處理好外傷即可，不需在救護紀錄表上多做註記，以免惹禍上身。","D":"強制要求伴侶離開現場，並警告若不離開將立即以現行犯逮捕。"},"answer":"B","manualChapter":"CH32","source":"AI出題","id":3799,"matchedChapters":["CH32"]},{"question":"老年人骨骼系統退化對外傷的影響，下列敘述何者錯誤？","options":{"A":"骨質疏鬆使得老年人即使遇到低能量機轉（如平地跌倒），也極易發生骨折。","B":"退行性脊椎疾病（如骨刺、脊椎僵硬）會增加頸椎受傷的風險，搬運時需特別注意固定。","C":"由於神經退化，老年人對疼痛的敏感度增加，輕微的骨折也會引發劇烈的疼痛與休克。","D":"長期駝背或四肢攣縮變形的老年患者，在固定於長背板時，應使用護墊或棉被填補空隙，避免強行拉直。"},"answer":"C","manualChapter":"CH32","source":"AI出題","id":3800,"matchedChapters":["CH32"]},{"question":"評估一名 1 歲大、體重約 10 公斤的外傷男嬰，發現其心跳 170 次/分、微血管充填時間（CRT） 4 秒、皮膚有大理石斑、血壓 85/50 mmHg、且幾乎無尿。此病患最可能處於下列何種狀態？","options":{"A":"輕度休克（失血量 < 30%）","B":"中度休克（失血量 30% ~ 45%）","C":"重度休克（失血量 > 45%）","D":"神經性休克"},"answer":"B","manualChapter":"CH32","source":"AI出題","id":3801,"matchedChapters":["CH32"]},{"question":"當懷孕超過 20 週的孕婦發生創傷而無意識時，在急救處置上「不應該」採用下列哪一種方法？","options":{"A":"為預防吸入性肺炎，若無法插管，使用 BVM 給氧時應備妥抽吸器材。","B":"讓孕婦完全平躺於擔架上，以利心肺復甦術的胸外按壓達到最大深度。","C":"若需使用長背板，可將長背板的右側墊高，使病患呈現左側傾斜。","D":"若無頸椎受傷疑慮，可直接讓孕婦採取左側臥姿，以減少下腔靜脈壓迫。"},"answer":"B","manualChapter":"CH32","source":"AI出題","id":3802,"matchedChapters":["CH32"]},{"question":"針對特殊外傷族群（小兒、老人、孕婦）的初步評估 XABCDE，下列總結何者最為正確？","options":{"A":"由於解剖生理的差異，這三類族群的初步評估順序應調整為 XCABDE。","B":"在處理小兒致命性大出血（X）時，止血帶的效果通常優於直接加壓，應為首選。","C":"老年人因代償能力差，少量出血即可能引發休克；相對地，兒童代償能力極佳，血壓下降通常是休克晚期（失償）的表現。","D":"孕婦發生車禍時，胎兒受子宮與羊水保護，即使母體休克，胎兒通常也不會受到影響。"},"answer":"C","manualChapter":"CH32","source":"AI出題","id":3803,"matchedChapters":["CH32"]},{"question":"一名 2 歲男童（體重約 12 公斤）在一起嚴重的對撞車禍中被救出，他未正確乘坐安全座椅。病童臉色蒼白、嗜睡且發出呻吟聲。生命徵象：心跳 165 次/分，呼吸 45 次/分，血壓 75/40 mmHg。微血管充填時間（CRT）為 4 秒，皮膚有大理石斑且冰冷，前囟門有膨出跡象。關於此病童的到院前評估與處置，下列敘述何者「最不適當」？","options":{"A":"病童呈現心搏過速、微血管充填時間延長及皮膚大理石斑，且血壓已低於正常值下限，顯示其代償機制可能已失效，處於失償性低血容休克。","B":"嬰幼兒因顱骨縫與囟門未完全閉合，對顱內壓升高的耐受性較大，但大量的顱內出血仍可能成為導致其低血容性休克的主要原因之一。","C":"若嘗試兩次靜脈注射（IV）失敗，應立即考慮建立骨針（IO）途徑，並快速給予 240 mL（20 mL/kg）的溫熱晶質液進行急救復甦。","D":"病童有明顯的意識改變與呼吸窘迫，為了徹底解決呼吸道問題並防止腦壓飆高，應直接在現場實施針頭環甲膜穿刺術（Needle cricothyrotomy）建立呼吸道。"},"answer":"D","manualChapter":"CH32","source":"AI出題","id":3804,"matchedChapters":["CH32"]},{"question":"一名 6 歲女童（體重約 20 公斤）騎腳踏車時遭小客車撞擊。病童意識清醒但極度躁動、大聲哭鬧。她的腹部有一道明顯的橫向挫傷痕跡（類似安全帶勒痕），且主訴胸部劇痛。生命徵象：心跳 140 次/分，呼吸 35 次/分，血壓 100/60 mmHg，血氧 93%。在進行初步評估與處置時，下列哪一項作法「最符合」小兒外傷的處置原則？","options":{"A":"兒童的心理恐懼會加劇生命徵象的不穩定，在處置過程中應盡可能讓父母在場陪伴，有助於減少病童的恐懼和焦慮以利評估。","B":"因病童胸部受創且血氧偏低，若聽診發現單側呼吸音減弱，應立即使用 14 號針頭於腋前線第五肋間進行針刺減壓。","C":"病童的心跳高達 140 次/分，加上腹部有明顯鈍傷痕跡，血壓 100/60 mmHg 顯示其已處於重度休克狀態，應避免給予晶質液，直接要求醫院備血。","D":"評估其意識狀態時，因 6 歲兒童尚無法準確回答人事物等定向感問題，應直接給予 GCS 語言評分（V）最低分 1 分。"},"answer":"A","manualChapter":"CH32","source":"AI出題","id":3805,"matchedChapters":["CH32"]},{"question":"一名 5 個月大的男嬰從火災現場被救出，其整個頭部、臉部、雙臂及前胸腹部皆受到二度燒燙傷。男嬰哭聲微弱，鼻毛有燒焦痕跡且口鼻周圍有碳灰。關於此燒燙傷嬰兒的評估與急救處置，下列敘述何者正確？","options":{"A":"若採用成人的「九的法則（Rule of Nines）」估算，此嬰兒的頭臉部占全身面積為 9%，前軀幹為 18%。","B":"嬰兒體表面積比例與成人不同，頭部占比較大，加上皮膚薄、皮下脂肪少，極易發生嚴重失溫，暴露檢查後必須立刻給予適當包覆保暖。","C":"嬰兒氣道短且狹窄，吸入性嗆傷會迅速導致呼吸道阻塞。若現場無小兒專用氣管內管，應立即執行外科環甲膜切開術（Surgical cricothyroidotomy）。","D":"考量燒傷面積廣大且嬰兒血容量少，應大量且快速灌注常溫的生理食鹽水，且絕對禁止給予含糖輸液以免造成高血糖滲透壓利尿。"},"answer":"B","manualChapter":"CH32","source":"AI出題","id":3806,"matchedChapters":["CH32"]},{"source":"練習卷","question":"孕婦失去多少血容量才會出現低血容症狀?","options":{"A":"10-15%","B":"20-25%","C":"30-35%","D":"40-45%"},"answer":"C","id":45451,"manualChapter":"CH32"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

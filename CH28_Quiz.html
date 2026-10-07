@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 28 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：48 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH28</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":51,"source":"105 高級救護技術員甄試筆試題目.doc","question":"有關連枷胸（flail chest）的說明，下列何者為非?","options":{"A":"理學檢查常有皮下捻髮音crepitus","B":"傷患往往呈現缺氧","C":"不要使用止痛藥以免抑制傷患呼吸","D":"病患常常會惡化到需要插管"},"answer":"C","manualChapter":"CH28"},{"id":145,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"張力性氣胸傷惠到院前進行針刺減壓的條件，不包括下列哪一項？","options":{"A":"傷患深度昏迷GCS 3分","B":"嚴重的呼吸窘迫徵象","C":"惠側呼吸音聽不到","D":"傷患收縮壓＜90 mmHg"},"answer":"A","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":186,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"有關於胸部鈍傷方面，下列敘述何者為非？","options":{"A":"合併第一，二肋骨骨折時須高度懷疑主動脈的損傷","B":"張力性氣胸的病患不一定出現頸靜脈怒張","C":"合併第十到十二肋骨骨折須懷疑肝臟或脾臟的損傷","D":"目前在台灣，若EMTP在院外發現懷疑張力性氣胸的傷患，可直接進行針刺減壓"},"answer":"D","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":219,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"高中生無照駕車，沒有帶安全帽騎機車發生車禍，現在感到呼吸困雞胸部疼痛，視診明顯頸靜脈怒張，但氣管無偏移，胸部起伏，無明顯傷口但是有右側有瘀青，聽診發現右側呼吸音減弱，扣診為實音，觸診疑似有肋骨骨折，下列何者為最可能的疾病？","options":{"A":"大量血胸","B":"張力性氣胸","C":"連枷胸","D":"主動脈剝離"},"answer":"A","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":571,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"某高中教官制止學生不常行為，被學生用刀刺在左側後背上方。119到達現場時，發現傷患的背部傷口一直在流血，理學檢查發現有兩道傷口長度各約4公分，凶器找不到。下圖照片為傷患臉朝下躺著，自背部拍攝的位置，右上方是頸部。以下敘述，何者為非？","options":{"A":"若是兩側胸部以下都會發麻，有可能傷到脊柱神經（spinal cord）","B":"若發現傷囗周邊有皮下氣腫，血壓下降，表示有刺到肺部造成氣胸，應立即針刺減壓","C":"若是有頸靜脈怒張，血壓下降，氣管沒有偏移，要高度懷疑是心包膜填塞","D":"若是頸靜脈沒有怒張，血壓下降，氣管沒有明顯偏移，要高度懷疑是大量血胸"},"answer":"B","manualChapter":"CH28","image":"題庫圖片/571.png"},{"id":580,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位45歲病患因呼吸急促以及胸痛休克需要急救，且頸靜脈鼓張，病患最不可能出現的狀況","options":{"A":"心因性休克","B":"心包膜填塞","C":"肺炎敗血性休克","D":"張力性氣胸"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":588,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位45歲病患因呼吸急促合併有休克的症狀，且頸靜脈明顯鼓張，請問他最不可能出現的狀況是？","options":{"A":"張力性氣胸（tension pneumothorax）","B":"心包膜填塞（cardiac tamponade）","C":"大量血胸（massive hemo-thorax）","D":"大片肺栓塞（massive pulmonary embolism）"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":603,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"張力性氣胸病患進行針刺減壓時，為何針要放置在肋骨的上緣？","options":{"A":"預防針刺減壓刺傷希氏束（bundle of His）","B":"預防傷害到肋骨的神經，靜脈及動脈","C":"為了在進針時在胸部上有依靠","D":"為了使肺部可以完全膨脹"},"answer":"B","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":700,"source":"第五章 創傷急症(2012-2014).doc","question":"會立刻威脅生命的胸部創傷，何者為非？","options":{"A":"心包填塞","B":"連枷胸","C":"肺挫傷","D":"張力性氣胸"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":706,"source":"第五章 創傷急症(2012-2014).doc","question":"有關創傷性主動脈斷裂（traumatic aortic rupture）敘述，下列何者為非？","options":{"A":"大部分傷患最後仍然死亡","B":"若是胸部鈍挫傷引起，主動脈破裂斷裂的位置通常是在動脈韌帶的位置","C":"傷患會因主動脈斷裂而導致右側胸腔內積血","D":"理學檢查可發現兩側肢體的脈搏不對稱"},"answer":"C","manualChapter":"CH28"},{"id":717,"source":"第五章 創傷急症(2012-2014).doc","question":"有關連枷胸（flail chest）下列敘述何者為非？","options":{"A":"身體檢查常可能有捻髮音crepitus","B":"臨床上這類病人常有缺氧的現象","C":"不應該用止痛藥，以免抑制呼吸功能","D":"有需要給予氣管插管"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":727,"source":"第五章 創傷急症(2012-2014).doc","question":"下列關於心包膜填塞及張力性氣胸，下列何者並非共通點（請選最適合的答案）？","options":{"A":"血壓低","B":"頸靜脈怒張","C":"氣管偏移","D":"均可能造成PEA"},"answer":"C","manualChapter":"CH28"},{"id":728,"source":"第五章 創傷急症(2012-2014).doc","question":"請問下列何者並非造成連枷胸病人喘的主要原因（請選最適合的答案）？","options":{"A":"反向呼吸","B":"疼痛","C":"肺挫傷","D":"因受傷機轉大造成其他相關淺在的肺部傷害"},"answer":"A","manualChapter":"CH28"},{"id":751,"source":"第五章 創傷急症(2012-2014).doc","question":"題目：下圖表示？該圖表示？","options":{"A":"氣胸","B":"連枷胸","C":"血胸","D":"氣管斷裂"},"answer":"A","manualChapter":"CH28","matchedChapters":["需要圖片"],"image":"題庫圖片/751.png"},{"id":753,"source":"第五章 創傷急症(2012-2014).doc","question":"有關於胸部鈍傷方面，下列敘述何者為非？","options":{"A":"合併第一、二肋骨骨折時須高度懷疑主動脈的損傷","B":"張力性氣胸的病患不一定出現頸靜脈怒張","C":"合併第十到十二肋骨骨折須懷疑肝臟或脾臟的損傷","D":"目前在台灣，若EMT在院外發現懷疑張力性氣胸的傷患，可直接進行針刺減壓"},"answer":"D","manualChapter":"CH28"},{"id":791,"source":"第五章 創傷急症(2015-2018).doc","question":"對於胸部創傷之陷阱及注意事項，下列何者為是？","options":{"A":"懷疑主動脈不完全破裂時，繼續積極處理不需考慮轉診至有能力處理的醫院","B":"插入胸管後仍有持續性氣胸，且肺臟無法擴張時，可先不用懷疑氣管.支氣管之破食道破裂","C":"橫隔破裂容易診斷，除了會影響呼吸功能外，更可能造成移位到胸腔之腹內器官缺血.壞死及破裂","D":"肋骨骨折之傷患可給予止痛藥物以免影響呼吸功能，造成進一步之肺部併發症及腸胃問題"},"answer":"D","manualChapter":"CH28"},{"id":802,"source":"第五章 創傷急症(2015-2018).doc","question":"初步評估的目標是抓出可能立即致死之創傷狀況，以下敘述何者為是？","options":{"A":"創傷性主動脈剝離死亡率極高，是以需在初度評估診斷並予以治療","B":"心包膜填塞的理學檢查體徵包括雙側頸動脈怒張與遙遠模糊的心音","C":"左側張力性氣胸的會造成左側單側的頸靜脈怒張，右側張力性氣胸則是造成右側單側頸靜脈怒張","D":"開放性氣胸若導致傷患死亡，其機轉是因為出血性休克所致"},"answer":"B","manualChapter":"CH28"},{"id":893,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一位6歲的孩童被一輛汽車撞傷之後，意識警醒、組織灌流正常，但是有呼吸窘迫的現象，他的頸椎已經被固定並已經使用100％的氧氣面罩，呼吸速率為60次/每分鐘，血壓為60 mmHg，右側胸部呼吸音減弱，氣管向左偏移，此時最合適的處置是:","options":{"A":"立即給予氣管內插管","B":"等待胸部X光的檢查報告","C":"立即給予氣管內插管並於右側胸部放置胸管","D":"先於右側胸部施行針頭減壓，再於右側胸部放置胸管"},"answer":"D","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":1040,"source":"第四章 非創傷急症(2012-2014).doc","question":"關於心包膜填塞，有所謂的貝克式三症狀（Beck's triad），下列何者不包含在內？","options":{"A":"低血壓","B":"頸靜脈怒張","C":"意識不清","D":"心音變弱且模糊"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":1069,"source":"第四章 非創傷急症(2012-2014).doc","question":"下列有關心包膜填塞的描述，何者為非？","options":{"A":"臨床表現包括：低血壓、呼吸急促、倦怠無力，甚而發紺","B":"理學檢查方面：頸靜脈怒張，心音變弱且模糊，心包膜摩擦音，有時會有奇脈（pulsus paradoxus）發生","C":"心電圖有時會有電氣交替（electrical alternans）現象","D":"貝克氏三症狀（Beck's triad）即指常見於急性心包膜填塞的「低血壓」「頸靜脈怒張」、以及「心電圖的電氣交替」"},"answer":"D","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":1136,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於心包膜填塞的貝克式三症狀（Beck's triad），下列何者不包含？","options":{"A":"低血壓","B":"頸靜脈怒張","C":"意識不清","D":"心音變弱且模糊"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2034,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"關於胸部創傷敘述，下列何者為是？","options":{"A":"根據統計，超過一半的創傷出血性休克死亡是因胸部創傷所致。","B":"肋骨骨折最常見的位置為中段第4至9根肋骨的側面。","C":"針刺減壓時，為避免傷害到神經，入針位置應在肋骨下沿。","D":"執行胸部超音波時看到條碼徵候（barcode sign）表示傷患沒有氣胸。"},"answer":"B","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2038,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"中年男性車禍被送到醫院時診斷為右側張力性氣胸，經細針減壓以及右側胸管置入後，血壓、血氧與呼吸狀況都獲得改善。五分鐘後，該患者突然又再度呼吸困難、血壓下降。下列敘述何者為是？","options":{"A":"因生命徵象不穩定，應重新進行初級評估。","B":"再次進行細針減壓最適當位置是右鎖骨中線第二肋間。","C":"先安排電腦斷層確定是否有其他內出血。","D":"可能胸管功能不佳，應再插上第二根胸管強化引流效果。"},"answer":"A","manualChapter":"CH28"},{"id":2128,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"有關針刺減壓的敘述下列何者最適當？","options":{"A":"適應症必須符合：頸靜脈怒張且氣管偏移，且患側呼吸聲音變小或聽不到，且收縮壓＜90mmHg。","B":"成人因前胸較厚，故較佳的針刺減壓的位置應在患側第五肋間腋中線前側。","C":"針刺減壓是張力性氣胸確切治療方式。","D":"為統一作法，針對兒童，針刺減壓位置也是患側第五肋間腋中線前側。"},"answer":"B","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2129,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於胸部創傷的描述，下列何者最適當？","options":{"A":"氣管支氣管破裂，以喉頭周圍2.5公分內的氣管破裂最常見。","B":"連枷胸常造成呼氣時胸壁凹陷，吸氣時胸壁凸出的奇異式呼吸運動。","C":"創傷性主動脈剝離，最常好發處為動脈韌帶(Ligmentum arteriosum)的位置。","D":"創傷性窒息常因下腔靜脈遭受壓迫，而造成臉部及頸部呈現青紫色及結膜出血。"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2216,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"關於下列胸部創傷的描述，下列何者為是？","options":{"A":"創傷性主動脈剝離，最常好發處為升主動脈。","B":"氣管支氣管破裂，以肺內細支氣管破裂最常見。","C":"心臟震盪(commotio cordis)的傷患，最常見的心律是心室顫動。","D":"創傷性窒息，常見受壓迫位置以下皮膚呈現藍紫色，而以上的皮膚顏色正常。"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2217,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"30歲男性自述右胸中彈，無肢體大出血，呼吸速率正常，經檢視後發現右胸壁前後各有一開放性傷口，給予塑膠包裝貼三邊覆蓋傷口後送醫，但在送醫途中傷患突然意識變化、呼吸急促。請問有關此患者相關處置，下列何者最不適當？","options":{"A":"再次檢查胸腹部是否有其他傷口。","B":"執行延伸性創傷超音波(e-FAST)評估傷患病情改變原因。","C":"移除傷口原塑膠包裝改用急救填塞止血敷料。","D":"若是評估為張力性氣胸，在第五肋間腋中線前側給予針刺減壓。"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2218,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"關於胸部創傷敘述，下列何者為是？","options":{"A":"執行超音波e-FAST，在劍突處進行掃描，主要是確認橫膈膜是否破裂。","B":"執行胸部超音波時看到條碼徵候（barcode sign）表示傷患可能有氣胸的情形。","C":"發現開放性氣胸時，應進行針刺減壓，減低胸內壓力。","D":"針刺減壓時應選擇第五肋間腋中線前側肋骨下緣下針。"},"answer":"B","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2312,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"下列胸部創傷的敘述何者為非？ (多選)","options":{"A":"兒童遭遇胸部創傷時，會比成人容易肋骨骨折。","B":"創傷性主動脈破裂的位置通常是在動脈韌帶。","C":"張力性氣胸針刺減壓在第五肋間腋前線的成功率較第二肋間鎖骨中線處高。","D":"肺部比起腹部受到層層保護，因此肺挫傷在初期症狀通常不明顯。"},"answer":"A,C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2322,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"中年男性車禍被送到醫院時診斷為右側張力性氣胸，經細針減壓以及右側胸管置入後，生命徵象都獲得改善。五分鐘後，該患者突然又再度呼吸困難、血壓下降。下列敘述何者最為適當？","options":{"A":"因生命徵象不穩定，應重新進行初級評估。","B":"再次進行細針減壓最適當位置是右腋中線第五肋間。","C":"先安排電腦斷層確定是否有其他內出血。","D":"可能胸管功能不佳，應再插上第二根胸管強化引流效果。"},"answer":"A","manualChapter":"CH28"},{"id":2325,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"到院前懷疑傷患為張力性氣胸，欲進行針剌減壓的三個要件，不包括？","options":{"A":"意識不清到對疼痛無反應。","B":"嚴重呼吸窘迫或通氣困難。","C":"患側呼吸音變小或聽不到。","D":"病人收縮壓小於90mmHg。"},"answer":"A","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2415,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"80歲男性病人，過去病史有慢性阻塞性肺病(COPD)，近期呼吸較喘且吐氣時有哮鳴聲，請問下列何者為非？","options":{"A":"COPD病人是依賴低氧驅力來維持呼吸，故血氧低於90%時，不可給氧以免導致患者不呼吸。","B":"若病人備有支氣管擴張劑吸入器，可協助家屬幫助病人使用。","C":"若病人出現呼吸急促、精神混亂、躁動則可能是血氧過低或者是血中二氧化碳過多所致。","D":"若聽診兩側肺音聽不到哮鳴聲，仍須考慮可能為嚴重之急性發作。"},"answer":"A","manualChapter":"CH28"},{"id":2439,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"關於創傷性主動脈斷裂(traumatic aortic rupture)，下列何者最適當？","options":{"A":"常見主動脈破裂或斷裂的位置是胸腹主動脈交接處。","B":"80~90%的傷患會有右側胸腔內積血。","C":"最常見於高處跌落創傷機轉。","D":"因動脈韌帶(ligamentum arteriosum)固定住主動脈，拉扯造成斷裂。"},"answer":"D","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2506,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"下列症狀或徵象都可能暗示病人有心包膜填塞，但何者為非？","options":{"A":"貝克氏三症狀(Beck's triad)。","B":"脈搏壓變窄且深呼吸時脈搏變弱。","C":"12導程心電圖出現電氣交替現象。","D":"吸氣收縮壓上昇與吐氣時收縮壓下降的奇脈現象。"},"answer":"D","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2514,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"下列敘述有關於張力性氣胸的描述，何者為非？","options":{"A":"張力性氣胸傷者，血氧濃度持續無法改善，不建議立即插氣管內管治療。","B":"頸靜脈怒張、單側呼吸音減弱或消失、及氣管偏移到對側可以強烈懷疑張力性氣胸。","C":"第十版ATLS建議成人張力性氣胸針刺減壓位置為第五肋間腋中線前方。","D":"身體評估會發現休克、頸靜脈怒張、以及模糊的心音。"},"answer":"D","manualChapter":"CH28"},{"id":2520,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"25歲男性與人鬥毆後，在左胸被插入一水果刀，救護人員到達現場時，現場已被警察控制，接觸患者，發現刀子還插在胸前，患者意識清楚，橈動脈摸得到，血壓100/80mmHg、心跳115下/分，最近的急救責任醫院路程約15分鐘，下列何者敘述最適當？","options":{"A":"警察表示要取下刀子作為證物，在現場須將刀子取下避免破壞物證。","B":"即使患者橈動脈摸得到，也有休克可能，必須考慮建立靜脈管路。","C":"如果患者出現頸靜脈怒張，需懷疑張力性氣胸，盡快給予針刺減壓。","D":"胸腔創傷的傷者，建議及早正壓給氧，避免患者因缺氧而昏迷。"},"answer":"B","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2529,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"該車司機被脫困救出後，您發現他的外觀上半身發紺、眼睛結膜下出血、臉部很腫。外觀如下圖。請問最有可能的診斷是？","options":{"A":"顱內出血。","B":"張力性氣胸。","C":"外傷性窒息。","D":"心包膜填塞。"},"answer":"C","manualChapter":"CH28","matchedChapters":["NeedImage"],"image":"題庫圖片/2529.png"},{"id":2595,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"對於開放性氣胸的院前處置，下列何者最適當？","options":{"A":"以透氣敷料覆蓋傷口。","B":"使用不透氣敷料封三邊、留一邊開放。","C":"立即給予正壓通氣。","D":"將外露臟器推回胸腔。"},"answer":"B","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2607,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"病人突發「撕裂樣胸痛、放射至背部」，到達現場評估發現雙側上肢血壓差異大於20 mmHg，最需要考慮什麼診斷？","options":{"A":"急性心肌梗塞。","B":"主動脈剝離。","C":"張力性氣胸。","D":"心包填塞。"},"answer":"B","manualChapter":"CH28"},{"id":2610,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"關於心包膜填塞（cardiac tamponade）的敘述，下列何者最適當？","options":{"A":"有可能出現頸靜脈怒張，如果血流動力學不穩定，可以給予靜脈輸液。","B":"心包膜腔積液過多，會先壓迫左心房以及左心室，造成無脈性的電氣活動（PEA）。","C":"低血壓的產生是因為在心臟收縮期時，影響到回心血流。","D":"典型的貝克氏三症狀(Beck's triad)於大多數心包膜填塞的病人都可見到。"},"answer":"A","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":2614,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"60男性主訴呼吸困難，下列哪一項發現最需考慮是「張力性氣胸」？","options":{"A":"雙側呼吸音減弱，雙側扣診呈現為實音。","B":"單側呼吸音減弱，氣管偏移合併低血壓。","C":"雙側哮鳴音(wheezing)，有粉紅色泡沫痰。","D":"心音聽診時非常小聲，合併頸靜脈怒張。"},"answer":"B","manualChapter":"CH28","matchedChapters":["CH28"]},{"question":"肋骨骨折最常見的位置為中段第幾肋骨的側面？","options":{"A":"3至8根","B":"4至9根","C":"2至7根","D":"5至10根"},"answer":"A","manualChapter":"CH28","id":3341,"source":"TP題庫 (圖片匯入)"},{"question":"關於嚴重鈍傷（如高速車禍的加速/減速機制）所引起之「外傷性主動脈斷裂（Traumatic aortic rupture）」，下列關於其好發的解剖位置及臨床表現，何者最為正確？","options":{"A":"最常斷裂於升主動脈，並大量出血至心包膜腔導致填塞。","B":"最常斷裂於主動脈弓，臨床上必定伴隨嚴重的右側血胸。","C":"最常斷裂於動脈韌帶（Ligamentum arteriosum）處，且約 80~90%會將血液積存於左側胸腔。","D":"最常發生於橫膈膜以下的腹主動脈，表現為無預警的腹內出血與休克。"},"answer":"C","manualChapter":"CH28","source":"TP題庫 (圖片匯入) - EMT-P 第 28 章 P.768","id":3488},{"id":3508,"source":"AI出題","question":"32歲男性，因行車糾紛胸部遭鈍器重擊。現場評估：病人呼吸極度困難、面色蒼白、神志躁動。生命徵象：脈搏 128 bpm（微弱）、血壓 84/50 mmHg、呼吸 28次/min、血氧 88%。救護人員進行身體檢查時，視診發現病人有頸靜脈怒張（JVD）。為了鑑別此病人是「急性心包填塞」還是「張力性氣胸」，下列哪一個評估線索最關鍵？","options":{"A":"觸診其遠端肢體是否發紺、微血管充填時間（CRT）是否延長。","B":"觸診病人的氣管位置是否偏移（Tracheal deviation），並配合聽診兩側肺泡呼吸音是否對稱。","C":"觸診前胸壁是否有肋骨斷裂導致的骨摩擦音（Crepitus）。","D":"量測病人是否有微弱的脈搏與心搏過速。"},"answer":"B","manualChapter":"CH28"},{"id":45556,"question":"橫膈肌向上進入胸部，最高位可達第幾肋?","options":{"A":"2","B":"4","C":"6","D":"8"},"answer":"B","source":"大白p749","manualChapter":"CH28"},{"id":45609,"question":"根據統計，約有多少的外傷死亡導因於胸部外傷?","options":{"A":"10%","B":"25%","C":"40%","D":"50%"},"answer":"B","source":"大白p754","manualChapter":"CH28"},{"id":45612,"question":"關於胸部創傷敘述，下列何者為是？","options":{"A":"執行超音波e-FAST，在劍突處進行掃描，主要是確認橫膈膜是否破裂。","B":"執行胸部超音波時看到條碼徵候（barcode sign）表示傷患可能有氣胸的情形。","C":"發現開放性氣胸時，應進行針刺減壓，減低胸內壓力。","D":"針刺減壓時應選擇第五肋間腋中線前側肋骨下緣下針。"},"answer":"B","source":"同學出題","manualChapter":"CH28"},{"id":45689,"question":"一名70歲男性駕駛轎車撞電線桿，車頭全毀、安全氣囊作動、除胸口到腹部有安全帶勒痕外，無其他明顯外傷，目前被救出表示呼吸困難，你評估沒有發紺，較有可能是以下哪種傷害？","options":{"A":"壓迫性窒息(traumatic asphyxia)。","B":"心肌挫傷(myocardial contusion)。","C":"心臟震盪(commotio cordis)。","D":"連枷胸(flail chest)。"},"answer":"B","source":"同學出題","manualChapter":"CH28"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

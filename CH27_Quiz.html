@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 27 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：47 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH27</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":173,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"頭部外傷導致意識模糊之病患，下列檢查發現中，何者與顱底骨折最沒有相關？","options":{"A":"眼眶周圍瘀青","B":"外耳撕裂傷","C":"耳後瘀青","D":"腦脊髓液由耳道或鼻孔留出"},"answer":"B","manualChapter":"CH27"},{"id":225,"source":"109年 - EMT-P 高級救護技術員教育訓練-1.doc","question":"下列症狀何者是典型的蜘蛛網膜下腔出血？","options":{"A":"昨天咳嗽，流鼻水，喉嚨痛，今天整個頭劇痛，還高燒到39度","B":"一小時前頭劇痛，三個月前騎機車出車禍有撞到頭，期間一直沒不舒服","C":"一小時前忽然左側顯葉處搏動性劇痛，痛到噁心但沒吐，而且會怕光","D":"一小時前忽然整個頭痛欲裂，這輩子沒這麼痛過，痛到吐了兩次，頸部覺得僵硬怪的"},"answer":"D","manualChapter":"CH27"},{"id":269,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"對於腦部損傷何者錯誤？","options":{"A":"Cushing's triad 血壓高、脈壓寬、心跳慢、呼吸不規則，若要插管可選擇ketamine當鎮靜藥物","B":"腦內出血主要發生在額葉，顯葉","C":"CPP = MAP-ICP。正常CPP約70-80mmhg，ICP約10xmmhg","D":"若on endo PaCO2須維持在35〜40mmhg之間。"},"answer":"A","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":270,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"對於脊髓損傷何者正確？","options":{"A":"Central cord syndrome：四肢輕癱且上肢較下肢嚴重，屬完全脊髓損傷","B":"Anterior cord syndrome：侵及脊髓前側三分之二，本體覺喪失，痛溫覺保留","C":"Brown-Sequard syndrome：同側痛覺喪失，對側運動保留","D":"Autonomic hypereflexia syndrome：常見高位脊髓損傷，與交感興奮，腎上腺素大量釋放有關"},"answer":"D","manualChapter":"CH27"},{"id":574,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"下列症狀何者是典型的蜘蛛網膜下腔出血？","options":{"A":"昨天咳嗽、流鼻水、喉嚨痛，今天整個頭劇痛，還高燒到39度","B":"一小時前頭劇痛，三個月前騎機車出車禍有撞到頭，期間一直沒不舒服","C":"一小時前忽然左側顳葉處搏動性劇痛，痛到噁心但沒吐，而且會怕光","D":"一小時前忽然整個頭痛欲裂，這輩子沒這麼痛過，痛到吐了兩次，頸部覺得僵硬怪怪的"},"answer":"D","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":579,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"有關頸椎神經控制之範圍，以下何者為非？","options":{"A":"抓手功能是由C7、C8所控制","B":"乳頭感覺是由T4所控制","C":"肚臍感覺是由T10所控制","D":"呼吸功能是由T4所控制"},"answer":"D","manualChapter":"CH27"},{"id":699,"source":"第五章 創傷急症(2012-2014).doc","question":"一名50歲男性，因車禍造成頭部外傷合併血腫。病患於事發當時有失去意識，但隨即清醒。但將患者送至醫院後，意識又開始模糊並且沒有恢復，GCS下降至7分，且瞳孔不等大。考慮其有頭部外傷，推測傷者最有可能是何種出血？","options":{"A":"硬腦膜上出血（epidural hemorrhage）","B":"硬腦膜下出血（subdural hemorrhage）","C":"蜘蛛腦膜下出血（subarachnoid hemorrhage）","D":"腦內出血（intracerebral hemorrhage）"},"answer":"A","manualChapter":"CH27"},{"id":725,"source":"第五章 創傷急症(2012-2014).doc","question":"一名40歲男性自三樓高處墜落，你到達現場評估意識時，病人雙眼自行睜開，予以病人胸骨疼痛刺激病人左手可以準確將你手撥開，右手則癱軟無力舉起，現場則一直喃喃自語：我有三太子附身，我不會死。請問依據ATLS第八版定義此傷患屬於何種頭部外傷？","options":{"A":"輕度頭部創傷（minor brain injury）","B":"中度頭部創傷（moderate brain injury）","C":"嚴重頭部創傷（severe brain injury）","D":"昏迷（coma）"},"answer":"A","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":726,"source":"第五章 創傷急症(2012-2014).doc","question":"黃忠，70歲男性、某日於練習射箭時，不慎自射箭平台墜落約兩公尺高，你接獲通報到後，病人意識清楚，BP＝80／60 mmHg，HR：120／min，RR：20／min，病人拼命叫喊背痛且自肚臍以下明顯均無感覺，雙腿偏癱無法抬起，請問下列何者敘述最為正確？","options":{"A":"此病人應該是T4受損且合併有神經性休克（neurogenic shock）","B":"此病人應該是T4受損且合併有脊椎性休克（spinal shock）","C":"此病人應該是T10受損且合併有神經性休克（neurogenic shock）","D":"此病人應該是T10受損且合併有脊椎性休克（spina lshock）"},"answer":"D","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":745,"source":"第五章 創傷急症(2012-2014).doc","question":"有關脊椎損傷的敘述，下列敘述何者為是？","options":{"A":"所謂神經性休克（neurogenic shock）係指脊髓受傷導致副交感神經失去對血管的控制，引起全身性的血管擴張","B":"脊髓性休克（spinal shock）指脊髓損傷後，脊髓的所有功能，表現如同完全脊髓損傷，但通常可在24小時內恢復脊髓的所有功能","C":"若頸椎受傷導致前脊髓症候群（anterior cord syndrome）時，會有四肢輕癱現象，且上肢較下肢嚴重。但痛覺及溫度感覺仍保留","D":"交感神經過度反射症候群（autonomic hyperreflexia syndrome）常見於胸椎下段脊髓（第6胸椎以下）損傷，與交感神經興奮、腎上腺素大量釋放有關"},"answer":"B","manualChapter":"CH27"},{"id":750,"source":"第五章 創傷急症(2012-2014).doc","question":"下圖該患者姿勢是？該患者姿勢是？","options":{"A":"去大腦皮質姿勢","B":"去大腦姿勢","C":"去小腦姿勢","D":"去延腦姿勢"},"answer":"B","manualChapter":"CH27","image":"題庫圖片/750.png"},{"id":759,"source":"第五章 創傷急症(2012-2014).doc","question":"關於顱颜部創傷，下列敘述何者不適當？","options":{"A":"臉部中央骨骨折的傷患，其臉部浮腫，可能會有不穩定的上頷骨，因此呼吸道處置時，應盡快置入鼻咽呼吸道，以防臉骨塌陷，血水堵住呼吸道","B":"外耳道或鼻孔流出之血水，要用無菌紗布或棉花暫時給予填塞止血，再照會耳鼻喉科醫師評估","C":"急性硬腦膜上血腫（epidural hematoma）可能會出現清明期（lucid interval），通常是顳骨骨折，中硬腦膜動脈（middle meningeal artery）破裂造成","D":"巴氏徵候（Battle's sign）出現，要懷疑有岩樣骨折"},"answer":"A","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":768,"source":"第五章 創傷急症(2012-2014).doc","question":"在處理頭部外傷的傷患，初步評估最重要的步驟是？","options":{"A":"維持呼吸道暢通","B":"戴上頸圈","C":"控制頭皮出血","D":"決定傷患現在GCS的分數"},"answer":"A","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":778,"source":"第五章 創傷急症(2012-2014).doc","question":"關於確切呼吸道，以下「何者為非」？","options":{"A":"插置氣管內管（endotrachealtube）","B":"環甲狀軟骨膜切開術（cricothyroidotomy）","C":"喉罩呼吸道（LMA）","D":"氣切管（tracheostomy）"},"answer":"C","manualChapter":"CH27"},{"id":799,"source":"第五章 創傷急症(2015-2018).doc","question":"高女士40歲，走樓梯時不慎滑倒，經送醫檢查診斷為中央脊髓症候群（Central cord syndorme），下列有關此脊髓受傷之敘述中何者為是？","options":{"A":"後脊髓動脈分支的損傷可能是主要原因","B":"下肢運動喪失比上肢嚴重","C":"用steroid治療，先Solu-medrol 54mg/kg滴注，之後再持續23小時以3.0 mg/kg/hr滴注","D":"恢復時依先後次序為下肢.膀胱.近側上肢.手"},"answer":"D","manualChapter":"CH27"},{"id":808,"source":"第五章 創傷急症(2015-2018).doc","question":"評估疑似頭部創傷意識不清患者，檢查患者二側瞳孔對光反應時，發現單側瞳孔放大，對光反應消失，以下研判及處置何者為是？","options":{"A":"傷患可能同時出現Cushing's triad，造成收縮壓升高.脈搏變快以及不規則的呼吸","B":"可能為視神經遭到壓迫","C":"嚴判顱內壓升高，應立即予以過度換氣，目標是PaC02＜30 mmHg","D":"很快的傷患可能會呈現GCS評估中，M3去大腦皮質（Decorticate）或M2去大腦（Decerebrate）姿勢"},"answer":"D","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":812,"source":"第五章 創傷急症(2015-2018).doc","question":"於頭部外傷病人的初期處理，最重要的步驟為：","options":{"A":"保護呼吸道","B":"保持頸椎不隨意移動","C":"維持血壓","D":"控制頭皮出血"},"answer":"A","manualChapter":"CH27"},{"id":840,"source":"第五章 創傷急症(2015-2018).doc","question":"所謂勒福型骨折（Le-Fort Fracture）指的是何處的骨折？","options":{"A":"頭部骨折","B":"頸部骨折","C":"掌骨骨折","D":"臉中心區域骨折"},"answer":"D","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":855,"source":"第五章 創傷急症(2015-2018).doc","question":"下列有關脊椎外傷敘述，何者為非？","options":{"A":"若已排除脊髓損傷疑慮，可考慮移除長背板","B":"脊髓性休克是指脊髓神經受傷後導致副交感神經失去對血管的控制，造成低血壓","C":"為避免發生褥瘡，長背板之使用一般不建議超過2小時","D":"懷疑頸椎受傷病人，需做仔細的神經學評估，不能僅從影像無明顯骨折就排除"},"answer":"B","manualChapter":"CH27"},{"id":2017,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"頭頸部的檢查主要依靠的是視診，以下評估訊息代表的意義何者不恰當？","options":{"A":"眼框周圍瘀青：顱底骨折。","B":"鞏膜黃疸：急性肝炎、肝硬化、肝衰竭、膽道阻塞、急性溶血。","C":"瞳孔固定縮小：抗乙烯膽鹼藥物中毒。","D":"頸靜脈怒張：右心房壓上升、胸內壓上昇、中膈腔偏移。"},"answer":"C","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":2020,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"脊椎保護是到院前救護非常重要的一項要求，關於脊椎檢查的敘述何者為非？","options":{"A":"對於意識不清的創傷患者，救護技術員應將其視為潛在性脊椎傷害患者而給予頸椎保護。","B":"讓患者自然站立，若發現兩側肩關節與髖關節高度不對稱，患者可能有脊椎側彎的問題。","C":"患者若不願意測試轉動頸椎、俯仰頭部等動作，救護技術員可協助用外力轉動患者頸椎。","D":"正常情況下，可以清楚定位的頸椎是第七節的脊突，且不該出現局部壓痛或腫痛。"},"answer":"C","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":2025,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"20歲男性，摩托車與汽車對撞車禍，初步評估：意識狀況清楚，呼吸淺快無雜音，呼吸次數28/min，血壓70/40 mmHg，脈搏110/min，血氧濃度為96%；四肢及其他外觀無明顯大出血，喪失T10以下部位的痛覺、冷熱感覺及運動功能。有關到院前的初步評估及傷患處置，下列何者較為正確？","options":{"A":"休克原因應該為神經性休克，需盡快打上點滴給予大量輸液。","B":"此病人可能有脊髓損傷，依症狀診斷為中央脊髓症候群。","C":"休克原因應該為出血性休克，可考慮超音波檢查，找出出血原因。","D":"此病人符合脊髓休克的定義，使用大量類固醇可有效改善神經預後。"},"answer":"C","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":2040,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"下列關於頭頸部及顏面部創傷的敘述，何者為是？","options":{"A":"當傷患眼睛受傷時，如有戴隱形眼鏡，應在現場將隱形眼鏡拔除以進行評估。","B":"一般而言，有嚴重頭部外傷的傷患，應將血氧濃度維持在100%。","C":"頭部外傷傷患如同時出現低血壓與低血氧，EPIC-TBI研究顯示死亡率可增加14倍。","D":"到院前頭部外傷併顱內壓升高徵象的傷患，一律需以BVM行過度換氣以降低腦壓。"},"answer":"C","manualChapter":"CH27"},{"id":2123,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"有關中央脊髓症候群(central cord syndrome)的敘述，下列何者最不適當？","options":{"A":"通常是由於脊椎過度的伸展或彎曲所造成的。","B":"主要的影響是阻礙了運動神經左邊到右邊，以及右邊到左邊的傳導。","C":"在頸椎受傷時，則有四肢輕癱現象，且下肢較上肢嚴重。","D":"有薦髓機能保留(sacral sparing)。"},"answer":"C","manualChapter":"CH27"},{"id":2124,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於脊椎創傷傷患發生低血壓時，下列敘述何者最適當？","options":{"A":"應優先考慮患者發生神經性休克，並加以處置。","B":"神經性休克傷患會有皮膚溼冷及心搏過速的情形。","C":"當給予輸液1-2公升仍無法改善低血壓時，可給予升壓劑改善休克。","D":"只有頸椎的受傷才可能造成神經性休克。"},"answer":"C","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":2125,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於眼睛損傷的描述，下列何者最不適當？","options":{"A":"複視的原因可能為支配眼球運動的肌肉受傷所致。","B":"眼球挫傷後的瞳孔反應不正常，最常見的原因是瞳孔括約肌撕裂傷。","C":"眼睛被化學物品灼傷時，可在醫療指導醫師指示下，將隱形眼鏡拔除。","D":"檢查視力時，要將一眼遮住，由沒受傷的眼睛先檢查，分別測試兩眼視力。"},"answer":"D","manualChapter":"CH27"},{"id":2126,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於顏面創傷的敘述，請問以下何者描述最適當？","options":{"A":"脫落的牙齒經過適當的保存可以有較高的再植入率，保存法包括將牙齒含在嘴巴裡或泡在牛奶裡。","B":"評估傷患眼球運動時是否有複視、視力模糊或視野局限的問題，主要是在評估第二、三、六對腦神經的功能。","C":"上頜骨骨折是除了鼻骨之外最常見的顏面骨骨折。","D":"耳朵撕裂傷的傷患，如果有組織脫落應該要直接包在濕紗裡一起帶到醫院。"},"answer":"A","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":2127,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"60歲男性傷患喝酒後騎腳踏車摔落，臉部有多處擦挫傷、左側浣熊眼(Raccoon’s eye)，頭皮有撕裂傷經加壓後可止血，口鼻有些許鮮血、呼吸淺快。經過評估，該名患者意識清楚、可配合指令，但無法回想起剛剛發生了什麼事且一直問重複的問題。以下關於此傷患的評估內容與相對處置，何者最不適當？","options":{"A":"應強烈懷疑患者有顱底骨折，並且應密切留意其意識狀態、瞳孔大小、對光反射等顱內出血徵象。","B":"傷患現意識清楚，但仍應擔憂其正處於硬腦膜上出血的「清明期(Lucid interval」，無法排除顱內出血、顱骨骨折的可能性。","C":"患者於評估過程突然大量嘔吐、意識不清僅對痛有反應，此時除了要擔心可能是顱內出血惡化，亦有可能是喝醉酒引起的反應。","D":"為了確保患者的呼吸道，應考慮以口咽、鼻咽呼吸道或聲門上呼吸道治療。"},"answer":"D","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":2213,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"您接獲指揮中心通報，據同車友人表示，病人開車自撞山壁後意識不清，但您抵達現場後發現病人意識清楚，主訴頭部疼痛，理學檢查發現頭部有5公分撕裂傷合併頭皮血腫，其餘各部分都無明顯外傷，後續轉送至醫院後，病人於留院觀察中突然失去意識、肢體癱瘓。請問有關此傷患最可能的傷害何者正確？","options":{"A":"硬腦膜上出血(epidural hemorrhage)。","B":"硬腦膜下出血(subdural hemorrhage)。","C":"蜘蛛膜下腔出血(subarachnoid hemorrhage)。","D":"腦內出血(Intracerebral hemorrhage)。"},"answer":"A","manualChapter":"CH27"},{"id":2214,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"關於眼睛損傷的描述，下列何者最不適當？","options":{"A":"若被強酸、強鹼灼傷，需儘快以大量清水沖洗。","B":"支配眼球運動的肌肉受傷時，可能產生複視的現象。","C":"眼球挫傷後的瞳孔反應不正常，最常見的原因是第三對腦神經損傷。","D":"眼睛被化學物品灼傷時，可在醫療指導醫師指示下，將隱形眼鏡拔除。"},"answer":"C","manualChapter":"CH27"},{"id":2215,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"下列有關於頸部創傷的敘述，何者為非？","options":{"A":"高位頸椎創傷須密切注意傷患使否進展至呼吸衰竭。","B":"罹患中央脊髓症候群(central cord syndrome)的傷患，可能有四肢輕癱現象，且上肢較下肢嚴重。","C":"根據加拿大頸椎守則(Canadian C-Spine Rule，簡稱CCR)，清醒且生命徵象穩定的傷患，即使沒有頸椎損傷的高危險及低危險因素，CCR建議應令傷患自行轉動頸部才能排除頸椎損傷。","D":"脊髓性休克(spinal shock)主要機轉為脊髓受傷導致交感神經受到影響，交感神經失去對血管的控制，引起全身性的血管擴張，治療為適度輸液，必要可以適度使用升壓劑。"},"answer":"D","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":2309,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於頭部創傷的到院前處置，下列敘述何者為是？","options":{"A":"若傷患合併低血容性休克，應給予靜脈輸液以維持收縮壓≥90mmHg。","B":"雖然可能延長送醫時間，但GCS<9分時仍應執行氣管內插管。","C":"頭皮撕裂傷的出血量有限，應優先處理其他傷勢。","D":"已知過度換氣可以降低腦壓保護腦部，應常規執行並維持EtCO2介於40~45mmHg之間。"},"answer":"A","manualChapter":"CH27"},{"id":2310,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"關於脊髓創傷的到院前處置，下列敘述何者為是？","options":{"A":"儘早給予高劑量類固醇注射可以有效改善傷患預後。","B":"若傷患低血壓合併四肢癱瘓，應優先考慮神經性休克。","C":"若為長時間運送，長背板固定效果比鏟式擔架更好且併發症更少。","D":"若胸部穿刺傷的傷患意識清楚，不需要常規執行脊椎固定。"},"answer":"D","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":2324,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"使用NEXUS Low Risk Criteria來評估是否有頸椎受傷，下列相關敘述何者正確？","options":{"A":"E：Extension向前伸頸時、頸部不會覺得疼痛。","B":"X：eXtreme distracting injury無其它劇痛的傷勢。","C":"U：Up向上提頸時、頸部不會覺得疼痛。","D":"S：Sense病人顏面與四肢感覺皆正常。"},"answer":"B","manualChapter":"CH27"},{"id":2430,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"有關顱底骨折的描述，以下敘述何者為非？","options":{"A":"眼眶周圍如果有類似浣熊眼(Raccoon's eyes)瘀青及鼻漏(rhinorrhea)，要懷疑有前顱底骨折。","B":"有耳漏(otorrhea)則要懷疑有中顱底骨折。","C":"耳後有瘀青，巴氏徵侯(Battle's sign)，要懷疑有後顱底骨折。","D":"顱底骨折第一時間易忽略，要跟醫師交班輔以X光檢查確診。"},"answer":"D","manualChapter":"CH27"},{"id":2431,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"有關頭部創傷的急救處置觀念，何者為非？","options":{"A":"在現場處理頭部創傷最重要的就是在保護頸椎的前提下，維持呼吸道的通暢並給予足夠的通氣與氧合。","B":"到院前低血氧(SpO2<90%)與低血壓(SBP < 90mmHg)都會增加創傷性腦損傷的死亡率。","C":"到院前使用BVM給氧治療頭部外傷傷患時，其換氣速率同一般急救(每分鐘10~12次通氣)。","D":"創傷性腦損傷血壓的控制要維持在90mmHg以下，避免平均動脈壓過高增加顱內壓或增加顱內出血風險。"},"answer":"D","manualChapter":"CH27"},{"id":2513,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"第十版ATLS提及外傷傷者初步評估有六大危及生命之傷害，下列何者為非？","options":{"A":"氣管支氣管傷害(Tracheobroncheal tree injury)。","B":"開放性氣胸(Open pneumothorax)。","C":"連枷胸合併肺挫傷(Flail chest and pulmonary contusion)。","D":"心包膜填塞(Cardiac tamponade)。"},"answer":"C","manualChapter":"CH27"},{"id":2518,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"下列關於脊椎損傷的敘述，何者最適當？","options":{"A":"所謂脊髓性休克，指的是因胸椎或頸椎傷害造成的低血壓、週邊血管擴張之休克。","B":"交感神經過度反射症候群常見於低位脊髓損傷，與交感神經興奮、腎上腺素大量釋放有關。","C":"中央脊髓症候：通常是因為頸椎過度伸展所造成，下肢的麻木和無力感會比上肢嚴重。","D":"脊髓半切症候：症狀為受傷同側的運動功能喪失，受傷對側痛、溫覺喪失。"},"answer":"D","manualChapter":"CH27"},{"id":2528,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"下列有關脊椎外傷敘述，何者為是？","options":{"A":"目前的臨床實證都支持，只要有脊髓損傷疑慮時，就需要固定。","B":"針對穿刺傷傷者，頸圈固定可能會增加死亡率。","C":"一旦確認頸椎受傷，就需要使用長背板協助固定，直到外科手術矯正後。","D":"懷疑頸椎受傷傷者，若頸部X-光片顯示無明顯骨折就可以排除受傷。"},"answer":"B","manualChapter":"CH27"},{"question":"行人被機車碰撞導致頭部撞擊出血，腦壓升高出現庫欣氏徵象，非應採取處置？","options":{"A":"大量輸液","B":"給予輕度過度通氣 Etco2=30~35mmHg","C":"降腦壓藥物","D":"肌肉鬆弛劑"},"answer":"A","manualChapter":"CH27","id":3328,"source":"TP題庫 (圖片匯入)"},{"question":"當病人腦內壓過高，出現庫欣氏徵象情況時，可以採取解開頸圈、給予輕度過度通氣及給予藥物來稍微降低腦壓，請問給予輕度過度通氣維持EtCO2的目標值為何？","options":{"A":"30~35mmHg","B":"35~40mmHg","C":"35~45mmHg","D":"40~45mmHg"},"answer":"A","manualChapter":"CH27","id":3460,"source":"TP題庫 (圖片匯入)"},{"id":3522,"source":"TP題庫","question":"請問嗅覺受損，顱底骨折會影響第幾對腦神經？","options":{"A":"第一對腦神經","B":"第二對腦神經","C":"第三對腦神經","D":"第四對腦神經"},"answer":"A","manualChapter":"CH27"},{"question":"關於中央脊髓症候群 (Central Cord Syndrome) 的敘述，下列何者正確？","options":{"A":"會導致完全的運動喪失，但保留所有感覺功能","B":"預後非常良好，通常在 24 小時內完全恢復","C":"症狀表現為下肢癱瘓比上肢嚴重","D":"常見於已有頸椎狹窄的老年人發生過度伸展傷害"},"answer":"D","source":"圖片匯入","manualChapter":"CH27","id":3572,"matchedChapters":["CH27"]},{"id":3808,"source":"AI出題","question":"對於疑似頸椎受傷的患者，下列哪一項理學檢查徵候最具特異性，可用於評估脊髓損傷？","options":{"A":"格拉斯哥昏迷指數 (GCS) 滿分","B":"瞳孔對光反應消失","C":"肛門反射 (anal wink) 消失","D":"血壓升高伴隨心跳緩慢"},"answer":"C","manualChapter":"CH27","matchedChapters":["未分類"]},{"question":"為了利於評估，可將頸部依水平位置分為三區，關於此三區的敘述下列何者正確?","options":{"A":"第一區(ZoneⅠ)為頸部的上段，從下顎骨角以上至枕骨大孔","B":"第二區(ZoneⅡ)為頸部的中段，從環狀軟骨到下顎骨角","C":"第三區(ZoneⅢ)為頸部的下半段，從鎖骨到環狀軟骨","D":"第三區域涵蓋範圍較廣，所以是最容易受傷的一區。"},"answer":"B","source":"同學出題","manualChapter":"CH27","id":3841},{"id":45742,"question":"正常成年人有幾顆牙齒?","options":{"A":"30","B":"32","C":"34","D":"36"},"answer":"B","source":"大白p744","manualChapter":"CH27"},{"id":45752,"question":"關於耳膜破裂的相關敘述，下列何者為非?","options":{"A":"壓力傷害可能導因於爆炸或潛水，通常這些傷害會自然恢復","B":"如果是異物穿刺，不應拔除，但避免進行固定及包紮，避免異物造成穿刺傷的深度更深","C":"若是嚴重穿刺傷，通常合併顴骨骨折","D":"若是嚴重穿刺傷，常見的併發症包括顏面神經麻痺、聽力喪失及眩暈"},"answer":"B","source":"大白p743","manualChapter":"CH27"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

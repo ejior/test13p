@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 45 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：21 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH45</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":72,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMT在野外醫學領域進行救護時，可能遭受的危險，何者為非？","options":{"A":"情緒危險","B":"人為危險","C":"地域危險","D":"個人危險"},"answer":"A","manualChapter":"CH45"},{"id":285,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"以下對野外救護時所施行之處置何者錯誤？","options":{"A":"野外缺乏食物與飲水，擔心患者低血糖，所以不用考慮運送時間應立即給予D10W","B":"擔心患者需要動手術，可以在到院前幾個小時再開始禁食","C":"使用長背板運送患者時，45分鐘就會造成嚴重疼痛，90分鐘就會產生壓瘡","D":"在運送患者過程中，盡量患者能離開擔架，活動下肢"},"answer":"A","manualChapter":"CH45"},{"id":286,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"野外醫學傷口的治療分為四個階段，下列何者錯誤？","options":{"A":"止血","B":"盡快復位","C":"回復功能","D":"美觀"},"answer":"B","manualChapter":"CH45"},{"id":934,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於野外醫學，以下敘述何者為是？","options":{"A":"高山症的初期症狀和感冒或是宿醉很類似，所以常被忽略。如果懷疑是高山症，應該避免繼續登高、考慮下山，並且給予acetazolamide和dexamethasone","B":"潛水者所併發的氣泡栓塞症，通常在浮到水面的幾分鐘內就會出現。如果沒有嚴重症狀，表示沒有產生潛水夫症，當天便可以搭民航機長途旅行","C":"低伏特數的交流電所造成的心律不整常常是無心律（asystole）；而高伏特數的交流電或是直流電所造成的致命心律不整常常是心室纖維顫動（ventricular fibrillation）","D":"海水溺水的病患比淡水溺水的病患存活率差"},"answer":"A","manualChapter":"CH45"},{"id":1001,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"關於野外醫學，以下敘述何者為是？","options":{"A":"高山症的初期症狀和感冒或是宿醉很類似，所以常常被忽略。如果懷疑是高山症，應該避免繼續登高，考慮下山，並且考慮給予Acetazolamide和Dexamethasone","B":"潛水者所併發的氣泡栓塞症，通常在浮到水面的幾分鐘內就會出現。如果沒有嚴重症狀，表示沒有產生潛水伕症，當天便可以搭民航機長途旅行","C":"低伏特數的交流電所造成的致命心律不整常常是無心律（Asystole），而高伏特數的交流電或是直流電所造成的致命心律不整常常是心室顫動（Ventricular fibrillation）","D":"Lichtenberg figure是雷擊病患特有的皮膚表徵，會留下永久的疤痕"},"answer":"A","manualChapter":"CH45"},{"id":1024,"source":"第六章 特殊狀況與特定病患(2015-2018).doc","question":"救護技術員在野外常需照護傷口，有時甚至可能長達數天。在野外環境，對傷囗照護的描述何者為非？","options":{"A":"靜眽出血也可能會致死","B":"對於有被泥土或其他髒東西污染的傷囗，可以使用針筒配上針頭給予高壓沖洗","C":"在野外可以拿來喝的水就可以用來沖洗傷囗","D":"野外環境下，建議為傷囗暴露24小時之後，再進行初步縫合以避免後續感染發生"},"answer":"D","manualChapter":"CH45"},{"id":2068,"source":"109年度EMTP筆試題目卷(100題)(含答案)(1091224修訂)","question":"野外救護之困境之描敘，以下何者為非？","options":{"A":"野外救護很難第一次評估就能找出所有問題，因此建議使用SOAP方式持續記錄評估病人問題避免遺漏。","B":"長時間搬運可能會導致病人傷害如壓瘡，建議可以使用抽氣式護木代替長背板固定頸椎或長背板上加墊其他物品，但以不影響固定效果為原則。","C":"因野外救護時間較長，即便是靜脈出血，病人也可能因此失血過多，加上搬運過程之便利性，止血帶止血方式應優先於直接加壓止血法使用","D":"因野外救護送醫時間較長，應注意傷口是否感染，因此要預防感染的發生，對於有被泥土或其他東西污染的傷口，以及髒東西造成的穿刺傷，都需給予高壓沖洗；相對的，沒有污染的傷口，給予低壓沖洗即可。"},"answer":"C","manualChapter":"CH45"},{"id":2157,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"下列有關於野外救護的敘述，何者最不適當？","options":{"A":"從事野外救護，最重要的就是環境安全評估與分析。","B":"脫臼或是變形的骨折可能會在數小時後才造成傷肢的缺血，若是天氣寒冷的環境下，有保護的效果，可能延長這個時間。","C":"抗休克褲(PASG)目前並不建議使用在野外做為所有休克的治療，但是可以利用它來固定骨折的骨盆、大腿骨折，達到控制出血的效果。","D":"在野外由於運送的時間比較長，即使病人需要手術，還是可以給予病人食物與飲水。"},"answer":"B","manualChapter":"CH45"},{"id":2158,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"有一位男性30歲傷患疑似左小腿骨折無法行走在深山待救，病患意識清醒，生命徵象穩定，但仍需約2天搬運才能下山，下列敘述何者最不適當？","options":{"A":"傷患的排泄問題應當被注重，不理會任由其排泄在褲內會有壓瘡的風險。","B":"因傷患骨折可能有開刀手術的需求，因此應從接觸開始就讓傷患禁食以維持空腹。","C":"用長背板搬運傷患時要注意有壓瘡的可能，考慮讓傷患在擔架上時可以翻身。","D":"若患者後續意識不清，需額外注意防曬問題，以免因傷患無法表達而忽略有曬傷的風險。"},"answer":"B","manualChapter":"CH45"},{"id":2228,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"某男於河堤路跑時不慎遭流浪犬隻攻擊造成臉部一處咬傷，請問咬傷的傷口處理原則下列敘述何者為非？","options":{"A":"給予抗生素治療。","B":"確實清洗傷口。","C":"給予破傷風治療。","D":"到院後傷口立即進行清創及縫合以免造成感染。"},"answer":"D","manualChapter":"CH45","matchedChapters":["CH45"]},{"id":2252,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"您獲派前往一山域救援行動。傷患資訊如下：女性，60歲有糖尿病史，求救原因為天雨路滑不慎摔倒導致左前臂約2公分撕裂傷及左側髖部挫傷以致於不能移動。傷患待援地點為該區最高點的一個涼亭。您接觸她的時候離受傷已過8小時。關於此傷患最適當的評估與處置描述為何？","options":{"A":"病人意識清楚但可能因為疼痛無法順利進食，應立即建立含糖輸液之管路以避免低血糖。","B":"因病人無法順利自行移動，應優先尋求直升機吊掛撤離，以及早進行手術。","C":"應同時評估是否有因維持同一姿勢過久而產生壓瘡或橫紋肌溶解症的風險。","D":"若左前臂之撕裂傷已無出血，表示傷口無進一步感染，可不必再重新清創。"},"answer":"C","manualChapter":"CH45"},{"id":2253,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"當您執行野外救護進行長時間搬運時，應留意脊椎固定或是使用長背板運送的病人，可能會出現壓瘡或深部靜脈血栓。以下關於避免長時間搬運產生可能的傷害，在權宜安全與避免傷害間，下列做法何者最不適當？","options":{"A":"抬長背板時，不應讓身體兩側輪流抬高。","B":"固定病人時要讓下肢能夠活動。","C":"允許病人能夠在擔架上翻身。","D":"全身的抽氣式護木(vacuum splint)取代長背板。"},"answer":"A","manualChapter":"CH45"},{"id":2633,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"在野外救援中，決定是否立即接近病人做處置前，環境風險評估的三項（3P）原則及順序以下何者最適當？","options":{"A":"Patient、Public、Personal。","B":"Personal、Public、Patient。","C":"Position、Pressure、Protection。","D":"Pace、Plan、Proceed。"},"answer":"B","manualChapter":"CH45"},{"id":2634,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"考量野外醫療針對傷患的照護，下列敘述何者最適當？","options":{"A":"考量到傷患在抵達醫院時可能需要接受手術或檢查，在下撤的過程中不能讓傷患喝水或吃東西，水分補充可以透過靜脈輸液進行。","B":"傷患的眼睛被樹木穿刺傷，應使用輕巧的物品固定穿刺物；若傷患能自行行走，可僅包紮受傷單眼，另一未受傷眼睛保持直視。","C":"針對穿刺傷口伴隨有泥土髒汙，可採用1%優碘水搭配注射器和靜脈留置針軟管，在傷口上施加壓力往內灌洗，避免長途運送感染。","D":"對於腕關節的脫臼，因該處解剖構造單純，根據野外醫療協定，可以進行復位後，利用夾板固定避免再次脫臼。"},"answer":"B","manualChapter":"CH45","explanation":"在醫院清創會使用無菌等張的溶液，像是生理食鹽水，但是將這些具有重量與體積的沖洗液帶到野外時並不實際，臨床上研究顯示，可以拿來喝的水就可以用來沖洗傷口，至於野外的水源像是溪水、雪水、河水經過處理後，到達可以飲用的標準時，就可以使用。水的處理以煮沸冷卻後的最好，次之可以選擇透過戶外商品化的攜帶式濾水器、淨水藥劑(如氯化銀)、戶外攜帶式紫外線燈來處理。若無上述物資可淨水濾水，將優碘加入水中製成1％的優碘水可以達到抑菌的效果。"},{"question":"野外脊椎評估通過的標準「不包括」下列何者？","options":{"A":"精神狀態正常且可信賴","B":"脊柱觸診無明顯變形且無壓痛","C":"四肢感覺運動檢測正常","D":"即使有輕微麻木感但力量正常"},"answer":"D","manualChapter":"CH45","id":3395,"source":"TP題庫 (圖片匯入)"},{"id":3530,"source":"TP題庫","question":"在野外執行 CPR30分鐘後，若持續無脈搏，下列何種情況「不建議」停止復甦術？","options":{"A":"病人的核心體溫極低，處於嚴重低體溫狀態","B":"因嚴重外傷導致的大量出血與心跳停止","C":"心因性內科疾病導致的心跳停止","D":"救援者已出現嚴重體力透支，且現場無人可替換"},"answer":"A","manualChapter":"CH45"},{"source":"EMT-P 第 45 章 P.1191","question":"在執行野外醫療檢傷評估時，下列哪種情況會使病患被視為「不可信賴」，導致物理理學檢查結果不可採信？","options":{"A":"病患出現急性壓力反應，表現出焦慮","B":"病患因手腕骨折感到疼痛，但在夾板固定後疼痛感已大幅減緩","C":"病患承認有少量飲酒，現場能夠配合指令","D":"病患在事發過程中曾出現短暫失憶，目前意識狀態完全清醒"},"answer":"A","manualChapter":"CH45","matchedChapters":["CH45"],"id":3645},{"source":"EMT-P 第 45 章 P.1204","question":"下列何者不是野外不實施CPR的建議？","options":{"A":"水下淹沒超過一小時(使用水肺)","B":"雪崩掩埋超過35分鐘且呼吸道被雪阻塞","C":"胸部結凍僵硬","D":"明顯致命傷"},"answer":"A","manualChapter":"CH45","matchedChapters":["CH45"],"id":3659},{"source":"EMT-P 第 45 章 P.1204","question":"請問有關野外骨折復位的部位，何者最不適合操作？","options":{"A":"髕骨","B":"手指、腳趾","C":"肩部","D":"腕關節"},"answer":"D","manualChapter":"CH45","matchedChapters":["CH45"],"id":3692,"explanation":"野外脫臼復位的適用適用時機為肩部、髕骨和手指、腳趾間接受力(槓桿、扭轉、拉扯)造成的脫臼，這些部位的脫臼通常是單純的且關節內部血管神經分布不錯縱複雜。至於遭受直接撞擊力量以及腕關節、肘關節、踝關節、膝關節、髖關節的脫臼則不適用，必須與不穩定的關節傷害處置相同，需要用夾板原姿勢固定，保持傷肢穩定性和CSM正常"},{"question":"在野外急救環境中，當高級救護技術員完成初級評估並針對傷患最嚴重的脊椎損傷風險時，關於後續執行「詳細地脊椎檢測」的適當時機，下列敘述何者最適當？","options":{"A":"應於患者評估系統 (PAS) 中的二次評估之後再行執行","B":"在給予高劑量抗生素靜脈注射滿二十四小時後再行執行","C":"應在接觸傷患的第一秒鐘，與暢通呼吸道同時強制執行","D":"只需在傷患由直升機吊掛撤退並安全抵達急診室後才執行"},"answer":"A","manualChapter":"CH45","source":"TPP","id":3773,"matchedChapters":["CH45"]},{"question":"在野外執行長時間病人照護 (PFC) 時，針對眼部穿刺異物的處置，下列原則何者正確？","options":{"A":"若病人需自行步行撤離，應同時包覆兩眼以減少眼球連動產生的再傷害。","B":"不論運送方式為何，均應立即將穿刺異物移除以減少眼球風阻並清創。","C":"固定異物後應將另一隻眼睛一起包覆，但前提是病人由他人搬運且隨時有人在旁。","D":"在擔架內運送時，應使用眼罩來限制病人頭部轉動，避免眼部異物晃動。"},"answer":"C","manualChapter":"CH45","source":"TPP","id":3774,"matchedChapters":["CH45"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

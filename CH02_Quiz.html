@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.2rem; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 5.5rem; color: var(--text-main); text-decoration: none; font-size: 1.2rem; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 2 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.2rem; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：23 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <span class="stat-badge" id="score-text">分類：CH02</span>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      
+      <div class="source-tag" id="source-tag">來源: 無</div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":1,"source":"105 高級救護技術員甄試筆試題目.doc","question":"以下皆是前瞻性的醫療指導模式，但何者為非?","options":{"A":"EMTP養成教育訓練","B":"醫療指導提出年度救護器材採購建議","C":"教護手機無線電通訊監控","D":"訂立線上醫療指導流程"},"answer":"C","manualChapter":"CH02"},{"id":107,"source":"108 EMT-P 高級救護技術員教育訓練.doc","question":"有關「回溯性醫療指導」的敘述，何者為非？","options":{"A":"比較容易進行","B":"與救護過程不直接相關","C":"救護錯誤可能已經發生","D":"檢查救護紀錄表即為一種回溯性醫療指導"},"answer":"B","manualChapter":"CH02"},{"id":289,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"依據緊急醫療救護法，緊急醫療救護應包含下列事項，何者為非？","options":{"A":"緊急傷病、大量傷病患或野外地區傷病之現場緊急救護及醫療處理","B":"送醫途中之緊急救護","C":"重大傷病患或離島，偏遠地區難以診治之傷病患之轉診","D":"抵達送醫目的醫療機構而醫護人員尚未處置前"},"answer":"D","manualChapter":"CH02"},{"id":290,"source":"109年 - EMT-P 高級救護技術員教育訓練-2.doc","question":"EMS醫療指導制度中，何者最費時費力？","options":{"A":"前瞻性的醫療指導","B":"即時性的醫療指導","C":"回朔性的醫療指導","D":"主動式的醫療指導"},"answer":"B","manualChapter":"CH02"},{"id":310,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"目前我國急救責任醫院分級分成幾級？","options":{"A":"2級","B":"3級","C":"4級","D":"5級"},"answer":"B","manualChapter":"CH02"},{"id":311,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"緊急醫療救護體系的醫療指導制度（EMS Medical Direction）主要包括","options":{"A":"緊急醫療救護體系的整體規劃","B":"品質管理","C":"教育訓練、督導考核","D":"以上皆是"},"answer":"D","manualChapter":"CH02"},{"id":312,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"EMS醫療指導制度中，教育訓練依時序性是屬於何種模式","options":{"A":"前瞻性（prospective）的醫療指導","B":"即時性（concurent）的醫療指導","C":"回溯性（retrospective）的醫療指導","D":"被動式（passive）的醫療指導"},"answer":"A","manualChapter":"CH02"},{"id":313,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"EMS醫療指導制度中，救護記錄表審核回顧，依時序性是屬於何種模式","options":{"A":"前瞻性（prospective）的醫療指導","B":"即時性（concurrent）的醫療指導","C":"回溯性（retrospective）的醫療指導","D":"被動式（passive）的醫療指導"},"answer":"C","manualChapter":"CH02"},{"id":321,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"下列有關社區提供消防為主的雙軌制高級救護服務（fire-based ALS service）的敘述，下列何者為非？","options":{"A":"以BLS-ALS的雙軌模式出勤，提供高級救護服務，可以節省高級救護服務的資源","B":"雙軌制高級救護服務的實施，有賴正確的派遣作業","C":"本地研究的資料顯示，相較於初級救護服務，高級救護服務（advanced life support）對於到院前心跳停止病患，可以提升病患循環恢復（return of spontaneous circulation，ROSC）的比例","D":"根據國內的調查顯示，緊急醫療救護的病患，需要高級救護服務的比例，約佔五成左右"},"answer":"D","manualChapter":"CH02"},{"id":333,"source":"第一章 系統運作與品質管理(2012-2014).doc","question":"何種模式之醫療指導，最能直接反映緊急救護的品質？","options":{"A":"前瞻性醫療指導","B":"即時性醫療指導","C":"回溯性醫療指導","D":"救護紀錄表審查"},"answer":"B","manualChapter":"CH02"},{"id":352,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"緊急醫療救護體系的醫療指導制度（EMS Medical Director）指導型式，按照時序，有三種方式，下列何者為非？","options":{"A":"救護技術員的教育訓練屬於前瞻性（prospective/offline）醫療指導模式的一種","B":"救護紀錄表回顧，屬於回溯性（retrospective/offline）醫療指導模式·相較其他模式，比較容易進行","C":"無線通訊指示，屬於即時性（concurrent/online）醫療指導模式，可以直接反映緊急救護品質，省時又省力","D":"預立醫療流程，屬於前瞻性（prospective/offline）醫療指導模式，可以事前確保人員的品質與救護流程的正確性"},"answer":"C","manualChapter":"CH02"},{"id":359,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"有關回溯性醫療指導（Retrospective Medical Direction）模式的敘述，下列何者為非？","options":{"A":"容易進行","B":"較不費時費力","C":"可以及時阻止錯誤發生","D":"是救護品質管理項目之一"},"answer":"C","manualChapter":"CH02"},{"id":365,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"醫療指導醫師每月到大隊主持案例討論會，針對案例内容與救護技術員進行一問一答的即時諮詢與討論，這是在進行那一類的醫療指導？","options":{"A":"前膽性","B":"即時性","C":"回溯性","D":"研究性"},"answer":"C","manualChapter":"CH02"},{"id":2101,"source":"113年度EMTP筆試-題目卷(100題)(含答案)-1131227公告版","question":"關於緊急救護派遣員的敘述，下列敘述何者最正確？","options":{"A":"大部分的報案者在報案時無法冷靜回答問題，派遣員常需要從報案者情緒化的反應中抽絲剝繭，獲取關鍵訊息。","B":"約有70%是來自第二方(指傷病患身旁的人)報案者，相較於自第一方(指傷病患本人)，派遣員仍可以從從他們身上取得關鍵的資訊。","C":"派遣員可以在報案電話裡迅速辨識出心跳停止的跡象，藉由詢問兩個關鍵問題“意識是否清醒？”以及“脈搏是否摸到？”來辨識報案電話中的OHCA。","D":"派遣員除了執行救護派遣及提供線上指導之外，如任務有需要，也可以幫忙聯繫救護員所需要的支援，例如警察、搜救隊、或電力公司等。"},"answer":"D","manualChapter":"CH02"},{"id":2285,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"有關台灣醫療指導制度，下列敘述何者為非？","options":{"A":"醫療指導醫師實施辦法為衛生福利部制訂，並自民國99年7月1日正式施行。","B":"線上醫療指導係指由消防局聘任之醫療指導醫師所執行的即時醫療指導。","C":"直轄市、縣（市）消防主管機關應指定醫療指導醫師，建立醫療指導制度。","D":"訂定各級救護技術員品質指標、執行品質監測為醫療指導醫師的法定任務。"},"answer":"B","manualChapter":"CH02"},{"id":2300,"source":"111年度EMTP筆試-題目卷(100題)(含答案)1120113公告","question":"公眾去顫系統(PAD)計畫要成功，除了經費充足與立法保護施救者外，還有四大要素，以下敘述何者為非？","options":{"A":"由醫療專業人員規畫與監督整個計畫的進行。","B":"加強訓練去顫器管理人員負責急救流程運作。","C":"與當地的緊急醫療救護系統緊密配合。","D":"定期的品管回顧檢討改進。"},"answer":"B","manualChapter":"CH02"},{"id":2378,"source":"110年度EMTP筆試-題目卷(100題)(含答案)1110317(公告)","question":"高級救護技術員的初訓課程，是屬於哪一種的醫療指導模式？","options":{"A":"前瞻性。","B":"培育性。","C":"即時性。","D":"任務性。"},"answer":"A","manualChapter":"CH02"},{"id":2472,"source":"108年度EMTP筆試題目卷(100題)(含答案)(1090106修訂)","question":"今天醫療指導醫師至您的分隊，先與隊員座談討論救護案例，然後參與正在進行的分隊心肺復甦術抽測講評、之後他又檢查本月的車廂內錄影急救過程，並且將發現的問題寫成醫療指導記錄交給承辦人及回傳救護科。請問在上述過程中，這位醫師進行了哪些模式的醫療指導？","options":{"A":"即時性與回溯性。","B":"前瞻性與即時性。","C":"前瞻性與回溯性。","D":"前瞻性、即時性與回溯性。"},"answer":"C","manualChapter":"CH02"},{"id":2556,"source":"114年度EMTP筆試-題目卷(100題)(含答案)-1141226公告版","question":"關於「到院前救護單位的派遣與反應模式」的敘述，下列何者正確？","options":{"A":"派遣員僅負責派車，不需提供到達前指導（pre-arrival instruction）。","B":"採用英美模式的國家，會由派遣中心進行檢傷並分流輕重症後再決定是否派車。","C":"現代化指揮中心應以「速度優先」為最高指導原則，盡快抵達現場。","D":"派遣員透過關鍵問題詢問與優先派遣系統，可分辨案件輕重緩急並提供適當協助。"},"answer":"D","manualChapter":"CH02"},{"question":"台灣的緊急醫療救護體系由多個專責單位協同運作，任何涉及消防局的流程變更，需經由下列何者單位批准，否則可能因未符合法律程序而無效？","options":{"A":"緊急醫療救護諮詢委員會","B":"醫療顧問委員會","C":"醫療指導醫師會議","D":"急救責任醫院"},"answer":"A","manualChapter":"CH02","id":3426,"source":"TP題庫 (圖片匯入)"},{"question":"細胞是由細胞核、細胞質、細胞壁組成，下列何者不屬於細胞質的組成要素？","options":{"A":"胞漿","B":"包涵體/細胞內液","C":"胞器","D":"胞蒂"},"answer":"D","manualChapter":"CH02","id":3432,"source":"TP題庫 (圖片匯入)"},{"id":3510,"source":"TP題庫","question":"負責協助提供醫療資訊與品質管制建議，必要時將討論的個案提交至緊急醫療諮詢委員會，以進行政策決議。上列描述屬於台灣緊急醫療救護的架構裡面哪個部分所負責的？","options":{"A":"緊急醫療諮詢委員會","B":"醫療顧問委員會","C":"醫療指導醫生會議","D":"急救責任醫院"},"answer":"B","manualChapter":"CH02"},{"question":"台灣現代緊急醫療救護系統的起源可追溯至 1968 年，當時救護車的主要來源為何？","options":{"A":"民間慈善團體捐贈","B":"日本引進的先進救護設備","C":"衛生福利部自行採購","D":"美軍捐贈的改裝廂型車"},"answer":"D","source":"圖片匯入","manualChapter":"CH02","id":3564,"matchedChapters":["CH02"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+    function startQuiz() {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               btn.classList.add("correct");
+               html += ' <span style="float:right;">✓ 正確答案</span>';
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        if ((isReviewMode || selectedAnswers[index] !== null) && q.explanation) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + q.explanation.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "提早結束作答";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題";
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   liClass = "is-correct";
+                   label = " (正確答案)";
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          if (q.explanation) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + q.explanation.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          div.innerHTML = '<div class="review-question">' + (i + 1) + '. ' + q.question + '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

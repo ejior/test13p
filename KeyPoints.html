@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>重點整理</title>
+  <style>
+    :root {
+      --bg-color: #F2EADA;
+      --primary-color: #51794E;
+    }
+    body {
+      font-family: 'Inter', system-ui, Avenir, sans-serif;
+      background-color: var(--bg-color);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 3rem 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      max-width: 800px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+    .back-btn {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      text-decoration: none;
+      color: #666;
+      font-weight: bold;
+      border: 1px solid #ccc;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+    .back-btn:hover { background: #f0f0f0; }
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 2rem;
+      margin-top: 1rem;
+    }
+    .point-content {
+      display: block;
+      text-align: left;
+      padding: 0 2rem;
+      min-height: 200px;
+    }
+    .point-text {
+      font-size: 1.4rem;
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+    .highlight {
+      color: red;
+      text-decoration: underline;
+      font-weight: bold;
+      display: inline;
+    }
+    .point-img-container {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .point-img-container img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .point-divider {
+      border: 0;
+      height: 1px;
+      background: #e2e8f0;
+      margin: 1.5rem 0;
+    }
+    .point-meta {
+      display: flex;
+      justify-content: space-between;
+      color: #718096;
+      font-size: 0.95rem;
+    }
+    .point-ref {
+      font-style: italic;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .counter {
+      margin-top: 1.5rem;
+      color: #999;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <a href="Dashboard_Quiz.html" class="back-btn">返回首頁</a>
+  <h1>📝 重點整理</h1>
+  <div id="content" class="point-content">載入中...</div>
+  <div class="controls">
+    <button id="prevBtn" class="btn">上一個</button>
+    <button id="nextBtn" class="btn">下一個</button>
+  </div>
+  <div id="counter" class="counter"></div>
+</div>
+
+<script>
+  const rawData = [{"uuid":"KP-1001","text":"老年人其他的症狀和徵候暗示有\"慢性高血壓，例如流鼻血、震顫和噁心嘔吐\"","reference":"CH47 p1250","image":""},{"uuid":"KP-1002","text":"任何到院前心肺停止病人之抽血檢測，難免會有\"缺氧、酸中毒、鉀離子\"異常等現象","reference":"CH23 p643","image":""},{"uuid":"KP-1003","text":"在結構上來說，安非他命和兒茶酚胺(腎上腺素以及正腎上腺素)相似，不過安非他命在\"中樞神經\"的作用大的多，副作用包括：心律過速、激動不安、血壓升高、呼吸過速、瞳孔散大、顫抖以及混亂的行為","reference":"CH50 p1352","image":""},{"uuid":"KP-9143","text":"急性溶血反應為最嚴重的輸血反應，通常是因為\"ABO血型\"不匹配引起的，當輸入的紅血球或病人本身的紅血球，與對應的\"抗體\"\n發生反應，造成\"紅血球細胞\"被破壞，進而引起\"發燒、胸痛、背痛、休克、血尿\"等症狀。","reference":"","image":""},{"uuid":"KP-6318","text":"中空消化器官內的氣體\"也會隨著高度改變而膨脹\"，\"引發病人嘔吐甚或吸入性肺炎\"，如果是條件許可並符合適應症的情況下，先行\"預防性插管\"及\"鼻胃管置入\"是可以考慮的","reference":"CH58 p1571","image":""},{"uuid":"KP-4034","text":"中空器官（胃、小腸、大腸）受損後容易因\"腸道細菌感染\"導致\"敗血症死亡\"","reference":"","image":""},{"uuid":"KP-7273","text":"骨盆骨折臨床表徵除了疼痛與不穩定，男性還可能出現\"陰囊腫脹或瘀青\"","reference":"","image":""},{"uuid":"KP-2784","text":"紅血球增生的情況，在\"慢性支氣管炎\"的病人要比\"原發性肺氣腫\"的病人來得常見","reference":"","image":""},{"uuid":"KP-8179","text":"長時間且過高濃度的氧氣才可能造成視網膜病變，所以並不需要為了擔心\"視網膜病變\"而不給予新生兒氧氣","reference":"","image":""},{"uuid":"KP-5325","text":"標靶藥物比非特異性細胞毒性化療藥物的\"毒性更小\"；然而，由於許多藥物需要長期使用，因此應考慮\"急性和慢性的治療相關毒性\"。","reference":"","image":""},{"uuid":"KP-9145","text":"活性碳的使用方式是將活性碳和\"生理食鹽水、水或軟便劑\"製備成\"泥漿狀\"，由\"嘴巴或胃管\"置入胃中；其作用機制是在\"腸道中吸附多種化學毒物分子，防止其進入人體循環\"，通常應在毒物\"食入後1個小時內\"給予才最具效果(但吞服強酸、強鹼或甲醇中毒時，不應該給予活性碳)","reference":"","image":""},{"uuid":"KP-7883","text":"早期敗血症病人因為\"周邊血管舒張\"造成心臟代償性增加\"心輸出血液量\"的緣故，病人的\"脈搏壓會呈現增加變寬\"，類似的生理變化也會反應在\"甲狀腺機能亢進\"或是\"貧血\"的病人","reference":"","image":""},{"uuid":"KP-6762","text":"野外初級評估系統「MARCH」中的「H」代表\"Head (頭部) \"與 \"Hypothermia (低體溫)\"","reference":"","image":""},{"uuid":"KP-3481","text":"庫欣氏三徵象 (Cushing's triad)：血壓升高（脈壓變寬）、心跳變慢(是迷走神經反射）和呼吸不規則；會導致腦疝脫、不一定同時出現，會出現\"M2(病人的中腦、腦幹受到傷害)\"或\"M3(姿勢、同側瞳孔放大)\"","reference":"","image":""},{"uuid":"KP-2327","text":"自主神經中的\"交感神經\"，其節前神經元從\"第一胸椎(T1)到第二腰椎(L2)\"傳出來","reference":"","image":""},{"uuid":"KP-3781","text":"教學課程模式可以分成\"目標、歷程、情境\"模式三種","reference":"","image":""},{"uuid":"KP-3419","text":"腸阻塞可以分為兩類，包含\"機械性腸阻塞\"和\"麻痺性腸阻塞\"（可能引發腹膜炎，要做手術）；（機械性）常見的原因有手術後的粘黏(占最大多數)、疝氣、糞便嵌塞或腫瘤、（麻痺性）藥物、電解質、感染、休克、嚴重外傷","reference":"","image":""},{"uuid":"KP-7672","text":"中暑（Heat stroke）與發燒（Fever）的主要病理生理差異：中暑是\"體溫調節機轉瓦解\"；發燒是因致病源作用使\"下視丘\"體溫設定點重調","reference":"","image":""},{"uuid":"KP-2988","text":"紅血球沒有\"粒線體\"，得靠\"醣解作用\"產生能量並通過血紅素運送氧氣。","reference":"CH12 p290","image":""},{"uuid":"KP-6600","text":"注射胰島素會引起\"血鉀降低，可能有嚴重心律不整的風險\"，在不清楚病人當下血鉀值的情況下，直接注射胰島素可能導致更多問題","reference":"CH16 p424","image":""},{"uuid":"KP-1754","text":"在野外環境的頸脊椎傷害確定，要做的固定保護就會\"相對比都市嚴謹及複雜\"，\"頸圈、軟式護木\"會增加\"呼吸道抑制\"跟\"顱內壓升高\"的風險","reference":"CH45 p1209","image":""},{"uuid":"KP-2246","text":"急性闌尾炎，俗稱急性盲腸炎，常因\"糞石塞住開口\"，或\"感染導致淋巴結腫大\"，引起發炎","reference":"CH38 p1026","image":""},{"uuid":"KP-a895e8ad","text":"如有\"破水\"之情形，易造成\"胎兒感染\"，故需要\"住院施打抗生素\"","reference":"CH49 p1297","image":""},{"uuid":"KP-32f559a0","text":"根據 AHA（美國心臟協會）急救指引中關於孕婦心跳停止之建議，若\"懷孕週數 >20週（或子宮底高於肚臍以上）\"，進行心肺復甦術（CPR）若\"在 4 分鐘內未能恢復自發性循環（ROSC）\"，應立即啟動死後剖腹產／復甦性剖腹產，並力求在\"心跳停止後 5 分鐘內將胎兒娩出\"","reference":"","image":""},{"uuid":"KP-6de8949f","text":"受傷後的血管收縮反應\"快速\"但卻是暫時的，藉由週邊皮下組織的協助促使血管強力收縮，可立即減少出血，並可造成受傷血管的末端完全封閉","reference":"","image":""},{"uuid":"KP-30d209c7","text":"腹部動脈血管在心臟收縮期出現嘈音並不意味著異常，而只有在收縮期與舒張期均出現的動脈嘈音，臨床上才比較有可能是病理性嘈音。","reference":"","image":""},{"uuid":"KP-11f2c317","text":"近端橈骨頭的半脫位(又稱褓母肘)，約占小兒的上肢受傷20％，可見於6個月大至5歲的小孩，大部分是1~3歲的族群。病史詢問表示曾有拉扯小兒手臂的動作，病童","reference":"","image":""}];
+  // Shuffle array on load
+  let points = [...rawData].sort(() => Math.random() - 0.5);
+  let currentIndex = 0;
+
+  const contentEl = document.getElementById('content');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const counterEl = document.getElementById('counter');
+
+  function render() {
+    if (points.length === 0) {
+      contentEl.innerHTML = "目前沒有重點整理資料。";
+      return;
+    }
+    
+    let item = points[currentIndex];
+    
+    // Replace "..." with red underline highlight
+    let formattedText = item.text.replace(/"([^"]+)"/g, '<span class="highlight">$1</span>');
+    
+    let html = '<div class="point-text">' + formattedText + '</div>';
+    
+    if (item.image) {
+      html += '<div class="point-img-container"><img src="' + item.image + '" alt="重點圖片"></div>';
+    }
+    
+    html += '<hr class="point-divider">';
+    
+    html += '<div class="point-meta">';
+    html += '  <span class="point-ref">來源: ' + (item.reference || '無') + '</span>';
+    html += '  <span class="point-uuid">重點編號: ' + (item.uuid || '無') + '</span>';
+    html += '</div>';
+
+    contentEl.innerHTML = html;
+
+    counterEl.innerText = (currentIndex + 1) + " / " + points.length;
+
+    prevBtn.disabled = (currentIndex === 0);
+    nextBtn.disabled = (currentIndex === points.length - 1);
+  }
+
+  prevBtn.addEventListener('click', () => {
+    if (currentIndex > 0) {
+      currentIndex--;
+      render();
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (currentIndex < points.length - 1) {
+      currentIndex++;
+      render();
+    }
+  });
+
+  // Init
+  render();
+</script>
+</body>
+</html>
