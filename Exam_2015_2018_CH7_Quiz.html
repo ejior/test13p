@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    .option-btn.multi-correct {
+      background-color: #fef08a !important;
+      border-color: #eab308 !important;
+      color: #854d0e !important;
+      font-weight: 600;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-multi-correct { background: #fef9c3; border-color: #fde047; color: #854d0e; font-weight: 600; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 6.2rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第七章 大量傷患與災難應變 (2015-2018)</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.5rem; font-weight: bold; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：45 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="fav-btn" type="button" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 4px; transition: transform 0.15s ease;" title="加入/取消我的最愛">☆</button>
+          <span class="stat-badge" id="score-text">分類：2015-2018 第七章</span>
+        </div>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1.5rem;">
+        <div id="question-category" style="display: none; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-align: left;"></div>
+        <div class="source-tag" id="source-tag" style="margin-top: 0; margin-left: auto;">來源: 無</div>
+      </div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":422,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關如「八仙塵暴」大量傷患事故的描述，何者有誤？","options":{"A":"傷患人數與嚴重度大於區域救護資源，可稱為災難","B":"現場傷患，應先做適檢傷分類與處置後後送","C":"以改良式的START（Revised START）檢傷法，可以有效處理「八仙塵暴」大量傷患事故","D":"現場事故控制管理應優於個別傷患處置"},"answer":"C","manualChapter":"CH52"},{"id":423,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關事故應變管理週期之順序，何者為是？1.準備2.應變3.復原4.減災","options":{"A":"1234","B":"1243","C":"4231","D":"4123"},"answer":"D","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":424,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關事故指揮系統ICS（Incident Command System）的敘述，何者有誤？","options":{"A":"指揮架構應配合平時行政組織架構，以發揮指揮效能","B":"指揮權轉移，應轉給ICS運作經驗夠的適任人員，而不是以位階高的人員","C":"事故中指揮權轉移，不宜過於頻繁","D":"事故規模不大，未被指定的職位，由事故指揮官兼任"},"answer":"A","manualChapter":"CH52"},{"id":425,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"當災難發生時，你是第一輛救護車，由資深的你擔任事故指揮官。長官與支援同僚也陸續抵達，這時候指揮權的轉移，何者最不適當？","options":{"A":"由職級高者，層層轉移","B":"可轉移給對事故指揮系統熟悉經驗多之同僚","C":"事故中指揮權轉移，不宜過於頻繁","D":"指揮權的轉移必須依照事故應變的整體狀況來決定"},"answer":"A","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":426,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關單純輻射傷害的描述，何者有誤？","options":{"A":"在暴露輻射的短期間就發生頭痛或身體不適的情況，這多半是心理因素導致","B":"輻射傷害傷患，外表無皮膚缺損，仍須做適當除汙","C":"輻射污染可以用輻射偵檢器檢測出，並且可以精確的定出污染範圍","D":"輻射傷害傷患除汙中，皮膚開始出現破損，偵測輻射劑量在背景值的2～3倍以上，仍須繼續清洗除污步驟"},"answer":"D","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":427,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關大型活動緊急醫療救護的敘述，何者有誤？","options":{"A":"大型群眾聚集活動，傷病及心臟停止的機會較低","B":"心臟停止病患的救活率，比大多數先進的緊急醫療救護系統為高","C":"治療心臟停止病人，電擊去顫為生存之鏈（Chainofsurvival）中最重要且最有效的一環","D":"超過二個人有類似特殊病況、傳染性疾病、嚴重病患，都需通知醫務執行長及總指揮"},"answer":"A","manualChapter":"CH54"},{"id":429,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關生物恐怖攻擊的描述，何者有誤？","options":{"A":"生物戰劑容易大量製造","B":"生物恐怖事件不易偵測、不易預防、難於辨認","C":"蔓延性廣、滲透性強；可造成嚴重的心理衝擊；能催垮所有現有資源","D":"生物戰劑可以有效率的散播"},"answer":"D","manualChapter":"CH43"},{"id":430,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"下列對災難後的醫療需求的描述，何者為是？","options":{"A":"最大的醫療需求是在前24小時，高峰期：持續三至五天","B":"急性期內科和創傷病患為主","C":"大多數的受害者都是依靠外來的醫療隊伍支援","D":"災區裡的醫療體系不太會受到衝擊"},"answer":"A","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":431,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"一生產鐵片的工廠發生大爆炸，已知傷患有五百位，於檢傷分類時，下列何者為非？","options":{"A":"寬五公分的鐵片，貫穿頸部，病患無呼吸、無脈搏，給予傷票“黑”","B":"寬五公分的鐵片，一端刺穿入胸內，病患呼吸急迫，給予傷票“紅”","C":"寬五公分鐵片，貫穿右大腿，病患不能行走，紅色鮮血直流，給予傷票“黃”","D":"病患左小腿撕裂傷十公分，深可見肌肉，無法行走，給予傷票“黃”"},"answer":"C","manualChapter":"CH52"},{"id":432,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"在災難事故現場，下列何者不是在醫療站時決定病患治療優先順位的影響因素？","options":{"A":"年齡","B":"送達醫療站的先後順序","C":"預估的醫療資源消耗","D":"需要穩定的ABC異常"},"answer":"B","manualChapter":"CH52"},{"id":433,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關START的敘述，何者正確？","options":{"A":"觀察病患的意識狀況為第一步驟","B":"凡是沒有呼吸，可立刻判為黑色","C":"呼吸速度超過每分鐘30下，應判為紅色","D":"START的快速治療主要包括心肺復甦術"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":434,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"在現場進行的初級檢傷時，只能做某些拯救生命的必要措施，這些可歸納成囗訣BASIC，以下選項何者為非？","options":{"A":"Breathe呼吸","B":"Airway呼吸道","C":"Shock休克預防","D":"Classification分類"},"answer":"A","manualChapter":"CH52"},{"id":435,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"下列有關事故指揮系統的描述，下列何者為非？","options":{"A":"共通詞彙（Common terminolog）","B":"模組化（Modular）","C":"管理範疇（Span of Command）","D":"交叉指揮（Conjugated command）"},"answer":"D","manualChapter":"CH52"},{"id":436,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關北美緊急應變指南的使用，下列何者為非？","options":{"A":"可以利用UN編號，查詢到危害物質的應變指引","B":"兩種危害物質可能使用相同一種應變指引","C":"每一種危害地上風、下風處隔離距離都不同，需要查詢相關「初期隔離與保護距離表」","D":"解針對不明危害物質，北美緊急應變指南在應變指引111，有初步的建議行動"},"answer":"C","manualChapter":"CH53"},{"id":437,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於毒化災防護衣，下列敘述何者為是？","options":{"A":"A級和B級防護衣都屬於全罩式氣密式連身防護衣","B":"A級毒化災防護衣可保護眼睛、黏膜、皮膚，但卻不能提供好的呼吸保護","C":"第一時間消防人員在熱區面對仍不清楚的毒化物質及濃度下應該穿著B級防護衣","D":"A級和B級防護衣都包含自攜式空氣呼吸器（self-containedbreathingapparatus，SCBA）"},"answer":"D","manualChapter":"CH53"},{"id":438,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於生物恐怖事件（Bioterrism），下列敘述何者為非？","options":{"A":"施放的恐怖分子本身可能也受到感染","B":"可依恐怖分子規劃，進行有效率的散播","C":"造成大量傷亡所需費用較低，又稱為「窮人的原子彈」","D":"炭疽病、鼠疫、天花屬於最高優先級（A類）可能被使用的生物戰劑"},"answer":"B","manualChapter":"CH43"},{"id":439,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於生物恐怖事件發生的流行病學和臨床線索，下列何者為非？","options":{"A":"出現大量死亡個案","B":"同時出現許多相同臨床症狀病患","C":"本土流行之感染症個案數增加","D":"常見的感染出現在不尋常季節"},"answer":"C","manualChapter":"CH53"},{"id":440,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於颱風災害對醫療服務的影響，下列何者為非？","options":{"A":"道路中斷，可能需要空中運輸","B":"緊急救護時，行車安全的風險增加","C":"醫療院所淹水及交通阻斷，影響醫院運作","D":"造成新興傳染病盛行，耗費大量醫療資源"},"answer":"D","manualChapter":"CH57"},{"id":441,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"危物質災難事件如果已經被限制在一定範圍內，事故現場可以劃分出污染區（或為區、紅區）、控制區（或稱為暖區、黃區）及安全區（或稱為冷區、綠區）三個區峨、為層區管制·於層區管制的念，以下敘述何者為非？","options":{"A":"事故周直接或間接（如受污染之傷患及器材）受到危害物質影響之處，應劃定為熱區","B":"安全區在事件開始時即需建立，將支援人員器材集結於此，並設定由下風高處做為嵈區及熱區的出人位置","C":"黃區為介於污染區及安全區之間的緩衝區域，作為除污及病人緊急醫療處理之處","D":"除污走廊應該位於暖區"},"answer":"B","manualChapter":"CH52"},{"id":442,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於輻災事故的變觀念，以下敘述何者為非？","options":{"A":"輻射會影傷囗癒合，所以輻射汙染病患的傷囗應該儘可能延遲二十四小時後再進行縫合","B":"較於化學物質事故，輻射事故通常不會造成受污染傷者立即性的危害，因此病患除污的急迫性較低","C":"在輻災事故，如果病患的衣物可能沾有輻射物質粉末，應該在移除病患衣物時，先將衣物潤濕，以防止輻射物質擴散至空氣中","D":"輻射污染可以用輻射偵檢器檢測出，通常可以精確地定出污染範圍"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":445,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"在大量傷病患事故，依據START（Simple Triage And Rapid Treatment，簡易分類並迅速治療）檢傷法，以下判定何者為是？","options":{"A":"二十歲男性，癱軟坐在地上，爬不起來，呼吸每分鐘20次，橈動脈脈搏很強，可以和工作人員清楚對談，應該判定為輕傷","B":"十歲孩童，呼吸每分鐘42次，微血管充填時間3秒，對工作人員的問話毫不理會，跑來跑去哭喊著找媽媽，應該判定為紅色","C":"五十歲女性，左右小腿均骨折，呼吸每分鐘20次，微血管充填時間1秒，可以和工作人員清楚對談，應該判定為中傷","D":"一百歲老公公，左大腿骨折變形，呼吸每分鐘8次，微血管充填時間5秒，意識不清，應該判定為黑色"},"answer":"C","manualChapter":"CH52"},{"id":447,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"事故指揮系統（IncidentCommandsystem）創建於1970年代，目的是簡化溝通以及建立明確的指揮系統·以下相關敘述何者為非？","options":{"A":"災難事件指揮系統是由功能的需求·而非個人原有的頭銜，來組織整個架構","B":"災難事件指揮系統應該要等上級指示之後再啟動，越晚成立越能夠有完整的架構與功能，也旨發揮越大的作用","C":"不論災難的本質如何，災難事件指揮系統的架構都是類似的，差異主要是核心人士的特殊專業考量","D":"災難事件指揮系統中，安全官（Safety Officer）的主要任務是負責工作人員的安全，以及特殊災難所需要的特殊技術（例如輻射線偵測以及處理生物感染控制）"},"answer":"B","manualChapter":"CH52"},{"id":448,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於事故指揮系統（Incident Command system）中財務行政部門的功能，下列何為非？","options":{"A":"分析財務成本","B":"維護電力及衛生設備","C":"追蹤應變人員的工作時間","D":"負責與廠商或其它部門簽訂財務契約"},"answer":"B","manualChapter":"CH52"},{"id":449,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於事故指揮系統（Incident command system）的描述，簡稱ICS，下列何者為非？","options":{"A":"主要架構包含指揮、執行、計畫、後勤、財務行政等五個主要的部門","B":"實際使用時，不一定每一組都要成立，是需求及現有資源而決定","C":"ICS架構一旦確立後，就只能增加，不能減少","D":"ICS中一定要有的單位是指揮官"},"answer":"C","manualChapter":"CH52"},{"id":450,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於事故指揮系統（Incident Command system），以下敘述何者為是？","options":{"A":"監督者與下屬的人數比例，建議是1：8較為合適","B":"安全官除了要確保救災及災難受害者安全外，同時要定期向媒體發布相關訊息","C":"資訊（Information）、聯絡（Liaison）、安全（security）等三項是輔助指揮的功能，可以由專人負責，或是由指揮官兼任","D":"指揮官必須對所有的災難都有非常專業的了解，否則不能擔任指揮官"},"answer":"C","manualChapter":"CH52"},{"id":451,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於災害現場的現場救護，何者為非？","options":{"A":"主要重點包含檢傷、治療及後送","B":"治療區一定包含重傷、中傷及輕傷區","C":"救護車後送的傷患人數通常只佔所有就醫傷患的一部分，所以後送時儘可能將中傷與重傷病患分配至不同醫院以避免壅塞","D":"檢傷是動態的，在現場救護區進行的檢傷統稱為「次級檢傷」，與檢傷的次數無關"},"answer":"B","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":452,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"有關院外災害現場緊急應變作業，下列敘述何者為非？","options":{"A":"在大量傷病患事故，可以簡易檢傷及快速治療法則（Simple Triage and Rapid Treatment,START）做檢傷分類","B":"在災害現場若有危及救護人員的情況，應以減少現場處置快速轉送為原則","C":"可將輕傷病人送往較遠的醫院，以免造成當地醫院急診壅塞，而無法有效處理重症病人","D":"為了儘速救災，指揮官應要求最近急救責任醫院派出醫療人員組成救護隊前往救援"},"answer":"D","manualChapter":"CH52"},{"id":453,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"在大量傷病事故，依照Simple Triage and Rapid Treatment（START）檢傷分類法評估以下病患：．中年女性：可行走，全身多處擦傷，包括兩側膝蓋與左側手掌，左小腿有4公分之撕裂傷持續出血中。．老年男性：意識不清對痛無反應，橈動脈摸得到。左頭皮有10公分撕裂傷，持續流血。．年輕女性：無法行走，意識清醒，血壓130/58 mmHg，脈搏126/分鐘，呼吸20/分鐘，跌倒後右膝蓋腫脹。．中年男性：無法行走，意識混亂，血壓130/60 mmHg，脈搏130/分鐘，呼吸36/分鐘，颜面部呈焦黑，眉毛被燒至焦黑，呼吸困難。．老年男性：四肢無力無法移動，不停呼叫求救，但可以配合簡單指令，血壓125/60 mmHg，脈搏90/分鐘，呼吸12/分鐘，除前額血腫外無其他明顯外傷。．年輕男性：可行走，意識清楚，血壓110/68 mmHg，心跳89/分鐘，呼吸16/分鐘，左小腿壓傷，輕微腫脹，表面擦傷約8公分×4公分，無變形或出血。．中年女性：無法行走，打開呼吸道後沒有呼吸，沒有脈搏。遭重物壓迫後左側小腿截肢，附近發現殘肢。經過你的檢傷分類後，請問分類的結果應該為何？","options":{"A":"2黑1紅2黃2綠","B":"1黑2紅2黃2綠","C":"1黑2紅1黃3綠","D":"2黑2紅1黃2綠"},"answer":"B","manualChapter":"CH52"},{"id":454,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"使用START（Simple Triage And Rapid Treatment）方法進行檢傷分類時，容易被「輕症重判」的病患，下列何者為非？","options":{"A":"失聰傷患","B":"嗆傷傷患","C":"過度換氣傷患","D":"下肢殘障傷患"},"answer":"B","manualChapter":"CH52"},{"id":455,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於毒性化學物質汙染的現場處置，何者為非？","options":{"A":"辨識危害物質並不容易，可能必須配合病患症狀以及現場資訊來一同判斷","B":"目前危害物質管轄的單位很多，包含環保署、勞動部、經濟部，消防署等等","C":"火災使用的防焰衣以及個人防護裝備，屬於B級的化災防護衣","D":"處理毒化災現場時，處理得「對」比處理得「快」還重要。如果沒有適當的防護，救災救護人員或病患都可能受到二次傷害"},"answer":"C","matchedChapters":["CH53"],"manualChapter":"CH53"},{"id":456,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於毒化災現場傷患緊急處理，下列何為非？","options":{"A":"污染傷囗應先清洗，再以防水敷料包紮","B":"傷患除污應在設置於暖區的除污走廊內進行","C":"呼吸裒竭傷患，應於熱區插管後，再送至暖區除污","D":"眼睛受污染傷患，可以大量生理食鹽水用沖眼器沖洗"},"answer":"C","manualChapter":"CH53"},{"id":457,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於危害物對健康的傷害，下列敘述何者為非？","options":{"A":"有機磷殺蟲可能造成意識障礙或痙攣","B":"氯氣主要傷害呼吸系統，嚴重可能造成呼吸衰竭","C":"氦氣度太高時，空氣中含氧量下降，造成缺氧性窒息","D":"氮氣造成紅血球破壞產生溶血，使細胞無法使用氧氣而窒息"},"answer":"D","manualChapter":"CH53"},{"id":458,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於生物恐怖事件（Bioterrism），下列敘述何者為非？","options":{"A":"可依規劃進行有效率的散播","B":"施放的恐怖分子本身可能也受到感染","C":"造成大量傷亡所需費用較低，又稱為「窮人的原子彈」","D":"炭疽病、鼠疫、天花屬於最高優先級（A類）可能被使用的生物戰劑"},"answer":"A","manualChapter":"CH43"},{"id":459,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於輻災事故的應變觀念，下列敘述何者為非？","options":{"A":"輻射物質如由吸人入方式進人人體，造成之傷害十分嚴重。所以切勿在管制區琙菸或飲食，以減少吸收輻射物質的機會","B":"以前曾參與輻災救災的工作人員，因為經驗較為豐富，應該儘可能派彺第一執行或除污的工作","C":"處理輻射事故之緊急救護人員應著長袖衣服，戴雙層手套、眼罩、口罩及帽子受到可能的輻射污染","D":"所有於輻射事故工作之人員，均須佩帶個人輻射計量器"},"answer":"B","manualChapter":"CH53"},{"id":460,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於大型活動的緊急醫療救護，何者為非？","options":{"A":"大型活動與一般緊急災害事件最大的不同，在於事先的規劃、減災措施可以減少災害發生的機率與可能的人命、財產損失","B":"醫療站設置的評估，需考慮活動的性質、地理資訊、參與人員的人數與特質、舉辦時間等","C":"大型活動的現場醫療最好可以與當地的醫療衛生資源建立合作機制，以利傷患的後送","D":"事故指揮系統（Incident Command system）僅適用於災難時候場景，在大型活動的現場醫療救護規劃不適用"},"answer":"D","manualChapter":"CH54"},{"id":461,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"關於大型活動的緊急醫療救護規劃，下列何者為非？","options":{"A":"應針對恐怖攻擊進行規劃","B":"「保護自己的安全」為首要規劃重點","C":"醫療站位置最好設置在五分鐘路程內可到所有活動區域處","D":"若無法在十分鐘內提供ACLS的醫療照顧，則現場必須準備自動體外電擊器"},"answer":"D","manualChapter":"CH54"},{"id":462,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"依國內災害防救法，下列哪一種災害應負責指揮、督導、協調之中央災害防救業務主管機關何者為非？","options":{"A":"重大火災為內政部","B":"毒性化學物質災害為經濟部","C":"土石流災害為行政院農業委員會","D":"震災為內政部"},"answer":"B","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":463,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"地震災害對健康的衝擊，下列何者為非？","options":{"A":"流產及早產的比例增加","B":"急性心肌梗塞比例增加","C":"常因頭、胸部嚴重壓傷造成立即死亡","D":"大量死亡的屍體未清理，常造成疫病的盛行"},"answer":"D","manualChapter":"CH57","matchedChapters":["CH57"]},{"id":464,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"事故指揮系統（ICS）各核心職位與任務的敘述，哪一個最不妥當？","options":{"A":"事故指揮官：監控各部門的應變效率","B":"聯絡官：聯絡安排參訪或訪談","C":"發言官：提供必要的消息給應變工作人員","D":"安全官：審核應變工作人員的醫療照護計畫"},"answer":"B","manualChapter":"CH52"},{"id":465,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"疑似輻射污染的現場，下列何種應變原則或作法是正確的？","options":{"A":"先確保必要的防護。若沒有鉛衣保護，對應變人員可能有風險，應該請隊上準備","B":"應常规服用碘片或含碘的藥物，用以拮抗輻射可能帶來的風險","C":"病輻射污染的考量不應優先於急救，若生命徵象不穩定應先急救病人","D":"輻射污染的患，不管污染或傷情嚴重程度，一律先送往輻傷/核災急救責任醫院以免污染擴大"},"answer":"C","manualChapter":"CH53"},{"id":467,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"大型活動緊急醫療救護的敘述，何者為是？","options":{"A":"在大型群眾聚集活動，心臟停止的發生機會較高，但救活率也比較高","B":"每千人的活動，建議配置一台有高級救護技術員的救護車","C":"每兩千人的活動，建議需有一位急診醫師在現場","D":"如果傷病患沒有超過15人，醫療站應該不會面臨大量傷患的問題"},"answer":"A","manualChapter":"CH54"},{"id":468,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"您出勤時載送全身黃疸及發燒的病人，疑似患有鉤端螺旋體病（Leptospirosis）關於鉤端螺旋體病，以下何者錯誤？","options":{"A":"是熱帶和亞熱帶常見的人畜共通感染病，台灣也有案例","B":"可經由動物尿液污染的水和土壤，進而感染人類","C":"極少見人傳人，若有帶手套和口罩處理病患基本上不會被感染","D":"直接接觸動物不會被傳染"},"answer":"D","manualChapter":"CH43"},{"id":469,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"炭疽病（Anthrax）是A級生物戰劑中，咸認最可能被用的病原體。關於炭疽病，何者正確？","options":{"A":"炭疽菌是專性嗜氧的格蘭氏陰性產孢桿菌，死亡率極高","B":"除皮膚性疽外，吸入型和腸胃道炭疽皆可能發生全身性炭疽症","C":"炭疽病沒有疫苗可施打","D":"炭疽病可能經由動物接觸而感染"},"answer":"D","manualChapter":"CH43"},{"id":470,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"颱風對緊急醫療救護的影響，何者為非？","options":{"A":"颱風時的緊急救護調度派遣會有風險，較不緊急的醫療情況可考慮風雨減緩後進行","B":"颱風時若交通中斷，風災後可考慮用直昇機進行救護","C":"颱風時，病患以外傷居多，颱風後，則可能出現胃腸道傳染病，甚至壓力造成的心理疾病","D":"颱風過後，傳染病都會增加，但與當地原有的傳染病型態沒有相關"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":471,"source":"第七章 大量傷患與災難應變(2015-2018).doc","question":"空中救護救護直昇機，管理辦法的規定，以下敘述何者錯誤？","options":{"A":"空中救護的範圍包括緊急救護、轉診和移植器官的緊急運送","B":"空中緊急救護，由當地欲轉診的醫院填具空中緊急救護申請表，直接傳真向內政部消防署救災救護指揮中心申請","C":"申請空中轉診的醫院，應與接受轉診的醫院先行聯絡協調，預作接受轉診的準備","D":"救護直昇機執行空中緊急救護或空中轉診時，除駕駛員外，應有空中救護人員隨機執行救護"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+
+    const FAV_KEY = "emtp_favorite_question_ids";
+    function getFavorites() {
+      try {
+        const data = localStorage.getItem(FAV_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function isFavorited(id) {
+      return getFavorites().includes(id);
+    }
+    function toggleFavorite(id) {
+      let favs = getFavorites();
+      const idx = favs.indexOf(id);
+      let added = false;
+      if (idx > -1) {
+        favs.splice(idx, 1);
+      } else {
+        favs.push(id);
+        added = true;
+      }
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      } catch (e) {}
+      return added;
+    }
+    function updateFavBtn(id) {
+      const favBtn = document.getElementById("fav-btn");
+      if (!favBtn) return;
+      const fav = isFavorited(id);
+      favBtn.textContent = fav ? "★" : "☆";
+      favBtn.style.color = fav ? "#f59e0b" : "#94a3b8";
+      favBtn.title = fav ? "已加入我的最愛 (點擊移除)" : "加入我的最愛 (點擊加入)";
+    }
+    function handleReviewFav(btn, id) {
+      const isFav = toggleFavorite(id);
+      btn.textContent = isFav ? "★" : "☆";
+      btn.style.color = isFav ? "#f59e0b" : "#94a3b8";
+    }
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+
+    const favBtnEl = document.getElementById("fav-btn");
+    if (favBtnEl) {
+      favBtnEl.addEventListener("click", () => {
+        const q = questions[currentQuestionIndex];
+        if (!q) return;
+        toggleFavorite(q.id);
+        updateFavBtn(q.id);
+        favBtnEl.style.transform = "scale(1.35)";
+        setTimeout(() => { favBtnEl.style.transform = "scale(1)"; }, 150);
+      });
+    }
+
+    function startQuiz() {
+      if (!questions || questions.length === 0) {
+        alert("目前沒有可測驗的題目！請先將題目加入收藏。");
+        return;
+      }
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      updateFavBtn(q.id);
+      
+      const catDiv = document.getElementById("question-category");
+      if (catDiv && ('第七章 大量傷患與災難應變 (2015-2018)'.includes('隨機') || '第七章 大量傷患與災難應變 (2015-2018)'.includes('最愛'))) {
+          catDiv.style.display = "block";
+          catDiv.textContent = q.manualChapter ? "分類：" + q.manualChapter : "分類：未分類";
+      }
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               if (q.multiAnswer) {
+                 btn.classList.add("multi-correct");
+                 html += ' <span style="float:right; font-weight:bold; color:#854d0e;">✓ 正確答案 (官方複選: ' + q.multiAnswer + ')</span>';
+               } else {
+                 btn.classList.add("correct");
+                 html += ' <span style="float:right;">✓ 正確答案</span>';
+               }
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        const curExp = q.explanation || q.analysis;
+        if ((isReviewMode || selectedAnswers[index] !== null) && curExp) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + curExp.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = (currentQuestionIndex === questions.length - 1) ? "結束作答" : "錯題回顧";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      let scoreHtml = "";
+      if ('第七章 大量傷患與災難應變 (2015-2018)'.includes('隨機')) {
+          const scorePerQuestion = questions.length === 25 ? 4 : (questions.length === 50 ? 2 : 0);
+          const totalScore = correctCount * scorePerQuestion;
+          scoreHtml = "<br><br><span style='color: #0369a1; font-size: 1.5rem; font-weight: bold;'>測驗分數：" + totalScore + " 分</span>";
+      }
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題" + scoreHtml;
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   if (q.multiAnswer) {
+                      liClass = "is-multi-correct";
+                      label = " (正確答案 - 官方複選: " + q.multiAnswer + ")";
+                   } else {
+                      liClass = "is-correct";
+                      label = " (正確答案)";
+                   }
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          const reviewExp = q.explanation || q.analysis;
+          if (reviewExp) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + reviewExp.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          const favState = isFavorited(q.id);
+          const favStar = favState ? '★' : '☆';
+          const favColor = favState ? '#f59e0b' : '#94a3b8';
+          div.innerHTML = '<div class="review-question" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">' +
+            '<div>' + (i + 1) + '. ' + q.question + '</div>' +
+            '<button type="button" onclick="handleReviewFav(this, ' + q.id + ')" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; color: ' + favColor + '; padding: 0 4px; flex-shrink: 0;" title="加入/取消我的最愛">' + favStar + '</button>' +
+          '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

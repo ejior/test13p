@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    .option-btn.multi-correct {
+      background-color: #fef08a !important;
+      border-color: #eab308 !important;
+      color: #854d0e !important;
+      font-weight: 600;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-multi-correct { background: #fef9c3; border-color: #fde047; color: #854d0e; font-weight: 600; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 6.2rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第六章 特殊狀況與特定病患 (2012-2014)</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.5rem; font-weight: bold; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：80 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="fav-btn" type="button" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 4px; transition: transform 0.15s ease;" title="加入/取消我的最愛">☆</button>
+          <span class="stat-badge" id="score-text">分類：2012-2014 第六章</span>
+        </div>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1.5rem;">
+        <div id="question-category" style="display: none; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-align: left;"></div>
+        <div class="source-tag" id="source-tag" style="margin-top: 0; margin-left: auto;">來源: 無</div>
+      </div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":864,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"年輕孕婦懷孕3週突然感到嚴重呼吸困難而打119求救，你到現場發現她有發紺、胸痛及休克現象，似乎快要窒息。此時急救的處置何者不正確？","options":{"A":"若量到她血壓偏低，建議以休克病患之頭低腳高方式運送","B":"可能的診斷為肺栓塞或是羊水栓塞","C":"為增加母親心輸出量，應該要左側躺或進行子宮左推手勢","D":"若母親心跳停止，應該在心跳停止後四到五分鐘內緊急剖腹產產出胎兒"},"answer":"A","manualChapter":"CH49"},{"id":865,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於子宮外孕（ectopic pregnancy），以下何者不正確？","options":{"A":"最常發生在受精後胚胎發育於輸卵管中","B":"可能會因腹腔內出血而有突發性腹痛、頭暈、昏倒或休克","C":"通常發生在懷孕第6到12週","D":"子宮外孕一定會有陰道出血"},"answer":"D","manualChapter":"CH49"},{"id":866,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於子癇前症及子癇症（eclampsia／pre-eclampsia），以下何者不正確？","options":{"A":"子癇前症亦稱妊娠毒血症，發生原因不明，通常發生於第一胎，最常發生在懷孕第二期","B":"病人在懷孕時會出現高血壓、水腫及尿蛋白三種症狀","C":"高血壓之定義為收縮壓≧140毫米汞柱或舒張壓≧90毫米汞柱","D":"子癇症則是子癇前症同時發生癲癇的情況。抽筋多為大發作，必須給予氧氣及硫酸鎂治療"},"answer":"A","manualChapter":"CH49"},{"id":867,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於產後大出血，以下何者不正確？","options":{"A":"產後大出血定義為產後出血大於500 cc","B":"產後子宮無法適當收縮（uterine atony）是出血最常見原因","C":"若為會陰部嚴重撕裂傷應避免會陰部檢查，但若合併大量出血應直接加壓止血","D":"可讓胎兒吸吮母親乳頭，使子宮分泌子宮收縮素"},"answer":"D","manualChapter":"combine"},{"id":868,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於孕婦重大外傷，以下何者不正確？","options":{"A":"除穿刺傷及嚴重腹部頓傷外，胎兒鮮少因外傷造成死亡","B":"母體可能耐受大量失血而無休克之症狀時，胎兒卻有可能因缺氧而面臨死亡","C":"孕婦懷孕過程中增加血量，所以約15％之出血量就會產生血壓低休克之症狀","D":"需將創傷之孕婦左側躺，並轉送至外傷中心或醫學中心"},"answer":"C","manualChapter":"CH49"},{"id":869,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"年輕孕懷孕40週突然感覺意識不清，119到現場發現她沒有脈搏，AED顯示為心室纖維震顫。此時急救的處置與一般ACLS略有不同，正確的作法是？","options":{"A":"Amiodarone在孕婦屬於C級用藥會導致畸，禁止使用於孕婦","B":"若有需要插管，應該選用口徑較大的氣管內管（例如7.5#或8#）","C":"依照AHA最新指導原則，應該要左側躺比子宮左推手是適合孕婦","D":"為了胎兒預後，若母親心跳停止，應該在心跳停止五分鐘內產生胎兒"},"answer":"D","manualChapter":"CH49"},{"id":870,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"年輕孕婦懷孕40週，急產產出一足月胎兒。剛出生時新生兒抽吸口鼻不會哭泣臉部也無表情，呼吸不規則，且每分鐘約20下。脈搏微弱且約每分鐘80下，刺激時手腳僅有一些無力的收縮。外觀發現四肢發紺，身體比較紅潤。請問其第一分鐘的APGAR分數是？","options":{"A":"3分","B":"4分","C":"5分","D":"6分"},"answer":"B","manualChapter":"CH49"},{"id":871,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於急產後新生兒之處置，以下何者為非？","options":{"A":"新生兒出生後必須執行擦乾－擺位－抽吸－刺激四項處置","B":"新生兒呼吸約每分鐘40～60下，若有呼吸衰竭，應盡早給予正壓給氧","C":"檢查臍動脈脈搏，若是小於每分鐘100下即需正壓給氧，小於每分鐘60下即需CPR","D":"可以搓揉新生兒背部來刺激呼吸，危急時可以倒吊新生兒並擊打臀部的方式來刺激呼吸"},"answer":"D","matchedChapters":["CH48"],"manualChapter":"CH48"},{"id":872,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"有關小兒與大人之呼吸道在結構上之差異何者不正確？","options":{"A":"舌頭相對於囗腔之比例較大","B":"咽喉呈漏斗狀","C":"最窄的部位在聲帶","D":"為防止昏迷平躺的小朋友呼吸道受到壓迫，可將肩部墊高預防"},"answer":"C","manualChapter":"CH48"},{"id":873,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一病人因為使用過多的海洛因造成中毒，下列敘述何者錯誤？","options":{"A":"常用解藥為naloxone","B":"具有呼吸抑制的作用","C":"可造成意識昏迷","D":"瞳孔放大"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":875,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"溺水病人之處置，何者為非？","options":{"A":"需考慮頸椎受傷之可能","B":"水中救援時，盡量將病患保持垂直姿勢","C":"病患可能因喉部痙攣導致呼吸停止，水並未吸入肺部","D":"溺水病人常合併低體溫，故不能輕易放棄CPR"},"answer":"B","manualChapter":"CH44"},{"id":876,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"兒童心室頻脈/心室顫動VTⅣF之去顫術的起始計量為","options":{"A":"10焦耳/kg","B":"5焦耳/kg","C":"2焦耳/kg","D":"1焦耳/kg"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":877,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一位新生兒出生時，您已經給予乾燥、保暖、適當之姿勢、抽吸及給予刺激，但此新生兒仍發紺、心搏過慢、呼吸困難，您下一步要做的是？","options":{"A":"以抽吸管抽吸囗鼻","B":"強力刺激新生兒的背部或足底","C":"使用簡單型面罩給予氧氣","D":"使用BVM給予100％氧氣正壓通氧"},"answer":"D","manualChapter":"CH48"},{"id":878,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一3歲15 kg男童突然失去意識，沒有反應、無呼吸及脈搏。醫護人員立即給予胸部按壓及bag-mask換氣呼吸。Monitor呈現如下：下列何者為最適當之後續治療？","options":{"A":"I.V.注射amiodarone 5 mg/kg","B":"I.V.注射epinephrine 0.01 mg/kg","C":"I.V.注射lidocaine 1 mg/kg","D":"電擊去顫30J後立即繼續胸部按壓"},"answer":"D","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/878.png"},{"id":879,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一男童無反應且無自發性呼吸，你給予通暢呼吸道、100％氧氣及bag-mask換氣呼吸後，你不確定他是否有脈搏，EKG monitor呈現下面波形：下列何者為最適當之後續治療？","options":{"A":"立即開始高品質胸部按壓及換氣呼吸","B":"準備經皮心臟節律器（transcutaneous pacing）","C":"建立IV途徑後，I.V.注射atropine 0.02 mg/kg","D":"建立IV途徑後，I.V.注射epinephrine 0.01 mg/kg（0.1 ml/kg Of 1:10,000）"},"answer":"A","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/879.png"},{"id":880,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於新生兒急救，如果發現呼吸暫停或心跳低於幾下，須施行正壓呼吸（bag-mask ventilation）？","options":{"A":"0／min","B":"＜60／min","C":"＜100／min","D":"＜120／min"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":881,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一位38歲女士，懷孕第一胎32週，在家裡看電視時突然有尖銳的下腹痛，EMT到達現場時已無反應，無呼吸，無脈搏，下列急救步驟何者有誤？","options":{"A":"儘早插管、氣管內管size和一般成人一樣","B":"將孕婦左側躺約15～30度","C":"胎兒＞245～25週：母親心跳停止大於4分鐘，可考慮緊急剖腹產","D":"I.V.管路宜在上半身（橫膈以上）"},"answer":"A","manualChapter":"CH49"},{"id":883,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"「根據2010年美國心臟醫學會所建議的心肺復甦術指引，以下關於兒童心肺復甦術的敘述何者為非？","options":{"A":"在建立高級呼吸道之前，單一施救者對於兒童的胸部按壓與通氣建議為30：2","B":"在建立高級呼吸道之前，兩名醫護人員對於兒童的胸部按壓與通氣建議為15：2","C":"如果已建立高級呼吸道，建議呼吸應配合胸部按壓進行，每次呼吸約1秒且可見胸部起伏","D":"如果已建立高級呼吸道，建議每6～8秒給予1次呼吸，也就是每分鐘約給予8～10次呼吸"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":885,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據2010年美國心臟醫學會所建議的心肺復甦術指引，以下關於新生兒心肺復甦術的敘述，何者為非？","options":{"A":"一旦開始正壓通氣或氧氣補充供給，應評估新生兒的充氧狀態，而且以脈衝式血氧計會比單純評估膚色來得更為可靠","B":"新生兒心臟停止的病例大部分為心臟問題，因此仍維持C-A-B的復甦步驟，並配合3：1的按壓通氣比率","C":"對於足月出生的嬰兒，開始進行急救時最好使用空氣，而不要使用100％的氧氣","D":"只有發生明顯自行呼吸障礙或需要正壓通氣的嬰兒，才需要在出生後立即進行抽吸（包c括使用球形注射器抽吸）的動作"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":887,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據2010年美國心臟醫學會所建議的心肺復甦術指引，以下敘述何者為非？","options":{"A":"為避免毒液活化並阻擋毒液進一步侵入體內，受到水母螫傷時，應儘快使用大量醋（4～6％的乙酸溶液）沖洗傷處至少30秒","B":"如果患者上肢被毒蛇咬傷，那麼以介於40與70毫米汞柱的力量，將壓力穩定繃帶捲繞被咬傷的整個肢段，是減緩淋巴流從而減少毒液散播的有效安全方式","C":"建議所有呼吸短促或胸部不適的患者，都應例行給予氧氣","D":"伸展、冰敷和按摩因為熱痙攣而疼痛的肌肉，可能會有所幫助"},"answer":"C","manualChapter":"CH50"},{"id":890,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"兒童的生存之鏈與成人的不同之處，在於特別強調哪一環？","options":{"A":"事故預防","B":"儘早CPR","C":"有效的高級救護（ALS）","D":"整合性復甦後照顧"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":891,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"小兒呼吸衰竭，插呼吸管時，其氣管內管的大小號碼選擇為多少？","options":{"A":"Age（Y）／4＋4","B":"［Age（Y）＋4］1／4","C":"Age（Y）／2＋4","D":"［Age（Y）＋4］／2"},"answer":"A","manualChapter":"CH48"},{"id":892,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一位十一個月大，有反應的嬰兒，發燒體溫39℃、燥動不安、皮膚出現斑塊、並有四冰冷。心跳速率為168下/分、呼吸速率為62下/分、血壓為78∕56 mmHg，酸鹼度為7.25。進行評估此嬰兒之後何者為是？","options":{"A":"外觀正常","B":"呼吸正常","C":"循環正常","D":"血壓正常"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":893,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一位6歲的孩童被一輛汽車撞傷之後，意識警醒、組織灌流正常，但是有呼吸窘迫的現象，他的頸椎已經被固定並已經使用100％的氧氣面罩，呼吸速率為60次/每分鐘，血壓為60 mmHg，右側胸部呼吸音減弱，氣管向左偏移，此時最合適的處置是:","options":{"A":"立即給予氣管內插管","B":"等待胸部X光的檢查報告","C":"立即給予氣管內插管並於右側胸部放置胸管","D":"先於右側胸部施行針頭減壓，再於右側胸部放置胸管"},"answer":"D","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":894,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"現在是冬季，你接獲救護指揮中心通報到達一住家內，現場一位10歲的男孩主訴胸痛且呼吸不順，根據母親訴病人之前無任何病史，約一周前開始覺得倦怠就沒再上課去，今天因為呼吸時覺得不順且起身走路時會更覺得更喘而求助。你發現病人意識清楚但是說話費力臉色蒼白且有輕微發紺現象，初步評估如下呼吸每分鐘32下，心跳速率每分鐘130下，血壓90/65毫米汞柱，血氧濃度92％，耳溫37·8℃，微血管充填時間約4～5秒，兩側呼吸音稍減低且使用輔助呼吸肌肉呼吸，心電圖顯示如下。下列描述何者最適當？","options":{"A":"根據病人心電圖顯示為PSVT（陣發性心室上心搏過速），心跳過快是造成病人症狀的主因盡速使用atropine降低病人心跳","B":"根據病人血氧濃度，使用鼻導管4 L/min使用即可","C":"病人有休克現象，立即給予大量輸液，在15分鐘，內給予500毫升的點滴注射","D":"病人休克原因最可能是心因性休克，可能是心肌炎造成"},"answer":"D","matchedChapters":["需要圖片"],"manualChapter":"CH33","image":"題庫圖片/894.png"},{"id":895,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"依據我國緊急醫療救護法第二十五條的規定，有關醫療指導醫師的工作內容，下列何者為非？","options":{"A":"對救災救護指揮中心的人員進行教育訓練","B":"到救災救護指揮中心分析報案與派遣資料","C":"到救災救護指揮中心審查救護技術員填寫的救護紀錄表","D":"到救災救護指揮中心執勤，擔任線上醫療指導"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":896,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"一位76歲男性於下午2點被人通報倒臥在農田中，高級救護技術員到達現場發現病人意識不清且口吐白沫，心電圖顯示如下圖，血壓70/40毫米汞柱，血氧濃度75％，耳溫39℃，送醫途中發生抽搐現象。下列處置何者最不適當？","options":{"A":"病人意識不清且血氧濃度過低，應考慮使用BVM給予強迫給氧或先插管給氧","B":"因病人體溫過高且有休克現象立即給予適當輸液，可在15分鐘內給予500毫升的點滴注射","C":"病人發生抽搐現象，可以根據預立醫囑使用diazepam或lorazepam控制抽搐","D":"因病人體溫過高可將病人泡在冰水或冷水中，盡速降低病人體溫"},"answer":"D","manualChapter":"CH33","image":"題庫圖片/896.png"},{"id":897,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"是一位高級救護技術員，你接獲勤務中心指派前往一汽車旅館執行救護，你到現場發現一位年輕男性囗鼻部有不知名白色粉末，意識不清、雙側瞳孔放大、囗吐白沫、不斷抽搐，心電圖顯示如下圖，血壓200/120毫米汞柱，血氧濃度75％，體溫40℃，全身濕透。下列處置何者最不適當？","options":{"A":"應先給予輔助呼吸道及高濃度氧氣，必要時給予插管給氧","B":"病患若持續抽搐，必要時可以給予diazepam或lorazepam","C":"可以給予適當輸液，避免高燒出汗後脫水","D":"病人心電圖心律呈現PSVT，盡早給予adenosine使用"},"answer":"D","manualChapter":"CH33","image":"題庫圖片/897.png"},{"id":898,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關活性碳（activated charcoal）的敘述，何者為非？","options":{"A":"可以在腸胃道中吸附毒藥的分子，使用適當的話可以吸附多達50％的食入毒藥","B":"假如食入的毒藥有囗服的解毒藥時，不要給予活性碳","C":"在出勤時常見的酒醉路倒病人，也可以給予活性碳幫助解酒","D":"毒藥食入已經發生超過一個小時的話，給予活性碳的幫助不大"},"answer":"C","manualChapter":"CH50"},{"id":899,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關毒蛇咬傷的敘述，何者為是？","options":{"A":"毒蛇咬傷的傷口可以冰敷來消腫止痛","B":"鎖鏈蛇的毒液成分為混合性毒，所以施打毒蛇血清時可以將抗出血性以及抗神經性毒蛇血清共用來治療","C":"切開毒蛇咬傷的傷口進行抽吸對病人有絕對的好處，所以要在現場緊急處置","D":"百步蛇咬傷的病人，抽血可以發現血小板低下以及凝血時間延長"},"answer":"D","manualChapter":"CH50","explanation":"切開傷口與抽吸是絕對禁忌！ 到院前急救嚴禁切開傷口或用嘴/器具抽吸，因為毒液會迅速擴散至皮下組織，切開傷口不僅無法有效排出毒素，反而會造成血管神經損傷、加重組織壞死及引發嚴重的二次細菌感染。\n\n鎖鏈蛇毒液雖屬混合毒（兼具出血與神經毒性），但疾管署針對鎖鏈蛇咬傷設有專門的「抗鎖鏈蛇毒血清」。臨床治療應直接施打專一性的抗鎖鏈蛇毒血清，而非將一般雙價的抗出血性（龜殼花/赤尾青竹絲）與抗神經性（雨傘節/眼鏡蛇）血清混合塗抹或注射。\n\n毒蛇咬傷嚴禁冰敷！ 冰敷會導致周邊血管劇烈收縮，造成局部組織嚴重缺血，反而會顯著加重腫脹、潰爛與組織壞死（特別是含有細胞毒素與出血毒的蛇毒）。","analysis":"切開傷口與抽吸是絕對禁忌！ 到院前急救嚴禁切開傷口或用嘴/器具抽吸，因為毒液會迅速擴散至皮下組織，切開傷口不僅無法有效排出毒素，反而會造成血管神經損傷、加重組織壞死及引發嚴重的二次細菌感染。\n\n鎖鏈蛇毒液雖屬混合毒（兼具出血與神經毒性），但疾管署針對鎖鏈蛇咬傷設有專門的「抗鎖鏈蛇毒血清」。臨床治療應直接施打專一性的抗鎖鏈蛇毒血清，而非將一般雙價的抗出血性（龜殼花/赤尾青竹絲）與抗神經性（雨傘節/眼鏡蛇）血清混合塗抹或注射。\n\n毒蛇咬傷嚴禁冰敷！ 冰敷會導致周邊血管劇烈收縮，造成局部組織嚴重缺血，反而會顯著加重腫脹、潰爛與組織壞死（特別是含有細胞毒素與出血毒的蛇毒）。"},{"id":901,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關身體體溫調節的敘述，何者為非？","options":{"A":"皮膚血管的擴張以及出汗可以增加體熱的散失","B":"環境相對溼度越高，身體蒸發散熱的效果越好","C":"溺水病人容易產生失溫的現象和身體的傳導散熱有關","D":"環境風速越快，身體對流散熱的效果越好"},"answer":"B","manualChapter":"CH44","matchedChapters":["CH44"]},{"id":903,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於兒科病患的休克，下列敘述何者？","options":{"A":"兒科病患因為代償功能較差，休克早期血壓就會顯著下降","B":"微血管沖填延遲雖是一種休克的生理指標，但是對於診斷休克沒有幫助","C":"雖不同年齡的血壓值有所不同，但收縮壓的下限值估算可以用70＋（年齡X 2）估是否為低血壓","D":"對於低血容性休克病患給予輸液急救是指快速給予0.33％G/S，劑量為20 ml/kg，最多給兩次"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":904,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於熱急症，下列敘述何者為是？","options":{"A":"中暑時中心體溫可能升高至41℃或以上","B":"目標在希望能快速降低體溫，越快越好。將病患移至陰涼處，給予冰水浴或是低輸液可以幫助病患快速降溫","C":"老人及小孩對於溫度反應較為敏感，且調節功能比較好，較不易發生中暑等熱急","D":"若病患出現高體溫（＞41℃）合併意識不清，需先排除感染急症後再給予降溫以免延治療"},"answer":"A","matchedChapters":["CH44"],"manualChapter":"CH44"},{"id":905,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於溺水及溺斃，下列敘述何者為是？","options":{"A":"溺斃的病人幾乎都是因為大量液體吸入肺中造成缺氧導致死亡","B":"溺水事件的受難者有高風險會發生浸泡性低體溫，在現場及轉送途中應考慮體外回溫以及給予加溫潮溼的氧氣","C":"應盡早給予病患呼吸施救，若懷疑有異物阻塞呼吸道，可以施行橫膈下推擠的哈姆立克急救法施救","D":"溺水時根據吸入不同的液體，及溫度，水的濁度等而有不同的預後"},"answer":"B","manualChapter":"CH44"},{"id":906,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於高山疾病，下列敘述何者為是？","options":{"A":"緩慢上升高度，保持身體活動及補充大量水份有助於預防高山疾病","B":"若出現頭痛，頭暈，食慾不佳，虛弱及嘔吐等症狀多是體力不好或不常爬山不適應，做好充分休息就可以","C":"使用藥物即可以完全預防高山症的發生","D":"高山腦水腫應盡速處理，到院前緊急醫療照護著重於支持呼吸道，呼吸，循環並盡快降低高度"},"answer":"D","manualChapter":"CH44"},{"id":907,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於行為急症，下列敘述何者為是？","options":{"A":"救護技術員在警察告知後就可以強制將病患約束及送醫","B":"盡量避免使用開放性問題而被病患引導進而讓場面失控","C":"盡量穩定病患情緒及情勢，儘速轉介至精神科接受評估","D":"病患家屬較清楚病患情形，可以幫忙協助介入以穩定病患情緒"},"answer":"C","manualChapter":"CH46","explanation":"在許多行為急症的案例中，家屬不一定能協助穩定情緒；有時家屬反而是誘發或激化病患情緒的壓力源（例如家暴、言語爭執或家庭關係緊張）。救護人員應觀察現場情勢，必要時應將病患與可能激化其情緒的對象分開。"},{"id":908,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於老人急症，下列敘述何者為是？","options":{"A":"老人突發意識混亂原因多是因腦部退化及年老失智所致","B":"老人因為常穿著過多衣物，因此容易造成體溫過高，量測不準的情形","C":"老人多有心肺功能不佳或本身就有慢性疾病，情緒及心理及自殺問題反而較年輕人少","D":"創傷為老人第五大死因，大部分創傷死亡原因為車禍，跌倒也是老人失能和死亡的原因"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":909,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於懷孕婦女的創傷處理，下列敘述何者為是？","options":{"A":"胎兒極為脆弱，懷孕婦女的創傷極易造成胎兒死亡","B":"胎兒的死亡大多因母親死亡或嚴重休克所造成","C":"因父母護子心切，所以孕婦創傷之救護首重於是否傷及胎兒及胎兒評佸","D":"因胎盤供給胎兒血液及營養，即使少量出血也容易造成孕婦休克，因此必須儘快打上點點滴給予輸液治療"},"answer":"B","manualChapter":"CH49"},{"id":911,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列何種情況需考慮老人虐待及忽視之情況？","options":{"A":"多處瘀傷","B":"反覆性無治療的壓瘡","C":"無法解釋的陰道或肛門出血","D":"以上皆是"},"answer":"D","manualChapter":"CH47"},{"id":912,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於安非他命類中樞神經興奮劑中毒時的可能症狀，下列敘述何者為是？","options":{"A":"嗜睡","B":"低體溫","C":"腦出血","D":"低血壓休克"},"answer":"C","manualChapter":"CH50"},{"id":913,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於懷孕的敘述，下列敘述何者為是？","options":{"A":"懷孕一般以3個月為一期，分為三個3月期。在第二個3月期之後，胎兒快速成長並逐漸進入產程準備，胎兒在此時期產出多可存活","B":"懷孕第四個月時子宮將會增大至肚臍附近","C":"懷孕末期平躺時子宮將會壓迫下腔靜脈造成血壓降低，故急救時需讓孕婦維持右側躺","D":"前置胎盤常引起陣痛性陰道出血，有可能危及生命。若孕婦出現低血容休克時即容易發生胎兒窘迫的情形"},"answer":"A","manualChapter":"CH49"},{"id":914,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於事故指揮系統（Incident Command System），以下敘述何者最不適當？","options":{"A":"事故指揮系統是由功能的需求，而非個人原有的頭銜，來組織整個架構","B":"應該要等上級指示之後再啟動事故指揮系統，越晚成立越能夠有完整的架構與功能，也才能發揮越大的作用","C":"事故指揮系統具有明確的架構，但並非每個事故都必須要啟動所有的功能群","D":"不論事故的本質如何，事故指揮系統的架構都是類似的，差異主要是核心人士的特殊專業考量"},"answer":"B","manualChapter":"CH52"},{"id":915,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"處理危害物質事故時，必須注意工作人員的安全。因此對於參與處理危害物質事件之工作人員，必須要有醫療評估及監測機制。以下觀念何者為非？","options":{"A":"就輻射事故而言、過往曾參與類似事故的工作人員通常經驗較為豐富，應該優先派到汙染區工作","B":"在進入現場工作中，應監測其工作時間及生命徵象；如果其中一位工作人員不適，則全組人員應全部撤離，換上另一組人員","C":"在進入現場前，應評估工作人員的意識狀態、體溫、心跳、血壓、過往病史、目前服用藥物，以了解對熱傷害的忍受力","D":"體重變化可以做為工作人員是否脫水的重要依據"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":916,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於輻災事故的應變觀念，以下何者敘述最不正確？","options":{"A":"輻射會影響傷囗癒合，所以輻射汙染病患的傷囗應該儘可能延遲24小時後再進行縫合","B":"相較於化學物質事故，輻射事故通常不會造成受污染傷者立即性的危害，因此病患除污的急迫性較低","C":"在輻災事故，如果病患的衣物可能沾有輻射物質粉末，應該在移除病患衣物時，先將衣物潤濕，以防止輻射物質擴散至空氣中","D":"輻射污染可以用輻射偵檢器檢測出，通常可以精確地定出污染範圍"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":918,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於空中救護的觀念，以下敘述何者為非？","options":{"A":"依照政府公告的「空中救護適應症」，創傷指數小於12，或年齡小於5歲，創傷指數小於9得以申請空中救護","B":"依照政府公告的「空中救護適應症」，昏迷指數小於10的傷病患得以申請空中救護","C":"依照政府公告的「空中救護適應症」，二度、三度燒面積達10％或特殊部位（如顏面、會陰）燒傷的傷病患得以申請空中救護","D":"符合空中救護適應症的傷病患，都應該啟動空中救護，預後會比較好"},"answer":"D","manualChapter":"CH58"},{"id":919,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"就緊急醫療系統的品質指標，「結構、過程、結果」三大構面是廣泛使用的醫療品量模式。關於品質指標的觀念，以下敘述何者為是？","options":{"A":"「結構面」的指標，是指在照護提供者與傷病患之間發生的過程","B":"「過程面」的指標，是指傷病患在接受醫療救護後，其健康狀態所發生的改變，通常可以分成臨床預後及經濟預後兩大類指標","C":"「每一千次出勤之交通事故比例」是屬於過程面的指標","D":"「結果面」的指標，是指緊急醫療救護系統所擁有的人力、設備、資源等"},"answer":"C","manualChapter":"CH09"},{"id":921,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於事故指揮系統（incident command system，ICS）的描述，以下觀念何者為非？","options":{"A":"事故指揮官（incident commander）必須確認指揮權順利轉移，並決定解除動員的時機和流程","B":"安全官（safety officer）必須評估事故的安全環境與危害物質的狀況，依狀況擬定防護措施","C":"執行部門（operation section）通常是事故現場最先成立的部門，如果後續來協助的人員和器材相當多，應該自行選定不同地點開始工作，以免混亂","D":"後勤部門（logistic section）負責提供工作人員醫療照護、餐飲，處理設備和補給品；這個部門所提供服務的直接對象是工作人員，而不是災民"},"answer":"C","manualChapter":"CH52"},{"id":922,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於多重傷病患事故（multiple casualty incident）和大量傷病患事故（mass casualty incident）的觀念，以下何者為非？","options":{"A":"「多照重傷病患事故」是指傷病患人數多於一人，但尚未超過該地區或系統所能負荷的能量","B":"依照「多照重傷病患事故」的觀念，現場傷勢最嚴重的病患，即使已無呼吸心跳，也應該優先搶救","C":"依照「大量傷病患事故」檢傷分類的觀念，最應該優先處理的，是傷勢危急但是還可能得救的傷病患，而不是那些即使耗用很多資源也無法拯救生命的瀕死傷病患","D":"依照國際慣例，所有的「大量傷病患檢傷法」都把傷病患區分為黑、紅、黃、綠這四種顏色，優先搶救紅色病患"},"answer":"D","manualChapter":"CH52"},{"id":923,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"對於事故應變的原則，以下何者為非？","options":{"A":"依照管理範疇（span of command）的觀念，可以有效管理的人數或單位通常是有限的，所以每個單位底下的子單位最好可以控制在3～7個之間","B":"如果有更適任或階層更高的人員已經抵達現場加入應變，那麼，在專業技術或法律規範的考量下，可以考量轉移指揮權","C":"平常一起工作的人員，或是同一個機構的人員，應該都要儘可能打散重新編組，使得記錄及通訊連絡更有效率","D":"報案電話應該保留給緊急事故通報之用，所以應該宣導民眾，盡量不要撥打119或110來詢問傷病患的動向"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":924,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"在事故應變中，有幾個應變地點相當重要，必須及早建立。以下關於事故指揮所（incident command post，ICP）的觀念，何者最不正確？","options":{"A":"事故指揮所最好可以位於事故現場附近，但又必須確保在危險區域之外","B":"隨著事故進展，事故指揮所可能必須變動位置","C":"尚未指派任務的工作人員或物資，必須先在事故指揮所裡集結，等後派遣","D":"無論事故的型態或規模，每個事故都必須建立某種形式的事故指揮所"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":925,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"在事故應變時，「危機溝通」相當重要。與民眾或是新聞媒體溝通時，以下作法何者為非？","options":{"A":"發言時不應該偏袒特定的媒體，但如果有媒體特別想要了解某些專業的問題，可以轉介給適合的專家","B":"對大眾發言時應儘量使用專業術語，以提升應變工作人員的專業形象","C":"發言時，盡可能不要接受或引用未經證實的消息","D":"發言官必須監控新聞媒體或群眾之間是否出現謠言。如果謠言可能造成群眾嚴重的負面效應，甚至影響到事故應變進行，發言官應及時向事故指揮官報告，並在授權之下儘速澄清"},"answer":"B","manualChapter":"CH53"},{"id":927,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"在大量傷病患事故的屍體處理，以下觀念何者為非？","options":{"A":"明顯死亡的屍體，只有在獲得許可之後，才能夠移動位置，因為這牽涉到死因鑑識和其它的法律問題","B":"如果橫陳的屍體阻礙了逃生或援救的通道，這種緊急狀況下可以搬動屍體來開通通道","C":"在危害物質事故中，考量除污的問題，遺體通常先留置在原先地點，等到事故控制至一定階段後再移動","D":"為了表示對死者的尊重，應該儘可能使用救護車把屍體載送到殯儀館或其他暫時安厝的場所"},"answer":"D","manualChapter":"CH52"},{"id":929,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"於災難的描述，以下觀念何者最不適當？","options":{"A":"自然災難時，通常民眾善良的本性會激發出來，自助互助的狀況非常常見","B":"目前的科技有很多方法可以協助鑑識大量屍體，應該儘可能鑑識屍體身分","C":"在自然災難中，最貧窮的區域通常死傷最嚴重","D":"災難後的大量屍體會造成瘟疫，處理大量屍體最有效的方法就是集體埋入土坑"},"answer":"D","matchedChapters":["CH10"],"manualChapter":"CH10"},{"id":931,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列台灣常見的毒蛇咬傷後，哪一種可能會引起呼吸衰竭？","options":{"A":"赤尾青竹絲","B":"龜殼花","C":"百步蛇","D":"眼鏡蛇"},"answer":"D","manualChapter":"CH50"},{"id":932,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關acetaminophen中毒之敘述何者為非？","options":{"A":"反覆嘔吐為中毒初期常見的症狀","B":"導致中毒的劑量多在150mg/kg以上","C":"中毒後，除引起肝傷害外，也可以導致腎衰竭、胰臟炎、昏迷或代謝性酸中毒等症狀","D":"中毒後引起肝傷害，一般於中毒24小時產生，且多為不可逆性的"},"answer":"D","manualChapter":"CH50"},{"id":933,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列敘述哪一個是為非？","options":{"A":"被有毒海洋生物咬螫的毒素通常為對熱穩定的蛋白質","B":"大多數蜘蛛的毒素對人體是無害的","C":"蜈蚣咬傷一般僅有局部的組織反應，不至於危害生命","D":"腔腸動物螫傷常於皮膚上呈現特殊紅棕色長條狀的風疹塊"},"answer":"A","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":934,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於野外醫學，以下敘述何者為是？","options":{"A":"高山症的初期症狀和感冒或是宿醉很類似，所以常被忽略。如果懷疑是高山症，應該避免繼續登高、考慮下山，並且給予acetazolamide和dexamethasone","B":"潛水者所併發的氣泡栓塞症，通常在浮到水面的幾分鐘內就會出現。如果沒有嚴重症狀，表示沒有產生潛水夫症，當天便可以搭民航機長途旅行","C":"低伏特數的交流電所造成的心律不整常常是無心律（asystole）；而高伏特數的交流電或是直流電所造成的致命心律不整常常是心室纖維顫動（ventricular fibrillation）","D":"海水溺水的病患比淡水溺水的病患存活率差"},"answer":"A","manualChapter":"CH45"},{"id":935,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"「北美應變指南」主要是協助初期應變人員，可迅速確認事件所波及物質的危害，並保護自身與民眾的安全。根據2008年中文版的北美應變指南，危險物質的指引可以根據以下哪種方式查到？甲：聯合國數字編號（UN number）乙：物質的英文名稱丙：物質的中文名稱丁：物質的輻射量","options":{"A":"只有甲正確，其他錯誤","B":"只有甲、乙正確，其他錯誤","C":"只有甲、乙、丙正確，其他錯誤","D":"甲、乙、丙、丁都可以"},"answer":"C","manualChapter":"CH53"},{"id":936,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據2008年中文版的北美應變指南，以下對於「初期隔離距離」和「防護行動區域」的敘述，何者為誤？","options":{"A":"如果危害物質的蒸氣雲穿越數棟高層建築物或流經峽谷，因為蒸氣雲與大氣較不容易混合，所以防護距離可能比應變指南所表列的建議距離更長","B":"一般而言，小洩漏是指等於或小於兩百公升的液體洩漏，或是等於或小於三百公斤的固體洩漏至水中","C":"防護行動距離有可能因為天候、事故嚴重度、地形等等因素而必須調整","D":"一般而言，在夜晚時，空氣比較平穩，使得化學品擴散較慢，因此毒性影響區域範圍會小於發生在白天的狀況"},"answer":"D","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":937,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據2008年中文版的北美應變指南，對於危害物質事故的應變原則，以下何者為非？","options":{"A":"應該從上風處小心地接近事故現場；如果方向許可，應該從地勢高處接近事故現場","B":"必須小心處理空的容器，因為在容器未完全清除或排淨所有危害物質之前，空容器仍然存在著危險性","C":"可以試著由標示牌、容器標示、運送聯單、物質安全資料表、現場專業人員等等，來辨識危害物質種類","D":"大多數為危害物質都有特殊異味；穿著防護衣處理"},"answer":"D","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":938,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據2008年中文版的北美應變指南，以下對於「初期隔離距離」和「防護行動區」的敘述，何者錯誤？","options":{"A":"一般而言，大洩漏的初期隔離距離比起小洩漏來得長","B":"一般而言，具有強烈逆溫又加上穩定的風向，這時候應該增加防護行動距離","C":"一般而言，發生在白天的事故，防護行動區域比起夜晚來得廣","D":"一般而言，事故下風處的防護行動區域比起上風處來得廣"},"answer":"C","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":939,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關活性碳（activated charcoal）的敘述，何者為非？","options":{"A":"可以在腸胃道中吸附毒藥的分子，使用適當的話可以吸附多達50％的食入毒藥","B":"假如食入的毒藥有囗服的解毒劑時，給活性碳會同時吸附解毒劑而降低療效","C":"在出勤時常見的酒醉路倒病人，也可以給予活性碳幫助解酒","D":"病人在給予活性碳之前，必須先確保病人的呼吸道可以維持暢通"},"answer":"C","manualChapter":"CH50"},{"id":940,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關洗胃（gastric lavage）的注意事項以及禁忌症，何者為非？","options":{"A":"病人如果意識不清，在洗胃之前應該要先確保呼吸道可以維持暢通","B":"幼兒病人洗胃時的沖洗液不需指定生理食鹽水，用一般蒸餾水也可以","C":"清醒的病人不會有嘔吐的問題，所以洗胃時左側躺是沒有意義的","D":"在洗胃之前就先給予活性碳是可以被接受的"},"answer":"C","manualChapter":"CH50"},{"id":941,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關肉毒桿菌素中毒的敘述，何者為是？","options":{"A":"肉毒桿菌素是一種很強的毒素，在醫學上沒有任何用途","B":"是因為被肉毒芽孢梭狀桿菌污染的泥土進人傷囗所導致的","C":"中毒病人的症狀是由末梢傳回中樞，先是四肢麻痺，再來才出現複視、眼瞼下垂以及吸衰竭等症狀","D":"中毒病人的死因是因為呼吸衰竭"},"answer":"D","manualChapter":"CH50"},{"id":942,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"30歲的男性士官長被發現在浴室中陷入昏迷，你和伙伴（都是合格的高級救護技術員）到達現場後發現士官長倒臥在寢室中的浴室，現場有濃重的農藥惡臭，牆角有兩個被撕掉標籤的空瓶，經初評發現病人完全昏迷（對痛沒有反應）、口鼻分泌物大量增加、口吐白沫、呼吸每分鐘6下、頸動脈摸的到（每分鐘68下）、四肢癱瘓、全身皮膚蒼白濕冷、血糖值為218 mg/dL、距離急救責任醫院約45分鐘車程；下列敘述何者為非？","options":{"A":"高級救護技術員在這種情況下須特別注意自我防護，以免吸入過量農藥而造成中毒","B":"需要立即建立進階呼吸道以確保呼吸道暢通，並在病人呼吸停止時給予強迫給氧","C":"病人的瞳孔是針狀瞳，可以線上醫療指導注射atropine解毒","D":"此種農藥中毒並無特別的解毒劑"},"answer":"D","manualChapter":"非創傷"},{"id":943,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關毒蛇咬傷的敘述，何者為是？","options":{"A":"毒蛇咬傷的傷口可以冰敷來消腫止痛","B":"百步蛇的毒液成分為很強的出血性毒，所以施打毒蛇血清時可以將青竹絲用的抗出血性毒蛇血清加倍來使用，效果相同","C":"切開毒蛇咬傷的傷囗進行抽吸並且在咬傷部位的近心端綁上止血帶對病人有絕對的好處，所以要在現場緊急處置","D":"百步蛇咬傷的病人，抽血可以發現血小板低下以及凝血時間延長"},"answer":"D","manualChapter":"CH50","explanation":"切開傷口與抽吸是絕對禁忌！ 到院前急救嚴禁切開傷口或用嘴/器具抽吸，因為毒液會迅速擴散至皮下組織，切開傷口不僅無法有效排出毒素，反而會造成血管神經損傷、加重組織壞死及引發嚴重的二次細菌感染。\n\n鎖鏈蛇毒液雖屬混合毒（兼具出血與神經毒性），但疾管署針對鎖鏈蛇咬傷設有專門的「抗鎖鏈蛇毒血清」。臨床治療應直接施打專一性的抗鎖鏈蛇毒血清，而非將一般雙價的抗出血性（龜殼花/赤尾青竹絲）與抗神經性（雨傘節/眼鏡蛇）血清混合塗抹或注射。\n\n毒蛇咬傷嚴禁冰敷！ 冰敷會導致周邊血管劇烈收縮，造成局部組織嚴重缺血，反而會顯著加重腫脹、潰爛與組織壞死（特別是含有細胞毒素與出血毒的蛇毒）。","analysis":"切開傷口與抽吸是絕對禁忌！ 到院前急救嚴禁切開傷口或用嘴/器具抽吸，因為毒液會迅速擴散至皮下組織，切開傷口不僅無法有效排出毒素，反而會造成血管神經損傷、加重組織壞死及引發嚴重的二次細菌感染。\n\n鎖鏈蛇毒液雖屬混合毒（兼具出血與神經毒性），但疾管署針對鎖鏈蛇咬傷設有專門的「抗鎖鏈蛇毒血清」。臨床治療應直接施打專一性的抗鎖鏈蛇毒血清，而非將一般雙價的抗出血性（龜殼花/赤尾青竹絲）與抗神經性（雨傘節/眼鏡蛇）血清混合塗抹或注射。\n\n毒蛇咬傷嚴禁冰敷！ 冰敷會導致周邊血管劇烈收縮，造成局部組織嚴重缺血，反而會顯著加重腫脹、潰爛與組織壞死（特別是含有細胞毒素與出血毒的蛇毒）。"},{"id":949,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"救護員運送這兩歲半清醒女童，發燒39℃、燥動不安、皮膚有出血性紫斑、四肢冰冷並有酸血症的現象，心跳速率為148下/分、呼吸速率為38下/分、血壓為80/56 mmHg，酸鹼度為7.25，運送後救護員除了標準車內清潔消毒外，應注意的事為：","options":{"A":"EMT應儘速返隊全車高規格消毒並靜置車輛6小時後才能再使用","B":"EMT應追蹤病患診斷並尋求醫師建議暴露後預防性投藥","C":"EMT應立即掛急診施打抗生素及免疫球蛋白","D":"EMT應掛門診追蹤胸部X光檢查"},"answer":"B","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":950,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關身體體溫調節的敘述，何者為是？1.皮膚血管的擴張以及出汗可以增加體熱的散失2.環境相對溼度越高、身體蒸發散熱的效果越不好3.溺水病人容易產生失溫的現象和身體的傳導散熱有關4.環境風速越快，身體對流散熱的效果越好","options":{"A":"1","C":"1、2、3","B":"1、2","D":"1、2、3、4"},"answer":"D","manualChapter":"CH44"},{"id":952,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關生物咬螫刺傷的敘述，下列何者為是？","options":{"A":"鎖鏈蛇的蛇毒為混合性毒，所以對於被鎖鏈蛇咬傷的傷患可以使用抗出血性蛇毒以及抗神經性蛇毒血清合併使用來治療","B":"被石頭魚（石狗公）的鰭刺傷的傷患會感到患部異常疼痛，所以可以冰敷來減輕疼痛感","C":"蜂類離體的毒刺毒囊不具活性，所以救護技術員到達現場發現傷患身上有離體的毒刺毒囊時不需要特別的處置","D":"水母的觸手離開水母的身體仍會保持活性一段時間"},"answer":"D","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":953,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關酒精對人體的危害，下列敘述何者為非？","options":{"A":"酒精會抑制維生素B1的在小腸的吸收而造成病患Wernicke-Korsakoff syndrome","B":"喝酒以後排尿量增加，是因為酒精抑制抗利尿激素的分泌，會造成脫水以及電解質不平衡","C":"長期酗酒可能和病患的腸胃道出血以及肝硬化沒有相關","D":"酒精會影響心臟的肌肉而使心臟收縮的力量降低"},"answer":"C","manualChapter":"CH46"},{"id":955,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"有關評估以及和行為急症的病患會談的技巧，下列敘述何者為非？","options":{"A":"許多病患有暴力傾向，救護技術員首先必須確認現場環境安全","B":"為了要和行為急症的病患建立好彼此的關係，適當的肢體接觸是必須的","C":"精神狀態檢查五步驟包括:觀察病患外觀、病患言語特徵、病患情緒特徵、評估病患思想以及決定病患定向感","D":"使用開放式的問題，讓病患描述自己的情況，誘導病患說話才較容易評估病患的病情"},"answer":"B","manualChapter":"CH46"},{"id":956,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"有關自殺以及準自殺行為的危險因素，下列敘述何者為非？","options":{"A":"執行一次或多次的準自殺行為","B":"單身，分居或離婚","C":"沒有職業或退休","D":"與家人或社會有良好的互動"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":957,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列有關老人預防跌倒與降低跌倒有關傷害的措施，何者敘述為非？","options":{"A":"使用輔助器","B":"保持適當的照明","C":"提供和使用扶手","D":"柔軟易移動的小地毯收納方便又可吸收老人跌倒時的衝擊力，建議使用"},"answer":"D","manualChapter":"CH47"},{"id":960,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"以下關於老年病患到院前照護的敘述，何者為是？","options":{"A":"老年病患跌倒送往醫院時，EMT應蒐集資訊判斷是否可能有內科急重症問題讓病患跌倒，並告知檢傷相關訊息","B":"老年病患因為代謝比較慢，所以比起一般成年人容易低體溫。也因為代謝慢，所以比較不會高體溫","C":"老年病患若有自殺的行為，通常成功的比例比其他年齡層低","D":"老年病患若遇到外傷所致之顱內出血，因為頭骨與腦部之間的空間增加，因此出血早期就會出現顱內壓升高之症狀"},"answer":"A","matchedChapters":["CH47"],"manualChapter":"CH47"},{"id":961,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"關於有機磷中毒患者的到院前辨認與處理，以下何者正確？","options":{"A":"Atropine的使用很重要，因為可以再活化乙醯膽鹼酶，讓無力的呼吸肌肉再度強化","B":"Atr。pine的使用劑量需要根據病患體重計算，不可超出上限","C":"由於有機磷會使得病患無力，因此一旦發生癲癇，不可以使用會讓病患更無力的diazepam或是lorazepam","D":"有機磷中毒的主要症狀是針狀瞳孔，流鼻水，呼吸道分泌物增多，流淚，流口水，全身出汗與腹瀉"},"answer":"D","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":962,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"新生兒（第一個月）發生癲癇重積狀態，常見的原因不包括？","options":{"A":"生產受傷","B":"先天性代謝異常","C":"腦部感染","D":"腦部腫瘤"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":963,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"新生兒急救時，所需的急救措施，依頻率而言，最常用到的措施是？","options":{"A":"擦乾、保暖、抽吸、剌激","B":"胸外按壓","C":"氣管插管","D":"強心劑藥物"},"answer":"A","matchedChapters":["CH48"],"manualChapter":"CH48"},{"id":966,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"有關毒藥物以及解毒藥劑的配對，下列何者為非？","options":{"A":"普拿疼中毒的解毒劑是N-acetylcysteine（Fluimucil）","B":"甲醇中毒的解毒劑是乙醇","C":"嗎啡類藥物中毒的解毒劑是naloxone","D":"氰化物中毒的解毒劑是flumazenil"},"answer":"D","manualChapter":"CH16"},{"id":967,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"根據北美應變指南，以下對於「初期隔離距離」和「防護行動區域」的敘述，何者為非？","options":{"A":"如果危害物質的蒸氣雲穿越數棟高層建築物或流經峽谷，因為蒸氣雲與大氣較不容易混合，所以防護距離可能比應變指南所表列的建議距離更長","B":"應該從上風處小心地接近事故現場；如果方向許可，應該從地勢高處接近事故現場","C":"防護行動距離有可能因為天候、事故嚴重度、地形等等因素而必須調整","D":"一般而言，在夜晚時空氣比較平穩，使得危害物質擴散較慢，因此毒性影響區域範圍會小於發生在白天的狀況"},"answer":"D","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":45465,"source":"第六章 特殊狀況與特定病患(2012-2014).doc","question":"下列台灣常見的毒蛇咬傷後，哪一種可能會引起呼吸衰竭？","options":{"A":"赤尾青竹絲","B":"龜殼花","C":"百步蛇","D":"眼鏡蛇"},"answer":"D","manualChapter":"背誦題"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+
+    const FAV_KEY = "emtp_favorite_question_ids";
+    function getFavorites() {
+      try {
+        const data = localStorage.getItem(FAV_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function isFavorited(id) {
+      return getFavorites().includes(id);
+    }
+    function toggleFavorite(id) {
+      let favs = getFavorites();
+      const idx = favs.indexOf(id);
+      let added = false;
+      if (idx > -1) {
+        favs.splice(idx, 1);
+      } else {
+        favs.push(id);
+        added = true;
+      }
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      } catch (e) {}
+      return added;
+    }
+    function updateFavBtn(id) {
+      const favBtn = document.getElementById("fav-btn");
+      if (!favBtn) return;
+      const fav = isFavorited(id);
+      favBtn.textContent = fav ? "★" : "☆";
+      favBtn.style.color = fav ? "#f59e0b" : "#94a3b8";
+      favBtn.title = fav ? "已加入我的最愛 (點擊移除)" : "加入我的最愛 (點擊加入)";
+    }
+    function handleReviewFav(btn, id) {
+      const isFav = toggleFavorite(id);
+      btn.textContent = isFav ? "★" : "☆";
+      btn.style.color = isFav ? "#f59e0b" : "#94a3b8";
+    }
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+
+    const favBtnEl = document.getElementById("fav-btn");
+    if (favBtnEl) {
+      favBtnEl.addEventListener("click", () => {
+        const q = questions[currentQuestionIndex];
+        if (!q) return;
+        toggleFavorite(q.id);
+        updateFavBtn(q.id);
+        favBtnEl.style.transform = "scale(1.35)";
+        setTimeout(() => { favBtnEl.style.transform = "scale(1)"; }, 150);
+      });
+    }
+
+    function startQuiz() {
+      if (!questions || questions.length === 0) {
+        alert("目前沒有可測驗的題目！請先將題目加入收藏。");
+        return;
+      }
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      updateFavBtn(q.id);
+      
+      const catDiv = document.getElementById("question-category");
+      if (catDiv && ('第六章 特殊狀況與特定病患 (2012-2014)'.includes('隨機') || '第六章 特殊狀況與特定病患 (2012-2014)'.includes('最愛'))) {
+          catDiv.style.display = "block";
+          catDiv.textContent = q.manualChapter ? "分類：" + q.manualChapter : "分類：未分類";
+      }
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               if (q.multiAnswer) {
+                 btn.classList.add("multi-correct");
+                 html += ' <span style="float:right; font-weight:bold; color:#854d0e;">✓ 正確答案 (官方複選: ' + q.multiAnswer + ')</span>';
+               } else {
+                 btn.classList.add("correct");
+                 html += ' <span style="float:right;">✓ 正確答案</span>';
+               }
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        const curExp = q.explanation || q.analysis;
+        if ((isReviewMode || selectedAnswers[index] !== null) && curExp) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + curExp.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = (currentQuestionIndex === questions.length - 1) ? "結束作答" : "錯題回顧";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      let scoreHtml = "";
+      if ('第六章 特殊狀況與特定病患 (2012-2014)'.includes('隨機')) {
+          const scorePerQuestion = questions.length === 25 ? 4 : (questions.length === 50 ? 2 : 0);
+          const totalScore = correctCount * scorePerQuestion;
+          scoreHtml = "<br><br><span style='color: #0369a1; font-size: 1.5rem; font-weight: bold;'>測驗分數：" + totalScore + " 分</span>";
+      }
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題" + scoreHtml;
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   if (q.multiAnswer) {
+                      liClass = "is-multi-correct";
+                      label = " (正確答案 - 官方複選: " + q.multiAnswer + ")";
+                   } else {
+                      liClass = "is-correct";
+                      label = " (正確答案)";
+                   }
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          const reviewExp = q.explanation || q.analysis;
+          if (reviewExp) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + reviewExp.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          const favState = isFavorited(q.id);
+          const favStar = favState ? '★' : '☆';
+          const favColor = favState ? '#f59e0b' : '#94a3b8';
+          div.innerHTML = '<div class="review-question" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">' +
+            '<div>' + (i + 1) + '. ' + q.question + '</div>' +
+            '<button type="button" onclick="handleReviewFav(this, ' + q.id + ')" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; color: ' + favColor + '; padding: 0 4px; flex-shrink: 0;" title="加入/取消我的最愛">' + favStar + '</button>' +
+          '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

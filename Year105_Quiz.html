@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    .option-btn.multi-correct {
+      background-color: #fef08a !important;
+      border-color: #eab308 !important;
+      color: #854d0e !important;
+      font-weight: 600;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-multi-correct { background: #fef9c3; border-color: #fde047; color: #854d0e; font-weight: 600; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 6.2rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">105年 高級救護技術員甄試筆試</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.5rem; font-weight: bold; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：84 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="fav-btn" type="button" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 4px; transition: transform 0.15s ease;" title="加入/取消我的最愛">☆</button>
+          <span class="stat-badge" id="score-text">分類：105年 甄試</span>
+        </div>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1.5rem;">
+        <div id="question-category" style="display: none; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-align: left;"></div>
+        <div class="source-tag" id="source-tag" style="margin-top: 0; margin-left: auto;">來源: 無</div>
+      </div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":1,"source":"105 高級救護技術員甄試筆試題目.doc","question":"以下皆是前瞻性的醫療指導模式，但何者為非?","options":{"A":"EMTP養成教育訓練","B":"醫療指導提出年度救護器材採購建議","C":"教護手機無線電通訊監控","D":"訂立線上醫療指導流程"},"answer":"C","manualChapter":"CH02"},{"id":2,"source":"105 高級救護技術員甄試筆試題目.doc","question":"所謂優先派遣的定義，最主要的根據是？","options":{"A":"傷病患主訴的關鍵問題","B":"傷病患所在位置","C":"最近有空救護車之救護分隊位置","D":"報案者描述緊急事件之性質"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":4,"source":"105 高級救護技術員甄試筆試題目.doc","question":"火場救災中有同袍受了重傷，身為EMTP，你可以察覺其它隊友如果出現下列症狀，很可能是創傷後症候群（PTSD），但何者為非？","options":{"A":"不斷地對他人談起火場裏的事","B":"變得過度緊張","C":"失眠","D":"注意力無法集中"},"answer":"A","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":5,"source":"105 高級救護技術員甄試筆試題目.doc","question":"車禍傷患在現場清醒表示不要戴頸圈。此時EMT將不戴頸圈的風險告知他，並且在救護紀錄表的補述欄記載清楚，這是哪一種減少過失傷害告訴的方法？","options":{"A":"時效抗辩","B":"正當防衛","C":"與有過失","D":"依法行政"},"answer":"C","manualChapter":"CH04"},{"id":6,"source":"105 高級救護技術員甄試筆試題目.doc","question":"面對倫理困境時，可以快速問自己三個問題來決定下一步的作法，但何者為非？","options":{"A":"折衷試驗","B":"無私試驗","C":"普及試驗","D":"答辨試驗"},"answer":"A","manualChapter":"CH04"},{"id":7,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列作用皆表示病患的交感神經旺盛，但何者為非？","options":{"A":"冒冷汗","B":"腸胃蠕動減少","C":"氣管收縮","D":"延遲排尿"},"answer":"C","manualChapter":"CH12"},{"id":9,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMTP給病患舌下含NTG片時，應在救護紀錄表上紀載的給藥途徑縮寫是？","options":{"A":"P.O.","B":"S.L.","C":"PR","D":"S.C."},"answer":"B","manualChapter":"暫存區","matchedChapters":["暫存區"]},{"id":11,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於藥物Atropine治療緩脈的敘述，何者為非?","options":{"A":"並非所有縣市的EMTP都可以使用Atropine","B":"治療成人有症狀的緩脈起始劑量是0.5mg","C":"使用於低體溫所造成的緩脈其劑量需比建議還高的劑量","D":"治療心臟移植病患發生的緩脈通常沒有效果"},"answer":"C","manualChapter":"CH16"},{"id":12,"source":"105 高級救護技術員甄試筆試題目.doc","question":"想要使用標準輸液套管在2小時內給病患500CC生理食鹽水，每分鐘滴數大約？","options":{"A":"60滴/分鐘","B":"80滴/分鐘","C":"100滴/分鐘","D":"120滴/分鐘"},"answer":"B","manualChapter":"CH17","matchedChapters":["CH17"],"explanation":"滴數係數 = 20 gtt/mL（標準輸液套管）\n每分鐘滴數=500ml*20 gtt/mL/120分鐘"},{"id":13,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於呼吸生理機轉的敘述，何者為非?","options":{"A":"吸氣是肌肉主動收縮消耗能量的動作，吐氣則是胸部肌肉被動的回彈","B":"平靜休息呼吸時，換氣耗能約佔達全身耗能量的一成","C":"當呼吸窘迫發生例如使用輔助肌時，換氣耗能可達全身耗能量的三成","D":"一般正常成年人即使用力吐盡氣，肺內餘氣容積仍然可達一公升"},"answer":"B","manualChapter":"CH12","matchedChapters":["CH12"]},{"id":15,"source":"105 高級救護技術員甄試筆試題目.doc","question":"血液中二氧化碳運輸的方式，不包括？","options":{"A":"與白蛋白結合","B":"與血紅素結合","C":"直接溶於血漿","D":"轉化成碳酸氫根溶於血漿"},"answer":"A","manualChapter":"CH12","matchedChapters":["CH12"]},{"id":16,"source":"105 高級救護技術員甄試筆試題目.doc","question":"結構式溝通的SOAP模式，不包括？","options":{"A":"Subjective data主訴資訊","B":"Objective data客觀評估","C":"Assessment data綜合判断","D":"Protection data隱私保護"},"answer":"D","manualChapter":"CH18"},{"id":18,"source":"105 高級救護技術員甄試筆試題目.doc","question":"一名76歲臥床多年的男性，您觀察到他的呼吸型態如下圖。請問此種呼吸型式，最不可能是下列哪一種疾病所引起？","options":{"A":"慢性阻塞性肺病","B":"心臟衰竭","C":"尿毒症","D":"陳舊性腦中風造成的間腦損傷"},"answer":"A","manualChapter":"呼吸型態(含肺音)","image":"題庫圖片/18.png"},{"id":19,"source":"105 高級救護技術員甄試筆試題目.doc","question":"有關心臟聽診與辦膜音位置的配對，正確的是？","options":{"A":"A：肺動脈區，B：主動脈區","B":"C：三尖辦區，D：肺動脈區","C":"B：三尖辦區，C：二尖辦區","D":"A：主動脈區，D：二尖辦區"},"answer":"D","manualChapter":"CH20"},{"id":20,"source":"105 高級救護技術員甄試筆試題目.doc","question":"各縣市之消防主管機關應設立醫療指導制度，是規定在哪個法條？","options":{"A":"消防法","B":"救護技術員管理辦法","C":"醫療指導醫師辦法實行細則","D":"緊急醫療救護法"},"answer":"D","manualChapter":"CH04"},{"id":21,"source":"105 高級救護技術員甄試筆試題目.doc","question":"與盲腸炎有關的理學檢查，不包括下列哪一項？","options":{"A":"肛門直腸指診（Digital rectal examination）","B":"洛夫辛徵象（Rovsing：ssign）","C":"腰大肌徵象（Psoas sign）","D":"透納氏徵象（Turner's sign）"},"answer":"D","manualChapter":"CH20"},{"id":22,"source":"105 高級救護技術員甄試筆試題目.doc","question":"在到院前進行下列處置時皆需要穿隔離衣，但不包括下列哪一項？","options":{"A":"急產接生","B":"氣管內插管","C":"大出血止血","D":"清除呼吸道中分泌物或異物"},"answer":"B","manualChapter":"CH51"},{"id":24,"source":"105 高級救護技術員甄試筆試題目.doc","question":"醫學上對於到院前死亡（OHCA）的現場終止急救條件，不包括？","options":{"A":"沒有目擊者","B":"沒有旁觀者心肺復甦術（CPR）","C":"現場急救過程中沒有出現可電擊心律","D":"EMS反應時間超過十五分鐘"},"answer":"D","manualChapter":"CH07","matchedChapters":["CH07"]},{"id":25,"source":"105 高級救護技術員甄試筆試題目.doc","question":"急救下列病患OHCA時，可以考慮使用E-CPR（葉克膜），不包括？","options":{"A":"嚴重心衰竭致死","B":"過敏性休克致死","C":"慢性阻塞性肺病呼吸衰竭致死","D":"大片肺栓塞致死"},"answer":"C","manualChapter":"CH24","matchedChapters":["CH24"],"explanation":"體外循環復甦術（E-CPR / VA-ECMO）的核心宗旨是「針對急性、致命但具備『可逆性（Reversible）』病因的心肺停止病人，透過葉克膜暫時替代其心肺功能，以維持腦部及全身器官灌流，爭取後續治療原發病因的時間」\n\n慢性阻塞性肺病呼吸衰竭致死 慢性阻塞性肺病（COPD）屬於慢性、漸進性且不可逆的肺部結構破壞與衰竭。當病人因終末期 COPD 演變至呼吸衰竭死亡時，葉克膜並無法修復其長期壞死的肺部組織；若非事先排定且評估完成的肺臟移植候補者，在 OHCA 急救時使用 E-CPR 屬於無效急救（Futility）與相對禁忌範疇"},{"id":26,"source":"105 高級救護技術員甄試筆試題目.doc","question":"一名中年男子血壓70 / 40mmHg，全身冒冷汗，一直喊胸口悶痛，監視器呈現心電圖如下。此時應請求線上醫療指導予以電氣治療是：","options":{"A":"雙向波同步電擊100焦耳","B":"雙向波非同步電擊100焦耳","C":"單向波同步電擊200焦耳","D":"單向波非同步電擊200焦耳"},"answer":"A","manualChapter":"CH33","image":"題庫圖片/26.png"},{"id":27,"source":"105 高級救護技術員甄試筆試題目.doc","question":"有關重大創傷三階段死亡率（tri-modal distribution）的敘述，何者正確？","options":{"A":"第一階段的死亡主因為嚴重出血與中樞神經系統重創","B":"第二階段的死亡主因為心因性休克與神經性休克","C":"有50％的死亡發生在創傷加護病房內","D":"良好的緊急醫療救護（EMS）可以降低第三階段的死亡率"},"answer":"A","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":30,"source":"105 高級救護技術員甄試筆試題目.doc","question":"火場搶救出中年男性約50公斤，傷勢：「前胸及腹部為二度及三度燒傷，雙腿全部為三度燒傷，雙手臂為一度燙傷」。依巴克蘭公式（Parkland formula），在燒傷後的第一個8小時中應給林格氏液的量大約為？","options":{"A":"4000 cc","B":"5500 cc","C":"8500 cc","D":"15000 cc"},"answer":"B","manualChapter":"CH31"},{"id":31,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列有關成人與小孩呼吸道解剖構造不同的地方，何者正確？","options":{"A":"小孩喉部軟骨較成人硬","B":"小孩最狹窄處為聲帶，而成人則在聲帶之下環形骨環","C":"小孩舌部相對較大","D":"小孩的會厭較成人平而有彈性"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":32,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列有關辛辛那提到院前腦中風評量表（CPSS）的描述，何者為非？","options":{"A":"要求病患雙手平舉10秒鐘，評估是否有單側無力或手臂下垂的情形","B":"請病患露齒微笑，評估臉部嘴唇是否對稱","C":"請病患重複你說的話，評估是否有口齒不清，答非所問或無法表達的情形","D":"評估症狀發生在24小時內"},"answer":"D","manualChapter":"CH36"},{"id":34,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列有關房室結傳導阻斷（atrio-ventricular block）的描述，何者為非?","options":{"A":"三級房室結傳導阻斷（third degree AV block）等於完全房室結傳導阻斷（complete AV | block），其P波之後完全無跟隨的QR S複合波，造成心房（P波）跳心房的、心室（QRS複合波）跳心室的，此即所謂的房室解離（AV dissociation）的情況","B":"Mobitz第一型二級房室結傳導阻斷：其阻斷位置通常在房室結或附近，心電圖的特點為P-R區間逐漸地拉長，終至傳導不下去而出現僅有P波而無跟隨的QRS複合波的情形。此型預後較差，隨時有惡化為完全房室結傳導阻斷（complete AV block）的可能","C":"Mobitz第二型二級房室結傳導阻斷：其阻斷位置較低，可能在His bundle或以下，其心電圖的特點為P-R區間在傳導中斷前一直保持不變，然而卻突發性的出現只有P波出現而無QRS複合波跟隨的情形","D":"一級房室結傳導阻斷（first degree AV block）：心電圖上的特點為P-R區間的拉長（＞200 ms），P波、QRS複合波及T波的型態均正常。一級房室結傳導阻斷的原因可能為退化或藥物因子，導致房室結傳導變慢所造成。"},"answer":"B","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":35,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列有關高滲透壓高血糖非酮酸性昏迷（HHNK coma）的描述，何者為非?","options":{"A":"HHNK的原因是病患的胰島素不能夠讓身體组織去運用葡萄糖作為能量的來源","B":"會誘發因子可能為感染，壓力，外傷，燒燙傷或心肌梗塞等","C":"常會出現快而深的呼吸代償：庫斯毛爾氏呼吸（Kussmaul's respiration）","D":"治療的方式是補充胰島素和充足的水分與監控及治療電解質不平衡的狀態"},"answer":"C","manualChapter":"CH37"},{"id":36,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列有關致命性過敏的描述，何者為非？","options":{"A":"致命性過敏最常引起死亡的原因是上呼吸道阻塞","B":"對於清醒的病患，如果有聲音沙啞，舌頭水腫和後口咽腫大則可以選擇性的早期插管（須依循當地的預立醫囑施行，並尋求線上醫療指導","C":"如果臨床上有休克、呼吸道腫脹或呼吸困難的微候，則給予腎上腺素。腎上腺素可以經由肌肉注射給予。","D":"區分致命性過敏與其他內科急症的關鍵為得到正確的病史，因為致命性過敏通常在抗原進入體內的數小時至數天後發生，所以有足夠的時間作鑑別診斷"},"answer":"D","manualChapter":"CH40"},{"id":37,"source":"105 高級救護技術員甄試筆試題目.doc","question":"有關急性下壁心肌梗塞合併右心室心肌梗塞之敘述，何者為非？","options":{"A":"常會出現血壓降低情形","B":"右側心電圖的胸前導程V4呈現ST節段上升Imm即可診斷","C":"病患血壓降低合併雙側肺部濕囉音，應給予大量生理食鹽水","D":"應避免使用會降低前負荷（Preload）的藥物如Morphine以及NTG"},"answer":"C","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":39,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列何者不屬於因血管性張力調節失常（體液重新分佈）所造成的休克？","options":{"A":"神經性休克","B":"敗血症休克","C":"過敏性休克","D":"心因性休克"},"answer":"D","manualChapter":"CH26"},{"id":40,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於腦中風病患急性期的血壓控制，何者為非？","options":{"A":"對缺血性中風病患，血壓應控制在正常或患病前的範圍內以免讓症狀加重","B":"除非有合併主動脈剝離，心衰竭等，否則缺血性中風病患，在收縮壓超過220mmHg或舒張壓超過120mmHg時方需要處理","C":"出血性中風病患，因考慮到其出血範圍會增加及再出血的可能性，血壓控制應較缺血性中風積極","D":"考慮要接受血栓溶解劑的病患其血壓應控制在收縮壓185mmHg，舒張壓110mmHg以下"},"answer":"A","manualChapter":"CH36"},{"id":41,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列呼吸道急症與其主要造成原因的配對，何者為非？","options":{"A":"嚴重氣喘：通氣","B":"會厭炎：通氣","C":"一氧化碳中毒：擴散","D":"肺栓塞：擴散"},"answer":"D","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":42,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於貝爾氏麻痺（Bell's palsy）之敘述，下列何者為非?","options":{"A":"主要造成原因不明或者是病毒感染","B":"貝爾氏麻痺的預後良好，大部分會自行恢復","C":"其神經學表徵為可以皺前額及眉頭","D":"在急性期不可使用含類固醇的藥物治療"},"answer":"C","matchedChapters":["CH36"],"manualChapter":"CH36"},{"id":43,"source":"105 高級救護技術員甄試筆試題目.doc","question":"肺栓塞最容易引起的心電圖發現，下列何者為是？","options":{"A":"S1Q3T3","B":"Atrial flutter","C":"Sinus tachycardia","D":"Right bundle branch block"},"answer":"C","manualChapter":"CH16"},{"id":45,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於白血球分類之功能敘述，下列何者正確？","options":{"A":"嗜酸性白血球（Eosinophils）-對抗細菌感染","B":"嗜中性白血球（Neutrophil）-對抗寄生蟲感染，過敏反應","C":"嗜鹼性白血球（Basophils）-對抗病毒","D":"單核球（Monocytes）-對抗結核菌"},"answer":"D","manualChapter":"CH12"},{"id":46,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於引發急性腎衰竭的因子，下列何者為非？","options":{"A":"消化道出血-腎前性因子","B":"攝護腺肥大-腎後性因子","C":"心臟衰竭-腎前性因子","D":"腎絲球腎炎-腎後性因子"},"answer":"D","manualChapter":"CH41"},{"id":47,"source":"105 高級救護技術員甄試筆試題目.doc","question":"發生外傷性橫紋肌溶解症時，下列何者為非？","options":{"A":"大量輸液","B":"口服補充KCL","C":"輸液補充Sodium Bicarbonate鹼化尿液","D":"可能造成急性腎衰竭"},"answer":"B","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":48,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於骨骼肌肉系統外傷之處理，下列何者為非？","options":{"A":"應注意受傷機轉","B":"理學檢查的重點包括遠端脈搏","C":"最常見的危急生命的電解質不平衡是高血鈣","D":"肢體大出血無法加壓止血時使用止血帶有幫助"},"answer":"C","manualChapter":"CH30"},{"id":49,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMTP檢查頭部外傷病患發現病患可能因顱內出血導致左側瞳孔放大5mm，其病理？","options":{"A":"左側腦出血壓迫第二對腦神經","B":"右側腦出血壓迫第二對腦神經","C":"左側腦出血壓迫第三對腦神經","D":"右側腦出血壓迫第三對腦神經"},"answer":"C","manualChapter":"CH12"},{"id":50,"source":"105 高級救護技術員甄試筆試題目.doc","question":"小兒腹部鈍傷中，最容易受傷的器官為何？","options":{"A":"十二指腸","B":"肝臟與脾臟","C":"小腸","D":"腎臟"},"answer":"B","manualChapter":"CH48"},{"id":51,"source":"105 高級救護技術員甄試筆試題目.doc","question":"有關連枷胸（flail chest）的說明，下列何者為非?","options":{"A":"理學檢查常有皮下捻髮音crepitus","B":"傷患往往呈現缺氧","C":"不要使用止痛藥以免抑制傷患呼吸","D":"病患常常會惡化到需要插管"},"answer":"C","manualChapter":"CH28"},{"id":52,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMT救護外傷病患，檢查到下列何者生命徵象，最不像是低血容性休克？","options":{"A":"血壓下降，心跳變快，尿量減少","B":"血壓下降，心跳變快，膚色蒼白濕冷","C":"血壓下降，心跳不快，膚色溫暖","D":"血壓下降，心跳變快，意識躁亂"},"answer":"C","manualChapter":"CH26"},{"id":53,"source":"105 高級救護技術員甄試筆試題目.doc","question":"嬰幼兒休克時給予輸液急救，建議每次的輸液量為？","options":{"A":"10 cc / kg Normal Saline","B":"15 cc / kg Normal Saline","C":"20 cc / kg Normal Saline","D":"30 cc / kg Normal Saline"},"answer":"C","manualChapter":"CH48"},{"id":54,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列何者外傷病患最不像是有尿道損傷？","options":{"A":"受傷機轉為騎馬鞍式撞擊骨盆","B":"尿道口有血跡","C":"雙大腿腫脹","D":"攝護腺於指診時高位或換八"},"answer":"C","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":55,"source":"105 高級救護技術員甄試筆試題目.doc","question":"OHCA現場急救，你在插管時發現看不見氣管入口。下列作法可幫助聲帶三角容易呈現，但何者除外？","options":{"A":"選擇適當大小的喉鏡葉片","B":"請人施行甲狀軟骨按壓術","C":"插管者姿勢蹲低或趴在地上","D":"將病患枕部下墊高約10公分。"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":56,"source":"105 高級救護技術員甄試筆試題目.doc","question":"急救常用的Epinephrine在下列成人重症與給藥的組合，下列何者為非？","options":{"A":"無脈搏急救：1mg靜脈推注，每3〜5分鐘一次","B":"氣喘重積症發作：0.3mg皮下注射，每20分鐘一次","C":"過敏性休克：0.3〜0.5mg皮下注射，每5〜15分鐘一次","D":"不稳定的緩脈併休克徵象：2〜10 meg / min連續滴注"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":57,"source":"105 高級救護技術員甄試筆試題目.doc","question":"你出勤救護一位燒炭自殺的中年男性，到達現場時，發現他已呈現深度昏迷的狀態。請問下列敘述何者為非？","options":{"A":"到達現場必須注意通風，注意施救者的安全","B":"病患血中一氧化碳血紅素應該超過50％","C":"若測量血氧濃度（SPO2）＞94％，不必一定要給氧","D":"若測量血氧濃度（SPO2）過低，問題可能出在呼吸道未暢通"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":59,"source":"105 高級救護技術員甄試筆試題目.doc","question":"保密的義務在為了某些更重要的社會利益是可以打破的，何者為非?","options":{"A":"法律上規範有通報義務的情形","B":"為了內部或是醫療品質改善需要","C":"為了社會大眾知的權利","D":"當檢察官持有搜索令狀，進行司法調查；或是為了阻止犯罪行為的發生"},"answer":"C","manualChapter":"CH04","matchedChapters":["CH04"]},{"id":60,"source":"105 高級救護技術員甄試筆試題目.doc","question":"一輛汽車因故撞上電線桿，下列狀況下，車上有三位需立刻送往創傷中心，何者為非？","options":{"A":"脫困時間10分鐘的後座乘客","B":"被從車內拋出的前座乘客","C":"評估後確認有骨盆骨折的駕駛","D":"GCS昏迷指數12的後座乘客"},"answer":"A","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":64,"source":"105 高級救護技術員甄試筆試題目.doc","question":"工地工人被倒塌之土牆壓到前胸，因胸部劇痛及呼吸困難而被送到急診室。病患到院時之血壓80 / 60mmHg，心跳110 / min，呼吸35 / min。理學檢查發現右胸無明顯肺部呼吸音，頸靜脈鼓脹。此時醫學上最應給予的優先處置為：","options":{"A":"快速麻醉並執行氣管內管插管","B":"建立兩條大管徑輸液管，先輸39“℃的生理食鹽水2000cc","C":"給予適當氧氣流速以維持血氧（oximeter）在94％以上後，立即照胸部X光床邊攝影","D":"以大管徑的空針扎向右側肋膜腔以減壓"},"answer":"D","manualChapter":"創傷"},{"id":65,"source":"105 高級救護技術員甄試筆試題目.doc","question":"依北美NEXUS原則，下列病患皆屬於頭椎受傷的低危險群，但何者為非？","options":{"A":"無頸部後中線的壓痛點的病患","B":"無肢體無力或發麻的病患","C":"疑似有喝酒的病患時而清醒時而亂言亂語的病患","D":"沒有明顯骨折或大片外傷疼痛的病患"},"answer":"C","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":66,"source":"105 高級救護技術員甄試筆試題目.doc","question":"一名35歲男性自約6米高處墜樓後送醫，到院時意識清楚，但血壓低合併休克症狀，同時患者失去對大腸及膀胱的感覺，且合併陰莖持續勃起，此時其休克的原因最可能？","options":{"A":"心因性休克Cardiogenic shock","B":"神經性休克Neurogenic shock","C":"脊髓性休克Spinal shock","D":"低血容性休克Hypovolemic shock"},"answer":"C","manualChapter":"CH26"},{"id":67,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於低體溫病患之到院前治療，何者為非？","options":{"A":"在低溫環境下疑似心跳停止的病患，檢查脈搏時間應達30-45秒","B":"劇烈地晃動病患可能誘發病患的心律不整，例如心室顫動（Vf）","C":"對於沒有反應且檢查不到脈搏的病患，為避免過度晃動病患，不建議插管","D":"瞳孔放大固定是重度低體溫常見的症候，故無法以此判斷病患是否已死亡很久"},"answer":"C","matchedChapters":["CH44"],"manualChapter":"CH44"},{"id":68,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於疑似發生高山症之隊友，其預防惡化的策略，何者為非？","options":{"A":"輕微增加其活動強度以強化其耐受性","B":"減緩上升速度或開始下降登山高度","C":"吃高碳水化合物的食物較好","D":"使用預防性的藥物例如丹木斯（Diamox）或威而剛（Viagra）"},"answer":"A","manualChapter":"CH44"},{"id":69,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMT可以用CAGE方法來評估病患是否有酒精成瘾問題。CAGE說明何者為非？","options":{"A":"Careless病患是否長期沒有人關心","B":"Annoyance病患是否因喝酒而遭親友嫌棄","C":"Guilty病患是否因喝酒而有罪惡感","D":"Eye opener病患是否一早起床張開眼就想找酒喝"},"answer":"A","manualChapter":"CH46"},{"id":70,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於老年人生理變化的說明，何者正確？","options":{"A":"呼吸方面，肺部的餘氣量與肺活量都會明顯下降","B":"心血管方面，血壓和心輸出量都會明顯增高","C":"體重方面，肌肉組織和脂肪組織成份都會明顯減少","D":"腎臟方面，腎臟重量和腎絲球過濾率都會明顯減少"},"answer":"D","manualChapter":"CH47"},{"id":71,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMT在接觸老年病患時，下列方法都有助於病史詢問，但何者為非？","options":{"A":"仔細聽，有耐心","B":"請病患裝上假牙或戴上老花眼鏡口","C":"先告訴對方自己是救護技術員","D":"以「阿伯你好」「阿媽你好」取代直呼其姓名"},"answer":"D","manualChapter":"CH19"},{"id":72,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMT在野外醫學領域進行救護時，可能遭受的危險，何者為非？","options":{"A":"情緒危險","B":"人為危險","C":"地域危險","D":"個人危險"},"answer":"A","manualChapter":"CH45"},{"id":73,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMT處置被右圖蛇類咬傷腳趾的傷患，何者為非?","options":{"A":"可以彈繃包紮壓迫腳踝，緊度為一指可插入","B":"傷肢可能在短期內出現快速腫脹及血泡","C":"傷口切開或吸吮器並無實效，甚至可能有害","D":"治療之蛇毒血清為出血性蛇毒血清"},"answer":"D","manualChapter":"CH50","image":"題庫圖片/73.png","matchedChapters":["CH50"]},{"id":74,"source":"105 高級救護技術員甄試筆試題目.doc","question":"陽明山求救案件，你到現場發現有一名登山客吃了山產後發生意識胡言亂語、皮膚乾熱潮紅、瞳孔放大、脈搏不規則。請問他呈現了哪一種中毒症象？","options":{"A":"膽鹼性中毒","B":"致幻覺性中毒","C":"抗膽鹼性中毒","D":"仿交感神經性中毒"},"answer":"C","manualChapter":"CH50","matchedChapters":["CH50"]},{"id":76,"source":"105 高級救護技術員甄試筆試題目.doc","question":"年輕孕婦懷孕急產產出一足月胎兒。剛出生時新生兒抽吸口鼻不會哭泣臉部也無表情，呼吸微弱不規則，脈搏微弱且約每分鐘120下，刺激時手腳僅有一些無力的收縮。外觀發現四肢發鉗，身體比較紅潤。請問其APGAR分數是？","options":{"A":"3分","B":"4分","C":"5分","D":"6分"},"answer":"C","manualChapter":"CH49"},{"id":77,"source":"105 高級救護技術員甄試筆試題目.doc","question":"一位兩歲的幼童，咳嗽流鼻水已經一週，目前僅對痛覺刺激有反應並有發紺現象，心跳速率為188次/每分鐘，呼吸速率為65次/每分鐘，肋間肌嚴重凹陷，微血管回填充時間小於兩秒鐘，到院前下列何項立即性的處理最為優先：","options":{"A":"建立靜脈管路並給予液體輸注","B":"打開呼吸道，使用甦醒球連接100％氧氣以提供輔助性正壓通氣","C":"提供100％氧氣面罩，並立即測血氧濃度分析","D":"提供100％氧氣面罩，並立即進行神經學檢查"},"answer":"B","manualChapter":"CH48"},{"id":78,"source":"105 高級救護技術員甄試筆試題目.doc","question":"在EMS品質的六大面向中，「所有的傷病患都應該接受相同而完整的EMS服務」，是符合哪一個面向的品質要求？","options":{"A":"公平","B":"有效","C":"安全","D":"傷病患為中心"},"answer":"A","manualChapter":"CH09","matchedChapters":["CH09"]},{"id":79,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於EMS品質指標的分類，下列皆是結構面指標，但何者為非？","options":{"A":"EMT的離職率","B":"EMT1，EMT2，EMTP的比率","C":"統一的標準作業流程與定期修改的記錄","D":"將重傷病患送到創傷中心的比率"},"answer":"D","manualChapter":"CH09"},{"id":80,"source":"105 高級救護技術員甄試筆試題目.doc","question":"憂鬱病史中年男性病患口服50顆10 mg的propanolol。EMTP到達時病患意識尚清醒。建立IV line並接上監視器後，心電圖如下所示。病人血壓70 / 40mmHg，體溫36⁰，呼吸22 / min，下列敘述何者正確？","options":{"A":"為Morbtiz type I 2⁰房室阻斷","B":"為Morbtiz type II 2⁰房室阻斷","C":"病患目前為穩定之緩脈，密切觀察即可","D":"應考慮給予atropine 0.5mg IV治療"},"answer":"D","manualChapter":"CH33","image":"題庫圖片/80.png"},{"id":81,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於生產之產程，以下何者為非？","options":{"A":"急產的定義為陣痛開始至胎兒產生小於三小時","B":"生產之第一個產程為規則陣痛開始至子宮頸全開","C":"生產之第二個產程（胎兒產出期）為子宮頭全開至胎兒生出完畢","D":"生產之第三個產程（胎盤產出期）為胎盤生出之過程"},"answer":"B","manualChapter":"CH49"},{"id":82,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於輻射事故緊急應變的處置，以下敘述何者為是？","options":{"A":"出現輻射傷害症狀的病患，身上必定有殘餘輻射，必須先進行除污之後才能進行醫療照護","B":"若發現病患衣物上有粉狀或固體之疑似輻射污染物質，切勿以水除污，以免產生化學反應。","C":"為了避免帶有輻射之砂石顆粒殘留傷口內，務必以纱布來回擦拭除污","D":"病患除污標準是手持式輻射偵測器檢測劑量在背景值的2-3倍以下即可"},"answer":"D","manualChapter":"CH53"},{"id":83,"source":"105 高級救護技術員甄試筆試題目.doc","question":"在毒化災事故中，對於有傷口水泡的傷病患而言，以下哪種除汙方式是比較合適的？","options":{"A":"以「低水壓，高流量」的清水來沖洗","B":"以「低水壓，低流量」的清水來沖洗","C":"以「高水壓，高流量」的清水來沖洗","D":"以「高水壓，低流量」的清水來沖洗"},"answer":"A","manualChapter":"CH53","matchedChapters":["CH53"]},{"id":84,"source":"105 高級救護技術員甄試筆試題目.doc","question":"目前有許多醫學文獻顯示EMTP在到院前救護車上使用「呼吸道正壓呼吸器（Positive Airway Pressure）」對下列病患有幫助，但以下何者為非？","options":{"A":"心衰竭導致肺水腫病之患","B":"嚴重過敏導致呼吸窘迫病患","C":"急性胸部鈍挫傷之病患","D":"慢性阻塞性肺病急性發作之病患"},"answer":"B","manualChapter":"CH51","matchedChapters":["CH51"]},{"id":85,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於危害物質災難事件層區管制的觀念，以下何者錯誤？","options":{"A":"安全區在事件開始時即需建立，將支援人員器材集結於此，並設定由下風高處做為暖區及熱區的出入位置","B":"事故周邊直接或間接（如受污染之傷惠及器材）受到危害物質影響之處，也應劃定為熱區","C":"黃區為介於污染區及安全區之之間的緩衝區域，作為除污及病人緊急醫療處理之處","D":"除污走廊應該位於暖區。"},"answer":"A","matchedChapters":["CH53"],"manualChapter":"CH53"},{"id":86,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於大型活動（Mass Gathering）的觀念，以下何者錯誤??","options":{"A":"一般而言，大型活動是指群眾聚集人數超過1000人的活動","B":"在1999年的英倫醫學雜誌建議，每千人需有一位急救人員，每三千人需有一輛有高級救護技術員的救護車，每五千人則需一位急診醫師","C":"每次醫療照護無論是輕是重，應該都要確實填寫一份醫療救護紀錄單","D":"如現場無法在五分鐘內提供高級心臟救命術的醫療照顧，現場就必須準備AED"},"answer":"B","manualChapter":"CH54"},{"id":87,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於生物戰劑的觀念，以下何者錯誤？","options":{"A":"相對於傳統武器與其他大規模殺傷性武器，生物戰劑容易大量製造，也容易施放","B":"生物恐怖事故不易偵測，可能造成嚴重的心理街擊","C":"忽然爆發的大量病患，其潛伏期均非常相近且密集，應該懷疑生物恐怖事故","D":"結核桿菌，天花病毒，水痘病毒，麻疹病毒，都是飛沫傳染"},"answer":"D","manualChapter":"CH43","matchedChapters":["CH43"]},{"id":88,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於空中救護的觀念，以下何者錯誤?","options":{"A":"符合空中救護適應症的傷病患，都應該啟動空中救護","B":"行政院已將空中消防隊、空中警察隊、民用航空局航空隊整合，成立「國家航空勤務總隊」","C":"依照政府公告的「空中救護適應症」，昏迷指數小於十的傷病患得以申請空中救護","D":"依照政府公告的「空中救護適應症」」二度，三度燒傷面積達百分之十或特殊部位（如顏面、會陰）燒傷的傷病患得以申請空中救"},"answer":"A","manualChapter":"CH58"},{"id":89,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於事故指揮系統（ICS）的描述，以下何者錯誤？","options":{"A":"事故指揮官負責整個事故的應變和管理。最早抵達現場的工作人員當中，應以位階最高者擔任事故指揮官","B":"聯絡官在事故指揮系統中扮演的是個接合的點，聯繫相關的政府部門、非政府組織、和民間機構","C":"執行部門負責主要的應變工作，例如「警戒管制」，應該由執行部門負責","D":"後勤部門負責提供工作人員醫療照護、餐飲，處理設備和補給品；這個部門所提供服務的直接對象是工作人員，而不是災民"},"answer":"A","manualChapter":"CH52"},{"id":90,"source":"105 高級救護技術員甄試筆試題目.doc","question":"EMTP到達一個自殺的現場有濃重的惡臭，牆角有一個被撕掉標籤的空瓶。經初評發現病人完全昏迷（對痛沒有反應）、口鼻分泌物大量增加、口吐白沫、呼吸每分鐘12下，頸動脈摸的到（每分鐘50下）、四肢癱瘓、全身皮膚蒼白濕冷、血糖值為180 mg / dL，距離急救責任醫院約20分鐘車程；下列敘述何者為非？","options":{"A":"高級救護技術員在這種情況下須特別注意自我防護以免吸入而造成中毒","B":"病人的瞳孔應該會呈現是擴瞳現象","C":"可請求線上醫療指導同意注射atropine","D":"此種中毒到院後有專屬的解毒劑"},"answer":"B","manualChapter":"非創傷"},{"id":91,"source":"105 高級救護技術員甄試筆試題目.doc","question":"在大量傷病患事故的檢傷分類，以下觀念何者最不適當？","options":{"A":"如果事故的傷病患人數極多，事故應變的時間較長，那麼，應該考慮讓救護技術員輪流擔任檢傷員，避免同一個人長時間承受檢傷的心理壓力","B":"大量傷病患檢傷分類是非常表淺的診治方式，所著重的是在短時間內區別出病患的嚴重度，不能夠取代實際的診治病患","C":"檢傷員應該盡可能在第一時間就完整處理傷病患的傷勢，嚴重傷病患應該立即實施氣管內管插管等等急救步驟，以免延誤病情。完成後，再繼續評估下一名病患","D":"檢傷之後，不同嚴重度的傷病患所得到的現場處置應該有所區別，檢傷這個步驟才會有所意義"},"answer":"C","manualChapter":"CH52"},{"id":92,"source":"105 高級救護技術員甄試筆試題目.doc","question":"在大量傷病患事故的屍體處理，以下觀念何者最不適當？","options":{"A":"為了表示對死者的尊重，應該儘可能使用救護車把屍體載送到殯儀館或其他暫時安厝的場所","B":"明顯死亡的屍體，只有在獲得許可之後，才能夠移動位置，因為這牽涉到死因鑑識和其它的法律問題","C":"如果橫陳的屍體阻礙了逃生或援救的通道，這種緊急狀況下可以搬動屍體來開通通道","D":"在危害物質事故中，考量除污的問題，遺體通常先留置在原先地點，等到事故控制至一定階段後再移動"},"answer":"A","manualChapter":"CH52"},{"id":93,"source":"105 高級救護技術員甄試筆試題目.doc","question":"對於災難的描述，以下觀念何者最不適當？","options":{"A":"災難後的大量屍體會造成瘟疫，處理大量屍體最有效的方法就是集體埋入土坑","B":"自然災難時，通常民眾善良的本性會激發出來，自助互助的狀況非常常見，很少會有治安的問題","C":"目前的科技有很多方法可以協助鑑識大量屍體，應該儘可能鑑識屍體身分","D":"在自然災難中，最貧窮的區域通常死傷最嚴重"},"answer":"A","manualChapter":"CH52"},{"id":94,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列關於防護衣的觀念何者正確？","options":{"A":"消防人員進入火場使用的的防護衣裝載有個人自給式呼吸系統，已經提供最高呼吸保護，遇到毒化災作業時可以直接當做B級防護衣使用","B":"C式防護衣可能是全身式或二截式，可以防液體潑濺，但無法阻止有毒液體滲入","C":"A級防護衣使用自給式呼吸設備，不會吸入空氣中的有毒物質，但無法阻播空氣中的有毒物質接觸皮膚造成傷害","D":"輻射事故緊急應變跟一般毒化災應變不同，無論是熱區，暖區或安全區人員，依照規定均需使用A級防護衣"},"answer":"B","manualChapter":"CH53"},{"id":95,"source":"105 高級救護技術員甄試筆試題目.doc","question":"根據『事故指揮系統』（ICS），以下哪位主管的管理範疇超過了合理範圍？","options":{"A":"『事故指揮官』管理：安全官發言官聯絡官各一名，執行部門80人，計畫部門5人與後勤部門4人","B":"『執行部門部長』管理：一個待命區群組（包括五台救護車，共15個人），一台後送救護直升機（3人），一個現場封鎖小隊（7人），一個搜索搶救群組（內含三個特勤小隊，共12人），一個警方霹靂小組（6人）","C":"『基隆河左岸區域主管』管理：一個河岸搜索小隊（6人），一個河面搜索小隊（6人），一個緊急救護小隊（2人），一台救護車（2人），一台加護型救護車（3人），一台後送救護直升機（3人），自願加入之義消一組（3人），急診醫護團隊（4人）","D":"『後勤部門部長』管理：通訊組（10人，包括一個電話中心），後勤醫療組（6人），飲食組（20人，包括兩單位的野戰廚房），物資供應組（6人），設備管理組（6人），運輸組（12人，包括2台教護車，一台卡車）"},"answer":"C","manualChapter":"CH52"},{"id":96,"source":"105 高級救護技術員甄試筆試題目.doc","question":"以下災難應變的概念，何者正確？","options":{"A":"多重傷病患檢傷的概念是在資源嚴重不足下，盡可能使大多數的傷病患可以得到必要治療，START檢傷法是其中的代表","B":"根據ICS，第一台抵達的應變車輛應該查看現場安全，並等待事故指揮官抵達","C":"應用START檢傷法時，如果你遇到有一個病患無法自行行走且明顯有換氣過度症候群，呼吸速率高達40次/分鐘，應檢為紅色重傷","D":"當後送單位將病患送達醫院後，在醫院內應該進行次級檢傷以決定看診先後次序"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":97,"source":"105 高級救護技術員甄試筆試題目.doc","question":"關於大型活動之緊急醫療救護，以下何者正確？","options":{"A":"現場醫療站的救護動線選擇，需同時考慮擔架與輪椅的寬度","B":"大型活動急症多屬於意外，依照目前的醫療科技無法預防","C":"若單一救護站遇到四名重傷患者但總數未達十五人，應不用啟動大量傷患計畫","D":"規劃醫療作業時，救護站作業應與活動同步，同時開站，同時結束"},"answer":"A","matchedChapters":["CH10"],"manualChapter":"CH10"},{"id":98,"source":"105 高級救護技術員甄試筆試題目.doc","question":"根據ICS，事故指揮官的管理幕僚包括發言官、安全官與聯絡官，以下何者正確？","options":{"A":"安全官審核應變工作人員的醫療照護計畫","B":"發言官必須批准新聞的發佈","C":"聯絡官必須定期舉行記者會","D":"發言官必須掌握相關機構名單與聯絡方式，並與這些機構交流資訊"},"answer":"A","manualChapter":"CH52"},{"id":99,"source":"105 高級救護技術員甄試筆試題目.doc","question":"於2016年2月的台南大地震，其EMS與醫療指導介入的過程，以下何者為非？","options":{"A":"地震造成513人傷亡，是我國自921大震後死傷最多的地震","B":"地震初期仍是由消防EMTP作為現場救護總指揮，24小時後方有醫療指導介入接手","C":"救護過程中醫療指導特別關注救護救災人員的職業傷害，例如徹底執行現場工作人員一律配戴N95以減少粉塵吸入","D":"本案有進行救護救災人員的現場與事後心理評估，以預防創傷後壓力症後群"},"answer":"B","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":100,"source":"105 高級救護技術員甄試筆試題目.doc","question":"下列何者不是醫學倫理的四原則之一？","options":{"A":"自主原則","B":"行善原則","C":"道德原則","D":"不傷害原則"},"answer":"C","manualChapter":"CH03"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+
+    const FAV_KEY = "emtp_favorite_question_ids";
+    function getFavorites() {
+      try {
+        const data = localStorage.getItem(FAV_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function isFavorited(id) {
+      return getFavorites().includes(id);
+    }
+    function toggleFavorite(id) {
+      let favs = getFavorites();
+      const idx = favs.indexOf(id);
+      let added = false;
+      if (idx > -1) {
+        favs.splice(idx, 1);
+      } else {
+        favs.push(id);
+        added = true;
+      }
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      } catch (e) {}
+      return added;
+    }
+    function updateFavBtn(id) {
+      const favBtn = document.getElementById("fav-btn");
+      if (!favBtn) return;
+      const fav = isFavorited(id);
+      favBtn.textContent = fav ? "★" : "☆";
+      favBtn.style.color = fav ? "#f59e0b" : "#94a3b8";
+      favBtn.title = fav ? "已加入我的最愛 (點擊移除)" : "加入我的最愛 (點擊加入)";
+    }
+    function handleReviewFav(btn, id) {
+      const isFav = toggleFavorite(id);
+      btn.textContent = isFav ? "★" : "☆";
+      btn.style.color = isFav ? "#f59e0b" : "#94a3b8";
+    }
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+
+    const favBtnEl = document.getElementById("fav-btn");
+    if (favBtnEl) {
+      favBtnEl.addEventListener("click", () => {
+        const q = questions[currentQuestionIndex];
+        if (!q) return;
+        toggleFavorite(q.id);
+        updateFavBtn(q.id);
+        favBtnEl.style.transform = "scale(1.35)";
+        setTimeout(() => { favBtnEl.style.transform = "scale(1)"; }, 150);
+      });
+    }
+
+    function startQuiz() {
+      if (!questions || questions.length === 0) {
+        alert("目前沒有可測驗的題目！請先將題目加入收藏。");
+        return;
+      }
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      updateFavBtn(q.id);
+      
+      const catDiv = document.getElementById("question-category");
+      if (catDiv && ('105年 高級救護技術員甄試筆試'.includes('隨機') || '105年 高級救護技術員甄試筆試'.includes('最愛'))) {
+          catDiv.style.display = "block";
+          catDiv.textContent = q.manualChapter ? "分類：" + q.manualChapter : "分類：未分類";
+      }
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               if (q.multiAnswer) {
+                 btn.classList.add("multi-correct");
+                 html += ' <span style="float:right; font-weight:bold; color:#854d0e;">✓ 正確答案 (官方複選: ' + q.multiAnswer + ')</span>';
+               } else {
+                 btn.classList.add("correct");
+                 html += ' <span style="float:right;">✓ 正確答案</span>';
+               }
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        const curExp = q.explanation || q.analysis;
+        if ((isReviewMode || selectedAnswers[index] !== null) && curExp) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + curExp.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = (currentQuestionIndex === questions.length - 1) ? "結束作答" : "錯題回顧";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      let scoreHtml = "";
+      if ('105年 高級救護技術員甄試筆試'.includes('隨機')) {
+          const scorePerQuestion = questions.length === 25 ? 4 : (questions.length === 50 ? 2 : 0);
+          const totalScore = correctCount * scorePerQuestion;
+          scoreHtml = "<br><br><span style='color: #0369a1; font-size: 1.5rem; font-weight: bold;'>測驗分數：" + totalScore + " 分</span>";
+      }
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題" + scoreHtml;
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   if (q.multiAnswer) {
+                      liClass = "is-multi-correct";
+                      label = " (正確答案 - 官方複選: " + q.multiAnswer + ")";
+                   } else {
+                      liClass = "is-correct";
+                      label = " (正確答案)";
+                   }
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          const reviewExp = q.explanation || q.analysis;
+          if (reviewExp) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + reviewExp.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          const favState = isFavorited(q.id);
+          const favStar = favState ? '★' : '☆';
+          const favColor = favState ? '#f59e0b' : '#94a3b8';
+          div.innerHTML = '<div class="review-question" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">' +
+            '<div>' + (i + 1) + '. ' + q.question + '</div>' +
+            '<button type="button" onclick="handleReviewFav(this, ' + q.id + ')" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; color: ' + favColor + '; padding: 0 4px; flex-shrink: 0;" title="加入/取消我的最愛">' + favStar + '</button>' +
+          '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

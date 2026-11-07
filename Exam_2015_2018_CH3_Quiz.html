@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    .option-btn.multi-correct {
+      background-color: #fef08a !important;
+      border-color: #eab308 !important;
+      color: #854d0e !important;
+      font-weight: 600;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-multi-correct { background: #fef9c3; border-color: #fde047; color: #854d0e; font-weight: 600; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 6.2rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第三章 病患評估與理學檢查 (2015-2018)</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.5rem; font-weight: bold; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：32 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="fav-btn" type="button" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 4px; transition: transform 0.15s ease;" title="加入/取消我的最愛">☆</button>
+          <span class="stat-badge" id="score-text">分類：2015-2018 第三章</span>
+        </div>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1.5rem;">
+        <div id="question-category" style="display: none; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-align: left;"></div>
+        <div class="source-tag" id="source-tag" style="margin-top: 0; margin-left: auto;">來源: 無</div>
+      </div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":534,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"EMTP使用醫學上常用的結構式溝通S-O-A-P模式，不包括下列哪一項？","options":{"A":"S：surrounding data環境安全與對病患及施救者之影響","B":"O：objective data病患身體評估的結果","C":"A：assessment data綜合上述結果形成的臨床判斷","D":"P：plan of management根據臨床判斷所形成的治療計畫"},"answer":"A","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":538,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"關於EMTP使用聽診器進行聽診的說明，何者為是？","options":{"A":"聽診的原理，是利用空氣或液體的流動所發出的聲響判斷身體部位哪裏有異常","B":"雙面聽診器的膜面，是為了收集較低頻率的聲音，所以使用膜面聽診時應輕放在皮膚表面即可","C":"若是EMTP聽診時發現病患有哮喘音（wheezes），就代表病患的呼吸窘迫一定是氣喘或肺氣腫所引起","D":"聽診在到院前環境中很難執行，故聽診檢查並非EMTP訓練及理學檢查的重點"},"answer":"A","manualChapter":"CH20"},{"id":539,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"各種到院前情境處理時所需要的個人防護裝備說明，下列何者為非？","options":{"A":"小出血止血不用穿隔離衣","B":"急產接生不用戴護目鏡","C":"氣插管不用穿隔離衣","D":"建立靜脈注射管路不用戴護目鏡"},"answer":"B","matchedChapters":["CH22"],"manualChapter":"CH22"},{"id":542,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"下列病患何者並非醫學上建議使用葉克膜（ECMO）進行急救之對象？","options":{"A":"剛發生車禍、頭部外傷併嚴重顱內出血的心跳停止病患","B":"心臟衰竭末期、經醫師評估有換心手術適應症的心跳停止病患","C":"火場剛剛救出、嚴重吸道灼傷導致窒息的心跳停止病患","D":"近一週內出現心肌炎導致心衰竭及心律不整的心跳停止病患"},"answer":"A","manualChapter":"CH24"},{"id":544,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關低溫治療可能發生的併發症影響或副作用，下列何者為是？","options":{"A":"心搏過慢","B":"可能影響免疫系統與電解質，包括高血鈉、低血鉀、低血鎂、低血磷、低血鈣等","C":"顫抖或出血","D":"以上皆是"},"answer":"D","manualChapter":"CH24"},{"id":546,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"指端血氧飽和度監視器會受到許多因素的影響，下列何者為非？","options":{"A":"膚色差異、黃疸","B":"指甲油塗抹、異常血紅素過多","C":"可偵測反應血液中的變性血紅素、一氧化碳血紅素","D":"休克、周邊動脈阻塞性疾病"},"answer":"C","manualChapter":"CH20","matchedChapters":["CH20"]},{"id":547,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"病人評估的優先順序，下列排序何者為是？1.重點式的病史詢問與理學檢查：測量生命徵象，並進行病史詢問與重點性的理學檢查，必要時並開始治療。2.初級評估：發現並處理所有危及生命的狀況，如果有必要的話，立刻給予急救。3.詳細理學檢查：以進一步獲得疾病診斷的其他相關資訊。4.繼續評估：在到院前持續監控病情，並給予適當的治療。","options":{"A":"1→2→3→4","B":"1→3→2→4","C":"2→3→1→4","D":"2→1→3→4"},"answer":"D","manualChapter":"CH19"},{"id":548,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關昏迷指數（Glasgowcomascale，GCS），下列何者為非？","options":{"A":"昏迷指數針對病患的睜眼、運動以及說話三個方面來評估計分，加總後病患意識介於3分到15分，最低為3分，代表病患完全喪失意識，而最好的意識狀態為15分","B":"運動反應，對疼痛刺激肢體會回縮躲避為5分","C":"運動反應，對疼痛刺激產生肢體伸直反應為2分","D":"說話反應，發出不連貫而無意義的字句為3分"},"answer":"B","manualChapter":"CH20"},{"id":549,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關到院前緊急醫療救護之病史詢問，下列何者為是？","options":{"A":"SAMPLE乃應用於主訴導向式系統檢閱","B":"OPQRST乃針對創傷傷患評估設計","C":"對發燒病患詢問TOCC四史指的是（旅遊史Travel history、職業別Occupationn、接觸史Contacthistory及群聚Cluster情形）","D":"現場救護往往會遭遇特殊的病患或狀況影響病患溝通與評估，高級救護技術員除了必須熟悉各種特殊狀況的溝通技巧外，應該儘量承諾來顯現自信以符合病患或家屬的期待"},"answer":"C","manualChapter":"CH19"},{"id":550,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關醫病與救護溝通可能會遇到的困境導致溝通無效或失敗，下列何者為非？","options":{"A":"接受者的背景或特質（Attributes of the receiver）：例如與外傭詢問是否應停止病患之現場急救復甦（TOR）","B":"選擇性的解讀（Selective perception）：例如某些宗教的病患對於肢體接觸感到被冒犯","C":"語義不清（Semantic problems）：例如救護技術員通知醫院關於病患意識不清的狀況","D":"時間壓力（Time pressure）：例如對於OHCA病患救護處置AED的使用訊息傳遞不足"},"answer":"B","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":551,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關醫療救護與病患互動的模式，下列敘述何者為是？","options":{"A":"高級救護技術員EMTP對於OHCA病患進行AED去顫是指導－合作模式","B":"高級救護技術員EMTP對於GCS 6分，呈呼吸衰竭徵狀，SpO2：78%的病患進行氣管內管插管是主動－被動模式","C":"高級救護技術員EMTP對於精神急症病患進行強制就醫是共同參與模式","D":"高級救護技術員EMTP對於GCS 15分，E4V5M6主訴頭暈肢體無力病患進行血糖機one touch血糖檢測是主動－被動模式"},"answer":"B","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":552,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關醫療救護與病患溝通四步驟與技巧（The Four Habits Model），下列何者為是？1.展現同理心（Demonstrate Empathy）2.開場（Invest the Beginning）3.確認病患認知（Elicitthe Patient's Perspective）4.結論與總結（Invest in the End）。","options":{"A":"1→2→4→3","B":"1→3→2→4","C":"2→3→1→4","D":"3→2→1→4"},"answer":"C","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":553,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關到院前緊急救護臨床決策的六個元素，要將這些有效率的臨床決策付諸行動與綜合運用，下列執行順序何者為是？（1）評估環境（Read the scene）。（2）評估病患（Read the patient）。（3）診斷治療（React）。（4）回顧事件（Review performance）。（5）重新評估（Revaluate）。（6）修改計畫（Revise management plan）","options":{"A":"2→1→3→5→4→6","B":"1→2→3→4→5→6","C":"1→2→3→4→6→5","D":"2→1→3→5→6→4"},"answer":"D","manualChapter":"CH22","matchedChapters":["CH22"]},{"id":555,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"關於理學檢查的基本描述，下列敘述何者為非？","options":{"A":"理學檢查基本的四大技術，分別是視診、觸診、扣診以及聽診","B":"生命徵象的檢測，也包括在理學檢查的項目當中","C":"神經學檢查因為太過複雜，一般救護現場都不施行","D":"重點性的理學檢查，通常都是配合病史詢問"},"answer":"C","manualChapter":"CH20"},{"id":559,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"以下配對，何者為非？","options":{"A":"主動脈剝離－突發性撕裂或刀割般的尖銳疼痛，偶爾合併前胸到後背的轉移痛","B":"急性心肌梗塞－急性左前胸壓迫或悶痛感，常合併下巴或左上肢的轉移痛","C":"自發性氣胸－急性單側胸痛，深呼吸時可減緩疼痛感","D":"輸尿管結石－急性單側腰痛，常合併後腰到鼠蹊部的轉移痛"},"answer":"C","manualChapter":"CH20"},{"id":560,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"72歲男性突然左側肢體無力，理學檢查發現病患會自發性睜眼，左側上下肢肌肉力量僅2分，且明顯失語症無法發出任何字句，但病患可用右手握筆跟你筆談。請問該病患的GCS昏迷指數為何？","options":{"A":"E4M2V1","B":"E4M6VA","C":"E4M6V1","D":"E4M2VA"},"answer":"B","manualChapter":"CH20"},{"id":561,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關於救護出勤時，醫病溝通過程的描述，下列何者為非？","options":{"A":"若懷疑病患有急性傳染病時，救護人員要求病患合作，此模式為指導－合作模式","B":"在一開始接觸病人時，應迅速建立和諧的氣氛，並採取開放式的問題搜集資訊","C":"在醫病關係的建立與溝通上，訊息傳達不良及缺乏同理心是常見的缺失","D":"適度讓病患或家屬參與醫療決策是完全沒有幫助的"},"answer":"D","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":562,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"高級救護技術員在緊急狀況下，為確保訊息傳遞的完整性與品質，其中一個常被使用的模式是SOAP模式，關於SOAP模式，以下敘述何者為非？","options":{"A":"S：病患的主觀症狀與資訊，其中包括家屬或目擊者提供的資訊","B":"0：客觀的評估觀察結果","C":"A：病患自覺的疾病","D":"P：已經進行中的治療及其他進一步治療計劃"},"answer":"C","manualChapter":"CH18"},{"id":563,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"下列關於病患主訴的症狀，高級救護技術員在評估過後的初步臨床判斷，下列何者是最不合理的初步臨床判斷？","options":{"A":"一位80歲的男性病患，描述在早上起床時，發現右側肢體無力，此時可能要懷疑病人有腦血管性疾病","B":"一位20歲的男性病患，描述昨晚去吃到飽的餐廳大吃大喝，今天早上起床時發現雙下肢無力，此時可能要懷疑病人有週期性低血鉀麻痺等疾病","C":"一位60歲的男性，描述左胸悶痛，平常有抽菸的習慣，最近在運動時會感到胸口有沈重壓迫感，並會延伸到左邊肩膀，休息時會緩解，此時可能要懷疑病人有氣胸等肺部疾病","D":"一位40歲的男性，描述咳嗽時會右邊胸痛，最近有發高燒及痰多的症狀，此時可能要懷疑病人有肺炎等肺部疾病"},"answer":"C","manualChapter":"非創傷"},{"id":564,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"給藥途徑縮寫〔I.H.〕指的是？","options":{"A":"皮下注射","B":"舌下含藥","C":"霧氣吸入","D":"氣管內管給藥"},"answer":"C","manualChapter":"CH16"},{"id":565,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"EMTP使用醫學上常用的結構式溝通S-O-A-P模式，不包括下列哪一項？","options":{"A":"S：surrounding data環境安全與對病患及施救者之影響","B":"0：objective data病患身體評估的結果","C":"A：assessment data綜合上述結果形成的臨床判斷","D":"P：plan of management根據臨床判斷所形成的治療計畫"},"answer":"A","manualChapter":"CH18"},{"id":566,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"除夕前一天，救護台通報有名女生打電話求救，表示頭很暈，全身全力。EMT到現場破門而入時，發現有三名女大學生倒在臥室，身邊沒有藥品。理學檢查病患身上無明顯外傷，但都呈現意識不清，心跳偏快。以下何者為是？","options":{"A":"若使用指端血氧飽和度監視器，應打開室內電燈，否則光線太暗，其數值會受到影響","B":"若使用指端血氧飽和度監視器，不需要避開量測血壓的肢體","C":"雖然指端血氧飽和度監視器呈現98%，該病患仍應提供高濃度氧氣治療","D":"女大學生指甲上的指甲油不會影響指端血氧飽和度監視器的數值"},"answer":"C","manualChapter":"CH20"},{"id":567,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關於轉移痛，以下何者為是？","options":{"A":"急性闌尾炎，一開始會痛在右下腹，之後會轉移至肚臍周邊","B":"急性膽囊炎會有轉移痛到左側肩胛骨下方","C":"左側輸尿管結石引起疼痛，會轉移到腹股溝或左側睪丸處","D":"急性心肌梗塞，轉移痛會痛到右側肩膀的"},"answer":"C","manualChapter":"CH38"},{"id":568,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"一名65歲病患，因身體不適由119送醫。病患表示全身酸痛，有寒顫，有一點咳。血壓120/80mmHg、心跳120/min、呼吸22/min、體溫39℃。有關於病史詢問以及理學檢查，那一項較不重要？","options":{"A":"病患疼痛指數，自1分～10分","B":"病患最近有沒有到那裡旅遊，包含國內或國外","C":"病患周邊同住的人是否有類似的症狀或發燒","D":"病患的職業是什麼"},"answer":"A","manualChapter":"CH19"},{"id":569,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"有關理學檢查，請問以下何者為是？","options":{"A":"胸部理學檢查的順序是視、觸、叩、聽","B":"心臟理學檢查的順序是視、聽、叩、觸","C":"腹部理學檢查的順序是視、叩、觸、聽","D":"病患的所有理學檢查步驟都必須在救護現場完成以正確診斷病情"},"answer":"A","manualChapter":"CH20"},{"id":570,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"一名老年男性，過去有糖尿病與高血壓病史。病患主訴忽然視力不佳，看東西會複視（diplopia）。119送醫時進行評估，發現病患的眼睛也是怪怪的，以下是病患往正前方看的圖片，請問以下的敘述，何者為是？","options":{"A":"病患有可能第三對腦神經病變","B":"病患有可能第四對腦神經病變","C":"病患有可能第六對腦神經病變","D":"病患有可能第七對腦神經病變"},"answer":"A","manualChapter":"CH12","matchedChapters":["需要圖片"],"image":"題庫圖片/570.png"},{"id":571,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"某高中教官制止學生不常行為，被學生用刀刺在左側後背上方。119到達現場時，發現傷患的背部傷口一直在流血，理學檢查發現有兩道傷口長度各約4公分，凶器找不到。下圖照片為傷患臉朝下躺著，自背部拍攝的位置，右上方是頸部。以下敘述，何者為非？","options":{"A":"若是兩側胸部以下都會發麻，有可能傷到脊柱神經（spinal cord）","B":"若發現傷囗周邊有皮下氣腫，血壓下降，表示有刺到肺部造成氣胸，應立即針刺減壓","C":"若是有頸靜脈怒張，血壓下降，氣管沒有偏移，要高度懷疑是心包膜填塞","D":"若是頸靜脈沒有怒張，血壓下降，氣管沒有明顯偏移，要高度懷疑是大量血胸"},"answer":"B","manualChapter":"CH28","image":"題庫圖片/571.png"},{"id":573,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"醫病之間互動與溝通的技巧是非常重要的。高級救護技術員在救護的過程中，關於展現同心的技巧，下列何者為非？","options":{"A":"注意病患或家屬肢體或語調所展現的情緒反應，並對些情緒反應採取開放的態度看待","B":"用適度的肢體語言表達同理心，例如：臉部的表情、適度的接觸，如輕拍肩膀等等","C":"根據病患或家屬的情緒回饋適度調整自己的應對，必要時以適時的沈默面對也無妨","D":"病患或家屬表現緊張情緒時，利用「放心好了，不會有什麼問題」類似語句加以安撫"},"answer":"D","matchedChapters":["CH18"],"manualChapter":"CH18"},{"id":574,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"下列症狀何者是典型的蜘蛛網膜下腔出血？","options":{"A":"昨天咳嗽、流鼻水、喉嚨痛，今天整個頭劇痛，還高燒到39度","B":"一小時前頭劇痛，三個月前騎機車出車禍有撞到頭，期間一直沒不舒服","C":"一小時前忽然左側顳葉處搏動性劇痛，痛到噁心但沒吐，而且會怕光","D":"一小時前忽然整個頭痛欲裂，這輩子沒這麼痛過，痛到吐了兩次，頸部覺得僵硬怪怪的"},"answer":"D","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":575,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"下列病患在未給氧時的血氧濃度都是100%，但以下的理學檢查發現，何者最需考慮盡速給予氣管內管插管？","options":{"A":"火場救出顏面燒傷傷患，頸部明顯喘鳴音（stridor），眉毛鼻毛燒焦捲曲","B":"過去病史心臟衰竭患者，兩側明顯濕囉音（crackles），使用輔助呼吸肌","C":"患者出現庫斯毛耳氏（Kussmaul respiration），呼吸每分鐘次數32下","D":"意識不清患者，瞳孔不等大，呼吸每分鐘次數12下，血壓200/120mmHg"},"answer":"A","manualChapter":"CH20"},{"id":576,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"你接派遣出勤酒醉路的患者。到達現場時病患渾身酒味，意識對聲音有反應，呼吸型態快且每都進行深度換氣、下列敘述何者為是？","options":{"A":"此種呼吸為陳施氏呼吸（Cheyne-Stokes respiration）","B":"此種呼吸型態為畢歐氏呼吸（Biot's respiration）","C":"應考慮病患可能為甲醇中毒引起的代謝性鹼中毒","D":"需對病患驗血糖，因有可能是糖尿病酮酸中毒引起"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":578,"source":"第三章 病患評估與理學檢查(2015-2018).doc","question":"根據AHA 2015年規範，關於小兒生命之鏈的敘述何者為是？","options":{"A":"第一個環為早期辨識心跳停止並啟動緊急醫療應變網","B":"與成人不同的地方在於強調需盡早取得AED並啟動緊急醫療應變網","C":"第三個環與成人OHCA生命之鏈不同","D":"與成人相同的地方在於先啟動緊急醫療應變系統接著盡快開始CPR"},"answer":"C","manualChapter":"CH48"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+
+    const FAV_KEY = "emtp_favorite_question_ids";
+    function getFavorites() {
+      try {
+        const data = localStorage.getItem(FAV_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function isFavorited(id) {
+      return getFavorites().includes(id);
+    }
+    function toggleFavorite(id) {
+      let favs = getFavorites();
+      const idx = favs.indexOf(id);
+      let added = false;
+      if (idx > -1) {
+        favs.splice(idx, 1);
+      } else {
+        favs.push(id);
+        added = true;
+      }
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      } catch (e) {}
+      return added;
+    }
+    function updateFavBtn(id) {
+      const favBtn = document.getElementById("fav-btn");
+      if (!favBtn) return;
+      const fav = isFavorited(id);
+      favBtn.textContent = fav ? "★" : "☆";
+      favBtn.style.color = fav ? "#f59e0b" : "#94a3b8";
+      favBtn.title = fav ? "已加入我的最愛 (點擊移除)" : "加入我的最愛 (點擊加入)";
+    }
+    function handleReviewFav(btn, id) {
+      const isFav = toggleFavorite(id);
+      btn.textContent = isFav ? "★" : "☆";
+      btn.style.color = isFav ? "#f59e0b" : "#94a3b8";
+    }
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+
+    const favBtnEl = document.getElementById("fav-btn");
+    if (favBtnEl) {
+      favBtnEl.addEventListener("click", () => {
+        const q = questions[currentQuestionIndex];
+        if (!q) return;
+        toggleFavorite(q.id);
+        updateFavBtn(q.id);
+        favBtnEl.style.transform = "scale(1.35)";
+        setTimeout(() => { favBtnEl.style.transform = "scale(1)"; }, 150);
+      });
+    }
+
+    function startQuiz() {
+      if (!questions || questions.length === 0) {
+        alert("目前沒有可測驗的題目！請先將題目加入收藏。");
+        return;
+      }
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      updateFavBtn(q.id);
+      
+      const catDiv = document.getElementById("question-category");
+      if (catDiv && ('第三章 病患評估與理學檢查 (2015-2018)'.includes('隨機') || '第三章 病患評估與理學檢查 (2015-2018)'.includes('最愛'))) {
+          catDiv.style.display = "block";
+          catDiv.textContent = q.manualChapter ? "分類：" + q.manualChapter : "分類：未分類";
+      }
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               if (q.multiAnswer) {
+                 btn.classList.add("multi-correct");
+                 html += ' <span style="float:right; font-weight:bold; color:#854d0e;">✓ 正確答案 (官方複選: ' + q.multiAnswer + ')</span>';
+               } else {
+                 btn.classList.add("correct");
+                 html += ' <span style="float:right;">✓ 正確答案</span>';
+               }
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        const curExp = q.explanation || q.analysis;
+        if ((isReviewMode || selectedAnswers[index] !== null) && curExp) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + curExp.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = (currentQuestionIndex === questions.length - 1) ? "結束作答" : "錯題回顧";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      let scoreHtml = "";
+      if ('第三章 病患評估與理學檢查 (2015-2018)'.includes('隨機')) {
+          const scorePerQuestion = questions.length === 25 ? 4 : (questions.length === 50 ? 2 : 0);
+          const totalScore = correctCount * scorePerQuestion;
+          scoreHtml = "<br><br><span style='color: #0369a1; font-size: 1.5rem; font-weight: bold;'>測驗分數：" + totalScore + " 分</span>";
+      }
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題" + scoreHtml;
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   if (q.multiAnswer) {
+                      liClass = "is-multi-correct";
+                      label = " (正確答案 - 官方複選: " + q.multiAnswer + ")";
+                   } else {
+                      liClass = "is-correct";
+                      label = " (正確答案)";
+                   }
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          const reviewExp = q.explanation || q.analysis;
+          if (reviewExp) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + reviewExp.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          const favState = isFavorited(q.id);
+          const favStar = favState ? '★' : '☆';
+          const favColor = favState ? '#f59e0b' : '#94a3b8';
+          div.innerHTML = '<div class="review-question" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">' +
+            '<div>' + (i + 1) + '. ' + q.question + '</div>' +
+            '<button type="button" onclick="handleReviewFav(this, ' + q.id + ')" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; color: ' + favColor + '; padding: 0 4px; flex-shrink: 0;" title="加入/取消我的最愛">' + favStar + '</button>' +
+          '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

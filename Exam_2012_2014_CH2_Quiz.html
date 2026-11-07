@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    .option-btn.multi-correct {
+      background-color: #fef08a !important;
+      border-color: #eab308 !important;
+      color: #854d0e !important;
+      font-weight: 600;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-multi-correct { background: #fef9c3; border-color: #fde047; color: #854d0e; font-weight: 600; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 6.2rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第二章 基礎醫學與呼吸處置 (2012-2014)</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.5rem; font-weight: bold; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：54 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="fav-btn" type="button" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 4px; transition: transform 0.15s ease;" title="加入/取消我的最愛">☆</button>
+          <span class="stat-badge" id="score-text">分類：2012-2014 第二章</span>
+        </div>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1.5rem;">
+        <div id="question-category" style="display: none; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-align: left;"></div>
+        <div class="source-tag" id="source-tag" style="margin-top: 0; margin-left: auto;">來源: 無</div>
+      </div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":579,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"有關頸椎神經控制之範圍，以下何者為非？","options":{"A":"抓手功能是由C7、C8所控制","B":"乳頭感覺是由T4所控制","C":"肚臍感覺是由T10所控制","D":"呼吸功能是由T4所控制"},"answer":"D","manualChapter":"CH27"},{"id":580,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位45歲病患因呼吸急促以及胸痛休克需要急救，且頸靜脈鼓張，病患最不可能出現的狀況","options":{"A":"心因性休克","B":"心包膜填塞","C":"肺炎敗血性休克","D":"張力性氣胸"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":581,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位35歲病患車禍後，發現兩大腿開放性骨折合併肢體疼痛無力。現場血壓80／40毫米汞柱，心跳50下／分鐘，最可能為何種休克？","options":{"A":"過敏性休克","B":"低血容性休克","C":"敗血性休克","D":"神經性休克"},"answer":"D","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":582,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"肥胖的54歲男性病患飯後在餐桌上與友人閒聊抽煙時發生胸悶，但使用硝化甘油舌下含片三次才可緩解。現場十二導程心電圖沒有ST波段改變，此病患最可能的診斷為何？","options":{"A":"穩定性心絞痛","B":"不穩定性心絞痛","C":"ST節段上升心肌梗塞","D":"張力性氣胸"},"answer":"B","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":583,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位45歲高血壓及糖尿病病患今晨人意識不清，血壓220/130 mmHg，心跳50下/min，最可能為何種原因？","options":{"A":"低血糖昏迷","B":"心肌梗塞","C":"糖尿病高滲透壓昏迷","D":"腦出血合併腦壓上升"},"answer":"D","manualChapter":"非創傷"},{"id":584,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"50歲女士唱歌時突發劇烈頭痛，整顆頭都痛到要爆炸開來一般。救護車現場吐了兩次，且血壓明顯升高（180／120 mmHg）。現場理學檢查脖子時發現頸部僵硬。請問最可能的診斷是？","options":{"A":"硬腦膜上出血","B":"硬腦膜下出血","C":"蜘蛛膜下腔出血","D":"小腦出血"},"answer":"C","manualChapter":"CH20"},{"id":585,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位45歲頭部外傷病患，數小時前人還清楚，之後意識越來越模糊，關於針對意識不清病患進行腦幹功能的神經學檢查，何者為非？","options":{"A":"角膜反射","B":"瞳孔反射","C":"Babinski sign的檢查","D":"Doll's eye sign的檢查"},"answer":"C","manualChapter":"CH36"},{"id":586,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"依據加拿大頸椎守則（Canadian C-spine Rule），下列何種情況不需要上頸圈？","options":{"A":"兩公尺高處落下","B":"肢體麻木或無力","C":"酒醉併意識昏迷","D":"頸部側邊有壓痛"},"answer":"D","manualChapter":"CH25"},{"id":587,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"45歲病患因騎摩托車車禍撞到後腦，到達現場時，發現病患無酒醉，四肢運動正常，但走路會搖晃不穩。關於本病患小腦的神經學檢查，何者為非？","options":{"A":"腳跟接腳尖走直線檢查平衡（Tandem Gait）","B":"指尖－鼻尖－指尖的檢查（Finger-Nose-Finger）","C":"看病患坐著會不會歪一邊（Sitting Balance）","D":"眼睛上下左右看眼球運動是否受到限制（EOM）"},"answer":"D","manualChapter":"CH36"},{"id":588,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位45歲病患因呼吸急促合併有休克的症狀，且頸靜脈明顯鼓張，請問他最不可能出現的狀況是？","options":{"A":"張力性氣胸（tension pneumothorax）","B":"心包膜填塞（cardiac tamponade）","C":"大量血胸（massive hemo-thorax）","D":"大片肺栓塞（massive pulmonary embolism）"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":589,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位65歲長年高血壓病史之病患，發生摩托車自摔後，出現右上臂閉鎖性骨折合併胸口疼痛，現場血壓80／40毫米汞柱，心跳50下／分鐘，請問他最不可能出現下列何種休克？","options":{"A":"心因性休克","B":"出血性休克","C":"神經性休克","D":"藥物過量引發休克"},"answer":"B","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":591,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"以下有關細胞的描述，何者為錯誤？","options":{"A":"細胞核含有存放遺傳訊息的物質，也就是DNA","B":"核糖體（ribosome）的主要功能是內製造蛋白質，主要附著在粒線體（mitochondria）內","C":"溶小體（lysosome），可清除胞內的細菌及各種細胞碎屑","D":"高基氏體（Golgi apparatus）合成糖化蛋白囊泡，可經由胞吐作用而分泌至細胞外"},"answer":"B","manualChapter":"CH12"},{"id":592,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"以下有關於血液中的鈉、鉀離子平衡的描述，何者為是？","options":{"A":"細胞內鈉離子濃度較高、鉀離子濃度較低","B":"當我們為病患注入大量的碳酸氫納（NaHCO3），鉀離子將由細胞內轉到細胞外","C":"細胞膜上具有一個「鈉一鉀交換幫浦」不斷的消耗ATP以維持細胞內外鈉、鉀的平衡。這就是物質運輸中的「被動運輸」","D":"物質由低濃度往高濃度的移動，是「主動運輸」"},"answer":"D","manualChapter":"CH39"},{"id":593,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一位長期高血壓的老先生因為新發生的眩暈感、步態不穩東倒西歪而求救。他的四肢肌肉力量都是正常，但無法站穩。你覺得他中樞神經的哪一部位最可能發生了問題？","options":{"A":"小腦或腦幹","B":"大腦的額葉","C":"大腦的頂葉","D":"大腦的顳葉"},"answer":"A","manualChapter":"CH12"},{"id":594,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"此病患左側臉部疑似有帶狀疱疹發作。請問依據各位所學，其影響的神經是那一條？","options":{"A":"三叉神經","B":"視神經","C":"面神經","D":"聽神經"},"answer":"A","manualChapter":"CH12","image":"題庫圖片/594.png"},{"id":595,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"交感神經受到刺激者，以下何者為錯誤的反應？","options":{"A":"增加血糖濃度","B":"延遲排尿","C":"增加腸胃道蠕動","D":"心跳變快"},"answer":"C","manualChapter":"CH12"},{"id":596,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"對於左右大腦半球的敘述，何者為是？","options":{"A":"語言功能主要由右大腦半球負責","B":"算數能力主要由右大腦半球負責","C":"空間認知主要由左大腦半球負責","D":"書寫能力主要由左大腦半球負責"},"answer":"D","manualChapter":"CH12"},{"id":598,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"冠狀動脈的左前降支阻塞時，心電圖較可能會出現什麼變化？","options":{"A":"V1-V4 ST段上昇","B":"Ⅰ，AVL，V5，V6 ST段上昇","C":"Ⅱ，Ⅲ，AVF ST段上昇","D":"AVR ST段上昇"},"answer":"A","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":599,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"作頸動脈按摩術可以治療部份心律不整，請問其原理為何？","options":{"A":"刺激頸動脈竇，啟動間腦的心臟抑制中樞，經由交感神經，使心跳變慢","B":"刺激頸動脈竇，啟動延腦的心臟抑制中樞，經由副交感神經，使心跳變慢","C":"刺激主動脈竇，啟動間腦的心臟刺激中樞，經由交感神經，使心跳變快","D":"刺激頸動脈竇，啟動延腦的心臟刺激中樞，經由副交感神經，使心跳變快"},"answer":"B","manualChapter":"CH34"},{"id":600,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"影響血壓的因子，以下敘述何者為非？","options":{"A":"週邊血管阻力上昇、血壓會上昇","B":"回心血量增加，則單次心搏量會增加","C":"心跳速率越快，則單次心搏量越會增加","D":"心輸出量增加，則血壓會上昇"},"answer":"C","manualChapter":"CH12"},{"id":601,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"有一年約18歲的女生，在校園裡呼叫119救護，主訴呼吸喘，四肢發麻，但呼吸音正常。到院時抽動脈血，發現病患的pH7.01、［HCO3-］下降、PaCO2 15毫米汞柱，請問您認為這位病患最可能出現的狀況是？","options":{"A":"過度換氣症候群","B":"大量嘔吐所致","C":"糖尿病合併酮酸中毒","D":"氣喘急性發作"},"answer":"C","manualChapter":"CH51","matchedChapters":["CH15"]},{"id":602,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"以下有關於藥物機轉的敘述，何者為是？","options":{"A":"腎上腺素作用於受體和非選擇性β受體。當作用於β，受體時，會增加心跳速率及增加心臟收縮力，使心臟輸出上昇","B":"Propranolol（Inderal）是一種選擇性β2受體拮抗劑，氣喘病患不適合使用，而心跳過慢的病患則較不會影響","C":"Dobutamine低劑量（1～5μg／kg／min）可活化D1受體，擴張腎臟和腸繫膜血管，增加腎臟灌流。中劑量（5～10μg／kg／min），活化β1，受體，增強心臟收縮力","D":"正腎上腺素作用於α受體和非選擇性β受體，故該藥作用時，氣管平滑肌會收縮"},"answer":"A","manualChapter":"CH16"},{"id":603,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"張力性氣胸病患進行針刺減壓時，為何針要放置在肋骨的上緣？","options":{"A":"預防針刺減壓刺傷希氏束（bundle of His）","B":"預防傷害到肋骨的神經，靜脈及動脈","C":"為了在進針時在胸部上有依靠","D":"為了使肺部可以完全膨脹"},"answer":"B","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":604,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"57歲男性已抽煙35年，EMTP發覺病人吐氣時總是會噘嘴，請問他噘嘴的原因為何？","options":{"A":"幫助維持氣管和肺泡內的壓力","B":"急速用力呼氣，使肺泡內的空氣吐出","C":"只是顯示病人可以控制呼吸，沒有特別用途","D":"增加病人過度換氣"},"answer":"A","manualChapter":"CH35"},{"id":605,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一歲半的兒童發現單側肺部有哮鳴音，最有可能的原因為何？","options":{"A":"氣喘","B":"異物阻塞支氣管","C":"心臟衰竭","D":"會厭炎"},"answer":"B","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":606,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"EMTP到達現場，發現病人意識不清，開始呼吸淺慢，以後逐漸加快加深，達高潮後，又逐漸變淺變慢，而後呼吸暫停數秒（約5～30秒）後，再次出現上述狀態的呼吸，如此週而復始的呼吸變化稱為？","options":{"A":"瀕死呼吸（agonal respirations）","B":"陳施氏呼吸（潮氏呼吸）（Cheyne-stokes respirations）","C":"庫斯毛耳氏呼吸（Kussmaul's respirations）","D":"畢歐氏呼吸（Biot's respiration）"},"answer":"B","manualChapter":"呼吸型態(含肺音)"},{"id":607,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"下列何種因素會使病患呼吸更加費力？","options":{"A":"缺乏肺泡表面活性劑（surfactant）","B":"氣道內阻力減少","C":"肺部順應性（compliance）增加","D":"體溫下降"},"answer":"A","manualChapter":"CH35"},{"id":608,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"給藥途徑縮寫［I.H.］指的是？","options":{"A":"皮下注射","B":"舌下含藥","C":"霧氣吸入","D":"氣管內管給藥"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":609,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"細胞內進行有氧呼吸產生三磷酸腺苷（ATP）的場所是？","options":{"A":"核糖體","B":"粒腺體","C":"溶小體","D":"高基氏體"},"answer":"B","manualChapter":"CH12"},{"id":612,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"心臟的傳導系統如圖示。請問由傳導系統造成心電圖上變化的敘述，錯誤的是？","options":{"A":"甲出問題，心電圖上會沒有正常的P波","B":"乙出問題，心電圖上的P波的數目會大於QRS波的數目丁","C":"丁出問題，心電圖上將呈現雙峰形的rSR'波","D":"當高位傳導系統失能時，戊將以固有節律每分鐘60下跳動"},"answer":"D","manualChapter":"CH33","matchedChapters":["需要圖片"],"image":"題庫圖片/612.png"},{"id":613,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"當某樣自主神經系統的藥物作用點是β1＝β2＞α時，它對人會造成的影響，正確的是？","options":{"A":"血管舒張","B":"心跳減緩","C":"氣管收縮","D":"血糖上昇"},"answer":"D","manualChapter":"CH16"},{"id":615,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"評估呼吸的品質要注意「深淺快慢」，所以「每分鐘肺泡通氣量」的算法應該是？","options":{"A":"（病患呼吸速率－無效呼吸速率）╳最大吸氣容積","B":"（最大吸氣容積－無效容積）╳呼吸速率","C":"（病患呼吸速率－正常呼吸速率（12））╳潮氣容積","D":"（潮氣容積－無效腔）╳呼吸速率"},"answer":"D","manualChapter":"CH14"},{"id":616,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"你出勤救護一位呼吸困難的病患。現場家屬表示：「病患有發燒多痰現象及慢性阻塞性肺病（COPD），最近因天氣冷常反覆COPD發作進出醫院。」病患目前血壓120／60 mmHg，心跳每分鐘102下、呼吸淺快每分鐘20下，血氧值SpO2為80%，意識為E3M6V5。請問下列敘述，正確的是？","options":{"A":"此病患維持呼吸剌激的趨力主要是靠血中paC02值","B":"若病患意識不清，應使用高濃度氧氣面罩，持續維持病患到院前血氧值SpO2 100%","C":"若病患意識清楚，應使用一般氧氣面罩、流速開2～3L／min，以減少過度換氣效應","D":"若病患由E3M6V5轉為E2M4V2，應使用袋瓣罩（BVM）裝置進行過度換氣"},"answer":"D","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":617,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"以下有關於交感神經的敘述，何者為非？","options":{"A":"氣管擴張","B":"腸胃道蠕動增加","C":"心跳加快","D":"延遲排尿"},"answer":"B","manualChapter":"CH12"},{"id":618,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"以下有關於人類細胞的敘述，何者為是？","options":{"A":"高基氏體可產生許多ATP，提供能量","B":"細胞核是細胞中唯一有具有DNA的部位","C":"溶小體可以提供細胞做為合成碳水化合物的場所","D":"核醣體負責合成蛋白質"},"answer":"D","manualChapter":"CH12"},{"id":620,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"以下有關氣體交換的敘述，何者為是？","options":{"A":"氧氣主要是溶於血漿內，再由動脈血液帶至週邊血管","B":"二氧化碳主要是溶於血漿內，再由靜脈帶至肺部進行氣體交換","C":"每一個血紅素分子可以攜帶四個分子的氧氣","D":"氧氣比一氧化碳對於血紅素親和力更強"},"answer":"C","manualChapter":"CH12","matchedChapters":["CH12"]},{"id":621,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"高級救護技術員需了解插管的程序，一般我們以來協助記憶。請問以下有關的順序，何者為是？","options":{"A":"準備（preparation）→前置給氧（preoxygenation）→前置給藥（pretreatment）→給藥（paralysis）→插管（placement）→插管後處置（postintubation management）","B":"前置給氧（preoxygenation）→準備（preparation）→前置給藥（pretreatment）→給藥（paralysis）→插管（placement）→插管後處置（postintubation management）","C":"前置給氧（preoxygenation）→準備（preparation）→給藥（paralysis）→前置給藥（pretreatment）→插管（placement）→插管後處置（postintubationmanagement）","D":"前置給氧（preoxygenation）→前置給藥（pretreatment）→準備（preparation）→給藥（paralysis）→插管（placement）→插管後處置（postintubation management）"},"answer":"A","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":622,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"副交感神經受到刺激之後所造成的生理反應，何者為是？","options":{"A":"支氣管收縮","B":"心跳變快","C":"血壓上昇","D":"瞳孔變大"},"answer":"A","manualChapter":"CH16"},{"id":623,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"下圖的敘述，何者為是？","options":{"A":"左側第三對腦神經麻痺","B":"週邊型面神經麻痺","C":"中樞型面神經麻痺","D":"若發生在三小時內，應考慮血栓溶解劑治療"},"answer":"B","manualChapter":"CH36","matchedChapters":["需要圖片"],"image":"題庫圖片/623.png"},{"id":624,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"下圖是一張心電圖，請問最可能是心臟的那個部位出了問題，出了什麼問題？","options":{"A":"心臟的左主冠狀動脈阻塞，併發心肌梗塞","B":"心臟的右冠狀動脈及左旋支阻塞，併發心肌梗塞","C":"心臟的左冠狀動脈，左旋支阻塞，併發心肌梗塞","D":"心臟的左冠狀動脈，左前降支阻塞，併發心肌梗塞"},"answer":"B","manualChapter":"CH33","matchedChapters":["需要圖片"],"image":"題庫圖片/624.png"},{"id":625,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一名病患在山區被蜂螫，發生過敏性休克。您是EMT-P，所屬縣市預立醫可以給瞽上腺（epinephrine）以及給予點滴（normal saline）。請問您會如何處理此一病患，請選擇最適的答案？","options":{"A":"打上16號I.V.，立即給予normal saline 500 ml以及epinephrine 1 mg I.V push","B":"立即給予epinephrine 1 mg舌下含","C":"打上16號I.V.，立即給予normal saline 500 ml以及epinephrine 0.3 mg I.M.","D":"立即給予epinephrine 0.3 mg I.V. push"},"answer":"C","manualChapter":"CH40","matchedChapters":["CH40"]},{"id":626,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"一名50歲病患在慢跑時發生心臟猝死，您是EMT-P，所屬縣市預立醫囑可以給腎上腺素（epinephrine），給予點滴（normal saline），骨針以及插管。您在為這位病患打點滴，無法打上，請問epinephrine該如何給予是最有效的？","options":{"A":"Epinephrine 1：1,000，10倍的劑量經稀釋後從氣管內容給予","B":"Epinephrine 1：1,000，2～3倍的劑量經稀釋後從氣管內容給予","C":"Epinephrme 1：1,000，從肛門給予","D":"立即操作骨針，epinephrine 1：1,000，1 mg經由骨針給予"},"answer":"D","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":627,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"呼吸衰竭病患，長期需要插管及呼吸器維持呼吸，醫師會建議做氣切。請問氣切是切在呼吸道的那個部位？","options":{"A":"支氣管","B":"聲帶以上的氣管","C":"聲帶以下的氣管","D":"細支氣管"},"answer":"C","manualChapter":"CH51","matchedChapters":["CH51"]},{"id":628,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"給藥途徑縮寫［P.O.］指的是？","options":{"A":"皮下注射","B":"舌下含藥","C":"霧氣吸入","D":"口服給藥"},"answer":"D","manualChapter":"CH16"},{"id":629,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"相同成份劑量的藥物，口服有時效果不如靜脈注射，最大的原因是？","options":{"A":"儲存效應（drug reservoirs）","B":"屏障效應（barriers to drug distribution）","C":"首渡效應（first-pass metabolism）","D":"拮抗效應（antagonism）"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":630,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"EMTP若要使用肌肉注射，最佳的位置是？","options":{"A":"肩三角肌","B":"肱三頭肌","C":"肩斜方肌","D":"肱二頭肌"},"answer":"A","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":631,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"將紅血球置入甲乙丙三種溶液中的結果如圖示，請問下列敘述完成正確的是？","options":{"A":"甲是0.45%食鹽水，乙是5%葡萄糖水，丙是3%食鹽水","B":"甲是10%葡萄糖水，乙是0.9%食鹽水，丙是0.9%食鹽水","C":"甲是5%葡萄糖水，乙是10%葡萄糖水，丙是0.9%食鹽水","D":"甲是10%葡萄糖水，乙是5%葡萄糖水，丙是0.45%食鹽水"},"answer":"A","manualChapter":"CH12","image":"題庫圖片/631.png"},{"id":632,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"呼吸道異物阻塞，最常見卡在何處？","options":{"A":"喉部或聲帶","B":"右側主支氣管","C":"左側主支氣管","D":"氣管"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":633,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"兒童的呼吸道解剖構造和成人有許多不同之處，關於兒童呼吸道的描述何者為非？","options":{"A":"較為脆弱容易受傷","B":"兒童的上呼吸道較狹窄，舌頭相對較大","C":"喉部相對於舌根的位置較為往後往下","D":"環狀軟骨是兒童呼吸道最狹窄的部位"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":634,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"有關潮氣末二氧化碳偵測器（end-tidal CO2，ETCO2）的描述，何者為非？","options":{"A":"用來偵測呼出氣體中的二氧化碳濃度","B":"可用來判斷氣管內管是否正確置於氣管內，或是在食道","C":"可作為急救是否有效的重要指標","D":"氣管內管插入食道，二氧化碳濃度應為零"},"answer":"D","manualChapter":"CH14","matchedChapters":["CH14"]},{"id":635,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"有關「喉罩呼吸道（LMA）」的描述，何者為非？","options":{"A":"在侷限空間及外傷頸椎固定的考量下，喉罩呼吸道有其獨到的優點","B":"無法使用潮氣末二氧化碳偵測器來偵測位置是否正確","C":"不適用於意識清醒或尚有嘔吐反射的病患","D":"可用來協助氣管內管的置放"},"answer":"B","manualChapter":"CH15"},{"id":636,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"有關自律神經系統的功能，以下敘述何者為非？","options":{"A":"交感神經作用會造成瞳孔擴大，副交感神經則造成瞳孔縮小","B":"交感神經作用會造成心跳加速氣管擴張，副交感神經則造成心跳變慢氣管收縮","C":"交感神經作用會造成腸蠕動增加，副交感神經則造成腸蠕動減少","D":"交感神經作用會停止唾液分泌，副交感神經則會分泌唾液"},"answer":"C","manualChapter":"CH12"},{"id":637,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"有關急救藥物腎上腺素（epinephrine）的敘述，下列何者為是？","options":{"A":"會增加心臟收縮力以及心搏速率，但不會提高心臟的耗氧量","B":"可以收縮小動脈以及皮膚黏膜的血管，造成收縮壓上升，但無法增加冠狀動脈之血液灌流","C":"可以使支氣管平滑肌鬆弛，支氣管擴張，但無法治療嚴重過敏造成的支氣管痙攣","D":"可以增加升糖素分泌，並抑制胰島素分泌來增加血糖"},"answer":"D","manualChapter":"CH16"},{"id":638,"source":"第二章 基礎醫學與呼吸處置(2012-2014)#98560.doc","question":"心臟的傳導系統有：（甲）竇房節、（乙）希氏束、（丙）房室節、（丁）普金吉氏纖維。請問心動的動作電位傳導的順序是？","options":{"A":"甲→乙→丙→丁","B":"甲→丙→乙→丁","C":"丙→甲→丁→乙","D":"丙→乙→甲→丁"},"answer":"B","manualChapter":"CH33","matchedChapters":["CH33"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+
+    const FAV_KEY = "emtp_favorite_question_ids";
+    function getFavorites() {
+      try {
+        const data = localStorage.getItem(FAV_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function isFavorited(id) {
+      return getFavorites().includes(id);
+    }
+    function toggleFavorite(id) {
+      let favs = getFavorites();
+      const idx = favs.indexOf(id);
+      let added = false;
+      if (idx > -1) {
+        favs.splice(idx, 1);
+      } else {
+        favs.push(id);
+        added = true;
+      }
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      } catch (e) {}
+      return added;
+    }
+    function updateFavBtn(id) {
+      const favBtn = document.getElementById("fav-btn");
+      if (!favBtn) return;
+      const fav = isFavorited(id);
+      favBtn.textContent = fav ? "★" : "☆";
+      favBtn.style.color = fav ? "#f59e0b" : "#94a3b8";
+      favBtn.title = fav ? "已加入我的最愛 (點擊移除)" : "加入我的最愛 (點擊加入)";
+    }
+    function handleReviewFav(btn, id) {
+      const isFav = toggleFavorite(id);
+      btn.textContent = isFav ? "★" : "☆";
+      btn.style.color = isFav ? "#f59e0b" : "#94a3b8";
+    }
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+
+    const favBtnEl = document.getElementById("fav-btn");
+    if (favBtnEl) {
+      favBtnEl.addEventListener("click", () => {
+        const q = questions[currentQuestionIndex];
+        if (!q) return;
+        toggleFavorite(q.id);
+        updateFavBtn(q.id);
+        favBtnEl.style.transform = "scale(1.35)";
+        setTimeout(() => { favBtnEl.style.transform = "scale(1)"; }, 150);
+      });
+    }
+
+    function startQuiz() {
+      if (!questions || questions.length === 0) {
+        alert("目前沒有可測驗的題目！請先將題目加入收藏。");
+        return;
+      }
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      updateFavBtn(q.id);
+      
+      const catDiv = document.getElementById("question-category");
+      if (catDiv && ('第二章 基礎醫學與呼吸處置 (2012-2014)'.includes('隨機') || '第二章 基礎醫學與呼吸處置 (2012-2014)'.includes('最愛'))) {
+          catDiv.style.display = "block";
+          catDiv.textContent = q.manualChapter ? "分類：" + q.manualChapter : "分類：未分類";
+      }
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               if (q.multiAnswer) {
+                 btn.classList.add("multi-correct");
+                 html += ' <span style="float:right; font-weight:bold; color:#854d0e;">✓ 正確答案 (官方複選: ' + q.multiAnswer + ')</span>';
+               } else {
+                 btn.classList.add("correct");
+                 html += ' <span style="float:right;">✓ 正確答案</span>';
+               }
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        const curExp = q.explanation || q.analysis;
+        if ((isReviewMode || selectedAnswers[index] !== null) && curExp) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + curExp.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = (currentQuestionIndex === questions.length - 1) ? "結束作答" : "錯題回顧";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      let scoreHtml = "";
+      if ('第二章 基礎醫學與呼吸處置 (2012-2014)'.includes('隨機')) {
+          const scorePerQuestion = questions.length === 25 ? 4 : (questions.length === 50 ? 2 : 0);
+          const totalScore = correctCount * scorePerQuestion;
+          scoreHtml = "<br><br><span style='color: #0369a1; font-size: 1.5rem; font-weight: bold;'>測驗分數：" + totalScore + " 分</span>";
+      }
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題" + scoreHtml;
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   if (q.multiAnswer) {
+                      liClass = "is-multi-correct";
+                      label = " (正確答案 - 官方複選: " + q.multiAnswer + ")";
+                   } else {
+                      liClass = "is-correct";
+                      label = " (正確答案)";
+                   }
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          const reviewExp = q.explanation || q.analysis;
+          if (reviewExp) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + reviewExp.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          const favState = isFavorited(q.id);
+          const favStar = favState ? '★' : '☆';
+          const favColor = favState ? '#f59e0b' : '#94a3b8';
+          div.innerHTML = '<div class="review-question" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">' +
+            '<div>' + (i + 1) + '. ' + q.question + '</div>' +
+            '<button type="button" onclick="handleReviewFav(this, ' + q.id + ')" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; color: ' + favColor + '; padding: 0 4px; flex-shrink: 0;" title="加入/取消我的最愛">' + favStar + '</button>' +
+          '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

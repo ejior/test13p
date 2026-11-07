@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    .option-btn.multi-correct {
+      background-color: #fef08a !important;
+      border-color: #eab308 !important;
+      color: #854d0e !important;
+      font-weight: 600;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-multi-correct { background: #fef9c3; border-color: #fde047; color: #854d0e; font-weight: 600; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 6.2rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第一章 系統運作與品質管理 (2015-2018)</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.5rem; font-weight: bold; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：27 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="fav-btn" type="button" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 4px; transition: transform 0.15s ease;" title="加入/取消我的最愛">☆</button>
+          <span class="stat-badge" id="score-text">分類：2015-2018 第一章</span>
+        </div>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1.5rem;">
+        <div id="question-category" style="display: none; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-align: left;"></div>
+        <div class="source-tag" id="source-tag" style="margin-top: 0; margin-left: auto;">來源: 無</div>
+      </div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":337,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"關於台灣緊急醫療救護系統的設計，以下何者為是？","options":{"A":"台灣屬於歐陸體系","B":"台灣屬於北美體系","C":"北美體系為以醫師為主體執行到院前救護","D":"歐陸體系由受過不同等級訓練與授權的救護技術員做為醫師在到院前救護的延伸"},"answer":"B","manualChapter":"CH01"},{"id":339,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"根據傷病患與事故的類型，緊急醫療救護的現場治療原則，可以區分為兩種模式，亦即「心臟模式」與「創傷模式」，以下關於兩種模式的敘述何者為是？","options":{"A":"心臟模式的原則是盡速送醫（Load and Go）","B":"創傷模式的原則是現場穩定（Stay and Play）","C":"對於創傷傷患，救護技術員的任務在於提供確切醫療","D":"對於突發性心跳停止的病患，應盡量在到院前開始施行高級救命術"},"answer":"D","manualChapter":"CH01"},{"id":340,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"關於高級救護技術員的敘述，以下何者為是？","options":{"A":"高級救護技術員就是高級的中級救護技術員","B":"高級救護技術要能夠獨立完成高級救命術（Advanced Life Support）","C":"高級救護技術員執行高級救命術無法改善呼吸窘迫病患的出院存活率","D":"高級救護技術員沒有接受繼續教育的需要"},"answer":"B","manualChapter":"CH03"},{"id":345,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"派遣中心接到電話至救護人員到達現場的時間間距是屬於品質測量三大構面中的哪一面？","options":{"A":"結構面","B":"過程面","C":"結果面","D":"起始面"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":346,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"到院前心肺停止的病患在到院前回復自然心律的比例是屬於品質測量三大構面中的哪一面？","options":{"A":"結構面","B":"過程面","C":"結果面","D":"起始面"},"answer":"C","manualChapter":"CH09"},{"id":347,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"有健康的救護技術員，才能有健全的緊急醫療救護系統，為了保持身心健康，您接受定期體檢，養成良好的飲食與運動習慣，流感季節期間接受疫苗注射，並定期接受胸部X光篩檢，在工作中遇到無法排解的壓力，會尋求心理諮商來協助，以下有關疾病自然史與三段五級預防，下列敘述何者為非？","options":{"A":"「良好的飲食與運動習慣」屬於初段預防","B":"「流感季節期間接受疫苗注射」是在疾病的可感受期提供保護","C":"「定期接受胸部X光篩檢」屬於次段預防","D":"「尋求心理諮商協助」是屬於健康促進"},"answer":"D","manualChapter":"CH03"},{"id":348,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"王先生是一位肺癌末期的病患，因而早已預立不施行急救的意願書，您接獲家人報案後至現場，現場家屬表示王先生由於久病厭世，服用大量嗎啡企圖自殺，初步評估:病人意識不清GCS E1V2M4，成針孔瞳孔，呼吸次數8/分鐘，血氧濃度80%，現場家屬很多，但各持一方意見，有些要你趕快送醫，有些則希望遵從患者DNR的遺願阻止你送醫，下列敘述何者為是？","options":{"A":"遵從病患自主，解釋後不予送醫","B":"病患有自殺行為，採強迫同意，強制送醫","C":"依現場家屬在安寧療護法的順位（配偶、成年子女、父母⋯·），決定送醫與否","D":"請現場家屬盡速討論，待家屬有共識後，再決定是否送醫"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":349,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"有關2001年，美國國家醫學研究院（IOM）訂出醫療照護品質的六大面向和目標，何者為非？","options":{"A":"病患為中心（Patient-centeredness）","B":"有效（Effectiveness）","C":"效率（Effliciency）","D":"預後（Prognosis）"},"answer":"D","manualChapter":"CH09"},{"id":350,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"某縣市政府消防局救護科為了提升高級救護技術員到院前氣管内插管成功率，除進行標竿學習外，亦同時邀請高級救護技術員針對插管失敗原因進行分析，以作為後續教育訓練的參考。請問分析過程中，你會使用下列何種圖表，最方便清楚表達插管失敗各個原因百分比所占的比率高低，得以針對重點項目，提出改善插管成功率之教育訓練計畫?","options":{"A":"因果圖（Cause and effect diagram）","B":"流程圖（Flow chart）","C":"柏拉圖分析（Pareto analysis）","D":"組織圖（Organizational chart）"},"answer":"C","manualChapter":"CH09"},{"id":352,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"緊急醫療救護體系的醫療指導制度（EMS Medical Director）指導型式，按照時序，有三種方式，下列何者為非？","options":{"A":"救護技術員的教育訓練屬於前瞻性（prospective/offline）醫療指導模式的一種","B":"救護紀錄表回顧，屬於回溯性（retrospective/offline）醫療指導模式·相較其他模式，比較容易進行","C":"無線通訊指示，屬於即時性（concurrent/online）醫療指導模式，可以直接反映緊急救護品質，省時又省力","D":"預立醫療流程，屬於前瞻性（prospective/offline）醫療指導模式，可以事前確保人員的品質與救護流程的正確性"},"answer":"C","manualChapter":"CH02"},{"id":354,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"有關緊急醫療救護系統下列何者為非？","options":{"A":"緊急醫療救護（Emergency Medical Service-EMS），指針對急重症的傷病患，在緊急傷病的現場、就醫的途中、乃至到達醫院急診部門所提供的醫療救護服務·在社區提供這些服務，結合各個要素，所成立的一套體系，則稱之為緊急醫療救護系統（Emergency Medical Services Systems-EMSS）","B":"救護技術員（Emergency Medical Technicians），簡稱為EMT，為受過不同等級訓練與授權的救護技術人員。作為緊急醫療救護的第一反應人員，或成為醫師在到院前救護的延伸（physician extenders），是緊急醫療救護體系的重要骨幹","C":"緊急醫療救護指揮中心（Emergency Medical Dispatch Center），可以透過有線與無線通訊，網際網路，地理資訊，來結合民眾的緊急救護需求，以及到院前救護和醫療資源。達到適當的傷病患，以適當的方式，在適當的時間，送達適當醫療機構的目的","D":"優先派遣（Priority Dispatch）是根據各地消防局訂定之關鍵問題（key questions）的詢問，在最短時間內派遣救護團隊前往現場進行救護"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":355,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"有關預防救護車意外，下列何者為非？","options":{"A":"盡情運用閃光與鳴笛","B":"適當的救優先派遣·救護案件，並非全是危急個案·非危急個案，則一般反應即可","C":"安全通過路口","D":"注意現場停車安全，必要時做安全警戒"},"answer":"A","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":356,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"下列何者非『過程面』之緊急救護體系品管指標？","options":{"A":"疑似因心疾病引起胸痛病患，有多少比例接受心電圖檢查","B":"出勤模式是否依據「緊急醫療救護派遣規則系統」","C":"實行氣管插管之傷病患中，誤插入食道但未被發現之比例為何","D":"每一千次出勤之交通事故比例"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":357,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"現代緊急醫療救護的濫觴，自於何種醫學？","options":{"A":"街道醫學","B":"重症醫學","C":"急診醫學","D":"軍陣醫學"},"answer":"D","manualChapter":"CH01"},{"id":358,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"下列關於台灣地區緊急醫療救護系統的描述，何者為非？","options":{"A":"突發性心跳停止，存活率每分鐘下降7~10%，因此採取儘速送醫（Load and Go）模式","B":"台灣的緊急醫療救護體系人力組成設計，是屬於北美體系（Anglo-American system）","C":"緊急醫療救護體系中的救護人員，包括醫師、護理師、及救護技術員","D":"台灣急救責任醫院分為三級，分別為一般級、中度級、及重度級"},"answer":"A","manualChapter":"CH01"},{"id":359,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"有關回溯性醫療指導（Retrospective Medical Direction）模式的敘述，下列何者為非？","options":{"A":"容易進行","B":"較不費時費力","C":"可以及時阻止錯誤發生","D":"是救護品質管理項目之一"},"answer":"C","manualChapter":"CH02"},{"id":360,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"有關醫學倫理的四個原則，最基本與最重要的原則為何？","options":{"A":"自主原則（Respect for Autonomy）","B":"不傷害原則（Do No Harm）","C":"行善原則（Beneficence）","D":"正義原則（Justice）"},"answer":"B","manualChapter":"CH03"},{"id":361,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"意外針扎後，門診追蹤檢驗有無感染受滋病，為疾病自然史與三段五級預防中的？","options":{"A":"初段預防","B":"次段預防","C":"三段預防","D":"特殊保護"},"answer":"B","manualChapter":"CH03"},{"id":362,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"下列敘述有關於緊急救護業務過失的構成要件，何者為非？","options":{"A":"有進行救護處置的義務","B":"救護處置未達標準","C":"對病患或他人造成傷害","D":"造成的傷害與所採取的救護處置無明顯因果關係"},"answer":"D","manualChapter":"CH04","matchedChapters":["CH04"]},{"id":363,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"下列關於品質管理的三大構面分析，何者為非？","options":{"A":"每一千次出勤之交通事故（EMS crashes）比例，屬於「過程面」","B":"疑似因心臟疾病引起之胸痛病患，有多少比例接受阿斯匹靈（aspirin）治療，屬於「過程面」","C":"EMS人員抵達現場後，若傷病患發生心肺功能停止（cardiac arrest），則傷病患能存活至離開急診部門及傷病患能存活至離開醫院之比例，屬於「過程面」","D":"實行氣管插管之傷病患中，誤插入食道但未被發現，屬於「過程面」"},"answer":"C","manualChapter":"CH09"},{"id":364,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"救護技術員執行業務時常會造成職傷害，以下何者為非？","options":{"A":"注射藥物時若發生針扎事件，會導致A型或C型肝炎，甚至HIV的感染可能性","B":"姿勢不良的搬運常會造成背痛，搬運過重傷患時建議以輔具協助","C":"若有暴露到水痘患者，僅配置口罩與手套無法保護自身安全而不被傳染","D":"執行業務導致之創傷後壓力症候群，為救護技術員職業傷害之一"},"answer":"A","matchedChapters":["CH05"],"manualChapter":"CH05"},{"id":365,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"醫療指導醫師每月到大隊主持案例討論會，針對案例内容與救護技術員進行一問一答的即時諮詢與討論，這是在進行那一類的醫療指導？","options":{"A":"前膽性","B":"即時性","C":"回溯性","D":"研究性"},"answer":"C","manualChapter":"CH02"},{"id":366,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"我國緊急醫療救護法，所指緊急醫療救護人員，以下何者為非？","options":{"A":"第一反應人員（First responder）","B":"護理人員","C":"救護技術員","D":"醫師"},"answer":"A","manualChapter":"CH01"},{"id":367,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"緊急救護之優先派遣，是以何者為主要判定優先與否之依據？","options":{"A":"病患年齡","B":"關鍵問題","C":"求救者之緊張程度","D":"求救者認定之嚴重度"},"answer":"B","manualChapter":"CH07"},{"id":368,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"民眾接觸緊急醫療救護系統的第一道窗口為何？","options":{"A":"第一反應人員","B":"緊急救護派遣員","C":"到現場之救護技術員","D":"旁觀者"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":369,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"何者不是緊急救護醫療指導醫師的工作範疇？","options":{"A":"緊急醫療救護體系的整體規劃","B":"教育訓練","C":"督導考核緊急救護派遣員","D":"救災救指揮中心值勤"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":370,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"緊急救護之「反應時間間距（Response Time Interval）」應為？","options":{"A":"以救災救護指揮中心接到電話至救護人員到現場之時間間距計算","B":"以通知出勤至救護人員到達傷病患身旁之時間間距計算","C":"以救災救護指揮中心接到電話至救護人員到達傷病患身旁之時間間距計算","D":"以出勤至救護人員到達傷病患身旁之時間間距計算"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+
+    const FAV_KEY = "emtp_favorite_question_ids";
+    function getFavorites() {
+      try {
+        const data = localStorage.getItem(FAV_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function isFavorited(id) {
+      return getFavorites().includes(id);
+    }
+    function toggleFavorite(id) {
+      let favs = getFavorites();
+      const idx = favs.indexOf(id);
+      let added = false;
+      if (idx > -1) {
+        favs.splice(idx, 1);
+      } else {
+        favs.push(id);
+        added = true;
+      }
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      } catch (e) {}
+      return added;
+    }
+    function updateFavBtn(id) {
+      const favBtn = document.getElementById("fav-btn");
+      if (!favBtn) return;
+      const fav = isFavorited(id);
+      favBtn.textContent = fav ? "★" : "☆";
+      favBtn.style.color = fav ? "#f59e0b" : "#94a3b8";
+      favBtn.title = fav ? "已加入我的最愛 (點擊移除)" : "加入我的最愛 (點擊加入)";
+    }
+    function handleReviewFav(btn, id) {
+      const isFav = toggleFavorite(id);
+      btn.textContent = isFav ? "★" : "☆";
+      btn.style.color = isFav ? "#f59e0b" : "#94a3b8";
+    }
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+
+    const favBtnEl = document.getElementById("fav-btn");
+    if (favBtnEl) {
+      favBtnEl.addEventListener("click", () => {
+        const q = questions[currentQuestionIndex];
+        if (!q) return;
+        toggleFavorite(q.id);
+        updateFavBtn(q.id);
+        favBtnEl.style.transform = "scale(1.35)";
+        setTimeout(() => { favBtnEl.style.transform = "scale(1)"; }, 150);
+      });
+    }
+
+    function startQuiz() {
+      if (!questions || questions.length === 0) {
+        alert("目前沒有可測驗的題目！請先將題目加入收藏。");
+        return;
+      }
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      updateFavBtn(q.id);
+      
+      const catDiv = document.getElementById("question-category");
+      if (catDiv && ('第一章 系統運作與品質管理 (2015-2018)'.includes('隨機') || '第一章 系統運作與品質管理 (2015-2018)'.includes('最愛'))) {
+          catDiv.style.display = "block";
+          catDiv.textContent = q.manualChapter ? "分類：" + q.manualChapter : "分類：未分類";
+      }
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               if (q.multiAnswer) {
+                 btn.classList.add("multi-correct");
+                 html += ' <span style="float:right; font-weight:bold; color:#854d0e;">✓ 正確答案 (官方複選: ' + q.multiAnswer + ')</span>';
+               } else {
+                 btn.classList.add("correct");
+                 html += ' <span style="float:right;">✓ 正確答案</span>';
+               }
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        const curExp = q.explanation || q.analysis;
+        if ((isReviewMode || selectedAnswers[index] !== null) && curExp) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + curExp.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = (currentQuestionIndex === questions.length - 1) ? "結束作答" : "錯題回顧";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      let scoreHtml = "";
+      if ('第一章 系統運作與品質管理 (2015-2018)'.includes('隨機')) {
+          const scorePerQuestion = questions.length === 25 ? 4 : (questions.length === 50 ? 2 : 0);
+          const totalScore = correctCount * scorePerQuestion;
+          scoreHtml = "<br><br><span style='color: #0369a1; font-size: 1.5rem; font-weight: bold;'>測驗分數：" + totalScore + " 分</span>";
+      }
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題" + scoreHtml;
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   if (q.multiAnswer) {
+                      liClass = "is-multi-correct";
+                      label = " (正確答案 - 官方複選: " + q.multiAnswer + ")";
+                   } else {
+                      liClass = "is-correct";
+                      label = " (正確答案)";
+                   }
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          const reviewExp = q.explanation || q.analysis;
+          if (reviewExp) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + reviewExp.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          const favState = isFavorited(q.id);
+          const favStar = favState ? '★' : '☆';
+          const favColor = favState ? '#f59e0b' : '#94a3b8';
+          div.innerHTML = '<div class="review-question" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">' +
+            '<div>' + (i + 1) + '. ' + q.question + '</div>' +
+            '<button type="button" onclick="handleReviewFav(this, ' + q.id + ')" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; color: ' + favColor + '; padding: 0 4px; flex-shrink: 0;" title="加入/取消我的最愛">' + favStar + '</button>' +
+          '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

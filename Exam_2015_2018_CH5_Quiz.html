@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    .option-btn.multi-correct {
+      background-color: #fef08a !important;
+      border-color: #eab308 !important;
+      color: #854d0e !important;
+      font-weight: 600;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-multi-correct { background: #fef9c3; border-color: #fde047; color: #854d0e; font-weight: 600; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 6.2rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第五章 創傷急症 (2015-2018)</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.5rem; font-weight: bold; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：65 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="fav-btn" type="button" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 4px; transition: transform 0.15s ease;" title="加入/取消我的最愛">☆</button>
+          <span class="stat-badge" id="score-text">分類：2015-2018 第五章</span>
+        </div>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1.5rem;">
+        <div id="question-category" style="display: none; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-align: left;"></div>
+        <div class="source-tag" id="source-tag" style="margin-top: 0; margin-left: auto;">來源: 無</div>
+      </div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":791,"source":"第五章 創傷急症(2015-2018).doc","question":"對於胸部創傷之陷阱及注意事項，下列何者為是？","options":{"A":"懷疑主動脈不完全破裂時，繼續積極處理不需考慮轉診至有能力處理的醫院","B":"插入胸管後仍有持續性氣胸，且肺臟無法擴張時，可先不用懷疑氣管.支氣管之破食道破裂","C":"橫隔破裂容易診斷，除了會影響呼吸功能外，更可能造成移位到胸腔之腹內器官缺血.壞死及破裂","D":"肋骨骨折之傷患可給予止痛藥物以免影響呼吸功能，造成進一步之肺部併發症及腸胃問題"},"answer":"D","manualChapter":"CH28"},{"id":792,"source":"第五章 創傷急症(2015-2018).doc","question":"關於壓碎性傷害，以下敘述何者為非？","options":{"A":"肢體長期壓迫，導致受傷肌肉釋放毒性物質引起急性腎衰竭","B":"可能出現高CK.高鉀.高磷.低鈣的情形","C":"可以大量輸液，以及鹼化尿液來治療","D":"受傷後數個小時內，CK值不高即可排除"},"answer":"D","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":794,"source":"第五章 創傷急症(2015-2018).doc","question":"幼兒的各項受傷中，可能懷疑有兒童虐待的情形何者為非？","options":{"A":"Corner骨折","B":"Epiphyseal-metaphyseal的肋骨骨折","C":"旋轉性上臂肱骨骨折","D":"二次以上的肘關節脫臼"},"answer":"D","manualChapter":"CH48","matchedChapters":["CH48"]},{"id":795,"source":"第五章 創傷急症(2015-2018).doc","question":"某一工人在建築工地倒塌中被卡在瓦礫中，約6個小時後被救，送至急診室，經檢查並無明顯骨折，但傷患下半身酸痛無力，再來應做那些檢查？","options":{"A":"電腦斷層","B":"血糖測定","C":"血液生化.CPK及Myoglobulin測定","D":"神經傳導及肌電圖檢查"},"answer":"C","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":796,"source":"第五章 創傷急症(2015-2018).doc","question":"五十歲男性，因車禍被送入急診，意識清楚，自訴駕車不慎撞擊及路墩，並抱怨胸痛，此時您認為下列何種病史最具診斷價值？","options":{"A":"是否使用安全帶","B":"方向盤是否變形","C":"開車前是否喝酒","D":"是否邊開車邊使用行動電話"},"answer":"B","manualChapter":"CH22"},{"id":797,"source":"第五章 創傷急症(2015-2018).doc","question":"20歲男性，騎機車發生車禍，送至急診室時，血壓70／50 mmHg、意識模糊、對痛有反應、喃喃自語、頭皮有血腫，經大量輸液後，血壓90/50 mmHg，皮膚仍然溼冷，微血管再填充時間為5秒，電腦斷層顯示額葉散在性的出血，下列何者處置為佳？","options":{"A":"給予mannitol，積極治療顱內壓昇高，以期治療低血壓","B":"給予昇壓劑，以提高腦灌注壓，改善腦部灌流","C":"安排胸部X光，與腹部超音波，積極地找尋其他的出血","D":"安排緊急開顱手術"},"answer":"C","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":798,"source":"第五章 創傷急症(2015-2018).doc","question":"KTV發生打架互毆事件，其中一傷患自行步人急診，主訴腹部被棒球鋁棒重擊後，疼痛異常，經你檢查此腹部鈍傷的傷患後，安排腹部Ⅹ-光檢查，你於X-光影像中發現腰肌影像（psoas shadow）旁有游離空氣（free air），此時要高度懷疑傷患何處受傷？","options":{"A":"脾臟","B":"十二指腸","C":"胰臟","D":"空腸"},"answer":"B","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":799,"source":"第五章 創傷急症(2015-2018).doc","question":"高女士40歲，走樓梯時不慎滑倒，經送醫檢查診斷為中央脊髓症候群（Central cord syndorme），下列有關此脊髓受傷之敘述中何者為是？","options":{"A":"後脊髓動脈分支的損傷可能是主要原因","B":"下肢運動喪失比上肢嚴重","C":"用steroid治療，先Solu-medrol 54mg/kg滴注，之後再持續23小時以3.0 mg/kg/hr滴注","D":"恢復時依先後次序為下肢.膀胱.近側上肢.手"},"answer":"D","manualChapter":"CH27"},{"id":800,"source":"第五章 創傷急症(2015-2018).doc","question":"關於創傷到院前救護的觀念，以下何者為是？","options":{"A":"越是嚴重的傷患，越需要就近送醫","B":"良好的到院前創傷救護系統能夠降低的是「不可預防死亡（non-preventable death）」，至於「可預防死亡」，（preventable death）則是要透過公衛手法，例如宣導騎機車使用安全帽，才能降低","C":"創傷出血性休克傷患的確定照護（Definite care）是緊急輸血","D":"現場創傷檢傷比較能夠容忍過度檢傷（over triage）而不是檢傷不足（under triage）"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":801,"source":"第五章 創傷急症(2015-2018).doc","question":"關於損傷預防的3個E，以下敘述何者為是？","options":{"A":"有權制定損傷預防相關法規的官員或議員都是被教育（education）的對象之一","B":"法律強制（enforcement）的效果最差，若非不得已，不建議使用","C":"緊急狀態宣告（emergency），針對天災人禍，對適用地區宣告緊急狀態，有助於避免傷害的發生","D":"安全設計（engineering）的例子：以科學方法測量煞車痕，推算車禍發生時的車速來幫助釐清肇事責任"},"answer":"A","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":802,"source":"第五章 創傷急症(2015-2018).doc","question":"初步評估的目標是抓出可能立即致死之創傷狀況，以下敘述何者為是？","options":{"A":"創傷性主動脈剝離死亡率極高，是以需在初度評估診斷並予以治療","B":"心包膜填塞的理學檢查體徵包括雙側頸動脈怒張與遙遠模糊的心音","C":"左側張力性氣胸的會造成左側單側的頸靜脈怒張，右側張力性氣胸則是造成右側單側頸靜脈怒張","D":"開放性氣胸若導致傷患死亡，其機轉是因為出血性休克所致"},"answer":"B","manualChapter":"CH28"},{"id":803,"source":"第五章 創傷急症(2015-2018).doc","question":"貴單位的醫療指導決定明年1月1日起將創傷現場檢傷送創傷中心的條件，由GCS＜13改成≦14，假設醫療水準與人口組成，交通狀況均相似的假設下，請問您預估明年度的送醫狀況相較於今年度，下列敘述何者為是？","options":{"A":"會有更多的ISS≧16（嚴重創傷）傷患因為這個改變被正確送到創傷中心","B":"明年度創傷中心收治的總人數會下降","C":"會有更多的ISS＜16傷患被正確送到就近急救責任醫院","D":"不會有影響"},"answer":"A","manualChapter":"CH25"},{"id":804,"source":"第五章 創傷急症(2015-2018).doc","question":"關於創傷休克的敘述，以下何者為是？","options":{"A":"頸靜脈不可能同時又怒張又塌陷，所以低血溶性休克不可能跟阻塞性休克同時發生","B":"若研判創傷傷患有心因性休克，需立刻給予傷患阿斯匹靈（Aspirin）300 mg口服","C":"顱內硬腦膜上出血最容易造成神經性休克","D":"出血性休克第二期為失償性休克，常見的理學檢查體徵是脈搏壓變小"},"answer":"D","manualChapter":"CH26"},{"id":805,"source":"第五章 創傷急症(2015-2018).doc","question":"自火場救出的傷患二隻手臂均有二度及三度灼傷，並主訴頭痛噁心，以下之敘述？","options":{"A":"初評時，傷患能對話，研判呼吸道正常，以排除吸入性灼傷的可能","B":"常規為傷患量測血壓及血氧值，以決定是否進行氧氣治療","C":"病史詢問除應依循一般通則外，現場資訊也很重要。例如：現場可能的燃燒物為何？是否有涉及化學物品的燃燒或接觸等","D":"傷患屬於嚴重灼傷，應通報為重大創傷個案並送往創傷中心治療"},"answer":"C","manualChapter":"CH31"},{"id":806,"source":"第五章 創傷急症(2015-2018).doc","question":"關於創傷型式與機轉之敘述何者為是？","options":{"A":"高級救護技術員除應依循創傷初步與二度評估處置原則處置傷傷患外，特別強調創傷機轉的詢問，以判斷潛藏傷害並預防併發症發生","B":"爆炸傷是一種複合性的傷害，當爆炸發生時會有四階段的受傷機轉，首當其衝是呼吸道的吸入性傷害，屬於第一階段傷害，因此處置爆炸傷的傷患都必須立即穩定其呼吸道","C":"高速公路上，自小客車失事撞上右側護欄，車身嚴重擠壓變形，高級救護技術員到達現場評估脫困後之傷患，若其生命徵象穩定且無胸腹部疼痛，就不須後送創傷中心","D":"根據國外相關文獻統計，高處墜落是造成鈍挫傷最主要的原因，因其直接造成骨盆骨折及骨盆腔內器官之損傷"},"answer":"A","manualChapter":"CH25"},{"id":807,"source":"第五章 創傷急症(2015-2018).doc","question":"關於腹部創傷之敘述何者為是？","options":{"A":"傷患被他人用尖刀刺入右前胸第6肋間位置，這個高度已經沒有腹部臟器，不會造成腹內傷害","B":"後腹腔創傷之體徵包括Turner sign（腰部瘀青）與Cullen sign（肚臍周圍瘀青），為早期病程之常見發現","C":"傷患被他人以步槍射擊，彈孔出現於右上背肩胛骨脊，此位置已經高於後腹腔，不會造成腹內傷害","D":"腹部創傷是所有創傷中最容易被忽略或延誤者。尤其是當傷患意識不清.頸椎受傷導致感覺異常.其他部位有嚴重傷勢.老年人或兒童，均可能影響理學檢查的正確性"},"answer":"D","manualChapter":"CH29"},{"id":808,"source":"第五章 創傷急症(2015-2018).doc","question":"評估疑似頭部創傷意識不清患者，檢查患者二側瞳孔對光反應時，發現單側瞳孔放大，對光反應消失，以下研判及處置何者為是？","options":{"A":"傷患可能同時出現Cushing's triad，造成收縮壓升高.脈搏變快以及不規則的呼吸","B":"可能為視神經遭到壓迫","C":"嚴判顱內壓升高，應立即予以過度換氣，目標是PaC02＜30 mmHg","D":"很快的傷患可能會呈現GCS評估中，M3去大腦皮質（Decorticate）或M2去大腦（Decerebrate）姿勢"},"answer":"D","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":809,"source":"第五章 創傷急症(2015-2018).doc","question":"四肢肌肉若遭受外力創傷，可能產生腔室症候群或壓碎傷症候群（Crush syndrome），關於兩者以下敘述何者為是？","options":{"A":"腔室症候群可能起因於壓碎傷症候群","B":"開放性骨折因為已經打破腔室，所以不會造成腔室症候群","C":"高血鉀是腔室症候群患者常見的致命性併發症，因此應給予大量輸液與監測心電圖","D":"壓碎傷症候群一旦發生，該患處肢體一定不保，因此治療方針是儘速截肢以挽救生命"},"answer":"A","manualChapter":"CH30"},{"id":810,"source":"第五章 創傷急症(2015-2018).doc","question":"在多重外傷病患之急救時，pulse oximetry為一種非常有用的非侵襲性之工具，被用來偵測血中血紅素氧氣之飽和度。Pulse oximeter的感應器可方便的置於許多體表處。但是下列何處並不適合？","options":{"A":"手指","B":"耳垂","C":"量自動血壓計的四肢","D":"腳趾"},"answer":"C","manualChapter":"CH52","matchedChapters":["CH52"]},{"id":811,"source":"第五章 創傷急症(2015-2018).doc","question":"一名32歲男性病患，因車禍受傷送醫。理學檢查顯示病患的血壓為70/40 mmHg，心跳速率為110/min，昏迷指數為13，呼吸速率為30/min，呼吸道內沒有異物，頸靜脈鼓脹，氣管移到右側，左側呼吸聲降低，腹部稍微鼓脹且有壓痛。此時該做什麼處置？","options":{"A":"插入氣管插管","B":"在左胸側第二肋間，靠近鎖骨中線處迅速插入大號針頭","C":"照胸部X部光","D":"緊急輸血及輸液"},"answer":"B","manualChapter":"CH20"},{"id":812,"source":"第五章 創傷急症(2015-2018).doc","question":"於頭部外傷病人的初期處理，最重要的步驟為：","options":{"A":"保護呼吸道","B":"保持頸椎不隨意移動","C":"維持血壓","D":"控制頭皮出血"},"answer":"A","manualChapter":"CH27"},{"id":814,"source":"第五章 創傷急症(2015-2018).doc","question":"一名28歲男性，因邊走邊玩手機遊戲，穿越馬路時被時速40公里的汽車撞倒，你和分隊同仁到達現場時發現，患者意識清楚但左大腿變型，患者表示左腹部及左下肢疼痛，現場生命徵象如下：體溫36.8，心跳110/min，呼吸25/min，血壓130/85，血氧98%，根據以上描述，下列處置何者較不適當？","options":{"A":"該患者改良創傷指數（RTS）10分，依據此項評估應立即送往創傷中心","B":"患者左腹有受傷疼痛須考慮脾臟損傷併腹內出血，則依休克評估屬第2級休克","C":"因外傷機轉為行人被汽車撞擊且汽車車速達40/小時，依據此項評估應立即轉送創傷中心","D":"若意識清楚且鎖骨以上無外傷，同時無頸部疼動與上肢神經學症狀，可不上頸圈"},"answer":"A","manualChapter":"CH25"},{"id":815,"source":"第五章 創傷急症(2015-2018).doc","question":"針對創傷傷患，臨床上會使用超音波來協助找尋可能之內臟損傷或出血，下列對應何者為非？","options":{"A":"劍突下界面（subxiphoid view）：看是否有心包膜積液","B":"恥骨上界面（suprapubic view）：看骨盆腔是否有積液","C":"右側肋間側面（right intercostal oblique view）：看胰臟周圍是否有積液","D":"左側肋間側面（left intercostal oblique view）：看脾臟周圍是否有積液"},"answer":"C","manualChapter":"CH21","matchedChapters":["CH21"]},{"id":816,"source":"第五章 創傷急症(2015-2018).doc","question":"對於創傷傷患，下列何者處置無法協助改善患者狀況？","options":{"A":"意識不清的患者給予口咽呼吸道（oropharyngeal airway）以暢通呼吸道","B":"氣管斷裂使用氣管內管插管","C":"張力性氣胸使用空針減壓及胸管置入","D":"低血容休克使用大管徑點滴溫暖輸液"},"answer":"B","manualChapter":"CH25"},{"id":817,"source":"第五章 創傷急症(2015-2018).doc","question":"一名小客車駕駛，年約40歲，因市區酒駕自撞護欄，被附近商家報警處理，你與分隊同仁到達現場時，傷患仍困於車內且胸前及腹部有紅腫，在協助拖困上救護車後患者表示頭暈且冒冷汗，還有胸腹部疼痛，此時生命徵象如下：體溫36.2℃、心跳130/min、呼吸22/min、血壓100/80 mmHg、血氧96%，下列評估與處置，何者最不恰當？","options":{"A":"懷疑有腹內出血，應儘早打上點滴，必要時給予生理食鹽水1.000 c.c.快速灌注（normal saline 1.000 c.c. challenge）","B":"因有胸部挫傷，若懷疑心肌挫傷可做心電圖，但不能因檢查延後送醫過久","C":"可能有頸部創傷，在未完全排除前應上頸圈","D":"患者若出現低血壓，對輸液反應不佳，應考慮給予升壓劑"},"answer":"D","manualChapter":"創傷","matchedChapters":["Combine"]},{"id":818,"source":"第五章 創傷急症(2015-2018).doc","question":"燒傷傷患可依據Parkland Formula給予輸液補充，若一位傷患體重60公斤，全身體表面積中10%為一度灼傷，10%為二度灼傷，10%為三度灼傷，則下列評估與處置何者為非？","options":{"A":"前24小時的估算輸液量為7.200mL","B":"灼傷發生後的前8小時輸液流速為150 mL/hr","C":"之後16小時的輸液流速為前8小時的一半","D":"可以視傷患臨床表現調整流速，如出現血壓低，微血管再充填時間延長，小便量減少，可再給予更多輸液補充"},"answer":"A","manualChapter":"CH31"},{"id":819,"source":"第五章 創傷急症(2015-2018).doc","question":"一名50歲左右男性，自約10公尺高處墜落，你與分隊同仁到達現場時，傷患意識清楚，但血壓低合併休克症狀，同時傷患失去對大腸及膀胱的感覺，且合併陰莖持續勃起，此時你認為其休克的原因最可能為？","options":{"A":"心因性休克（cardiogenicshock）","B":"脊髓性休克（spinalshock）","C":"阻塞性休克（obstructiveshock）","D":"敗血性休克（septicshock）"},"answer":"B","manualChapter":"CH26"},{"id":821,"source":"第五章 創傷急症(2015-2018).doc","question":"下列關於腹部創傷傷患的處置，何者為非？","options":{"A":"維持呼吸道暢通，並保護頸椎","B":"給予足夠氧氣，維持血氧濃度95%以上","C":"對於不穩定骨盆骨折患者，給予骨盆固定及適當輸液治療","D":"外露臟器可嘗試一次將其推回腹腔，若失敗則以無菌濕敷料保護，避免因乾燥而壞死"},"answer":"D","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":822,"source":"第五章 創傷急症(2015-2018).doc","question":"頭部外傷導致意識模糊之病患，下列理學檢查何者和顱底骨折最無相關？","options":{"A":"眼眶周圍瘀青","B":"耳後瘀青","C":"疑似腦脊髓液鼻漏","D":"鼻骨斷裂"},"answer":"D","manualChapter":"CH20"},{"id":823,"source":"第五章 創傷急症(2015-2018).doc","question":"一位45歲女性因汽車車禍，汽車翻滾導致同車乘客死亡，傷患被拋出車外，車禍現場傷患意識清醒抱怨嚴重頭痛，血壓130/80 mmHg，心跳每分鐘68次，呼吸次數每分鐘20下，下列何者為是？","options":{"A":"由生命徵象評估應送至創傷中心","B":"由年齡評估應送至創傷中心","C":"由傷害程度評估應送至創傷中心","D":"由創傷機轉評估應送至創傷中心"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":824,"source":"第五章 創傷急症(2015-2018).doc","question":"一位45歲經火場搶救之女性傷患，現場評估發現，身上多處燒燙傷，前胸約有9%二度燒燙傷，後背約有9%三度傷燙傷，雙上肢共約有9%一度燒燙傷，患者約60公斤，請問該傷患在前8小時建議應給予多少輸液？","options":{"A":"2.160 C.C","B":"4.320 C.C","C":"6.480 C.C","D":"3.240 C.C"},"answer":"A","manualChapter":"CH31","matchedChapters":["CH31"]},{"id":825,"source":"第五章 創傷急症(2015-2018).doc","question":"52歲男性傷患，現場機車與汽車對撞，在現場評估病患意識時，病患眼睛需疼痛刺激才可睜開眼睛，口中僅能發出無意義的聲音，但是手卻可以準確撥開同仁的手，而測量生命徵象時發現，傷患：血壓BP = 80/43 mmHg，心率HR = 132/min，體溫BT = 36.7℃，O2 sat血氧濃度= 87%，呼吸速率（R.R）= 30/min，請問依照改良創傷指數（RTS），此傷患之正確RTS是？","options":{"A":"8","B":"9","C":"10","D":"11"},"answer":"B","manualChapter":"CH25"},{"id":826,"source":"第五章 創傷急症(2015-2018).doc","question":"高速撞擊事故中，以下均為高能量機轉，何者為非？","options":{"A":"機動車事故車速每小時64公里以上","B":"行人被車速每小時35公里以上之車輛撞到","C":"撞擊時車輛凹陷達75公分以上","D":"與傷患對邊之車側凹陷達45公分以上"},"answer":"D","manualChapter":"CH25"},{"id":828,"source":"第五章 創傷急症(2015-2018).doc","question":"關於Kehr徵象（Kehr sign）主要為描述下列何種器官受損？","options":{"A":"肝臟","B":"脾臟","C":"小腸","D":"胰臟"},"answer":"B","manualChapter":"CH29"},{"id":829,"source":"第五章 創傷急症(2015-2018).doc","question":"以下針對創傷形式與機轉”的描述，何者為非？","options":{"A":"所謂鈍挫傷係指因外力直接撞擊所造成的傷害。造成傷害的機轉包括壓迫及剪力","B":"刀刺傷屬低能量傷害，可為刀子.玻璃或剪刀等造成，僅會造成穿過部位損傷","C":"爆炸傷是一種複合性的傷害，當爆炸發生時會有四階段的受傷機轉，其中第二階段一被彈出撞擊地面或其他物體","D":"汽車碰撞事故中傷患被彈出車外，且距車體超過一公尺，是屬於高能量機轉，即傀現場生命徵象穩定，亦應視為嚴重多重創傷將其送往最近且最高層級的急救責任醫"},"answer":"C","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":830,"source":"第五章 創傷急症(2015-2018).doc","question":"出血性休克是嚴重創傷傷患最重要的致命原因之一，針對「出血」的描述何者為非？","options":{"A":"大部分外出血肇因於軟組織損傷，且多可以直接加壓方式止血，較少有致命性的出血","B":"體內可能因穿刺傷或鈍傷而出血，血液流失於血管外的體腔內，容易從外觀判定出血","C":"身體為防止持續失血，一些自我防衛機轉如局部血管收縮，血小板凝結，血栓形成，纖維結締組織生長，血管修補等便開始啟動","D":"動脈出血的失血量往往較多，較不易止血，處理不當常會導致低血容性休克；靜脈出血的失血速度相對較慢，止血比較容易"},"answer":"B","manualChapter":"CH25","matchedChapters":["CH25"]},{"id":831,"source":"第五章 創傷急症(2015-2018).doc","question":"35歲男性機車騎士於十字路口自摔，未戴安全帽有頭部外傷，軀幹以及肢體處皆無明顯外傷，當您抵達現場後快速又專業的執行救護評估及處置，以下描述何者為是？","options":{"A":"在與傷患溝通時，患者自覺聽力受損但耳部外觀正常，要小心顱底骨折的可能","B":"眼眶周圍發覺有類似浣熊眼（Raccoon's eyes）瘀青則要懷疑有中顱底骨折","C":"頭皮一處15公分的撕裂傷正在流血，等到二評時再來包紮止血就好","D":"自行走上救護車，卻在送醫途中暫時失去意識，可能是硬腦膜下出血的清明期表現"},"answer":"A","manualChapter":"CH25"},{"id":832,"source":"第五章 創傷急症(2015-2018).doc","question":"45歲女性開車停紅綠燈時遭後方小貨車撞擊後受困於駕駛座上，有繫安全帶但安全氣啟動，傷患的雙腳夾困於儀表板跟座椅之間但無明顯外出血。您是抵達現場的高級救彟術員。在救助隊建立脫困途徑的同時，您被指派執行現場救護處置。下列描述何者為非？","options":{"A":"接近傷患前先與指揮官充分溝通，確保環境安全如車輛漏油控制，車輛已熄火等","B":"依據該創傷機轉，傷患頸部可能因為過度伸展的作用力而造成損傷","C":"體感溫暖，血壓為76/55 mmHg，心跳為每分鐘78下，出血性休克最有可能要立刻建立靜脈輸液來治療","D":"經過25分鐘後終於將傷患脫困而出，雖屬危急個案，但不需要將止血帶綁於雙腳夾傷處上方"},"answer":"C","matchedChapters":["CH25"],"manualChapter":"CH25"},{"id":833,"source":"第五章 創傷急症(2015-2018).doc","question":"72歲老農修理自家水塔時不慎由三公尺高處跌落，鄰居報案後十分鐘鄰近分隊救護車抵達現場。傷患自述左上背著地後左手因疼痛無法舉起，左胸痛而且呼吸困難，頭頸部沒有受傷，其他肢體無明顯外傷；理學檢查上發現身體濕冷，左側呼吸音不明顯。現場生命徵象如下BP：152/102 mmHg、HR：112 beat/min、SpO2：88%，當傷患送至醫院後立刻推入急救區進行急救處置。請問下列描述何者為非？","options":{"A":"當時老農很痛也很難配合檢查，可視為危急個案，給予高濃度氧氣治療，趕緊送醫","B":"在救護車上，老農的氣管偏向右側，應考慮張力性氣胸","C":"老農的老婆說他心臟不好，如果雙手橈動脈脈搏不對稱，創傷性主動脈剝離也是有可能","D":"如果老農頸靜脈怒脹而且還咳血，就能判定是左側大量血胸"},"answer":"D","manualChapter":"創傷"},{"id":834,"source":"第五章 創傷急症(2015-2018).doc","question":"關於腹部臟器創傷，下列描述何者為非？","options":{"A":"胰臟損傷很常見，最常見的機轉為外力直接撞擊上腹部壓迫胰臟撞擊脊椎所致，例如向盤或機踏車把手直接撞擊上腹部症狀包括上腹部瘀青.傷口，上腹痛並放射至背部","B":"脾臟為腹部鈍挫傷中最常見的臟器損傷，約佔40～55%。60%傷患有Kehr徵象，即疼痛會放射至左肩","C":"肝臟為腹部最大的實質器官，為腹部刀刺傷中最常受損的器官，約佔40%。部分傷患疼痛會放射至右肩。小腸為腹部槍傷中最常見的臟器損傷，約佔40%","D":"小腸損傷初期主要症狀為腹部疼痛，理學檢查沒有腹膜炎徵象並不能排除小腸損傷的可能"},"answer":"A","manualChapter":"CH29","matchedChapters":["CH29"]},{"id":835,"source":"第五章 創傷急症(2015-2018).doc","question":"地震獲救的傷患中，有多人因為壓碎傷症候群（Crush syndrome）需住院治療，尤其是在事故後4到6小時以後才被脫困救出的傷患。該類傷患可能於斷瓦殘壁間，在肢體被重物壓迫的狀態存活數天，但卻可能在重物被移除，脫困數分鐘內死亡。下列描述何者為非？","options":{"A":"受壓迫的肢體突然被鬆開時，會造成以下現象：休克(低血壓)、急性腎功能衰竭跟緊急的代謝異常","B":"在脫困出傷患、鬆開受壓迫的肢體前，應給予大量靜脈輸液","C":"監測心律，注意有無高血鉀之變化，必要時尋求醫療指導，使用碳酸氫鈉輸注控制高血鉀、酸血症並鹼化尿液減低腎衰竭","D":"注意有無其他併發症，如腔室症候群、肢體無力及麻痺是腔室症候群最早期的症狀"},"answer":"D","manualChapter":"CH30"},{"id":836,"source":"第五章 創傷急症(2015-2018).doc","question":"電傷害是電流通過身體組織所造成的傷害，而其嚴重度端看電流本身的強度與性質、接觸電流的時間長短、電流經過的身體部位來決定。依電源的不同可分為：閃電電擊、高壓電及家用電，下列描述何者為是？","options":{"A":"閃電電擊的死亡率最高；高壓電所造成的軟組織併發症最多，且住院時間最長","B":"高壓電電傷害的致命性心律不整通常可在12小時內完全緩解，使用連續性的心電圖監測不宜超過一天","C":"電阻以骨骼最低，血管.肌肉.皮膚介於中間，神經最高。傷害的嚴重度跟單位肢體截面積與通過的電流密度相關","D":"表皮燒傷遠比深部的軟組織傷害更多更嚴重，越是高壓電所造成的傷害越是如此"},"answer":"A","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":837,"source":"第五章 創傷急症(2015-2018).doc","question":"有關重大創傷（Major Trauma）的敘述，以下何者為是？","options":{"A":"所有孕婦或小兒創傷，都應視為重大創傷","B":"傷患的昏迷指數以及生命跡象都正常，則可排除重大創傷","C":"應後送到最近的任何醫院，以讓傷患儘快獲得初步治療","D":"應後送到最近的創傷中心，以讓傷患獲得確定處置改善"},"answer":"D","manualChapter":"CH49"},{"id":840,"source":"第五章 創傷急症(2015-2018).doc","question":"所謂勒福型骨折（Le-Fort Fracture）指的是何處的骨折？","options":{"A":"頭部骨折","B":"頸部骨折","C":"掌骨骨折","D":"臉中心區域骨折"},"answer":"D","manualChapter":"CH27","matchedChapters":["CH27"]},{"id":841,"source":"第五章 創傷急症(2015-2018).doc","question":"有關骨折或脫臼的固定，以下配對何者為非？","options":{"A":"肩關節脫臼，可用三角巾固定","B":"髖關節脫臼，可用骨盆固定帶","C":"骨盆骨折，可用KED固定","D":"股骨頸骨折，可用板夾或副木固定"},"answer":"B","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":842,"source":"第五章 創傷急症(2015-2018).doc","question":"您是被派遣去火災現場支援救護的高級救護技術員，據無線電通報，其他同仁已從火場救出兩名中年女性OHCA傷患。請問以下敘述，何者為非？","options":{"A":"要準備一氧化碳偵測器","B":"要準備比平常大半號的氣管內管（如8.0及8.5號）","C":"要準備AED及急救藥物包","D":"要準備比平常多的生理食鹽水及紗布"},"answer":"B","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":843,"source":"第五章 創傷急症(2015-2018).doc","question":"有關斷指的處理，以下現場處理順序何者為是？","options":{"A":"用生理食鹽水紗布濕敷→放入塑膠袋內→放入冰水之中→送往醫院","B":"用無菌紗布泡稀釋Epinephrine包起來→放入塑膠袋內→把冰水倒入塑膠袋內→送往醫院","C":"用無菌紗布包起來放入塑膠袋內→把常溫水倒入塑膠袋內→送往醫院","D":"不須包覆，直接放入塑膠袋內→倒入冰塊→送往醫院"},"answer":"A","manualChapter":"CH26","matchedChapters":["CH26"]},{"id":844,"source":"第五章 創傷急症(2015-2018).doc","question":"上圖顯示轎車駕駛被砂石車從後追撞，掀開上衣後發現有安全帶的明顯勒痕。以下敘述，何者為非？","options":{"A":"依據該創傷機轉，傷患可能有頸椎損傷","B":"依據該創傷機轉，傷患可能有肩關節脫臼","C":"依據該創傷機轉，傷患可能有肝臟破裂","D":"依據該創傷機轉，傷患可能有橫膈膜疝氣"},"answer":"B","manualChapter":"CH25","matchedChapters":["NeedImage"],"image":"題庫圖片/844.png"},{"id":845,"source":"第五章 創傷急症(2015-2018).doc","question":"40歲男性，騎摩托車與卡車相撞，主訴胸痛。其心跳每分鐘85下，血壓110/80 mmHg，呼吸速率每分鐘24次；血氧：90%，意識清醒。理學檢查：氣管無偏移，呼吸音：右側音'無呼吸音減弱，腹部無明顯壓痛。以下描述何者為是？","options":{"A":"需立即靜脈給予2,000 cc生理食鹽水","B":"可能合併肋骨骨折","C":"須立即給予針刺減壓","D":"院後需常規給予胸管治療"},"answer":"B","manualChapter":"創傷"},{"id":846,"source":"第五章 創傷急症(2015-2018).doc","question":"50歲男性，騎摩托車與汽車相撞，其心跳每分鐘120次，血壓80/50 mmHg，呼吸速率每分鐘24次；血氧90%，意識E2M5V4。理學檢查：頸靜脈怒張，氣管無偏移，呼吸音正常，腹部無明顯壓痛。傷患吸氣時，脈搏明顯變得更微弱。以下描述何者為非？","options":{"A":"可靜脈給予1,000cc生理食鹽水灌注","B":"使用超音波對於診斷可能有幫忙","C":"需送到創傷中心","D":"應立即給予胸管治療"},"answer":"D","manualChapter":"CH20"},{"id":847,"source":"第五章 創傷急症(2015-2018).doc","question":"50歲男性，騎摩托車撞擊安全島，其心跳每分鐘110下，血壓120/50 mmHg，呼吸速率每分鐘18次，血氧98%，意識清醒。理學檢查發現氣管無偏移，呼吸音正常，腹部無明顯壓痛。左膝及大腿明顯腫脹變形，左大腿上有個3公分開放性傷口在噴血。以下描述何者為非？","options":{"A":"須注意遠端足背動脈有無脈搏","B":"膝脫臼常造成後脛神經受傷","C":"固定骨折處可以減少疼痛","D":"應直接使用止血帶"},"answer":"D","manualChapter":"創傷"},{"id":849,"source":"第五章 創傷急症(2015-2018).doc","question":"60歲男性.騎摩托車與汽車相撞，現場意識清楚，主訴頭痛，但在救護車上突然意識變化。意識E2M5V1，其心跳每分鐘60下，血壓180/90 mmHg，呼吸速率每分鐘10次，血氧90%，理學檢查：瞳孔不等大（左3/右5），氣管無偏移，呼吸音正常。以下描述何者為非？","options":{"A":"暢通呼吸道並給予氧氣","B":"可考盧給予過度換氣","C":"病患表現為清明期，為硬腦膜上出血的典型症狀","D":"血壓太高，需立即降血壓"},"answer":"D","manualChapter":"創傷"},{"id":850,"source":"第五章 創傷急症(2015-2018).doc","question":"40歲男性，騎摩托車與貨車撞擊，主訴腹痛，同時有聲音沙啞。病患心跳每分鐘120下，血壓70/50 mmHg，意識E4V5M6，呼吸速率每分鐘30次，血氧80%。理學檢查：頸部皮下氣腫，頸靜脈無怒張，氣管無偏移，右側呼吸音減弱，腹部明顯壓痛。以下處置，何者為優先？","options":{"A":"維持呼吸道暢通，評估是否有喘鳴（stridor）","B":"立即給予右側針刺減壓","C":"立即給予靜脈注射1,000cc生理食鹽水","D":"立即給予斷血炎（Transamine，也就是Tranexamic acid）1公克"},"answer":"A","manualChapter":"創傷"},{"id":851,"source":"第五章 創傷急症(2015-2018).doc","question":"根據美國外科醫學會訂定「現場檢傷分類指引」，下列傷患狀況何者不需後送創傷中心？","options":{"A":"3歲小孩從約一公尺高的床上跌落，造成頭部受傷","B":"45歲女性搭乘小客車發生車禍，臉部擦傷，頸部痠痛，小客車駕駛當場死亡","C":"25歲男性機車車禍受傷，目前昏迷指數（GCS）14，呼吸速率22次/分","D":"35歲男性從火場救出，臉部及頭部有多處毛髮燒焦的痕跡"},"answer":"C","manualChapter":"CH25"},{"id":852,"source":"第五章 創傷急症(2015-2018).doc","question":"50歲女性騎機車與小客車擦撞，意識嗜睡，昏迷指數E2V3M5。右大腿明顯腫脹變形。血壓80/40mmHg，脈搏130下/分鐘，血氧濃度為95%。到院前的初步評估及處置，下列何者為是？","options":{"A":"為了保持呼吸道通暢，須立即給予口咽呼吸道（oralpharyngealairway）","B":"評估發現氣管偏移至右側，可能為右側張力性氣胸，需考慮給予右側胸部針刺減壓","C":"初評顯示傷患有休克現象，休克鑑別診斷中，優先考慮出血性休克，需立即給予輸液","D":"神經學評估傷患四肢運動功能正常，不需要施行脊椎保護"},"answer":"C","manualChapter":"創傷","matchedChapters":["Combine"]},{"id":853,"source":"第五章 創傷急症(2015-2018).doc","question":"關外傷病人呼吸道處置，下列何者為非？","options":{"A":"喉罩呼吸管（Laryngeal mask airway，LMA）的置放，可作為困難插管時的選擇，是屬於確切呼吸道（Definitive airway）","B":"需要插氣管內管的病患，如無特殊禁忌，應考慮施行快速程序插管（Rapid Sequence Intubation，RSI）","C":"顏面部嚴重受傷病人，如無法以氣管內管建立呼吸道，應考慮外科呼吸道如環甲切開術（cricothyrotomy）","D":"鼻咽呼吸道可用於半昏迷或仍有喉頭反射（gag reflex）的病人，但疑似顱底骨折的病人應避免使用"},"answer":"A","manualChapter":"CH35"},{"id":854,"source":"第五章 創傷急症(2015-2018).doc","question":"60歲女性騎機車沒有戴安全帽，被砂石車撞倒。檢查時發現昏迷指數E2V2M4，頭部及四肢多處擦傷及撕裂傷，右側頭皮血腫，右眼瞳孔放大，血氧濃度為89%。在線上醫療指導開放處置權限下，到院前的初步評估及處置，下列何者為是？","options":{"A":"為了保持呼吸道通暢，須考慮氣管內管插管治療","B":"嚴重頭部外傷可能會出現庫興三症狀（Cushing's triad），包括收縮壓上升，心跳加快和呼吸不規則","C":"評估此傷患其他生命徵象，血壓為80/40 mmHg，需考慮顱內出血造成的出血性休克","D":"傷患有呈現浣熊眼（Raccoon's eyes），需考慮中顱窩顱底骨折"},"answer":"A","manualChapter":"創傷"},{"id":855,"source":"第五章 創傷急症(2015-2018).doc","question":"下列有關脊椎外傷敘述，何者為非？","options":{"A":"若已排除脊髓損傷疑慮，可考慮移除長背板","B":"脊髓性休克是指脊髓神經受傷後導致副交感神經失去對血管的控制，造成低血壓","C":"為避免發生褥瘡，長背板之使用一般不建議超過2小時","D":"懷疑頸椎受傷病人，需做仔細的神經學評估，不能僅從影像無明顯骨折就排除"},"answer":"B","manualChapter":"CH27"},{"id":856,"source":"第五章 創傷急症(2015-2018).doc","question":"壓傷症候群的敘述，下列何者為非？","options":{"A":"病患可能併發急性腎衰竭","B":"症狀可能有患肢癱瘓和深色的尿液","C":"血液檢查，常可見代謝性酸中毒，低血鉀，高血鈣","D":"需密切監測生命徵象，檢查尿量及尿液pH值"},"answer":"C","manualChapter":"CH30","matchedChapters":["CH30"]},{"id":857,"source":"第五章 創傷急症(2015-2018).doc","question":"有關治療懷孕的外傷病患，下列敘述何者為是？","options":{"A":"評估處置的順序與未懷孕女性不同","B":"先治療孕婦的傷勢再對胎兒做早期評估","C":"X光檢查在懷孕初期不可使用","D":"孕婦傷患在到院前若呈現休克狀態，可以給予右側躺"},"answer":"B","manualChapter":"CH49"},{"id":858,"source":"第五章 創傷急症(2015-2018).doc","question":"有關外傷病患出血性休克的處置，下列何者為是？","options":{"A":"治療出血性休克，最重要的是積極補充體液或血液，好讓血壓恢復正常","B":"為了盡快恢復血壓，出血性休克病人應該常規使用升壓藥","C":"接受輸血的病人，應常規補充鈣離子，因為血袋中添加的檸檬酸鹽會造成低血鈣","D":"如果沒有加溫器，可考慮以微波爐加溫晶質液，以避免大量輸液造成低體溫"},"answer":"D","manualChapter":"CH26"},{"id":859,"source":"第五章 創傷急症(2015-2018).doc","question":"落實「損傷預防」重點有三，稱為損傷預防3E。下列何者不屬於損傷預防3E？","options":{"A":"流病研究（Epidemiology）","B":"教育訓練（Education）","C":"法律強制（Enforcement）","D":"安全設計（Engmeering）"},"answer":"A","manualChapter":"CH25"},{"id":860,"source":"第五章 創傷急症(2015-2018).doc","question":"交通事故傷患應送外傷中心的條件，下列何者為非？","options":{"A":"機車或汽車碰，車輛凹陷20公分","B":"軀幹被車輛輾過","C":"死亡車禍的同車倖存者","D":"行人被車速每小時大於35公里以上的車輛撞到"},"answer":"A","manualChapter":"CH25"},{"id":862,"source":"第五章 創傷急症(2015-2018).doc","question":"創傷照護體系的組成，下列何者為非？","options":{"A":"損傷預防","B":"到院前照護","C":"慢性照護","D":"住院後照護"},"answer":"C","manualChapter":"CH25"},{"id":863,"source":"第五章 創傷急症(2015-2018).doc","question":"有關創傷嚴重度的評估，下列何者為非？","options":{"A":"根據國外的經驗，救護技術員是可依定量的方法來評估創傷嚴重度","B":"臨床上創傷嚴重度的評估方式可分為生理學指數，解剖學指數與混合型指數","C":"對救護技術員而言'改良式創傷指數（Revised Trauma Score，RTS）常用來評估創傷的嚴","D":"昏迷指數無法用來判斷創傷的嚴重度"},"answer":"D","manualChapter":"CH25","matchedChapters":["CH25"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+
+    const FAV_KEY = "emtp_favorite_question_ids";
+    function getFavorites() {
+      try {
+        const data = localStorage.getItem(FAV_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function isFavorited(id) {
+      return getFavorites().includes(id);
+    }
+    function toggleFavorite(id) {
+      let favs = getFavorites();
+      const idx = favs.indexOf(id);
+      let added = false;
+      if (idx > -1) {
+        favs.splice(idx, 1);
+      } else {
+        favs.push(id);
+        added = true;
+      }
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      } catch (e) {}
+      return added;
+    }
+    function updateFavBtn(id) {
+      const favBtn = document.getElementById("fav-btn");
+      if (!favBtn) return;
+      const fav = isFavorited(id);
+      favBtn.textContent = fav ? "★" : "☆";
+      favBtn.style.color = fav ? "#f59e0b" : "#94a3b8";
+      favBtn.title = fav ? "已加入我的最愛 (點擊移除)" : "加入我的最愛 (點擊加入)";
+    }
+    function handleReviewFav(btn, id) {
+      const isFav = toggleFavorite(id);
+      btn.textContent = isFav ? "★" : "☆";
+      btn.style.color = isFav ? "#f59e0b" : "#94a3b8";
+    }
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+
+    const favBtnEl = document.getElementById("fav-btn");
+    if (favBtnEl) {
+      favBtnEl.addEventListener("click", () => {
+        const q = questions[currentQuestionIndex];
+        if (!q) return;
+        toggleFavorite(q.id);
+        updateFavBtn(q.id);
+        favBtnEl.style.transform = "scale(1.35)";
+        setTimeout(() => { favBtnEl.style.transform = "scale(1)"; }, 150);
+      });
+    }
+
+    function startQuiz() {
+      if (!questions || questions.length === 0) {
+        alert("目前沒有可測驗的題目！請先將題目加入收藏。");
+        return;
+      }
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      updateFavBtn(q.id);
+      
+      const catDiv = document.getElementById("question-category");
+      if (catDiv && ('第五章 創傷急症 (2015-2018)'.includes('隨機') || '第五章 創傷急症 (2015-2018)'.includes('最愛'))) {
+          catDiv.style.display = "block";
+          catDiv.textContent = q.manualChapter ? "分類：" + q.manualChapter : "分類：未分類";
+      }
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               if (q.multiAnswer) {
+                 btn.classList.add("multi-correct");
+                 html += ' <span style="float:right; font-weight:bold; color:#854d0e;">✓ 正確答案 (官方複選: ' + q.multiAnswer + ')</span>';
+               } else {
+                 btn.classList.add("correct");
+                 html += ' <span style="float:right;">✓ 正確答案</span>';
+               }
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        const curExp = q.explanation || q.analysis;
+        if ((isReviewMode || selectedAnswers[index] !== null) && curExp) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + curExp.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = (currentQuestionIndex === questions.length - 1) ? "結束作答" : "錯題回顧";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      let scoreHtml = "";
+      if ('第五章 創傷急症 (2015-2018)'.includes('隨機')) {
+          const scorePerQuestion = questions.length === 25 ? 4 : (questions.length === 50 ? 2 : 0);
+          const totalScore = correctCount * scorePerQuestion;
+          scoreHtml = "<br><br><span style='color: #0369a1; font-size: 1.5rem; font-weight: bold;'>測驗分數：" + totalScore + " 分</span>";
+      }
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題" + scoreHtml;
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   if (q.multiAnswer) {
+                      liClass = "is-multi-correct";
+                      label = " (正確答案 - 官方複選: " + q.multiAnswer + ")";
+                   } else {
+                      liClass = "is-correct";
+                      label = " (正確答案)";
+                   }
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          const reviewExp = q.explanation || q.analysis;
+          if (reviewExp) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + reviewExp.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          const favState = isFavorited(q.id);
+          const favStar = favState ? '★' : '☆';
+          const favColor = favState ? '#f59e0b' : '#94a3b8';
+          div.innerHTML = '<div class="review-question" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">' +
+            '<div>' + (i + 1) + '. ' + q.question + '</div>' +
+            '<button type="button" onclick="handleReviewFav(this, ' + q.id + ')" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; color: ' + favColor + '; padding: 0 4px; flex-shrink: 0;" title="加入/取消我的最愛">' + favStar + '</button>' +
+          '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統 - 儀表板</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --border-radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 2rem; text-align: center; }
+
+    .top-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 1.5rem;
+      transition: all 0.2s;
+    }
+
+    .stat-box.link {
+      text-decoration: none;
+      flex-direction: row;
+      gap: 1rem;
+    }
+
+    
+    .stat-box.link:hover .link-text {
+      color: #94a3b8 !important;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      line-height: 1;
+      margin-top: 0.5rem;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+      align-items: stretch;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid, .top-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Middle side bars */
+    .middle-col {
+      background: #f8fafc;
+      padding: 1.5rem;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .section-title {
+      font-size: 1.5rem; font-weight: bold;
+      color: var(--text-main);
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .css-hbar-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .css-hbar-label {
+      width: 60px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-align: right;
+      padding-right: 8px;
+      white-space: nowrap;
+    }
+    .css-hbar-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #e2e8f0;
+      border-radius: 4px;
+      height: 14px;
+    }
+    .css-hbar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .css-hbar-value {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      font-weight: bold;
+      margin-left: 8px;
+      min-width: 30px;
+    }
+
+    /* Right side buttons */
+    .right-col {
+      background: #f8fafc;
+      padding: 1.5rem;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .chapter-link {
+      display: block;
+      background: #ffffff;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+      padding: 0.3rem 0;
+      text-align: center;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    
+    .chapter-link:hover {
+      background: var(--primary-color) !important;
+      color: #d1d5db !important;
+    }
+
+    .flex-btn {
+      padding: 0.45rem 0.75rem !important;
+      font-size: 0.88rem !important;
+      line-height: 1.35 !important;
+      white-space: normal !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      border-radius: 8px !important;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="card">
+      <h1>EMTP測驗系統</h1>
+      
+      
+
+      <div class="dashboard-grid">
+        <!-- Left Column (1/3) -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+          <div class="middle-col" style="height: 100%; padding-top: 0.5rem;">
+            <div class="section-title" style="margin-top: 0.5rem;">實用工具&分類測驗</div>
+            <div class="top-stats" style="margin-bottom: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+              <div class="stat-box" style="background-color: #dcfce7; border-color: #86efac; height: 80px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0;">
+                <div style="color:#166534; font-size:1rem; font-weight:600; line-height:1;">總題目數量</div>
+                <div class="stat-value" style="color:#15803d; font-size:2rem; font-weight:bold; margin-top:0.3rem; line-height:1;">3043</div>
+              </div>
+              <a href="search.html" class="stat-box link" style="background-color: #dcfce7; border-color: #86efac; height: 80px; border-radius: 12px; display: flex; flex-direction: row; gap: 0.5rem; align-items: center; justify-content: center; padding: 0; text-decoration: none; ">
+                <div style="font-size: 1.8rem; line-height:1;">🔍</div>
+                <div class="link-text" style="color:#166534; font-size:1.5rem; font-weight:bold; margin-top:0; line-height:1;">前往搜尋頁面</div>
+              </a>
+            </div>
+            <div class="btn-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+              
+              <a href="Random25_Quiz.html" class="chapter-link" style="background-color: #e0f2fe; color: #0369a1; border-color: #38bdf8;">隨機測驗25題</a>
+              <a href="Random50_Quiz.html" class="chapter-link" style="background-color: #e0f2fe; color: #0369a1; border-color: #38bdf8;">隨機測驗50題</a>
+              <a href="Random25_Print.html" class="chapter-link" style="background-color: #fff9c4; color: #333; border-color: #ef4444;">隨機25題測驗(可列印)</a>
+              <a href="條列式重點.html" class="chapter-link" style="background-color: #fff9c4; color: #333; border-color: #ef4444;">條列式重點</a>
+              <a href="Favorite_Quiz.html" class="chapter-link" id="fav-dash-btn" style="background-color: #fee2e2; color: #b91c1c; border-color: #ef4444; font-weight: bold;">⭐ 我的最愛</a>
+              
+              <a href="Comprehensive_Summary.html" class="chapter-link" style="background-color: #e9ecef; color: #2b2d42; border-color: #2c3e50;">綜合整理</a>
+              <a href="TrueFalse_Quiz.html" class="chapter-link" style="background-color: #f3e8ff; color: #6b21a8; border-color: #a855f7; font-weight: bold;">是非題</a>
+              <a href="TrainingRooms.html" class="chapter-link" style="background-color: #fef3c7; color: #92400e; border-color: #f59e0b; font-weight: bold;">🥋 練功室</a>
+              <a href="背誦題_Quiz.html" class="chapter-link">背誦題</a><a href="PHTLS_Quiz.html" class="chapter-link">PHTLS</a><a href="呼吸型態(含肺音)_Quiz.html" class="chapter-link">呼吸型態(含肺音)</a><a href="創傷_Quiz.html" class="chapter-link">創傷</a><a href="非創傷_Quiz.html" class="chapter-link">非創傷</a><a href="呼吸急症_Quiz.html" class="chapter-link">呼吸急症</a>
+              <a href="暫存區_Quiz.html" class="chapter-link" style="background-color: #ffffff; color: #333; border-color: #94a3b8;">暫存區</a>
+            </div>
+          </div>
+
+          <!-- 歷屆年度考題 & 試卷 -->
+          <div class="middle-col">
+            <div class="section-title">歷屆年度考題 & 試卷</div>
+            
+            <!-- 1. 歷屆甄試筆試題目卷 -->
+            <div style="font-size: 1rem; font-weight: bold; color: #78350f; margin: 0.8rem 0 0.5rem 0; display: flex; align-items: center; gap: 6px;">
+              <span>📜</span> 歷屆甄試筆試題目卷
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.25rem;">
+              <a href="Year114_Quiz.html" class="chapter-link flex-btn" style="background-color: #fef3c7; color: #92400e; border-color: #f59e0b;" title="114年考題 (96題)">114年 (96題)</a><a href="Year113_Quiz.html" class="chapter-link flex-btn" style="background-color: #fef3c7; color: #92400e; border-color: #f59e0b;" title="113年考題 (89題)">113年 (89題)</a><a href="Year112_Quiz.html" class="chapter-link flex-btn" style="background-color: #fef3c7; color: #92400e; border-color: #f59e0b;" title="112年考題 (96題)">112年 (96題)</a><a href="Year111_Quiz.html" class="chapter-link flex-btn" style="background-color: #fef3c7; color: #92400e; border-color: #f59e0b;" title="111年考題 (100題)">111年 (100題)</a><a href="Year110_Quiz.html" class="chapter-link flex-btn" style="background-color: #fef3c7; color: #92400e; border-color: #f59e0b;" title="110年考題 (100題)">110年 (100題)</a><a href="Year109_Quiz.html" class="chapter-link flex-btn" style="background-color: #fef3c7; color: #92400e; border-color: #f59e0b;" title="109年考題 (95題)">109年 (95題)</a><a href="Year108_Quiz.html" class="chapter-link flex-btn" style="background-color: #fef3c7; color: #92400e; border-color: #f59e0b;" title="108年考題 (100題)">108年 (100題)</a>
+              <a href="Year105_Quiz.html" class="chapter-link flex-btn" style="background-color: #fef3c7; color: #92400e; border-color: #f59e0b;" title="105 高級救護技術員甄試筆試題目 (84題)">105年 甄試 (84題)</a>
+            </div>
+
+            <!-- 2. EMT-P 高級救護技術員教育訓練試卷 -->
+            <div style="font-size: 1rem; font-weight: bold; color: #1e40af; margin: 0.8rem 0 0.5rem 0; display: flex; align-items: center; gap: 6px;">
+              <span>🎓</span> EMT-P 高級救護技術員教育訓練試卷
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.25rem;">
+              <a href="Year108_Edu_Quiz.html" class="chapter-link flex-btn" style="background-color: #eff6ff; color: #1e40af; border-color: #3b82f6;" title="108 EMT-P 高級救護技術員教育訓練 (78題)">108年 教育訓練 (78題)</a>
+              <a href="Year109_Edu_Quiz.html" class="chapter-link flex-btn" style="background-color: #eff6ff; color: #1e40af; border-color: #3b82f6;" title="109年 EMT-P 高級救護技術員教育訓練 (彙整卷，76題)">109年 教育訓練 (76題)</a>
+              <a href="Year110_Edu_Quiz.html" class="chapter-link flex-btn" style="background-color: #eff6ff; color: #1e40af; border-color: #3b82f6;" title="110年 EMT-P 高級救護技術員教育訓練 (2題)">110年 教育訓練 (2題)</a>
+            </div>
+
+            <!-- 3. 2015-2018 試題 -->
+            <div style="font-size: 1rem; font-weight: bold; color: #065f46; margin: 0.8rem 0 0.5rem 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <span>📚 2015-2018年 歷屆試題</span>
+              <a href="Exam_2015_2018_All_Quiz.html" class="chapter-link flex-btn" style="background-color: #d1fae5; color: #065f46; border-color: #10b981; font-weight: bold; padding: 0.35rem 0.85rem; font-size: 0.9rem;" title="2015-2018 全試題彙整 (335題)">🌟 2015-2018 全試題彙整 (335題)</a>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin-bottom: 1.25rem;">
+              <a href="Exam_2015_2018_CH1_Quiz.html" class="chapter-link flex-btn" style="background-color: #f0fdf4; color: #166534; border-color: #86efac;" title="第一章 系統運作與品質管理 (27題)">第一章 系統運作與品管 (27題)</a>
+              <a href="Exam_2015_2018_CH2_Quiz.html" class="chapter-link flex-btn" style="background-color: #f0fdf4; color: #166534; border-color: #86efac;" title="第二章 基礎醫學與呼吸處置 (44題)">第二章 基礎醫學與呼吸 (44題)</a>
+              <a href="Exam_2015_2018_CH3_Quiz.html" class="chapter-link flex-btn" style="background-color: #f0fdf4; color: #166534; border-color: #86efac;" title="第三章 病患評估與理學檢查 (32題)">第三章 評估與理學檢查 (32題)</a>
+              <a href="Exam_2015_2018_CH4_Quiz.html" class="chapter-link flex-btn" style="background-color: #f0fdf4; color: #166534; border-color: #86efac;" title="第四章 非創傷急症 (60題)">第四章 非創傷急症 (60題)</a>
+              <a href="Exam_2015_2018_CH5_Quiz.html" class="chapter-link flex-btn" style="background-color: #f0fdf4; color: #166534; border-color: #86efac;" title="第五章 創傷急症 (65題)">第五章 創傷急症 (65題)</a>
+              <a href="Exam_2015_2018_CH6_Quiz.html" class="chapter-link flex-btn" style="background-color: #f0fdf4; color: #166534; border-color: #86efac;" title="第六章 特殊狀況與特定病患 (62題)">第六章 特殊狀況與特定病患 (62題)</a>
+              <a href="Exam_2015_2018_CH7_Quiz.html" class="chapter-link flex-btn" style="background-color: #f0fdf4; color: #166534; border-color: #86efac;" title="第七章 大量傷患與災難應變 (45題)">第七章 大傷與災難應變 (45題)</a>
+            </div>
+
+            <!-- 4. 2012-2014 試題 -->
+            <div style="font-size: 1rem; font-weight: bold; color: #581c87; margin: 0.8rem 0 0.5rem 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <span>📖 2012-2014年 歷屆試題</span>
+              <a href="Exam_2012_2014_All_Quiz.html" class="chapter-link flex-btn" style="background-color: #f3e8ff; color: #581c87; border-color: #a855f7; font-weight: bold; padding: 0.35rem 0.85rem; font-size: 0.9rem;" title="2012-2014 全試題彙整 (381題)">🌟 2012-2014 全試題彙整 (381題)</a>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin-bottom: 0.5rem;">
+              <a href="Exam_2012_2014_CH1_Quiz.html" class="chapter-link flex-btn" style="background-color: #faf5ff; color: #6b21a8; border-color: #d8b4fe;" title="第一章 系統運作與品質管理 (26題)">第一章 系統運作與品管 (26題)</a>
+              <a href="Exam_2012_2014_CH2_Quiz.html" class="chapter-link flex-btn" style="background-color: #faf5ff; color: #6b21a8; border-color: #d8b4fe;" title="第二章 基礎醫學與呼吸處置 (54題)">第二章 基礎醫學與呼吸 (54題)</a>
+              <a href="Exam_2012_2014_CH3_Quiz.html" class="chapter-link flex-btn" style="background-color: #faf5ff; color: #6b21a8; border-color: #d8b4fe;" title="第三章 病患評估與理學檢查 (54題)">第三章 評估與理學檢查 (54題)</a>
+              <a href="Exam_2012_2014_CH4_Quiz.html" class="chapter-link flex-btn" style="background-color: #faf5ff; color: #6b21a8; border-color: #d8b4fe;" title="第四章 非創傷急症 (34題)">第四章 非創傷急症 (34題)</a>
+              <a href="Exam_2012_2014_CH5_Quiz.html" class="chapter-link flex-btn" style="background-color: #faf5ff; color: #6b21a8; border-color: #d8b4fe;" title="第五章 創傷急症 (85題)">第五章 創傷急症 (85題)</a>
+              <a href="Exam_2012_2014_CH6_Quiz.html" class="chapter-link flex-btn" style="background-color: #faf5ff; color: #6b21a8; border-color: #d8b4fe;" title="第六章 特殊狀況與特定病患 (80題)">第六章 特殊狀況與特定病患 (80題)</a>
+              <a href="Exam_2012_2014_CH7_Quiz.html" class="chapter-link flex-btn" style="background-color: #faf5ff; color: #6b21a8; border-color: #d8b4fe;" title="第七章 大量傷患與災難應變 (48題)">第七章 大傷與災難應變 (48題)</a>
+            </div>
+          </div>
+        
+<div class="middle-col">
+            <div class="section-title">各章節題目數量</div>
+            <div style="column-count: 2; column-gap: 1.5rem;">
+              <div class="css-hbar-row" title="暫存區: 51題">
+                    <div class="css-hbar-label">暫存區</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 34.45945945945946%; background-color: hsl(24, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">51</div>
+                  </div><div class="css-hbar-row" title="第1章: 39題">
+                    <div class="css-hbar-label">第1章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 26.351351351351347%; background-color: hsl(36, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">39</div>
+                  </div><div class="css-hbar-row" title="第2章: 22題">
+                    <div class="css-hbar-label">第2章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 14.864864864864865%; background-color: hsl(48, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">22</div>
+                  </div><div class="css-hbar-row" title="第3章: 23題">
+                    <div class="css-hbar-label">第3章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 15.54054054054054%; background-color: hsl(60, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">23</div>
+                  </div><div class="css-hbar-row" title="第4章: 18題">
+                    <div class="css-hbar-label">第4章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 12.162162162162163%; background-color: hsl(72, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">18</div>
+                  </div><div class="css-hbar-row" title="第5章: 15題">
+                    <div class="css-hbar-label">第5章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 10.135135135135135%; background-color: hsl(84, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">15</div>
+                  </div><div class="css-hbar-row" title="第6章: 55題">
+                    <div class="css-hbar-label">第6章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 37.16216216216216%; background-color: hsl(96, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">55</div>
+                  </div><div class="css-hbar-row" title="第7章: 57題">
+                    <div class="css-hbar-label">第7章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 38.513513513513516%; background-color: hsl(108, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">57</div>
+                  </div><div class="css-hbar-row" title="第8章: 6題">
+                    <div class="css-hbar-label">第8章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 4.054054054054054%; background-color: hsl(120, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">6</div>
+                  </div><div class="css-hbar-row" title="第9章: 41題">
+                    <div class="css-hbar-label">第9章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 27.7027027027027%; background-color: hsl(132, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">41</div>
+                  </div><div class="css-hbar-row" title="第10章: 8題">
+                    <div class="css-hbar-label">第10章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 5.405405405405405%; background-color: hsl(144, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">8</div>
+                  </div><div class="css-hbar-row" title="第11章: 17題">
+                    <div class="css-hbar-label">第11章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 11.486486486486488%; background-color: hsl(156, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">17</div>
+                  </div><div class="css-hbar-row" title="第12章: 105題">
+                    <div class="css-hbar-label">第12章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 70.94594594594594%; background-color: hsl(168, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">105</div>
+                  </div><div class="css-hbar-row" title="第13章: 28題">
+                    <div class="css-hbar-label">第13章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 18.91891891891892%; background-color: hsl(180, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">28</div>
+                  </div><div class="css-hbar-row" title="第14章: 60題">
+                    <div class="css-hbar-label">第14章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 40.54054054054054%; background-color: hsl(192, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">60</div>
+                  </div><div class="css-hbar-row" title="第15章: 28題">
+                    <div class="css-hbar-label">第15章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 18.91891891891892%; background-color: hsl(204, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">28</div>
+                  </div><div class="css-hbar-row" title="第16章: 89題">
+                    <div class="css-hbar-label">第16章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 60.13513513513513%; background-color: hsl(216, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">89</div>
+                  </div><div class="css-hbar-row" title="第17章: 12題">
+                    <div class="css-hbar-label">第17章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 8.108108108108109%; background-color: hsl(228, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">12</div>
+                  </div><div class="css-hbar-row" title="第18章: 28題">
+                    <div class="css-hbar-label">第18章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 18.91891891891892%; background-color: hsl(240, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">28</div>
+                  </div><div class="css-hbar-row" title="第19章: 25題">
+                    <div class="css-hbar-label">第19章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 16.89189189189189%; background-color: hsl(252, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">25</div>
+                  </div><div class="css-hbar-row" title="第20章: 82題">
+                    <div class="css-hbar-label">第20章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 55.4054054054054%; background-color: hsl(264, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">82</div>
+                  </div><div class="css-hbar-row" title="第21章: 7題">
+                    <div class="css-hbar-label">第21章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 4.72972972972973%; background-color: hsl(276, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">7</div>
+                  </div><div class="css-hbar-row" title="第22章: 18題">
+                    <div class="css-hbar-label">第22章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 12.162162162162163%; background-color: hsl(288, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">18</div>
+                  </div><div class="css-hbar-row" title="第23章: 14題">
+                    <div class="css-hbar-label">第23章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 9.45945945945946%; background-color: hsl(300, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">14</div>
+                  </div><div class="css-hbar-row" title="第24章: 18題">
+                    <div class="css-hbar-label">第24章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 12.162162162162163%; background-color: hsl(312, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">18</div>
+                  </div><div class="css-hbar-row" title="第25章: 77題">
+                    <div class="css-hbar-label">第25章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 52.02702702702703%; background-color: hsl(324, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">77</div>
+                  </div><div class="css-hbar-row" title="第26章: 65題">
+                    <div class="css-hbar-label">第26章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 43.91891891891892%; background-color: hsl(336, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">65</div>
+                  </div><div class="css-hbar-row" title="第27章: 56題">
+                    <div class="css-hbar-label">第27章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 37.83783783783784%; background-color: hsl(348, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">56</div>
+                  </div><div class="css-hbar-row" title="第28章: 52題">
+                    <div class="css-hbar-label">第28章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 35.13513513513514%; background-color: hsl(0, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">52</div>
+                  </div><div class="css-hbar-row" title="第29章: 24題">
+                    <div class="css-hbar-label">第29章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 16.216216216216218%; background-color: hsl(12, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">24</div>
+                  </div><div class="css-hbar-row" title="第30章: 57題">
+                    <div class="css-hbar-label">第30章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 38.513513513513516%; background-color: hsl(24, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">57</div>
+                  </div><div class="css-hbar-row" title="第31章: 42題">
+                    <div class="css-hbar-label">第31章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 28.37837837837838%; background-color: hsl(36, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">42</div>
+                  </div><div class="css-hbar-row" title="第32章: 32題">
+                    <div class="css-hbar-label">第32章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 21.62162162162162%; background-color: hsl(48, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">32</div>
+                  </div><div class="css-hbar-row" title="第33章: 83題">
+                    <div class="css-hbar-label">第33章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 56.08108108108108%; background-color: hsl(60, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">83</div>
+                  </div><div class="css-hbar-row" title="第34章: 49題">
+                    <div class="css-hbar-label">第34章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 33.108108108108105%; background-color: hsl(72, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">49</div>
+                  </div><div class="css-hbar-row" title="第35章: 48題">
+                    <div class="css-hbar-label">第35章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 32.432432432432435%; background-color: hsl(84, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">48</div>
+                  </div><div class="css-hbar-row" title="第36章: 53題">
+                    <div class="css-hbar-label">第36章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 35.810810810810814%; background-color: hsl(96, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">53</div>
+                  </div><div class="css-hbar-row" title="第37章: 38題">
+                    <div class="css-hbar-label">第37章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 25.675675675675674%; background-color: hsl(108, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">38</div>
+                  </div><div class="css-hbar-row" title="第38章: 22題">
+                    <div class="css-hbar-label">第38章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 14.864864864864865%; background-color: hsl(120, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">22</div>
+                  </div><div class="css-hbar-row" title="第39章: 56題">
+                    <div class="css-hbar-label">第39章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 37.83783783783784%; background-color: hsl(132, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">56</div>
+                  </div><div class="css-hbar-row" title="第40章: 48題">
+                    <div class="css-hbar-label">第40章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 32.432432432432435%; background-color: hsl(144, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">48</div>
+                  </div><div class="css-hbar-row" title="第41章: 30題">
+                    <div class="css-hbar-label">第41章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 20.27027027027027%; background-color: hsl(156, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">30</div>
+                  </div><div class="css-hbar-row" title="第42章: 95題">
+                    <div class="css-hbar-label">第42章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 64.1891891891892%; background-color: hsl(168, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">95</div>
+                  </div><div class="css-hbar-row" title="第43章: 59題">
+                    <div class="css-hbar-label">第43章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 39.86486486486486%; background-color: hsl(180, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">59</div>
+                  </div><div class="css-hbar-row" title="第44章: 82題">
+                    <div class="css-hbar-label">第44章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 55.4054054054054%; background-color: hsl(192, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">82</div>
+                  </div><div class="css-hbar-row" title="第45章: 22題">
+                    <div class="css-hbar-label">第45章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 14.864864864864865%; background-color: hsl(204, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">22</div>
+                  </div><div class="css-hbar-row" title="第46章: 36題">
+                    <div class="css-hbar-label">第46章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 24.324324324324326%; background-color: hsl(216, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">36</div>
+                  </div><div class="css-hbar-row" title="第47章: 38題">
+                    <div class="css-hbar-label">第47章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 25.675675675675674%; background-color: hsl(228, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">38</div>
+                  </div><div class="css-hbar-row" title="第48章: 104題">
+                    <div class="css-hbar-label">第48章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 70.27027027027027%; background-color: hsl(240, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">104</div>
+                  </div><div class="css-hbar-row" title="第49章: 100題">
+                    <div class="css-hbar-label">第49章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 67.56756756756756%; background-color: hsl(252, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">100</div>
+                  </div><div class="css-hbar-row" title="第50章: 108題">
+                    <div class="css-hbar-label">第50章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 72.97297297297297%; background-color: hsl(264, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">108</div>
+                  </div><div class="css-hbar-row" title="第51章: 20題">
+                    <div class="css-hbar-label">第51章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 13.513513513513514%; background-color: hsl(276, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">20</div>
+                  </div><div class="css-hbar-row" title="第52章: 86題">
+                    <div class="css-hbar-label">第52章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 58.108108108108105%; background-color: hsl(288, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">86</div>
+                  </div><div class="css-hbar-row" title="第53章: 84題">
+                    <div class="css-hbar-label">第53章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 56.75675675675676%; background-color: hsl(300, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">84</div>
+                  </div><div class="css-hbar-row" title="第54章: 30題">
+                    <div class="css-hbar-label">第54章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 20.27027027027027%; background-color: hsl(312, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">30</div>
+                  </div><div class="css-hbar-row" title="第55章: 20題">
+                    <div class="css-hbar-label">第55章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 13.513513513513514%; background-color: hsl(324, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">20</div>
+                  </div><div class="css-hbar-row" title="第56章: 17題">
+                    <div class="css-hbar-label">第56章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 11.486486486486488%; background-color: hsl(336, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">17</div>
+                  </div><div class="css-hbar-row" title="第57章: 25題">
+                    <div class="css-hbar-label">第57章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 16.89189189189189%; background-color: hsl(348, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">25</div>
+                  </div><div class="css-hbar-row" title="第58章: 23題">
+                    <div class="css-hbar-label">第58章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 15.54054054054054%; background-color: hsl(0, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">23</div>
+                  </div><div class="css-hbar-row" title="第59章: 6題">
+                    <div class="css-hbar-label">第59章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 4.054054054054054%; background-color: hsl(12, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">6</div>
+                  </div><div class="css-hbar-row" title="第60章: 23題">
+                    <div class="css-hbar-label">第60章</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 15.54054054054054%; background-color: hsl(24, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">23</div>
+                  </div><div class="css-hbar-row" title="背誦題: 91題">
+                    <div class="css-hbar-label">背誦題</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 61.48648648648649%; background-color: hsl(48, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">91</div>
+                  </div><div class="css-hbar-row" title="PHTLS: 148題">
+                    <div class="css-hbar-label">PHTLS</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 100%; background-color: hsl(60, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">148</div>
+                  </div><div class="css-hbar-row" title="呼吸型態(含肺音): 18題">
+                    <div class="css-hbar-label">呼吸型態(含肺音)</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 12.162162162162163%; background-color: hsl(72, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">18</div>
+                  </div><div class="css-hbar-row" title="創傷: 50題">
+                    <div class="css-hbar-label">創傷</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 33.78378378378378%; background-color: hsl(84, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">50</div>
+                  </div><div class="css-hbar-row" title="非創傷: 40題">
+                    <div class="css-hbar-label">非創傷</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 27.027027027027028%; background-color: hsl(96, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">40</div>
+                  </div><div class="css-hbar-row" title="呼吸急症: 11題">
+                    <div class="css-hbar-label">呼吸急症</div>
+                    <div class="css-hbar-container">
+                      <div class="css-hbar" style="width: 7.4324324324324325%; background-color: hsl(108, 70%, 55%);"></div>
+                    </div>
+                    <div class="css-hbar-value">11</div>
+                  </div>
+            </div>
+          </div>
+        </div>
+        <!-- Right Column (2/3) -->
+        <div class="right-col" style="height: 100%;">
+          <div class="section-title">章節測驗</div>
+          <div class="btn-grid">
+            <a href="CH01_Quiz.html" class="chapter-link">第1章</a><a href="CH02_Quiz.html" class="chapter-link">第2章</a><a href="CH03_Quiz.html" class="chapter-link">第3章</a><a href="CH04_Quiz.html" class="chapter-link">第4章</a><a href="CH05_Quiz.html" class="chapter-link">第5章</a><a href="CH06_Quiz.html" class="chapter-link">第6章</a><a href="CH07_Quiz.html" class="chapter-link">第7章</a><a href="CH08_Quiz.html" class="chapter-link">第8章</a><a href="CH09_Quiz.html" class="chapter-link">第9章</a><a href="CH10_Quiz.html" class="chapter-link">第10章</a><a href="CH11_Quiz.html" class="chapter-link">第11章</a><a href="CH12_Quiz.html" class="chapter-link">第12章</a><a href="CH13_Quiz.html" class="chapter-link">第13章</a><a href="CH14_Quiz.html" class="chapter-link">第14章</a><a href="CH15_Quiz.html" class="chapter-link">第15章</a><a href="CH16_Quiz.html" class="chapter-link">第16章</a><a href="CH17_Quiz.html" class="chapter-link">第17章</a><a href="CH18_Quiz.html" class="chapter-link">第18章</a><a href="CH19_Quiz.html" class="chapter-link">第19章</a><a href="CH20_Quiz.html" class="chapter-link">第20章</a><a href="CH21_Quiz.html" class="chapter-link">第21章</a><a href="CH22_Quiz.html" class="chapter-link">第22章</a><a href="CH23_Quiz.html" class="chapter-link">第23章</a><a href="CH24_Quiz.html" class="chapter-link">第24章</a><a href="CH25_Quiz.html" class="chapter-link">第25章</a><a href="CH26_Quiz.html" class="chapter-link">第26章</a><a href="CH27_Quiz.html" class="chapter-link">第27章</a><a href="CH28_Quiz.html" class="chapter-link">第28章</a><a href="CH29_Quiz.html" class="chapter-link">第29章</a><a href="CH30_Quiz.html" class="chapter-link">第30章</a><a href="CH31_Quiz.html" class="chapter-link">第31章</a><a href="CH32_Quiz.html" class="chapter-link">第32章</a><a href="CH33_Quiz.html" class="chapter-link">第33章</a><a href="CH34_Quiz.html" class="chapter-link">第34章</a><a href="CH35_Quiz.html" class="chapter-link">第35章</a><a href="CH36_Quiz.html" class="chapter-link">第36章</a><a href="CH37_Quiz.html" class="chapter-link">第37章</a><a href="CH38_Quiz.html" class="chapter-link">第38章</a><a href="CH39_Quiz.html" class="chapter-link">第39章</a><a href="CH40_Quiz.html" class="chapter-link">第40章</a><a href="CH41_Quiz.html" class="chapter-link">第41章</a><a href="CH42_Quiz.html" class="chapter-link">第42章</a><a href="CH43_Quiz.html" class="chapter-link">第43章</a><a href="CH44_Quiz.html" class="chapter-link">第44章</a><a href="CH45_Quiz.html" class="chapter-link">第45章</a><a href="CH46_Quiz.html" class="chapter-link">第46章</a><a href="CH47_Quiz.html" class="chapter-link">第47章</a><a href="CH48_Quiz.html" class="chapter-link">第48章</a><a href="CH49_Quiz.html" class="chapter-link">第49章</a><a href="CH50_Quiz.html" class="chapter-link">第50章</a><a href="CH51_Quiz.html" class="chapter-link">第51章</a><a href="CH52_Quiz.html" class="chapter-link">第52章</a><a href="CH53_Quiz.html" class="chapter-link">第53章</a><a href="CH54_Quiz.html" class="chapter-link">第54章</a><a href="CH55_Quiz.html" class="chapter-link">第55章</a><a href="CH56_Quiz.html" class="chapter-link">第56章</a><a href="CH57_Quiz.html" class="chapter-link">第57章</a><a href="CH58_Quiz.html" class="chapter-link">第58章</a><a href="CH59_Quiz.html" class="chapter-link">第59章</a><a href="CH60_Quiz.html" class="chapter-link">第60章</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+        </div>
+    </div>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        try {
+          const favs = JSON.parse(localStorage.getItem('emtp_favorite_question_ids') || '[]');
+          const btn = document.getElementById('fav-dash-btn');
+          if (btn) {
+            btn.textContent = "⭐ 我的最愛 (" + favs.length + "題)";
+          }
+        } catch(e) {}
+      });
+    </script>
+  </body>
+</html>

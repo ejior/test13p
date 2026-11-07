@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    .option-btn.multi-correct {
+      background-color: #fef08a !important;
+      border-color: #eab308 !important;
+      color: #854d0e !important;
+      font-weight: 600;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-multi-correct { background: #fef9c3; border-color: #fde047; color: #854d0e; font-weight: 600; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 6.2rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第四章 非創傷急症 (2015-2018)</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.5rem; font-weight: bold; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：60 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="fav-btn" type="button" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 4px; transition: transform 0.15s ease;" title="加入/取消我的最愛">☆</button>
+          <span class="stat-badge" id="score-text">分類：2015-2018 第四章</span>
+        </div>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1.5rem;">
+        <div id="question-category" style="display: none; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-align: left;"></div>
+        <div class="source-tag" id="source-tag" style="margin-top: 0; margin-left: auto;">來源: 無</div>
+      </div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":1082,"source":"第四章 非創傷急症(2015-2018).doc","question":"一位平時有酒癮的病患，突然發生抽搐，造成頭部外傷，且意識不清，以下作法何者為非？","options":{"A":"應測量血糖並給予維他命B1補充","B":"為了避免影響判斷是否為酒精戒斷所引起的抽搐，應避免給予Lorazepam此類鎮靜藥物","C":"此時不應給予Flumazenil此類鎮靜劑之拮抗藥物，因可能再引發抽搐","D":"有可能是酒精造成的意識不清，但仍需注意是否有腦出血的可能"},"answer":"B","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":1083,"source":"第四章 非創傷急症(2015-2018).doc","question":"對於有冠狀動脈性心臟病病史的急性胸痛病患，以下敘述何者為非？","options":{"A":"進行到院前12導程心電圖檢查有助於縮短ST波段上升型心肌梗塞進行心導管的時問","B":"對於典型胸痛且無相關禁忌症的病患，應給予Aspirin服用","C":"建議給予氧氣鼻管3L/min，以改善潛在的心臟缺氧狀況","D":"如果使用NTG，無論男女應先確認病患有無服用Viagra這類磷酸二酯抑制劑藥物"},"answer":"C","manualChapter":"CH34"},{"id":1084,"source":"第四章 非創傷急症(2015-2018).doc","question":"對於穩定規則窄QRS波頻脈，以下敘述何者為非？","options":{"A":"若發生於孕婦身上，因可能影響胎兒心律，因此不應使用Adenosine","B":"除了Adenosine之外，亦可選擇乙型腎上腺受體阻斷劑、毛地黃加以治療","C":"若使用鈣離子阻斷劑不必擔心引發有氣喘病史病患的氣喘","D":"若藥物治療無效，可考慮電擊整流"},"answer":"A","manualChapter":"CH49"},{"id":1085,"source":"第四章 非創傷急症(2015-2018).doc","question":"一位25歲年輕女性，出現眼睛凸出、脖子腫的情形，以下敘述何者為非？","options":{"A":"心電圖可能出現竇性心搏過速或心房纖維顫動","B":"病史上常可發現體重減輕、怕熱的情形","C":"此疾病俗稱「大脖子」，應補充碘鹽","D":"若出現發燒、意識不清、肚子痛的情形，是危及生命的緊急狀況，應立刻就醫"},"answer":"C","manualChapter":"CH37","matchedChapters":["CH37"]},{"id":1086,"source":"第四章 非創傷急症(2015-2018).doc","question":"對於身上突然出現多處瘀斑的病患，以下敘述何者為非？","options":{"A":"此為凝血功能障礙，應檢查血小板數量與功能以及肝臟製造凝血因子能力","B":"血友病病患雖無外傷，也可能有自發性出血，但多以深部組織出血為主","C":"對於自發性出血的病患，為避免造成傷口及出血不止，不應進行靜留置針注射","D":"即便血小板數量正常，仍有可能出現自發性的出血"},"answer":"C","manualChapter":"CH39"},{"id":1087,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於過敏的描述，以下敘述何者為非？","options":{"A":"局部性的過敏反應並不會影響到全身，治療最有效的藥物是Diphenhydramine","B":"嚴重過敏病患休克的原因是因為呼吸道阻塞、水腫，最好的治療是給予氣管擴張劑","C":"如果出現聲音沙啞舌頭水腫、喘鳴等，應評估是否要早期插管","D":"嚴重過敏最有效的治療藥物是腎上腺素"},"answer":"B","manualChapter":"CH16"},{"id":1089,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於疥瘡，以下敘述何者為非？","options":{"A":"若病患有在使用類固醇，病症會較不典型，不易診斷","B":"治療疥瘡常用的疥瘡乳劑不適用於孕婦","C":"疥瘡患者接觸過的床單、被褥、枕頭套應以塑膠袋密封兩週使成蟲及蟲卵死亡","D":"疥蟲孵化只需3天，因此若懷疑接觸疥瘡患者，一週以上沒有症狀，就不用擔心感染"},"answer":"D","manualChapter":"CH42"},{"id":1091,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關於成人呼吸窘迫症（adult respiratory distress syndrome,ARDS）的敘述，下列何者為非？","options":{"A":"是一種猛爆型的呼吸衰竭","B":"急性的肺發炎和廣泛性的肺泡及微血管傷害為特徵","C":"這症候群通常不會因為其他的傷害或疾病所引起","D":"這類病患的肺部會變得又濕又重，肺泡彈性變差使氣體擴散能力大幅下降"},"answer":"C","manualChapter":"CH35"},{"id":1092,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列有關洛杉磯到院前腦中風評量表的評量項目，以下敘述何者為非？","options":{"A":"症狀發生在24小時內。","B":"下列三項中任何之一有單側不對稱的情形：臉部表情、握力、手臂力量的強度","C":"年紀大於35歲","D":"病患平常不是坐輪椅或長期臥床"},"answer":"C","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":1094,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關於肺動脈栓塞的維爾氏評分系統（well's scoring system），下列敘述何者為是？","options":{"A":"臨床上懷疑深部靜脈血栓：3.0分","B":"其他替代診斷可能性低：3.0分","C":"在過去四周曾接受外科手術或臥床少動：1.5分","D":"以上敘述皆為正確"},"answer":"D","manualChapter":"CH34"},{"id":1095,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關於急性肺水腫無合併低血壓及休克第一線治療的敘述，下列何者為非？","options":{"A":"furosemide（lasix）靜脈注射是第一線治療","B":"morphine靜脈注射是第一線治療","C":"nitroglycerin舌下片是第一線治療，nitroglycerin靜脈滴注則是第二線治療","D":"此類病患心臟不佳，氣管插管的刺激太大會惡化病情，故絕不考慮使用"},"answer":"D","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":1097,"source":"第四章 非創傷急症(2015-2018).doc","question":"65歲男性病患因為意識昏迷，家屬發現後報案，指揮中心派遣高救隊到現場，現場患者意識昏迷對痛沒有反應，膚色蒼白濕冷，呼吸每分鐘6下，脈搏每分鐘24下，血壓50/量不到mmHg，pulse oximeter：60%；病患過去病史為腎衰竭合併洗腎，但根據家屬表示，病患已經有半個月沒有接受血液透析治療，家屬也表示病患拒絕插管以及任何壓胸電擊等急救治療，只要給予藥物；下列敘述何者為是？（送醫時間30分鐘）","options":{"A":"病患不可能是高血鉀引起的腎衰竭病患的併發症","B":"可以線上醫療指導靜脈注射calcium及sodium bicarbonate來治療","C":"病患是腎衰竭患者，因此要絕對限水，不可以幫他打上點滴","D":"腎衰竭病患若是有接受血液透析治療，就絕對不可能有尿液的產生"},"answer":"B","manualChapter":"CH41"},{"id":1098,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關致命性過敏反應，下列敘述何者為非？","options":{"A":"過敏性抗原進入人體後造成白血球釋放組織胺以及白三烯素等物質有關","B":"組織胺以及白三烯素會造成血管擴張以及氣管痙攣而引起循環崩潰和休克進而致命","C":"人體接受抗原的刺激次數越多，越容易產生免疫作用而使過敏反應越輕微","D":"治療的藥物包括腎上腺素、抗組織胺以及類固醇等"},"answer":"C","manualChapter":"CH40"},{"id":1099,"source":"第四章 非創傷急症(2015-2018).doc","question":"44歲男性病患在與朋友飲酒後吐大量鮮血，指揮中心派遣高救隊到現場，現場病患臉色蒼白冒冷汗，意識對痛有反應，脈搏每分鐘120下，血壓80/50mmHg，呼吸每分鐘30次，過去病史以及過敏史不詳，下列敘述何者為是？1.病患疑似為上消化道出血合併休克，Mallory-Weiss症候群不可能為病因2.病患一定有解黑便的症狀3.在時間以及裝備許可的情況下，病患應接受生理食鹽水的輸液治療4.長期酗酒的病患有可能是因為食道靜脈曲張出血造成大量吐血","options":{"A":"1，2，3，4","B":"2，3","C":"3，4","D":"1，4"},"answer":"C","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":1103,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於後天免疫缺乏症候群（愛滋病）病患的處置原則何者為非？","options":{"A":"愛滋病病患在無症狀潛伏期不易由外表觀察得知，而病患也往往不知道自己已經被感染","B":"對於已知有愛滋病之患者也不要輕忽同時有其他傳染性疾病，例如肺結核的可能","C":"要避免發生針扎事件，萬一不幸發生時，應該立刻擠壓傷口，使血液流出並在流動水下清洗傷口五分鐘","D":"感染愛滋病毒感的機率，遠比B型肝炎來得低，若針扎事件對象已確知有愛滋病之病患，可待檢驗確診後，再開始使用抗病毒藥物以降低感染率"},"answer":"D","matchedChapters":["CH42"],"manualChapter":"CH42"},{"id":1105,"source":"第四章 非創傷急症(2015-2018).doc","question":"一名65歲男性過去僅有高血壓病史，無抽搐或癲癇之病史，突然感到右側肢體無力無法行走而立即打119求救，你到現場發現嘴歪、口齒不清、右手無法平舉現象，他的血糖130mg/dL、血壓210/80mmHg，以下明何者為非？","options":{"A":"依據辛辛那提到院前腦中風評量表（CPSS），該病患有85%可能性為腦中風","B":"依據洛杉磯到院前腦中風評量表（LAPSS），其陽性預測值為97%","C":"為了改善血液灌流不足，可以給予含糖的輸液，以增加腦細胞之存活性","D":"血栓溶解劑（t-PA）被證實可以有效減輕缺血性腦中風的神經症"},"answer":"C","manualChapter":"CH36"},{"id":1107,"source":"第四章 非創傷急症(2015-2018).doc","question":"一位65歲高血壓、心臟病合併慢性腎病之病患，近日經常噁心、嘔吐及食慾不佳，因呼吸困難而打119求救，你到達現場發現雙側肺音囉音，監視器顯示如下圖，以下何者為非？","options":{"A":"此病患呼吸困難可能是因為發生肺水腫","B":"此病患有可能發生致命性心律不整而猝死，建議可以使用calciumchloride","C":"嚴重高血鉀（＞6.5mmol/L）因腎衰竭引起是罕見的","D":"此病患接受規則血液透析治療後不久，發生頭痛、嘔吐急抽搐現象，可能發生不平衡症候群"},"answer":"C","manualChapter":"CH33","image":"題庫圖片/1107.png"},{"id":1110,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關全身立即致命過敏性休克，下列敘述何者為非？","options":{"A":"組織胺釋放","B":"發生血管舒張","C":"心輸出增加，循環崩潰與休克","D":"發生氣管痙攣"},"answer":"C","manualChapter":"CH40"},{"id":1111,"source":"第四章 非創傷急症(2015-2018).doc","question":"根據2010年美國心臟醫學會的建議，以下關於成人心肺復甦術的敘述，何者錯誤？","options":{"A":"腎衰竭病患如果突然發生心肺功能停止時，要把嚴重高血鉀列入鑑別診斷當中","B":"病史詢問時如發現心肺功能停止病患有腎衰竭病史，在醫療指導醫師指示下，可以考慮靜脈注射calcium及sodium bicarbonate","C":"部分不平衡症候群（disequilibrium syndrome）患者於透析的過程中或是結束後八小時內發生","D":"不平衡症候群（disequilibrium syndrome），是末期腎臟病患者因透析過度緩慢所產生的中樞性神經症狀群"},"answer":"D","manualChapter":"CH41"},{"id":1113,"source":"第四章 非創傷急症(2015-2018).doc","question":"以下何者心律是出現窄的QRS波？","options":{"A":"VF","B":"VT","C":"Torsadesdepoints","D":"2度II AV block"},"answer":"D","manualChapter":"CH16"},{"id":1114,"source":"第四章 非創傷急症(2015-2018).doc","question":"對於小孩之CPR，最重要優先之處置是？","options":{"A":"快速建立IV","B":"儘快給予電擊","C":"維持呼吸道通暢與呼吸動力","D":"注射藥物Epinephrine"},"answer":"C","manualChapter":"CH13"},{"id":1115,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於呼吸道處置與給藥的叙述，何者正確？","options":{"A":"有顔面創傷，或疑顱底骨折的病患，最適合使用鼻咽呼吸道","B":"若患者頭或頸部受傷，應使用推顎法，避免移動頸部","C":"LMA（喉罩氣道）可以防止吸入性肺炎，是很好的氣管插管替代品","D":"當建立氣管内管後，非脂溶性的藥物皆可經由氣管内管給藥"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":1116,"source":"第四章 非創傷急症(2015-2018).doc","question":"電擊與雷擊的急救處理原則，以下何者為非？","options":{"A":"閃電擊中，多人需急救時，應睬反向檢傷分類","B":"閃電擊中導致心臟停止比其他原因造成者，具有較高救活成功率，因些儘管在急救前心臟停止比較久，努力急救仍可能有效地救治","C":"閃電擊中常常造成VF，在急救過程需要多加注意是否需要去顫","D":"雖然大的電流比較會造成嚴重的傷害，家用電也有致死的可能"},"answer":"C","manualChapter":"CH30"},{"id":1117,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於懷孕婦女的急救，以下何者為非？","options":{"A":"應先急救母親，再考慮胎兒","B":"孕婦只要很小的失血量，就會出現壓下降與週邊灌流不足（休克）的徵象","C":"若懷孕大於24週，孕婦儘可能保持左側躺的姿勢。右髖部墊高、長背板左傾15～30度，以減少子宮對主動脈、下腔靜脈的壓迫","D":"當母親心跳停止5分鐘內，剖腹產救出大於24～25週的胎兒，此時胎兒存活機率最高"},"answer":"B","manualChapter":"CH49"},{"id":1118,"source":"第四章 非創傷急症(2015-2018).doc","question":"對於休克描述，下列何者為非？","options":{"A":"只要收縮壓小於90mmHg就是休克","B":"休克患者會有皮膚冰冷，心跳過速，冒冷汗，呼吸困難症狀","C":"休克主要是組織灌流不足，造成氧氣運送不能應付組織代謝所需","D":"可依rate、volume、pump（律水壓）的原則，對休克依序做初步處理"},"answer":"A","manualChapter":"CH26"},{"id":1119,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列有關量張十二導程心電圖的描述何者為非？","options":{"A":"此為Sinus Bradycardia","B":"心率約每分鐘30～36次","C":"心臟下壁的急性心肌梗塞","D":"V1～V4的ST段下降是對應變化（reciprocal changes）"},"answer":"A","manualChapter":"CH33","image":"題庫圖片/1119.png"},{"id":1120,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列有關內分泌及代謝急症的配對，何者為非？","options":{"A":"愛迪生疾病（Addison disease）：腎上腺素不足","B":"黏液性水腫（Myxedema）：腎上腺素亢進","C":"酮酸血症：胰島素的缺乏","D":"葛瑞夫茲病：甲狀腺機能亢進"},"answer":"B","manualChapter":"CH37"},{"id":1121,"source":"第四章 非創傷急症(2015-2018).doc","question":"50歲男性，求救原因為意識改變，到達現場時，家人描述今天早上開始解數次大量的便剛突然大吐血了一次後就不省人事，過去病史有肝硬化與肝癌，現場初評發現，病患皮冷，呼吸淺快有雜音，血自口鼻持續冒出，頸動脈微弱且橈動脈摸不到，脈搏約135下/分，呼吸次數約25次/分，血氧濃度85%，意識對痛有些微反應，下列哪個步驟應最優先處置？","options":{"A":"給予高濃度氧氣面罩，提升血氧濃度","B":"接上三導程心律監測器，評估心律","C":"打上兩條大號靜脈管路，快速輸液","D":"清除口鼻血塊，維持呼吸道暢通"},"answer":"D","manualChapter":"非創傷","matchedChapters":["Combine"]},{"id":1122,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列有關血液的組成與功能，何者為非？","options":{"A":"成人的血液約佔體重的1/13","B":"血球組成中，最多的是血小板","C":"血漿中水約占了90%","D":"血漿中的白蛋白可維持血液與組織液間滲透壓的恆定性"},"answer":"B","manualChapter":"CH12"},{"id":1123,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列有關嚴重高血鉀的處置與敘述，何者為非？","options":{"A":"靜脈注射Calcium可以最快減少高血鉀對心臟的影響","B":"靜脈注射Sodium bicarbonate可以將鉀離子移除到身體外面","C":"心電圖可以看到QRS變寬和高聳的T波","D":"容易發生在末期腎病變的病患身上"},"answer":"B","manualChapter":"CH16"},{"id":1126,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於藥物給予與路徑選擇，下列何者為非？","options":{"A":"幫孕婦建立IV路徑一般建議在下半身（橫膈以下）","B":"若緊急時無法建立IV路徑，除了IM肌肉注射，Naloxone也可以由氣管內管給藥","C":"大部份的急救藥物都可以由IO骨內注射給予，吸收速度相當於IV靜脈注射","D":"在心臟衰竭合併喘鳴、或洗腎合併血壓降低病患身上給予點滴靜脈輸注須特別小心謹慎，因流速太快可能引發肺水腫導致呼吸困難惡化"},"answer":"A","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":1127,"source":"第四章 非創傷急症(2015-2018).doc","question":"您幫一位OHCA病患緊急氣管內插管，插上後幫病患接上潮氣末二氧化碳監測器（end_tidal C02 monitor/Capnography），繼續進行CPR後，二氧化碳濃度（PETCO2）監測時二氧化碳分壓一直達不到10mmHg，可能原因有好幾個，但以下何者為非？","options":{"A":"心肺功能停止過久，肺部血流無循環","B":"氣管內管前端反折或被血塊等異物塞住","C":"插管位置過深","D":"壓胸下壓深度不足，CPR品質效率不好"},"answer":"C","manualChapter":"CH14","matchedChapters":["CH14"]},{"id":1128,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關影響腦部灌流壓力高低，與下列何項因素無關？","options":{"A":"收縮壓","B":"舒張壓","C":"顱內壓","D":"頸動脈壓"},"answer":"D","manualChapter":"CH26"},{"id":1129,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關周邊型眩暈和中樞型眩暈的區分，下列敘述何者為非？","options":{"A":"周邊型眩暈多因內耳迷路問題造成","B":"周邊型眩暈經多次轉頭可減輕眩暈程度","C":"中樞型眩暈的眼震方向多為單向，且合併對側肢體無力","D":"中樞型眩暈常合併如手腳不協調等症狀"},"answer":"C","manualChapter":"CH36"},{"id":1130,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關腎上腺危象的常見臨床表現，下列敘述何者為非？","options":{"A":"常合併高滲透壓高血糖非酮酸性昏迷症狀表現。","B":"多合併鈉、鉀離子等電解質異常","C":"多合併低血壓","D":"需補充大量輸液"},"answer":"A","manualChapter":"CH37"},{"id":1131,"source":"第四章 非創傷急症(2015-2018).doc","question":"你執行創傷救護時，傷患告訴你他有人類免疫病毒（HIV）感染但有規則服藥、且上次回診時醫師說他的病毒量已測不到。請問下列敘述何者為非？","options":{"A":"若病毒量已經量測不到，即不具有傳染性","B":"不論是接觸懷疑感染或已確認感染的病人，都應須遵守標準防護措施","C":"若遇到此類患者，應戴兩層手套並穿B級以上防護衣才能避免感染","D":"落實個人防護觀念及步驟是最有效的保護方法"},"answer":"C","manualChapter":"CH05"},{"id":1132,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於中風的敘述，何者為非？","options":{"A":"單純從病人臨床上的症狀表現很難區分此病人發生出血性或缺血性腦中風","B":"一般急性腦中風除了大片腦梗塞、腦出血或腦幹中風外，鮮少會造成病患意識不清，所以如病患發生意識不清時，應先排除其他造成病患意識不清的情形，例如低血糖","C":"一般來說，缺血性腦中風特別容易發生在睡眠中或剛睡醒時","D":"如病患之辛辛那提到院前腦中風評量表為陽性時，由於其可能是腦中風的機會高達七成，而高血糖會造成腦中風病患腦部進一步的傷害，因此就算檢測發現病患發生低血糖的情形，也不應給予50%的葡萄糖水或含糖輸液"},"answer":"D","manualChapter":"CH36"},{"id":1133,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於心電圖操作與判定的敘述，下列何者為非？","options":{"A":"黏貼十二導程的胸前導程時，V3是貼在左胸第五肋間的鎖骨中線處","B":"一般正常的PR區間（PR interval）為0.12～0.20秒","C":"V1和V2導程主要是在觀察心室中膈的解剖位置","D":"右心室傳導束傳導阻斷（right bundle branch block，RBBB）在心電圖最大的特徵是在V1及V2導程出現RSR'型態（RSR' pattern）"},"answer":"A","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":1134,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於糖尿病酮酸血症（DKA）常見的臨床症狀與表徵，下列何者為非？","options":{"A":"心搏過速","B":"姿態性低血壓","C":"蒼白濕冷的皮膚","D":"腹痛"},"answer":"C","manualChapter":"CH37","matchedChapters":["CH37"]},{"id":1135,"source":"第四章 非創傷急症(2015-2018).doc","question":"中年男性昏倒求救。你在救護車上幫他接上三導程心電圖如下。請問此心律為何？","options":{"A":"第二度第一型房室傳導阻滯","B":"第二度第二型房室傳導阻滯","C":"第三度房室傳導阻滯","D":"竇性心搏過緩併單型性早期心房收縮"},"answer":"C","manualChapter":"CH33","image":"題庫圖片/1135.png"},{"id":1136,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於心包膜填塞的貝克式三症狀（Beck's triad），下列何者不包含？","options":{"A":"低血壓","B":"頸靜脈怒張","C":"意識不清","D":"心音變弱且模糊"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":1138,"source":"第四章 非創傷急症(2015-2018).doc","question":"有關院外「成人生存之鏈（Adult chain of survival）」之排列順序，何者正確？1.進行快速去顫（rapid defibrillation）2.儘早CPR，並強調先作胸部按壓（early CPR）3.立即確認心臟停止並啟動緊急應變系統（Immediate recognition and activation）4.整合的心臟停止後照護（integrated post-cardiac arrest care）5.有效高級救命術（effective advanced life support）","options":{"A":"1，2，3，4，5","B":"2，3，1，5，4","C":"3，2，1，5，4","D":"5，2，1，3，4"},"answer":"C","manualChapter":"CH24"},{"id":1139,"source":"第四章 非創傷急症(2015-2018).doc","question":"50歲男性，與友人聊天時，突然昏倒不醒人事，EMT到現場時發現病患對痛有反應，左側肢體無力。目前生命徵象為：血壓210/140mmHg，脈搏86次/分鐘，呼吸22次/分鐘，SPO2 90％。以下敘述何者為非？","options":{"A":"可給與氧氣","B":"可能為腦血管疾病","C":"為預防呼吸抑制的發生，應放置oral airway","D":"可檢測病人的血糖值（one touch）"},"answer":"C","manualChapter":"非創傷"},{"id":1140,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於「Nitroglycerin」下列敘述何者為非？","options":{"A":"可有效治療狹心病（angina pectoris）","B":"可降低鬱血性心衰竭（CHF）病人之前後負荷（preload）","C":"主要作用是增加心肌收縮，有效治療心臟衰竭","D":"可能會造成低血壓（hypotension）"},"answer":"C","manualChapter":"CH16"},{"id":1141,"source":"第四章 非創傷急症(2015-2018).doc","question":"請問此為何種心率？","options":{"A":"1st degree AV block","B":"Mobitz type I","C":"Mobitz type II","D":"3rd degree AV block"},"answer":"C","manualChapter":"CH33","image":"題庫圖片/1141.png"},{"id":1143,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列何者不屬於體液分佈形休克（Distributive Shock）？","options":{"A":"敗血性休克","B":"神經性休克","C":"過敏性休克","D":"張力性氣胸導致休克"},"answer":"D","manualChapter":"CH26"},{"id":1145,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於會厭炎的敘述，何者為非？","options":{"A":"某些族群罹患會厭炎的盛行率比較高，包括免疫功能低下、脾臟切除的病患","B":"引起會厭炎的病原菌，以A型嗜血桿菌感染最常見","C":"會厭炎通常會使病患出現發燒和喉嚨痛","D":"到院前照護主要是給予病患支持性療法，但要特別注意病患是否出現呼吸窘迫的徵兆"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":1146,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於周邊型眩暈和中樞型眩暈的敘述，何者為非？","options":{"A":"周邊型眩暈病患會出現聽力減弱、耳鳴、耳痛及腫脹","B":"周邊型眩暈病患發生眼震時，為多方向眼震","C":"多次轉頭不會減輕中樞型眩暈病患的眩暈程度","D":"中樞型眩暈病患可出現言語不清、站立不穩、手腳不協調等其他神經症狀"},"answer":"B","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":1147,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列何者為典型胸痛的表現？","options":{"A":"與呼吸相關的胸痛","B":"與姿勢相關的胸痛","C":"有壓痛點的胸痛","D":"與運動相關的胸痛"},"answer":"D","manualChapter":"CH34"},{"id":1148,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列關於內分泌及代謝急症的敘述，何者為非？","options":{"A":"糖尿病酮酸血症很少會導致病患出現嚴重的意識不清，因此對於出現意識不清的病患，必須要考慮同時合併其他的疾病，例如頭部外傷、中風等","B":"高滲透壓高血糖非酮酸性昏迷的早期症狀通常和水分的流失有關，包括心悸、疲累、意識混亂甚至昏迷","C":"甲狀腺風暴臨床的徵狀包括嚴重的心跳加速、心臟衰竭、心律不整、體溫升高、休克、意識混亂甚至昏迷等","D":"腎上腺危象的病患，容易有血糖濃度上升、鈉鉀離子不平衡、身體含水量流失及血壓下降，使得身體無法維持正常血液循環，而導致病患有生命危險情形"},"answer":"D","manualChapter":"CH37","matchedChapters":["CH37"]},{"id":1149,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列對於腸胃急症的敘述，何者為非？","options":{"A":"大部分的急性腸胃炎是由細菌所引起的，包括沙門氏桿菌、大腸桿菌、志賀氏桿菌等","B":"機械性腸阻塞最常見的原因為手術後的粘黏","C":"憩室炎的臨床症狀包括發燒與腹痛。而因為憩室通常在乙狀結腸較多，因此常常是以左下腹痛為表現","D":"痔瘡分為內痔與外痔，以肛門的梳狀線為分界"},"answer":"A","manualChapter":"CH38"},{"id":1150,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列對於血液疾病的敘述，何者為非？","options":{"A":"地中海型貧血屬於小球性貧血","B":"缺乏第八因子稱為B型血友病","C":"如果血小板小於20,000/uL，可能引起重要器官自發性出血，如腦出血、腸胃道或肺部出血","D":"非何杰金氏淋巴癌早期通常沒有明顯症狀，大多數人開始的症狀就是頸部、腋下或鼠蹊部出現腫大的淋巴結、發燒、夜間流汗或疲倦等"},"answer":"B","manualChapter":"CH39","matchedChapters":["CH39"]},{"id":1151,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列對於腎臟泌尿系統急症的敘述，何者為非？","options":{"A":"在台灣最常見的泌尿道結石成分為草酸鈣","B":"泌尿道感染大多是逆行性的感染，也就是細菌經由尿道逆行而上，造成尿道炎、膀胱炎或急性腎盂腎炎","C":"不平衡症候群的症狀表現可以從輕微的頭痛、頭暈，以至嚴重的意識不清及抽搐","D":"急性副睪炎的病患，讓其躺臥時，並用手輕輕地往上抬起疼痛側的睪丸，並不能緩解病患的疼痛感"},"answer":"D","manualChapter":"CH41"},{"id":1152,"source":"第四章 非創傷急症(2015-2018).doc","question":"下列傳染性疾病，何者非為蟲媒傳染病？","options":{"A":"流行性斑疹傷寒","B":"萊姆病","C":"Q熱","D":"黃熱病"},"answer":"C","manualChapter":"CH43"},{"id":1154,"source":"第四章 非創傷急症(2015-2018).doc","question":"許多藥物可能引發血壓偏低，但下列藥物何者為非？","options":{"A":"Amiodarone","B":"Naloxone","C":"Nitroglycerin","D":"Lasix（Furosemide）"},"answer":"B","manualChapter":"CH16"},{"id":1155,"source":"第四章 非創傷急症(2015-2018).doc","question":"請問下列何種診斷較不會出現喘鳴（stridor）？","options":{"A":"肺動脈栓塞","B":"火場救出傷患疑似吸入性灼傷","C":"過敏產生的上呼吸道血管性水腫","D":"急性會厭炎"},"answer":"A","matchedChapters":["Combine"],"manualChapter":"非創傷"},{"id":1156,"source":"第四章 非創傷急症(2015-2018).doc","question":"34歲女性，求救原因為心悸併呼吸困難與腹瀉。初評生命跡象為心跳204下/分，血壓126/74mmHg，呼吸30下/分，血氧99%（無用氧下），體溫38.1℃。上救護車後，發現病人身材消瘦，意識躁動不安。執行12導程心電圖如下：請問此病人最不可能是以下哪一種鑑別診斷？","options":{"A":"葛瑞夫茲病（Grave’s disease）合併甲狀腺風暴(thyroid storm)","B":"糖尿病酮酸血症（Diabetic ketoacidosis）","C":"庫欣氏症候群（Cushing syndrome）","D":"可能使用古柯鹼或安非他命等違禁藥物"},"answer":"C","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/1156.png"},{"id":1157,"source":"第四章 非創傷急症(2015-2018).doc","question":"64歲女性，求救原因為剛剛看電視時突發右側肢體無力。初評生命跡象為血壓169/63mmHg，心跳54下/分，呼吸12下/分，給予鼻導管氧氣2L/分後血氧99％，體溫36.1℃。家人說她平時有吃高血壓跟糖尿病藥物，35分鐘之前突然走路往右偏倒，說話也咬字不清。依據中風流程AHA/ASA Guidelines，以下步驟何者必須先執行？","options":{"A":"12導程心電圖","B":"快速血糖檢測","C":"腦部電腦斷層掃描","D":"腦部核磁共振掃描"},"answer":"B","manualChapter":"CH36","matchedChapters":["CH36"]},{"id":1158,"source":"第四章 非創傷急症(2015-2018).doc","question":"關於快速程序插管（Rapid Sequence Intubation，RSI），以下七個P的口訣步驟，正確順序為？","options":{"A":"Preparation準備→Pretreatment前置給藥→Positionin擺位→Preoxygenation前置給氧→Paralysis鎮靜肌肉麻痺Placement插管→Post-intubationmanagement插管後處置。","B":"Preparation準備→Pretreatment前置給藥→Positionin擺位→Paralysis鎮靜肌肉麻痺→Preoxygenation前置給氧→Positionin擺位→Placement插管→Post-intubation management插管後處置","C":"Preparation準備→Preoxygenation前置給氧→Pretreatment前置給藥→Positionin擺位→Paralysis鎮靜肌肉麻痺→Placement插管→Post-intubation management插管後處置。","D":"Preparation準備→Pretreatmentfifj前置給藥→Positionin擺位→Preoxygenation前置給氧→Placement插管→Paralysis鎮靜肌肉麻痺→Post-intubationmanagement插管後處置。"},"answer":"C","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":1159,"source":"第四章 非創傷急症(2015-2018).doc","question":"根據高級救護技術員教科書，以下何者不是讓插管病患肌肉鬆弛的神經肌肉阻斷劑？","options":{"A":"Succinylcholine","B":"Midazolam","C":"Vecuronium","D":"Pancuronium"},"answer":"B","manualChapter":"CH16"}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+
+    const FAV_KEY = "emtp_favorite_question_ids";
+    function getFavorites() {
+      try {
+        const data = localStorage.getItem(FAV_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function isFavorited(id) {
+      return getFavorites().includes(id);
+    }
+    function toggleFavorite(id) {
+      let favs = getFavorites();
+      const idx = favs.indexOf(id);
+      let added = false;
+      if (idx > -1) {
+        favs.splice(idx, 1);
+      } else {
+        favs.push(id);
+        added = true;
+      }
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      } catch (e) {}
+      return added;
+    }
+    function updateFavBtn(id) {
+      const favBtn = document.getElementById("fav-btn");
+      if (!favBtn) return;
+      const fav = isFavorited(id);
+      favBtn.textContent = fav ? "★" : "☆";
+      favBtn.style.color = fav ? "#f59e0b" : "#94a3b8";
+      favBtn.title = fav ? "已加入我的最愛 (點擊移除)" : "加入我的最愛 (點擊加入)";
+    }
+    function handleReviewFav(btn, id) {
+      const isFav = toggleFavorite(id);
+      btn.textContent = isFav ? "★" : "☆";
+      btn.style.color = isFav ? "#f59e0b" : "#94a3b8";
+    }
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+
+    const favBtnEl = document.getElementById("fav-btn");
+    if (favBtnEl) {
+      favBtnEl.addEventListener("click", () => {
+        const q = questions[currentQuestionIndex];
+        if (!q) return;
+        toggleFavorite(q.id);
+        updateFavBtn(q.id);
+        favBtnEl.style.transform = "scale(1.35)";
+        setTimeout(() => { favBtnEl.style.transform = "scale(1)"; }, 150);
+      });
+    }
+
+    function startQuiz() {
+      if (!questions || questions.length === 0) {
+        alert("目前沒有可測驗的題目！請先將題目加入收藏。");
+        return;
+      }
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      updateFavBtn(q.id);
+      
+      const catDiv = document.getElementById("question-category");
+      if (catDiv && ('第四章 非創傷急症 (2015-2018)'.includes('隨機') || '第四章 非創傷急症 (2015-2018)'.includes('最愛'))) {
+          catDiv.style.display = "block";
+          catDiv.textContent = q.manualChapter ? "分類：" + q.manualChapter : "分類：未分類";
+      }
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               if (q.multiAnswer) {
+                 btn.classList.add("multi-correct");
+                 html += ' <span style="float:right; font-weight:bold; color:#854d0e;">✓ 正確答案 (官方複選: ' + q.multiAnswer + ')</span>';
+               } else {
+                 btn.classList.add("correct");
+                 html += ' <span style="float:right;">✓ 正確答案</span>';
+               }
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        const curExp = q.explanation || q.analysis;
+        if ((isReviewMode || selectedAnswers[index] !== null) && curExp) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + curExp.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = (currentQuestionIndex === questions.length - 1) ? "結束作答" : "錯題回顧";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      let scoreHtml = "";
+      if ('第四章 非創傷急症 (2015-2018)'.includes('隨機')) {
+          const scorePerQuestion = questions.length === 25 ? 4 : (questions.length === 50 ? 2 : 0);
+          const totalScore = correctCount * scorePerQuestion;
+          scoreHtml = "<br><br><span style='color: #0369a1; font-size: 1.5rem; font-weight: bold;'>測驗分數：" + totalScore + " 分</span>";
+      }
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題" + scoreHtml;
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   if (q.multiAnswer) {
+                      liClass = "is-multi-correct";
+                      label = " (正確答案 - 官方複選: " + q.multiAnswer + ")";
+                   } else {
+                      liClass = "is-correct";
+                      label = " (正確答案)";
+                   }
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          const reviewExp = q.explanation || q.analysis;
+          if (reviewExp) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + reviewExp.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          const favState = isFavorited(q.id);
+          const favStar = favState ? '★' : '☆';
+          const favColor = favState ? '#f59e0b' : '#94a3b8';
+          div.innerHTML = '<div class="review-question" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">' +
+            '<div>' + (i + 1) + '. ' + q.question + '</div>' +
+            '<button type="button" onclick="handleReviewFav(this, ' + q.id + ')" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; color: ' + favColor + '; padding: 0 4px; flex-shrink: 0;" title="加入/取消我的最愛">' + favStar + '</button>' +
+          '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

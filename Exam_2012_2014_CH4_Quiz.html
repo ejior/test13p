@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    .option-btn.multi-correct {
+      background-color: #fef08a !important;
+      border-color: #eab308 !important;
+      color: #854d0e !important;
+      font-weight: 600;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-multi-correct { background: #fef9c3; border-color: #fde047; color: #854d0e; font-weight: 600; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 6.2rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第四章 非創傷急症 (2012-2014)</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.5rem; font-weight: bold; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：34 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="fav-btn" type="button" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 4px; transition: transform 0.15s ease;" title="加入/取消我的最愛">☆</button>
+          <span class="stat-badge" id="score-text">分類：2012-2014 第四章</span>
+        </div>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1.5rem;">
+        <div id="question-category" style="display: none; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-align: left;"></div>
+        <div class="source-tag" id="source-tag" style="margin-top: 0; margin-left: auto;">來源: 無</div>
+      </div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":1034,"source":"第四章 非創傷急症(2012-2014).doc","question":"OHCA現場急救，你在插管時發現看不見氣管入口。下列作法可幫助聲帶三角容易呈現，但何者除外？","options":{"A":"選擇適當大小的喉鏡葉片","B":"將病患雙肩下墊高","C":"插管者姿勢蹲低或趴在地上","D":"請人施行環狀軟骨按壓術"},"answer":"B","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":1035,"source":"第四章 非創傷急症(2012-2014).doc","question":"根據復甦醫學界著名的心臟停止後三階段急救模式（3-Phase Time-Sensitive Resuscitative Model），下列敘述正確的是？","options":{"A":"心跳剛停止後的4分鐘內是circulatory phase，此時徒手的CPR將是最有效的治療","B":"心跳停止後的4～10分鐘是metabolic phase，此時最有效的治療是以各種急救藥物進行處理","C":"心跳停止後的10分鐘以上是electrical phase，此時往往必須靠多次的電擊去顫術才能恢復心跳","D":"以上皆非"},"answer":"D","matchedChapters":["CH06"],"manualChapter":"CH06"},{"id":1036,"source":"第四章 非創傷急症(2012-2014).doc","question":"ACLS建議在CPR的過程中，應儘量全程使用ETCO2。連續監測，乃是基於三個重要原因，何者除外？","options":{"A":"它是CPR品質的生理性指標之一","B":"它是過度換氣的生理性指標之一","C":"它是確認插管位置是否正確最客觀的工具","D":"它能在不中斷壓胸的情形下顯示病人是否回復心跳"},"answer":"B","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":1037,"source":"第四章 非創傷急症(2012-2014).doc","question":"急救常用的epinephrine。在下列成人重症與給藥的組合，何者錯誤？","options":{"A":"無脈搏急救：1 mg I.V.，每3～5分鐘一次","B":"氣喘重積症發作：0.3 mg S.C.，每20分鐘一次","C":"過敏性休克：0.5 mg S.C.，每5～15分鐘一次","D":"不穩定的緩脈：2～10 mcg／min連續滴注"},"answer":"C","manualChapter":"CH16","matchedChapters":["CH16"]},{"id":1039,"source":"第四章 非創傷急症(2012-2014).doc","question":"你接獲指揮中心通報，到某安養中心救護病人，求救原因為意識不清，到現場後發現病人平躺床上，且護理人員已將心電圖監測器接上，如下圖：請問下列敘述何者最正確？","options":{"A":"此心電圖一定是PSVT","B":"此病人需立刻同步整流電擊","C":"此病人需立刻非同步去顫電擊","D":"此病人需先確認頸動脈再決定下一步行動"},"answer":"D","matchedChapters":["CH07"],"manualChapter":"CH07"},{"id":1040,"source":"第四章 非創傷急症(2012-2014).doc","question":"關於心包膜填塞，有所謂的貝克式三症狀（Beck's triad），下列何者不包含在內？","options":{"A":"低血壓","B":"頸靜脈怒張","C":"意識不清","D":"心音變弱且模糊"},"answer":"C","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":1041,"source":"第四章 非創傷急症(2012-2014).doc","question":"某天，你正在分隊作教育訓練時，有來訪民眾突然倒下，與以「快看電擊板」後發現病人心律為VF，你身為訓練有素的EMT-P，馬上給與去顫電擊，請問電擊完後，接下來的最適當處置為？","options":{"A":"予以再次去顫電擊","B":"予以確認病人脈搏","C":"予以繼續高品質CPR","D":"予以插置氣管內管"},"answer":"C","manualChapter":"非創傷"},{"id":1042,"source":"第四章 非創傷急症(2012-2014).doc","question":"心律不整的處理以下何者為非：","options":{"A":"不論快的（tachycardia）與慢的（bradycardia）心律不整都有危及生命的可能性。十二導程心電圖可供判定心律","B":"心房撲動（atrial flutter），心房顫動（atrial fibrillation）屬於快的心律不整，若是因此產生休克，同步整流電擊是可用的治療的方式","C":"Atropine是可以逆轉副交感神經所造成的症狀，可用在有症狀的心搏過緩","D":"針對心律不整且意識狀態改變的病人，儘速取得電擊器，施於至少一次的去顫電擊"},"answer":"D","manualChapter":"CH34","matchedChapters":["CH33"]},{"id":1043,"source":"第四章 非創傷急症(2012-2014).doc","question":"以下何者心律可以出現窄的QRS波：","options":{"A":"VF","B":"VT","C":"Torsades de pointes","D":"2度Ⅱ型AV block"},"answer":"D","manualChapter":"CH33"},{"id":1044,"source":"第四章 非創傷急症(2012-2014).doc","question":"70歲男性因呼吸困難來到急診，脈搏40次／min，血壓70／40mmHg，以下處置何者為是：","options":{"A":"儘快做完12 lead的EKG，若為3度AV block，給予同步電擊150 J","B":"O2 I.V. monitor，準備做心導管，因為心肌梗塞可能以bradycardia來表現","C":"病人呈現心因性休克合併肺水腫應優先快速大量體液補充，並密切觀察心律變化","D":"可重複給atropine 0.5 mg I.V. push 5到6次，並觀察病人反應，若反應不佳，節律器使用"},"answer":"D","manualChapter":"CH35","matchedChapters":["CH35"]},{"id":1045,"source":"第四章 非創傷急症(2012-2014).doc","question":"有關心電圖的敘述，下列何為為韭？","options":{"A":"右心房擴大在心電圖上的變化主要為P波變高（＞25 mm）而寬度不變，形成所謂的P pulmonale","B":"左心房擴大的變化主要為P波變寬（＞02秒），形成所謂的P mitrale","C":"右心室肥厚時，QRS的變化主要為胸前導程V5的R波變高、V1的S波變深","D":"三個以上連續出現的心室性期外收縮則稱為short-run ventricular tachycardia"},"answer":"C","manualChapter":"CH16"},{"id":1046,"source":"第四章 非創傷急症(2012-2014).doc","question":"心電圖出現p-R區間逐漸地拉長，終至傳導不下去而出現僅有p波而無跟隨的QRS複合波的情形，這心電圖的判讀是：","options":{"A":"一級房室結傳導阻斷","B":"Mobitz第二型二級房室結傳導阻斷","C":"Mobitz第一型二級房室結傳導阻斷","D":"三級房室結傳導阻斷"},"answer":"C","manualChapter":"CH33"},{"id":1047,"source":"第四章 非創傷急症(2012-2014).doc","question":"下列敘述何者有誤？","options":{"A":"於無意識的病人，最常見的呼吸道阻塞原因為會厭倒下造成","B":"CPR時由施救者囗中吹出的氧氣濃度約17%","C":"CPR經評估脈搏恢復後應維持吹氣每分鐘10～12次","D":"LMA可以在到院前使用以暫時取代氣管內管"},"answer":"A","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":1048,"source":"第四章 非創傷急症(2012-2014).doc","question":"下列打開呼吸道的方式及輔助呼吸道的使用何者較適當？","options":{"A":"非外傷昏迷病人一律以下巴推擠法打開呼吸道","B":"意識昏迷併有鎖骨以上創傷病人一律以壓額抬下巴法來打開呼吸道","C":"教導一般民眾不論創傷或非創傷病患一律使用壓額抬下巴法（頭後斜／下顎上提法）來打開呼吸道","D":"意識不清，顏面部創傷病人使用鼻咽呼吸道較適合"},"answer":"C","manualChapter":"CH15","matchedChapters":["CH15"]},{"id":1049,"source":"第四章 非創傷急症(2012-2014).doc","question":"30歲男性病患在公車站突然發生抽搐的現象。根據他的朋友描述，病患突然倒地，先是全身僵硬，牙關緊閉；接著有適當呼吸，但四肢開始抽動，口吐白沫。病患之前並沒有發生過類似的情形。你發現病患意識不清仰躺於地，已經沒有抽搐的情形。下列何項評估或處置為佳？","options":{"A":"應將病患擺成復甦姿勢，以利囗水等分泌物的引流，同時給予病患高流量的氧氣","B":"病患的意識不清有可能是因為他現正處於抽搐後的混淆期，會慢慢恢復清醒","C":"病患的抽搐屬於所謂的「大發作」，一般包含三個階段，其中以陣攣（clonic）期時問最短","D":"在到院前應測量病患的指尖血糖值，因為低血糖可能是造成病患抽搐的原因"},"answer":"C","manualChapter":"非創傷"},{"id":1050,"source":"第四章 非創傷急症(2012-2014).doc","question":"對於張力性氣胸進行針刺減壓的正確位置是？","options":{"A":"鎖骨中線第二肋間","B":"腋中線第二肋間","C":"腋中線第三肋間","D":"鎖骨中線第三肋間"},"answer":"A","matchedChapters":["暫存區"],"manualChapter":"暫存區"},{"id":1051,"source":"第四章 非創傷急症(2012-2014).doc","question":"對於休克描述，下列何者為韭？","options":{"A":"收縮壓小於90 mmHg就是休克","B":"休克患者會有皮膚冰冷，心跳過速，冒冷汗，呼吸困難症狀","C":"休克主要是組織灌流不足，造成氧氣運送不能應付組織代謝所需","D":"依rate→volume→pump，對休克做初步處理"},"answer":"A","manualChapter":"CH26"},{"id":1052,"source":"第四章 非創傷急症(2012-2014).doc","question":"一個年約60歲男性，路倒、意識昏迷、沒有正常呼吸、頸動脈摸不到脈搏，需要CPR且心電圖監視器如下：請問下列何者正確？","options":{"A":"這種一定有脈搏，不需要CPR","B":"應使用電擊器去顫","C":"應立即CPR","D":"應先打上點滴給予大量的輸液，若未改善就需CPR"},"answer":"C","manualChapter":"CH33","matchedChapters":["NeedImage"],"image":"題庫圖片/1052.png"},{"id":1054,"source":"第四章 非創傷急症(2012-2014).doc","question":"想要在短時間內找出PEA／Asystole病人可能原因，快速的理學檢查是不可缺的一環，下列何者不包含在內？","options":{"A":"查看病人頸靜脈是否怒張","B":"測量病人的深肌腱反射","C":"聽診病人兩側呼吸音","D":"以超音波檢視病患的心臟、肺部及腹部"},"answer":"B","manualChapter":"CH20"},{"id":1055,"source":"第四章 非創傷急症(2012-2014).doc","question":"您（EMT-P）在擁擠車站的候車室目睹站在前方的男性突然倒地，心臟停止，下列處置何者最正確：","options":{"A":"立即做5個循環的CPR→請他人求救並取得AED→CPR至AED到時，立即以AED分析是否建議去顫（defibrillation）","B":"請他人求救並取得AED→立即做5個循環的CPR後，再以AED分析是否建議去顫","C":"請他人求救並取得AED→CPR至AED到時，立即以AED分析是否建議去顫（defibrillation）→若去顫，立即做5個循環的CPR","D":"立即做5個循環的CPR→請他人求救並取得AED→CPR至AED到時，先檢查是否有脈搏，若無脈搏再以AED分析是否建議去顫（defibrillation）"},"answer":"C","manualChapter":"CH23"},{"id":1056,"source":"第四章 非創傷急症(2012-2014).doc","question":"一位81歲尿毒症患者，每週一、五上午洗腎治療。星期日晚上，忽然呼吸困難、意識昏迷，EMT到達現場時已無脈搏，EKG如下圖：請問以下何者最有可能是造成此病人PEA的原因？","options":{"A":"氣喘發作","B":"高血鉀症","C":"高血糖","D":"低體溫"},"answer":"B","matchedChapters":["需要圖片"],"manualChapter":"CH33","image":"題庫圖片/1056.png"},{"id":1058,"source":"第四章 非創傷急症(2012-2014).doc","question":"有關成人「生存之鏈（chainofsurvival）」排列順序，何者正確？（1）早期心肺甦醒術（early CPR）；（2）早期高級心臟救命術（early ACLS）；（3）早期求救（early access）；（4）早期電擊治療（early defibrillation）；（5）整合之心臟停止後照護","options":{"A":"1，2，3，4，5","B":"2，3，1，4，5","C":"3，1，4，2，5","D":"4，2，1，3，5"},"answer":"C","manualChapter":"CH23","matchedChapters":["CH23"]},{"id":1061,"source":"第四章 非創傷急症(2012-2014).doc","question":"病患的EKG出現asystole時，最早給予最適當的處置為何？","options":{"A":"給BVM O2","B":"給予電擊200～300焦耳","C":"開始CPR","D":"給予epinephrine"},"answer":"C","manualChapter":"CH23"},{"id":1062,"source":"第四章 非創傷急症(2012-2014).doc","question":"一名50歲男性病患，主訴有呼吸困難，血壓低89／30 mmHg，橈動脈弱，心音聽起來非常小聲，頸靜脈怒張。請問病患最有可能的診斷為何？","options":{"A":"Pericardial tamponade心包填塞","B":"Pulmonary contusion肺挫傷","C":"Paradoxical hypotension低血壓","D":"Flail chest連枷胸"},"answer":"A","manualChapter":"呼吸急症","matchedChapters":["CH20"]},{"id":1064,"source":"第四章 非創傷急症(2012-2014).doc","question":"根據2010年美國心臟醫學會的建議，自動體外電擊器在胸部的貼片位置，以下何者是可以接受的？甲：胸壁前方一側壁乙：胸壁前方一後方丙：胸壁前方一左肩胛下方丁：胸壁前方一右肩胛下方","options":{"A":"只有甲可以接受","B":"只有甲、乙可以接受","C":"只有甲、乙、丙可以接受","D":"甲、乙、丙、丁都可以接受"},"answer":"D","manualChapter":"CH23"},{"id":1069,"source":"第四章 非創傷急症(2012-2014).doc","question":"下列有關心包膜填塞的描述，何者為非？","options":{"A":"臨床表現包括：低血壓、呼吸急促、倦怠無力，甚而發紺","B":"理學檢查方面：頸靜脈怒張，心音變弱且模糊，心包膜摩擦音，有時會有奇脈（pulsus paradoxus）發生","C":"心電圖有時會有電氣交替（electrical alternans）現象","D":"貝克氏三症狀（Beck's triad）即指常見於急性心包膜填塞的「低血壓」「頸靜脈怒張」、以及「心電圖的電氣交替」"},"answer":"D","manualChapter":"CH28","matchedChapters":["CH28"]},{"id":1070,"source":"第四章 非創傷急症(2012-2014).doc","question":"關於心包膜填塞（cardiac tamponade）的敘述，何者為是？","options":{"A":"會造成胸痛，可以比照缺血性胸痛給予MONA","B":"心包膜腔液體過多的話，會先壓迫左心房以及左心室，造成無脈性的電氣活動（PEA）","C":"會影響到回心血流是在心臟收縮期時","D":"高度懷疑心包膜填塞之病患，可以考慮到院前建立靜脈管路，給予生理食鹽水等靜脈注射"},"answer":"D","manualChapter":"CH34"},{"id":1071,"source":"第四章 非創傷急症(2012-2014).doc","question":"病患有陣發性心房纖維顫動（paroxysmal atrial fibrillation）以及WPW的病史，此時發生陣發性上心室心搏過速（PSVT），病患臨床症狀穩定，使用非藥物的方式均無法改善，如要使用藥物應選擇何種藥物較為安全？","options":{"A":"Amiodarone","B":"Adenosine","C":"Digoxin（毛地黃）","D":"Beta blockers（乙型阻斷劑）"},"answer":"A","manualChapter":"CH16"},{"id":1072,"source":"第四章 非創傷急症(2012-2014).doc","question":"一名30歲男性病患被路人發現倒臥橋邊，經高級救護技術員到達現場評估後發現摸得到微弱的頸動脈，心臟監視器呈現下列心律，何者為是？","options":{"A":"Torsades de pointes","B":"Ventricular fibrillation","C":"Ventricular tachycardia","D":"Atrial fibrillation"},"answer":"A","manualChapter":"CH33","image":"題庫圖片/1072.png"},{"id":1076,"source":"第四章 非創傷急症(2012-2014).doc","question":"在心臟整流（cardioversion）的過程中，病患突然變成VF，你應該馬上採取下列那一步驟？","options":{"A":"開始胸部按壓，建立氣管內管","B":"立即靜脈快速注射epinephrine 1 mg然後給予去顫電擊","C":"關掉同步開關，立即進行非同步的心臟電擊","D":"立即進行第二次同步的心臟整流"},"answer":"C","manualChapter":"CH34","matchedChapters":["CH34"]},{"id":1077,"source":"第四章 非創傷急症(2012-2014).doc","question":"VF電擊完，CPR兩分鐘五個循環後，心電圖監視器的心律呈現二度二型房室傳導障礙（2度AV block typeⅡ）波形，你下一步該如何？","options":{"A":"檢查頸動脈是否有脈搏","B":"給予atropine 0.5 mg靜脈注射","C":"給予體外經皮式心律調節器（TCP）","D":"已急救成功，趕快將病患送醫"},"answer":"A","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":1078,"source":"第四章 非創傷急症(2012-2014).doc","question":"一位年輕病患因心悸至急診，EKG顯示PSVT，心跳180／min，血壓120／80mmHg，呼吸尚平順，下列處置何者最優先？","options":{"A":"跟病患解釋後，予以鎮靜，給予同步電擊50焦耳","B":"給予adenosine 6 mg快速I.V.注射","C":"給予amiodarone 150 mg，I.V.滴注10分鐘","D":"確定無carotid bruits後，給予頸動脈竇按摩"},"answer":"D","manualChapter":"CH33","matchedChapters":["CH33"]},{"id":1079,"source":"第四章 非創傷急症(2012-2014).doc","question":"心跳停止的病患（OHCA）恢復自發性循環（ROSC）之後，依據ACLS 2010年的建議，哪種病患應該進行低體溫治療？","options":{"A":"所有ROSC病患皆應進行","B":"僅限於高度懷疑心肌梗塞病患","C":"僅限於意識不清無法聽從指令的病患","D":"僅限於成人非創傷病患"},"answer":"C","matchedChapters":["CH24"],"manualChapter":"CH24"},{"id":1080,"source":"第四章 非創傷急症(2012-2014).doc","question":"依ACLS 2010年建議，須作15：2按壓換氣比的情況是？","options":{"A":"成人急救，兩名一般施救者","B":"兒童急救，一名一般施救者","C":"兒童急救，兩名專業醫療人員","D":"新生兒急救，一名專業醫療人"},"answer":"C","manualChapter":"CH48","matchedChapters":["CH48"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+
+    const FAV_KEY = "emtp_favorite_question_ids";
+    function getFavorites() {
+      try {
+        const data = localStorage.getItem(FAV_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function isFavorited(id) {
+      return getFavorites().includes(id);
+    }
+    function toggleFavorite(id) {
+      let favs = getFavorites();
+      const idx = favs.indexOf(id);
+      let added = false;
+      if (idx > -1) {
+        favs.splice(idx, 1);
+      } else {
+        favs.push(id);
+        added = true;
+      }
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      } catch (e) {}
+      return added;
+    }
+    function updateFavBtn(id) {
+      const favBtn = document.getElementById("fav-btn");
+      if (!favBtn) return;
+      const fav = isFavorited(id);
+      favBtn.textContent = fav ? "★" : "☆";
+      favBtn.style.color = fav ? "#f59e0b" : "#94a3b8";
+      favBtn.title = fav ? "已加入我的最愛 (點擊移除)" : "加入我的最愛 (點擊加入)";
+    }
+    function handleReviewFav(btn, id) {
+      const isFav = toggleFavorite(id);
+      btn.textContent = isFav ? "★" : "☆";
+      btn.style.color = isFav ? "#f59e0b" : "#94a3b8";
+    }
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+
+    const favBtnEl = document.getElementById("fav-btn");
+    if (favBtnEl) {
+      favBtnEl.addEventListener("click", () => {
+        const q = questions[currentQuestionIndex];
+        if (!q) return;
+        toggleFavorite(q.id);
+        updateFavBtn(q.id);
+        favBtnEl.style.transform = "scale(1.35)";
+        setTimeout(() => { favBtnEl.style.transform = "scale(1)"; }, 150);
+      });
+    }
+
+    function startQuiz() {
+      if (!questions || questions.length === 0) {
+        alert("目前沒有可測驗的題目！請先將題目加入收藏。");
+        return;
+      }
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      updateFavBtn(q.id);
+      
+      const catDiv = document.getElementById("question-category");
+      if (catDiv && ('第四章 非創傷急症 (2012-2014)'.includes('隨機') || '第四章 非創傷急症 (2012-2014)'.includes('最愛'))) {
+          catDiv.style.display = "block";
+          catDiv.textContent = q.manualChapter ? "分類：" + q.manualChapter : "分類：未分類";
+      }
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               if (q.multiAnswer) {
+                 btn.classList.add("multi-correct");
+                 html += ' <span style="float:right; font-weight:bold; color:#854d0e;">✓ 正確答案 (官方複選: ' + q.multiAnswer + ')</span>';
+               } else {
+                 btn.classList.add("correct");
+                 html += ' <span style="float:right;">✓ 正確答案</span>';
+               }
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        const curExp = q.explanation || q.analysis;
+        if ((isReviewMode || selectedAnswers[index] !== null) && curExp) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + curExp.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = (currentQuestionIndex === questions.length - 1) ? "結束作答" : "錯題回顧";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      let scoreHtml = "";
+      if ('第四章 非創傷急症 (2012-2014)'.includes('隨機')) {
+          const scorePerQuestion = questions.length === 25 ? 4 : (questions.length === 50 ? 2 : 0);
+          const totalScore = correctCount * scorePerQuestion;
+          scoreHtml = "<br><br><span style='color: #0369a1; font-size: 1.5rem; font-weight: bold;'>測驗分數：" + totalScore + " 分</span>";
+      }
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題" + scoreHtml;
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   if (q.multiAnswer) {
+                      liClass = "is-multi-correct";
+                      label = " (正確答案 - 官方複選: " + q.multiAnswer + ")";
+                   } else {
+                      liClass = "is-correct";
+                      label = " (正確答案)";
+                   }
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          const reviewExp = q.explanation || q.analysis;
+          if (reviewExp) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + reviewExp.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          const favState = isFavorited(q.id);
+          const favStar = favState ? '★' : '☆';
+          const favColor = favState ? '#f59e0b' : '#94a3b8';
+          div.innerHTML = '<div class="review-question" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">' +
+            '<div>' + (i + 1) + '. ' + q.question + '</div>' +
+            '<button type="button" onclick="handleReviewFav(this, ' + q.id + ')" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; color: ' + favColor + '; padding: 0 4px; flex-shrink: 0;" title="加入/取消我的最愛">' + favStar + '</button>' +
+          '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>

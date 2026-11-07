@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMTP測驗系統</title>
+  <style>
+        :root {
+      --primary-color: #2c3e50;
+      --primary-hover: #1a252f;
+      --bg-color: #e9ecef;
+      --card-bg: #ffffff;
+      --text-main: #2b2d42;
+      --text-muted: #6c757d;
+      --success: #2e7d32;
+      --error: #c62828;
+      --border-radius: 12px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      transition: var(--transition);
+      animation: fadeIn 0.4s ease-out forwards;
+      margin-bottom: 2rem;
+    }
+
+    h1 { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 0.5rem; text-align: center; }
+    .chapter-title { font-size: 1.5rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; font-weight: normal; }
+    h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem; color: var(--text-main); text-align: center; }
+    p { color: var(--text-muted); }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(106, 140, 175, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background-color: #ffffff;
+      color: #1e3a8a;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      font-size: 1.05rem;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .option-btn.selected {
+      background-color: #eff6ff;
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .option-btn.correct {
+      background-color: #f0fdf4 !important;
+      border-color: #16a34a !important;
+      color: #1e3a8a !important;
+    }
+    .option-btn.multi-correct {
+      background-color: #fef08a !important;
+      border-color: #eab308 !important;
+      color: #854d0e !important;
+      font-weight: 600;
+    }
+    
+    .explanation-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8fafc;
+      border-left: 4px solid var(--primary);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+    .option-btn.wrong {
+      background-color: #fef2f2 !important;
+      border-color: #ef4444 !important;
+      color: #991b1b !important;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-badge {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      background: #e2e8f0;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+    }
+
+    .source-tag {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: right;
+    }
+
+    .category-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .category-box label {
+      display: block;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    .category-box input[type="text"] {
+      padding: 0.4rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      margin-left: 0.5rem;
+      font-size: 0.95rem;
+      width: 70%;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    .hidden { display: none !important; }
+    .text-center { text-align: center; }
+    .mt-4 { margin-top: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    .review-item { margin-bottom: 2rem; padding: 1.5rem; border-radius: 12px; background: #f8fafc; border-left: 6px solid #e2e8f0; text-align: left; }
+    .review-item.incorrect { border-left-color: var(--error); }
+    .review-question { font-weight: 600; margin-bottom: 1rem; color: var(--text-main); }
+    .review-options { list-style: none; margin-bottom: 1rem; }
+    .review-options li { padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .review-options li.is-correct { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 500; }
+    .review-options li.is-multi-correct { background: #fef9c3; border-color: #fde047; color: #854d0e; font-weight: 600; }
+    .review-options li.is-wrong { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+
+    .image-container {
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .image-container img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .source-tag {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 1rem;
+      text-align: right;
+    }
+    .cat-tag {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  
+  
+  <a href="Dashboard_Quiz.html" style="position: absolute; left: 20px; top: 3rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="返回首頁">🏠 返回</a>
+  <a href="search.html" style="position: absolute; left: 20px; top: 6.2rem; color: var(--text-main); text-decoration: none; font-size: 1.5rem; font-weight: bold; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; z-index: 100;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='var(--card-bg)'" title="前往題庫搜尋系統">🔍 搜尋</a>
+  <div id="app">
+    <div class="card" id="start-screen">
+      <h1>EMTP測驗系統</h1>
+      <h2 class="chapter-title" style="color: #51794E; font-weight: bold;">第 1 章</h2>
+      <div class="text-center mt-4 mb-4">
+        
+        <button id="start-btn" style="font-size: 1.5rem; font-weight: bold; padding: 1rem 3rem;">開始測驗</button>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 1.1rem; font-weight: bold;">題目數量：39 題</p>
+      </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div class="card hidden" id="quiz-screen">
+      <div class="question-header">
+        <span class="stat-badge" id="progress-text">問題 1 / 10</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="fav-btn" type="button" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: 0 4px; transition: transform 0.15s ease;" title="加入/取消我的最愛">☆</button>
+          <span class="stat-badge" id="score-text">分類：CH01</span>
+        </div>
+      </div>
+      
+      <h2 id="question-text" style="text-align: left; line-height: 1.5; color: #1e3a8a;">問題內容</h2>
+      <div id="image-container" class="image-container hidden">
+        <img id="question-image" src="" alt="Question Image">
+      </div>
+      
+      <div id="options-container" class="mt-4">
+        <!-- Options will be injected here -->
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1.5rem;">
+        <div id="question-category" style="display: none; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-align: left;"></div>
+        <div class="source-tag" id="source-tag" style="margin-top: 0; margin-left: auto;">來源: 無</div>
+      </div>
+      
+      <div class="flex-between mt-4" style="flex-wrap: wrap; gap: 10px;">
+        <button id="prev-btn" class="hidden" style="background-color: var(--text-muted);">上一題</button>
+        <div style="display: flex; gap: 10px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end;">
+          <button id="submit-btn" class="hidden" style="background-color: var(--success);">提交並看結果</button>
+          <button id="next-btn" class="hidden">下一題</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="card hidden" id="result-screen">
+      <h1>測驗完成！</h1>
+      <div class="text-center mb-4">
+        <p style="font-size: 1.5rem; color: var(--text-main); margin-top: 1rem;" id="final-stats"></p>
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">錯題回顧</h3>
+      <div id="review-container">
+        <!-- Review items will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [{"id":337,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"關於台灣緊急醫療救護系統的設計，以下何者為是？","options":{"A":"台灣屬於歐陸體系","B":"台灣屬於北美體系","C":"北美體系為以醫師為主體執行到院前救護","D":"歐陸體系由受過不同等級訓練與授權的救護技術員做為醫師在到院前救護的延伸"},"answer":"B","manualChapter":"CH01"},{"id":339,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"根據傷病患與事故的類型，緊急醫療救護的現場治療原則，可以區分為兩種模式，亦即「心臟模式」與「創傷模式」，以下關於兩種模式的敘述何者為是？","options":{"A":"心臟模式的原則是盡速送醫（Load and Go）","B":"創傷模式的原則是現場穩定（Stay and Play）","C":"對於創傷傷患，救護技術員的任務在於提供確切醫療","D":"對於突發性心跳停止的病患，應盡量在到院前開始施行高級救命術"},"answer":"D","manualChapter":"CH01"},{"id":357,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"現代緊急醫療救護的濫觴，自於何種醫學？","options":{"A":"街道醫學","B":"重症醫學","C":"急診醫學","D":"軍陣醫學"},"answer":"D","manualChapter":"CH01"},{"id":358,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"下列關於台灣地區緊急醫療救護系統的描述，何者為非？","options":{"A":"突發性心跳停止，存活率每分鐘下降7~10%，因此採取儘速送醫（Load and Go）模式","B":"台灣的緊急醫療救護體系人力組成設計，是屬於北美體系（Anglo-American system）","C":"緊急醫療救護體系中的救護人員，包括醫師、護理師、及救護技術員","D":"台灣急救責任醫院分為三級，分別為一般級、中度級、及重度級"},"answer":"A","manualChapter":"CH01"},{"id":366,"source":"第一章 系統運作與品質管理(2015-2018).doc","question":"我國緊急醫療救護法，所指緊急醫療救護人員，以下何者為非？","options":{"A":"第一反應人員（First responder）","B":"護理人員","C":"救護技術員","D":"醫師"},"answer":"A","manualChapter":"CH01"},{"id":2186,"source":"112年度EMTP筆試-題目卷(100題)(含答案)-1121221公告版","question":"建立完善的緊急醫療救護體系須從四個面向努力，下列有關四個面向的敘述，何者為是？","options":{"A":"卓越領導：依緊急醫療救護法第25條，建立醫療指導制度，由醫療指導醫師領導緊急醫療救護體系發展。","B":"完整系統：完整系統的要素，舉凡人才招募、教育訓練、醫療設施、品質管理等，都必須逐項建立。","C":"健全財務：公家機關資源有限，民間資源無窮，訓練經費與器耗材不足等的資金缺口都可依賴募款補足。","D":"妥善立法：依緊急醫療救護法第2條，社區緊急醫療救護系統之運作，主管機關在各縣市，相關法規應由各縣市自行立法。"},"answer":"B","manualChapter":"CH01"},{"id":3307,"source":"使用者新增","question":"台灣的緊急醫療救護體系由多個專責單位協同運作，任何涉及消防局的流程變更，需經由下列何者單位批准，否則可能因未符合法律程序而無效?","options":{"A":"緊急醫療救護諮詢委員會","B":"醫療顧問委員會","C":"醫療指導醫師會議","D":"急救責任醫院"},"answer":"A","manualChapter":"CH01"},{"id":3512,"source":"TP題庫","question":"下列哪個不是EMS Agenda 2050的特性","options":{"A":"安全與有效","B":"整合與無縫","C":"依賴與準備","D":"溝通與協調"},"answer":"D","manualChapter":"CH01","matchedChapters":["CH01"]},{"question":"所謂冗餘系統 (Redundant System) 主要目的為何？","options":{"A":"減少設備數量","B":"降低教育需求","C":"災害或故障時維持運作","D":"減少人力配置"},"answer":"C","source":"圖片匯入","manualChapter":"CH01","id":3563,"matchedChapters":["CH01"]},{"question":"在《EMS agenda 2050》提出的「安全與有效」指導原則中，為了建立安全的系統文化，下列哪一項做法最符合其核心願景？","options":{"A":"全面取消救護車的閃燈與鳴笛以降低交通意外發生率","B":"要求救護人員在抵達現場後才開始收集環境安全資訊以避免預判偏差","C":"僅針對造成實質病人傷害的嚴重醫療疏失進行懲處","D":"建立匿名通報機制以紀錄並分析「跡近錯誤」"},"answer":"D","source":"圖片匯入","manualChapter":"CH01","id":3567,"matchedChapters":["CH01"]},{"question":"世界衛生組織緊急醫療照護系統架構中，何者不屬於「照護現場」範圍？","options":{"A":"巡迴","B":"旁觀者應變","C":"救護人員應變","D":"病人轉送"},"answer":"D","source":"圖片匯入","manualChapter":"CH01","id":3568,"matchedChapters":["CH01"]},{"id":45870,"question":"緊急救護分為英美系統及德法系統，其中關於英美系統之敘述下列何者錯誤?","options":{"A":"病人由急救人員送往急診部門，而不是直接送往醫院病房。","B":"不論病人嚴重度，派遣中心一律派出救護車進行協助。","C":"快速搬運目的是迅速將病人送到醫院，並且在院前進行較少的干預，現場處置時間較長。","D":"通常與警察或消防部門聯繫在一起，出勤的救護車多為以消防分隊為基地的出勤方式。"},"answer":"C","manualChapter":"CH01","source":"未標明"},{"id":45881,"question":"某消防局發現救護人員因長時間勤務，造成肌肉傷害及心理壓力增加，因此增加搬運病人訓練、安全駕駛教育及定期心理健康評估。依照EMS agenda 2050中的六大發展願景，像上述這樣關注基層後續發展與效益的是何者?","options":{"A":"安全與有效","B":"具社會公平","C":"永續與效益","D":"信賴與準備"},"answer":"A","manualChapter":"CH01","source":"未標明","matchedChapters":["CH01"]},{"id":46170,"question":"依照EMS agenda 2050中的六大發展願景，「以醫學實證和病人預後調整各地區救護措施，需要持續不間斷的紀錄與推動品質改善計畫（QI），此舉往往需耗費數年甚至數十年才能建立成效並在區域內廣泛運作」屬於下列何種發展與效益?","options":{"A":"安全與有效","B":"整合與無縫","C":"信賴與準備","D":"具社會公平"},"answer":"A","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46171,"question":"依照EMS agenda 2050中的六大發展願景，「有計畫且縝密地訂定病人預後指標，並持續追蹤紀錄不良事件，不僅能促進以安全為核心的醫學研究，也能依據研究證據制定出更完善的人員培訓課程與標準作業程序」屬於下列何種發展與效益?","options":{"A":"整合與無縫","B":"安全與有效","C":"信賴與準備","D":"具社會公平"},"answer":"B","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46172,"question":"依照EMS agenda 2050中的六大發展願景，「提供適切的救護訓練並營造健康的職場環境，能有效降低緊急醫療救護人員在執勤過程中身體與心理承受傷害的風險」屬於下列何種發展與效益?","options":{"A":"整合與無縫","B":"信賴與準備","C":"安全與有效","D":"具社會公平"},"answer":"C","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46173,"question":"依照EMS agenda 2050中的六大發展願景，「建立開放順暢的垂直與平行溝通管道，使所有團隊成員皆能在免於恐懼的氛圍下，主動反映與病人安全或救護員安全相關的關鍵問題並共同改善」屬於下列何種發展與效益?","options":{"A":"永續與效益","B":"適應與創新","C":"信賴與準備","D":"安全與有效"},"answer":"D","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46174,"question":"依照EMS agenda 2050中的六大發展願景，「運用科技進行即時監測，在救護人員抵達現場前便能預先掌握患者狀況與環境風險；資訊來源涵蓋病患的穿戴式裝置、旁觀者回報或無人機等先進設備，協助救護員抵達後能更全面且精準地評估現場動態」屬於下列何種發展與效益?","options":{"A":"安全與有效","B":"信賴與準備","C":"永續與效益","D":"適應與創新"},"answer":"A","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46175,"question":"依照EMS agenda 2050中的六大發展願景，「緊急醫療照護與其他醫療照護機構或是社區是一個照護的連續體，提供病人從緊急傷病發生當下到社區進行復健和返回職場的所有需求」屬於下列何種發展與效益?","options":{"A":"永續與效益","B":"整合與無縫","C":"具社會公平","D":"信賴與準備"},"answer":"B","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46176,"question":"依照EMS agenda 2050中的六大發展願景，「與病人相關的資訊和溝通系統是彼此互相連接並即時更新的，以確保能夠立即為合適的病人提供合適的照護」屬於下列何種發展與效益?","options":{"A":"信賴與準備","B":"具社會公平","C":"整合與無縫","D":"永續與效益"},"answer":"C","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46177,"question":"依照EMS agenda 2050中的六大發展願景，「各個不同的專業團隊之間，包含緊急救護技術人員、醫院端的醫療照護提供者、社區內的人員應該進行跨團隊的交流，透過一起學習以及一起接受訓練來成為一個跨專業的團隊，以對特定議題進行應對」屬於下列何種發展與效益?","options":{"A":"具社會公平","B":"適應與創新","C":"信賴與準備","D":"整合與無縫"},"answer":"D","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46178,"question":"依照EMS agenda 2050中的六大發展願景，「負責培訓和教育各級救護技術專業人員的教師也必須因應相關的災害，而不斷轉型以符合最新的教育需求」屬於下列何種發展與效益?","options":{"A":"信賴與準備","B":"安全與有效","C":"整合與無縫","D":"具社會公平"},"answer":"A","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46179,"question":"依照EMS agenda 2050中的六大發展願景，「教育計劃的制定由醫師和教育提供者的團隊所領導，他們經過精心選拔、培訓和教育，並以過往的經驗和醫學實證不斷地調整和改善其教育方針」屬於下列何種發展與效益?","options":{"A":"安全與有效","B":"信賴與準備","C":"永續與效益","D":"整合與無縫"},"answer":"B","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46180,"question":"依照EMS agenda 2050中的六大發展願景，「在一般的醫療照護訓練之外，應該進行更全面的培訓，在民眾對緊急情況做出反應時，有即時的決策系統可以協助他們對病人有適當的處置」屬於下列何種發展與效益?","options":{"A":"適應與創新","B":"永續與效益","C":"信賴與準備","D":"具社會公平"},"answer":"C","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46181,"question":"依照EMS agenda 2050中的六大發展願景，「具備有韌性的基礎設施（如通訊、電力、能源和交通），且基礎設施必須堅固，並且具備冗餘系統（redundant system），以確保在災害發生或設備故障期間還是能持續地提供照護」屬於下列何種發展與效益?","options":{"A":"永續與效益","B":"具社會公平","C":"適應與創新","D":"信賴與準備"},"answer":"D","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46182,"question":"依照EMS agenda 2050中的六大發展願景，「與其他公共安全機構、醫療系統以及社區做緊密的整合。其中，緊急醫療救護系統應積極參與社區的應變準備工作，包括民眾的公共教育和與當地緊急應變系統的合作」屬於下列何種發展與效益?","options":{"A":"信賴與準備","B":"具社會公平","C":"安全與有效","D":"適應與創新"},"answer":"A","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46183,"question":"依照EMS agenda 2050中的六大發展願景，「確保緊急醫療救護系統能快速取得必要的資源，如藥物、醫療用品和運輸車輛也是相當重要的，制定相關計畫以及流程以應變在醫療需求突然增加時（如自然災害或大規模傷亡事件）能快速調動額外資源來協助病人」屬於下列何種發展與效益?","options":{"A":"永續與效益","B":"信賴與準備","C":"適應與創新","D":"整合與無縫"},"answer":"B","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46184,"question":"依照EMS agenda 2050中的六大發展願景，「能預見未來的挑戰和不斷演變的威脅，這些挑戰和威脅可能來自於新興傳染病、人口結構變化（如高齡化社會）或突發的災難等，緊急醫療救護系統應定期更新其計劃、流程和培訓計劃，以應對這些挑戰」屬於下列何種發展與效益?","options":{"A":"永續與效益","B":"具社會公平","C":"信賴與準備","D":"適應與創新"},"answer":"C","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46185,"question":"依照EMS agenda 2050中的六大發展願景，「緊急醫療救護系統必須被設計成有足夠的覆蓋率，以達到最大的可近性。無論一個人在城市、鄉村或介於兩者之間的地區接受緊急醫療服務，這些不同的居住地理位置對他們所接受到的醫療品質，以及對於病人預後的影響應該微乎其微」屬於下列何種發展與效益?","options":{"A":"安全與有效","B":"整合與無縫","C":"信賴與準備","D":"具社會公平"},"answer":"D","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46186,"question":"依照EMS agenda 2050中的六大發展願景，「救護人員應接受培訓課程，以理解並尊重文化差異，並提供不同文化背景以及不同多樣性的醫療照護」屬於下列何種發展與效益?","options":{"A":"具社會公平","B":"整合與無縫","C":"安全與有效","D":"適應與創新"},"answer":"A","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46187,"question":"依照EMS agenda 2050中的六大發展願景，「緊急醫療救護系統應該收集及分析數據，以識別出不同族群之間的健康不平等情形，並制定針對特定族群的計畫，投入資源並努力弭平這些特定族群的健康不平等」屬於下列何種發展與效益?","options":{"A":"安全與有效","B":"具社會公平","C":"整合與無縫","D":"信賴與準備"},"answer":"B","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46188,"question":"依照EMS agenda 2050中的六大發展願景，「在緊急醫療救護系統內部應該具備有多元的接納性，提供緊急醫療救護的隊伍本身應該要能了解社區的多樣性為何，並且招聘和留任相對應多樣性的專業人員，以便他們能夠與社區建立聯繫並有效地服務社區」屬於下列何種發展與效益?","options":{"A":"信賴與準備","B":"安全與有效","C":"具社會公平","D":"永續與效益"},"answer":"C","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46189,"question":"依照EMS agenda 2050中的六大發展願景，「建立一個不僅資源能做高效率應用，且還能長期維持其運營的緊急醫療救護系統」屬於下列何種發展與效益?","options":{"A":"適應與創新","B":"具社會公平","C":"信賴與準備","D":"永續與效益"},"answer":"D","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46190,"question":"依照EMS agenda 2050中的六大發展願景，「領導者應該確保整個緊急醫療系統應審慎地使用資源，讓緊急救護從啟動到治療的每一步驟都能為社區和病人提供價值」屬於下列何種發展與效益?","options":{"A":"永續與效益","B":"安全與有效","C":"具社會公平","D":"整合與無縫"},"answer":"A","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46191,"question":"依照EMS agenda 2050中的六大發展願景，「透過與醫藥器材製造商和研發人員的密切合作，以確保關鍵醫療器材和藥品的價格是合理透明的，但同時也不會因壓低價格而讓醫藥器材產業停止創新」屬於下列何種發展與效益?","options":{"A":"信賴與準備","B":"永續與效益","C":"整合與無縫","D":"適應與創新"},"answer":"B","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46192,"question":"依照EMS agenda 2050中的六大發展願景，「對病人預後、執行成效和財務結果進行統計，並公開報告予民眾，讓社區和政策制定者能夠依據相關報告做出適當的決策」屬於下列何種發展與效益?","options":{"A":"適應與創新","B":"整合與無縫","C":"永續與效益","D":"安全與有效"},"answer":"C","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46193,"question":"依照EMS agenda 2050中的六大發展願景，「發展人工智能以協助臨床決策、遠距醫療和先進的診斷工具以提供更好的照護」屬於下列何種發展與效益?","options":{"A":"信賴與準備","B":"整合與無縫","C":"永續與效益","D":"適應與創新"},"answer":"D","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46194,"question":"依照EMS agenda 2050中的六大發展願景，「緊急醫療救護的提供者也應參與終身學習，並持續在學習中成長，而作為這些照護提供者背後的系統，則應鼓勵和支持這些人員持續進修，並以最新的醫學實證和科技整合在一起，以提供病人更好的照護」屬於下列何種發展與效益?","options":{"A":"適應與創新","B":"安全與有效","C":"整合與無縫","D":"信賴與準備"},"answer":"A","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]},{"id":46195,"question":"依照EMS agenda 2050中的六大發展願景，「應與其他醫療照護提供者、技術開發人員和社區利害關係人密切合作，以辨識出各地區的問題並以創新的想法提出解決方案」屬於下列何種發展與效益?","options":{"A":"具社會公平","B":"適應與創新","C":"安全與有效","D":"永續與效益"},"answer":"B","source":"EMS agenda 2050","manualChapter":"CH01","matchedChapters":["CH01"]}];
+    let currentQuestionIndex = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+    let isReviewMode = false;
+
+    const FAV_KEY = "emtp_favorite_question_ids";
+    function getFavorites() {
+      try {
+        const data = localStorage.getItem(FAV_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function isFavorited(id) {
+      return getFavorites().includes(id);
+    }
+    function toggleFavorite(id) {
+      let favs = getFavorites();
+      const idx = favs.indexOf(id);
+      let added = false;
+      if (idx > -1) {
+        favs.splice(idx, 1);
+      } else {
+        favs.push(id);
+        added = true;
+      }
+      try {
+        localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      } catch (e) {}
+      return added;
+    }
+    function updateFavBtn(id) {
+      const favBtn = document.getElementById("fav-btn");
+      if (!favBtn) return;
+      const fav = isFavorited(id);
+      favBtn.textContent = fav ? "★" : "☆";
+      favBtn.style.color = fav ? "#f59e0b" : "#94a3b8";
+      favBtn.title = fav ? "已加入我的最愛 (點擊移除)" : "加入我的最愛 (點擊加入)";
+    }
+    function handleReviewFav(btn, id) {
+      const isFav = toggleFavorite(id);
+      btn.textContent = isFav ? "★" : "☆";
+      btn.style.color = isFav ? "#f59e0b" : "#94a3b8";
+    }
+    
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const submitBtn = document.getElementById("submit-btn");
+    const progressText = document.getElementById("progress-text");
+    const scoreText = document.getElementById("score-text");
+    const reviewContainer = document.getElementById("review-container");
+    
+    document.getElementById("start-btn").addEventListener("click", startQuiz);
+    prevBtn.addEventListener("click", () => navigate(-1));
+    nextBtn.addEventListener("click", () => navigate(1));
+    submitBtn.addEventListener("click", showResults);
+
+    const favBtnEl = document.getElementById("fav-btn");
+    if (favBtnEl) {
+      favBtnEl.addEventListener("click", () => {
+        const q = questions[currentQuestionIndex];
+        if (!q) return;
+        toggleFavorite(q.id);
+        updateFavBtn(q.id);
+        favBtnEl.style.transform = "scale(1.35)";
+        setTimeout(() => { favBtnEl.style.transform = "scale(1)"; }, 150);
+      });
+    }
+
+    function startQuiz() {
+      if (!questions || questions.length === 0) {
+        alert("目前沒有可測驗的題目！請先將題目加入收藏。");
+        return;
+      }
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      
+      // Shuffle questions
+      for (let i = questions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = questions[i];
+        questions[i] = questions[j];
+        questions[j] = temp;
+      }
+      
+      // Shuffle options
+      questions.forEach(q => {
+        if (q.options) {
+          let keys = Object.keys(q.options);
+          for (let i = keys.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = keys[i];
+            keys[i] = keys[j];
+            keys[j] = temp;
+          }
+          q.shuffledKeys = keys;
+        }
+      });
+      
+      loadQuestion(0);
+    }
+    
+    function loadQuestion(index) {
+      currentQuestionIndex = index;
+      const q = questions[index];
+      
+      questionText.textContent = q.question;
+      updateFavBtn(q.id);
+      
+      const catDiv = document.getElementById("question-category");
+      if (catDiv && ('第 1 章'.includes('隨機') || '第 1 章'.includes('最愛'))) {
+          catDiv.style.display = "block";
+          catDiv.textContent = q.manualChapter ? "分類：" + q.manualChapter : "分類：未分類";
+      }
+      
+      const imgContainer = document.getElementById("image-container");
+      const imgEl = document.getElementById("question-image");
+      if (q.image) {
+        imgEl.src = q.image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+      
+      optionsContainer.innerHTML = "";
+      if (q.options) {
+        let keysToUse = q.shuffledKeys || Object.keys(q.options);
+        const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+        keysToUse.forEach((key, optIdx) => {
+          const value = q.options[key];
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          const dLetter = displayLetters[optIdx] || key;
+          
+          let html = "<strong>" + dLetter + ".</strong> " + value;
+          
+          if (isReviewMode || selectedAnswers[index] !== null) {
+             btn.disabled = true;
+             if (key === q.answer) {
+               if (q.multiAnswer) {
+                 btn.classList.add("multi-correct");
+                 html += ' <span style="float:right; font-weight:bold; color:#854d0e;">✓ 正確答案 (官方複選: ' + q.multiAnswer + ')</span>';
+               } else {
+                 btn.classList.add("correct");
+                 html += ' <span style="float:right;">✓ 正確答案</span>';
+               }
+             } else if (selectedAnswers[index] === key) {
+               btn.classList.add("wrong");
+               html += ' <span style="float:right;">✗ 你的作答</span>';
+             }
+          } else {
+             btn.addEventListener("click", () => selectOption(key));
+          }
+          
+
+          btn.innerHTML = html;
+          optionsContainer.appendChild(btn);
+        });
+        
+        const curExp = q.explanation || q.analysis;
+        if ((isReviewMode || selectedAnswers[index] !== null) && curExp) {
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-box";
+          expDiv.innerHTML = "<strong>💡 解析：</strong><br>" + curExp.replace(/\n/g, "<br>");
+          optionsContainer.appendChild(expDiv);
+        }
+
+      }
+      
+      document.getElementById("source-tag").textContent = "ID: " + q.id + " | 來源: " + (q.source || "無");
+      
+      updateNavButtons();
+      updateProgress();
+    }
+    
+    function selectOption(key) {
+      if (isReviewMode || selectedAnswers[currentQuestionIndex] !== null) return;
+      selectedAnswers[currentQuestionIndex] = key;
+      loadQuestion(currentQuestionIndex);
+    }
+    
+    function navigate(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < questions.length) {
+        loadQuestion(newIndex);
+      }
+    }
+    
+    function updateNavButtons() {
+      prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+      nextBtn.classList.toggle("hidden", currentQuestionIndex === questions.length - 1);
+      
+      // Always show submit button, rename to "結束測驗" if not already done in HTML
+      submitBtn.classList.remove("hidden");
+      submitBtn.disabled = false;
+      submitBtn.textContent = (currentQuestionIndex === questions.length - 1) ? "結束作答" : "錯題回顧";
+    }
+    
+    function updateProgress() {
+      progressText.textContent = "問題 " + (currentQuestionIndex + 1) + " / " + questions.length;
+    }
+    
+    function showResults() {
+      isReviewMode = true;
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      
+      const answeredCount = selectedAnswers.filter(a => a !== null).length;
+      const correctCount = selectedAnswers.filter((a, i) => a === questions[i].answer).length;
+      const wrongCount = answeredCount - correctCount;
+      const unansweredCount = questions.length - answeredCount;
+      const percentage = Math.round((correctCount / questions.length) * 100);
+      
+      let scoreHtml = "";
+      if ('第 1 章'.includes('隨機')) {
+          const scorePerQuestion = questions.length === 25 ? 4 : (questions.length === 50 ? 2 : 0);
+          const totalScore = correctCount * scorePerQuestion;
+          scoreHtml = "<br><br><span style='color: #0369a1; font-size: 1.5rem; font-weight: bold;'>測驗分數：" + totalScore + " 分</span>";
+      }
+      document.getElementById("final-stats").innerHTML = "答對 <span style='color: var(--success); font-weight: bold;'>" + correctCount + "</span> 題 / 答錯 <span style='color: var(--error); font-weight: bold;'>" + wrongCount + "</span> 題" + scoreHtml;
+      
+      reviewContainer.innerHTML = "";
+      questions.forEach((q, i) => {
+        if (selectedAnswers[i] !== null && selectedAnswers[i] !== q.answer) {
+          const div = document.createElement("div");
+          div.className = "review-item incorrect";
+          
+          let optionsHtml = '<ul class="review-options">';
+          if (q.options) {
+             let keysToUse = q.shuffledKeys || Object.keys(q.options);
+             const displayLetters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+             keysToUse.forEach((k, optIdx) => {
+                let v = q.options[k];
+                let dLetter = displayLetters[optIdx] || k;
+                let liClass = "";
+                let label = "";
+                if (k === q.answer) {
+                   if (q.multiAnswer) {
+                      liClass = "is-multi-correct";
+                      label = " (正確答案 - 官方複選: " + q.multiAnswer + ")";
+                   } else {
+                      liClass = "is-correct";
+                      label = " (正確答案)";
+                   }
+                } else if (k === selectedAnswers[i]) {
+                   liClass = "is-wrong";
+                   label = " (你的作答)";
+                }
+                optionsHtml += '<li class="' + liClass + '">' + dLetter + '. ' + v + label + '</li>';
+             });
+          }
+          optionsHtml += "</ul>";
+          
+          
+          let reviewExpHtml = '';
+          const reviewExp = q.explanation || q.analysis;
+          if (reviewExp) {
+            reviewExpHtml = '<div class="explanation-box"><strong>💡 解析：</strong><br>' + reviewExp.replace(/\n/g, "<br>") + '</div>';
+          }
+          
+          const favState = isFavorited(q.id);
+          const favStar = favState ? '★' : '☆';
+          const favColor = favState ? '#f59e0b' : '#94a3b8';
+          div.innerHTML = '<div class="review-question" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">' +
+            '<div>' + (i + 1) + '. ' + q.question + '</div>' +
+            '<button type="button" onclick="handleReviewFav(this, ' + q.id + ')" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; color: ' + favColor + '; padding: 0 4px; flex-shrink: 0;" title="加入/取消我的最愛">' + favStar + '</button>' +
+          '</div>' +
+            optionsHtml + reviewExpHtml +
+            '<div class="source-tag">ID: ' + q.id + ' | 來源: ' + (q.source || '無') + '</div>';
+
+          reviewContainer.appendChild(div);
+        }
+      });
+      if (reviewContainer.innerHTML === "") {
+        reviewContainer.innerHTML = '<p class="text-center">太棒了！您全答對了！</p>';
+      }
+    }
+    
+    
+  </script>
+</body>
+</html>
